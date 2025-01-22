@@ -50,7 +50,7 @@ const ProfileForm = () => {
             first_name: formData.firstName,
             last_name: formData.lastName,
             phone_number: normalizedPhoneNumber,
-            email: formData.email || null,
+            email: formData.email,
             password: formData.password,
           },
         ])
@@ -116,11 +116,12 @@ const ProfileForm = () => {
         />
 
         <FormField
-          label="Email (Optional)"
+          label="Email"
           name="email"
           type="email"
           value={formData.email}
           onChange={handleChange}
+          required
           placeholder="john@example.com"
         />
 
