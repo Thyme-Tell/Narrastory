@@ -1,11 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ZoomIn, ZoomOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface StoryMediaProps {
   storyId: string;
 }
 
 const StoryMedia = ({ storyId }: StoryMediaProps) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
   const { data: mediaItems } = useQuery({
     queryKey: ["story-media", storyId],
     queryFn: async () => {
@@ -20,44 +27,105 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
     },
   });
 
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 0.5, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 0.5, 0.5));
+  };
+
+  const handleImageClick = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setZoomLevel(1); // Reset zoom when opening new image
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedImage(null);
+    setZoomLevel(1); // Reset zoom when closing
+  };
+
   if (!mediaItems?.length) return null;
 
   return (
-    <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-      {mediaItems.map((media) => {
-        const { data } = supabase.storage
-          .from("story-media")
-          .getPublicUrl(media.file_path);
+    <>
+      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        {mediaItems.map((media) => {
+          const { data } = supabase.storage
+            .from("story-media")
+            .getPublicUrl(media.file_path);
 
-        if (media.content_type.startsWith("image/")) {
+          if (media.content_type.startsWith("image/")) {
+            return (
+              <img
+                key={media.id}
+                src={data.publicUrl}
+                alt={media.file_name}
+                className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => handleImageClick(data.publicUrl)}
+              />
+            );
+          }
+
+          // For other media types, show a placeholder with filename
           return (
-            <img
+            <div
               key={media.id}
-              src={data.publicUrl}
-              alt={media.file_name}
-              className="rounded-lg object-cover aspect-square w-full"
-            />
-          );
-        }
-
-        // For other media types, show a placeholder with filename
-        return (
-          <div
-            key={media.id}
-            className="rounded-lg bg-muted p-4 flex items-center justify-center aspect-square"
-          >
-            <a
-              href={data.publicUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-center break-words hover:underline"
+              className="rounded-lg bg-muted p-4 flex items-center justify-center aspect-square"
             >
-              {media.file_name}
-            </a>
+              <a
+                href={data.publicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-center break-words hover:underline"
+              >
+                {media.file_name}
+              </a>
+            </div>
+          );
+        })}
+      </div>
+
+      <Dialog open={!!selectedImage} onOpenChange={() => handleCloseDialog()}>
+        <DialogContent className="max-w-[90vw] w-fit h-[90vh] flex flex-col">
+          <div className="flex justify-center items-center gap-2 mb-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 0.5}
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 3}
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
           </div>
-        );
-      })}
-    </div>
+          <div className="flex-1 overflow-auto">
+            <div className="h-full flex items-center justify-center">
+              {selectedImage && (
+                <img
+                  src={selectedImage}
+                  alt="Full screen view"
+                  className="max-h-full object-contain transition-transform duration-200"
+                  style={{
+                    transform: `scale(${zoomLevel})`,
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
