@@ -19,9 +19,14 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('Webhook received request');
+    
     // Verify the Synthflow API key
     const authHeader = req.headers.get('authorization');
+    console.log('Auth header:', authHeader);
+    
     if (!authHeader || authHeader !== `Bearer ${synthflowApiKey}`) {
+      console.error('Unauthorized request received');
       throw new Error('Unauthorized');
     }
 
@@ -33,6 +38,7 @@ Deno.serve(async (req) => {
     console.log('Received query parameters:', { phone_number, generated_story });
 
     if (!phone_number || !generated_story) {
+      console.error('Missing required parameters');
       throw new Error('Missing required query parameters: phone_number and generated_story are required');
     }
 
@@ -43,9 +49,17 @@ Deno.serve(async (req) => {
       .eq('phone_number', phone_number)
       .single();
 
-    if (profileError || !profile) {
+    if (profileError) {
+      console.error('Error finding profile:', profileError);
+      throw profileError;
+    }
+
+    if (!profile) {
+      console.error('No profile found for phone number:', phone_number);
       throw new Error(`Profile not found for phone number: ${phone_number}`);
     }
+
+    console.log('Found profile:', profile);
 
     // Insert the story into the database
     const { data: story, error: storyError } = await supabase
@@ -60,6 +74,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (storyError) {
+      console.error('Error inserting story:', storyError);
       throw storyError;
     }
 
