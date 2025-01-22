@@ -73,6 +73,16 @@ const Profile = () => {
     enabled: !!id && isVerified,
   });
 
+  const handlePasswordVerify = async (password: string) => {
+    if (!profile) return false;
+    
+    const isValid = profile.password === password;
+    if (isValid) {
+      setIsVerified(true);
+    }
+    return isValid;
+  };
+
   const handleLogout = async () => {
     // Remove the authorization cookie
     Cookies.remove('profile_authorized');
