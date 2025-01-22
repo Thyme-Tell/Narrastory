@@ -25,14 +25,15 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Parse the webhook payload
-    const payload = await req.json();
-    console.log('Received webhook payload:', payload);
+    // Get the URL and parse query parameters
+    const url = new URL(req.url);
+    const phone_number = url.searchParams.get('phone_number');
+    const generated_story = url.searchParams.get('generated_story');
 
-    // Extract the phone number and generated story from the payload
-    const { phone_number, generated_story } = payload;
+    console.log('Received query parameters:', { phone_number, generated_story });
+
     if (!phone_number || !generated_story) {
-      throw new Error('Missing required fields');
+      throw new Error('Missing required query parameters: phone_number and generated_story are required');
     }
 
     // Find the profile with the matching phone number
