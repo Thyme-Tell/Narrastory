@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PasswordProtectionProps {
   onVerify: (password: string) => Promise<boolean>;
@@ -13,14 +14,26 @@ const PasswordProtection = ({ onVerify }: PasswordProtectionProps) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for existing authorization cookie
-    const authCookie = Cookies.get('profile_authorized');
-    if (authCookie === 'true') {
-      setIsAuthorized(true);
-    }
+    const checkAuth = async () => {
+      // Check for existing authorization cookie
+      const authCookie = Cookies.get('profile_authorized');
+      
+      // Check if user is signed in through Supabase auth
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (authCookie === 'true' || session) {
+        setIsAuthorized(true);
+      }
+      
+      setIsCheckingAuth(false);
+    };
+
+    checkAuth();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,6 +65,11 @@ const PasswordProtection = ({ onVerify }: PasswordProtectionProps) => {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return null;
+  }
 
   // If user is already authorized, don't show the password form
   if (isAuthorized) {
