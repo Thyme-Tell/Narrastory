@@ -38,7 +38,16 @@ serve(async (req) => {
     const data = await response.json();
     console.log('Synthflow API response:', data);
 
-    return new Response(JSON.stringify(data), {
+    // Process the generated text to extract title and content
+    const lines = data.text.split('\n');
+    const title = lines[0].trim();
+    const content = lines.slice(1).join('\n').trim();
+
+    return new Response(JSON.stringify({ 
+      title,
+      content,
+      raw: data 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
