@@ -13,7 +13,7 @@ const Profile = () => {
         .from("profiles")
         .select("id, first_name, last_name, created_at")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -52,7 +52,12 @@ const Profile = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-lg">Profile not found</p>
+        <div className="text-center space-y-4">
+          <p className="text-lg">Profile not found</p>
+          <Link to="/" className="text-primary hover:underline">
+            Sign up for Narra
+          </Link>
+        </div>
       </div>
     );
   }
