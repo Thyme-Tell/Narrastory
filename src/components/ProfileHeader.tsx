@@ -8,7 +8,7 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({ firstName, lastName }: ProfileHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">
+      <h1 className="text-atlantic text-2xl leading-[108.7%] font-semibold">
         {firstName} {lastName}
       </h1>
       <Link 
