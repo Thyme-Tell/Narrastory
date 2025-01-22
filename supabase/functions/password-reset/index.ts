@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders } from '../_shared/cors.ts'
+import { Twilio } from 'npm:twilio'
 
 interface RequestBody {
   action: 'request' | 'reset'
@@ -63,12 +64,29 @@ Deno.serve(async (req) => {
         throw tokenError
       }
 
-      // In a real application, you would send this token via SMS
-      // For now, we'll just return it in the response
+      // Initialize Twilio client
+      const twilioClient = new Twilio(
+        Deno.env.get('TWILIO_ACCOUNT_SID'),
+        Deno.env.get('TWILIO_AUTH_TOKEN')
+      )
+
+      // Send SMS with reset token
+      try {
+        await twilioClient.messages.create({
+          body: `Your password reset code is: ${resetToken}. This code will expire in 1 hour.`,
+          to: phoneNumber,
+          from: Deno.env.get('TWILIO_PHONE_NUMBER'),
+        })
+
+        console.log('SMS sent successfully to:', phoneNumber)
+      } catch (error) {
+        console.error('Error sending SMS:', error)
+        throw new Error('Failed to send SMS. Please try again later.')
+      }
+
       return new Response(
         JSON.stringify({ 
-          message: 'Reset token generated',
-          token: resetToken // In production, remove this and send via SMS
+          message: 'Reset code sent to your phone number'
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -125,6 +143,7 @@ Deno.serve(async (req) => {
 
     throw new Error('Invalid action')
   } catch (error) {
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
