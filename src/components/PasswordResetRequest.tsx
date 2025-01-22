@@ -68,7 +68,7 @@ const PasswordResetRequest = () => {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <img
-            src="/lovable-uploads/e730ede5-8b2e-436e-a398-0c62ea70f30c.png"
+            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z"
             alt="Narra Logo"
             className="mx-auto h-16 w-auto"
           />
