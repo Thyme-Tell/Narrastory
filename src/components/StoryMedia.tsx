@@ -2,10 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ZoomIn, ZoomOut, Play } from "lucide-react";
+import { ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import Plyr from "plyr-react";
+import "plyr-react/plyr.css";
 import {
   Carousel,
   CarouselContent,
@@ -76,12 +78,12 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
 
   const handleImageClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);
-    setZoomLevel(1); // Reset zoom when opening new image
+    setZoomLevel(1);
   };
 
   const handleCloseDialog = () => {
     setSelectedImage(null);
-    setZoomLevel(1); // Reset zoom when closing
+    setZoomLevel(1);
   };
 
   const startEditingCaption = (mediaId: string, currentCaption: string | null) => {
@@ -116,6 +118,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
                       alt={media.file_name}
                       className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => handleImageClick(data.publicUrl)}
+                      loading="lazy"
                     />
                     {editingCaption === media.id ? (
                       <div className="flex gap-2">
@@ -151,20 +154,31 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
                 );
               }
 
-              // For video content
               if (media.content_type.startsWith("video/")) {
+                const videoOptions = {
+                  controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+                  settings: ['quality', 'speed'],
+                  quality: {
+                    default: 720,
+                    options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
+                  }
+                };
+
                 return (
                   <CarouselItem key={media.id} className="space-y-2">
                     <div className="relative aspect-square rounded-lg overflow-hidden">
-                      <video
-                        src={data.publicUrl}
-                        className="w-full h-full object-cover"
-                        controls
-                        poster={`${data.publicUrl}#t=0.1`}
-                        preload="metadata"
-                      >
-                        Your browser does not support the video tag.
-                      </video>
+                      <Plyr
+                        source={{
+                          type: "video",
+                          sources: [
+                            {
+                              src: data.publicUrl,
+                              type: media.content_type,
+                            },
+                          ],
+                        }}
+                        options={videoOptions}
+                      />
                     </div>
                     {editingCaption === media.id ? (
                       <div className="flex gap-2">
@@ -200,7 +214,6 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
                 );
               }
 
-              // For other media types, show a placeholder with filename
               return (
                 <CarouselItem key={media.id}>
                   <div className="rounded-lg bg-muted p-4 flex items-center justify-center aspect-square">
