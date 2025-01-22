@@ -10,7 +10,7 @@ const Profile = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -18,6 +18,20 @@ const Profile = () => {
         .select("id, first_name, last_name, created_at")
         .eq("id", id)
         .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: stories, isLoading: isLoadingStories } = useQuery({
+    queryKey: ["stories", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stories")
+        .select("*")
+        .eq("profile_id", id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
@@ -34,6 +48,19 @@ const Profile = () => {
       });
 
       if (response.error) throw response.error;
+
+      const { data, error } = await supabase
+        .from("stories")
+        .insert([
+          {
+            profile_id: id,
+            content: response.data,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
 
       toast({
         title: "Story Generated!",
@@ -52,7 +79,7 @@ const Profile = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-lg">Loading profile...</p>
@@ -87,7 +114,26 @@ const Profile = () => {
               {isGenerating ? "Generating..." : "Generate New Story"}
             </Button>
           </div>
-          <p className="text-muted-foreground">No stories generated yet.</p>
+          
+          {isLoadingStories ? (
+            <p className="text-muted-foreground">Loading stories...</p>
+          ) : stories && stories.length > 0 ? (
+            <div className="space-y-4">
+              {stories.map((story) => (
+                <div 
+                  key={story.id} 
+                  className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm"
+                >
+                  <p className="whitespace-pre-wrap">{story.content}</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {new Date(story.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">No stories generated yet.</p>
+          )}
         </div>
       </div>
     </div>
