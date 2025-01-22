@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +18,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface StoryCardProps {
   story: {
@@ -140,9 +146,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             className="w-full min-h-[100px]"
           />
           <div className="flex space-x-2">
-            <Button onClick={handleSave}>
-              Save
-            </Button>
+            <Button onClick={handleSave}>Save</Button>
             <Button variant="outline" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
@@ -154,51 +158,54 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             <p className="text-sm text-muted-foreground">
               {new Date(story.created_at).toLocaleDateString()}
             </p>
-            <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                onClick={() => setIsEditing(true)}
-              >
-                Edit
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action will move this story to the archive. You can't undo this action.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="text-destructive"
                     >
+                      <Trash2 className="h-4 w-4 mr-2" />
                       Delete
-                    </AlertDialogAction>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action will move this story to the archive. You can't undo this action.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           {story.title && (
             <h3 className="font-semibold text-lg">{story.title}</h3>
           )}
           <p className="whitespace-pre-wrap">{story.content}</p>
           <div className="mt-[30px] mb-[20px]">
-            <StoryMediaUpload 
-              storyId={story.id}
-              onUploadComplete={onUpdate}
-            />
+            <StoryMediaUpload storyId={story.id} onUploadComplete={onUpdate} />
           </div>
           <StoryMedia storyId={story.id} />
         </>
