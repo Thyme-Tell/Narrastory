@@ -21,19 +21,10 @@ Deno.serve(async (req) => {
   try {
     console.log('Webhook received request');
     
-    // Verify the Synthflow API key
-    const authHeader = req.headers.get('authorization');
-    console.log('Auth header:', authHeader);
-    
-    if (!authHeader || authHeader !== `Bearer ${synthflowApiKey}`) {
-      console.error('Unauthorized request received');
-      throw new Error('Unauthorized');
-    }
-
-    // Get the URL and parse query parameters
+    // Parse the URL and get query parameters
     const url = new URL(req.url);
-    const phone_number = url.searchParams.get('phone_number');
-    const generated_story = url.searchParams.get('generated_story');
+    const phone_number = url.searchParams.get('phone_number')?.trim();
+    const generated_story = url.searchParams.get('generated_story')?.trim();
 
     console.log('Received query parameters:', { phone_number, generated_story });
 
