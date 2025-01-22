@@ -5,11 +5,20 @@ import { Link } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import PasswordProtection from "@/components/PasswordProtection";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
 const Profile = () => {
   const { id } = useParams();
   const [isVerified, setIsVerified] = useState(false);
+
+  useEffect(() => {
+    // Check for existing authorization cookie
+    const authCookie = Cookies.get('profile_authorized');
+    if (authCookie === 'true') {
+      setIsVerified(true);
+    }
+  }, []);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],

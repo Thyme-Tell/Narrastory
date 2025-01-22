@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
+import Cookies from "js-cookie";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -47,6 +48,9 @@ const SignIn = () => {
         });
         return;
       }
+
+      // Set cookie to expire in 365 days
+      Cookies.set('profile_authorized', 'true', { expires: 365 });
 
       toast({
         title: "Success!",
