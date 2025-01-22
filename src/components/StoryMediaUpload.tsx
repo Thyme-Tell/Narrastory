@@ -62,7 +62,7 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
   };
 
   return (
-    <div className="flex justify-center mb-5">
+    <div className="flex justify-center mb-5 mt-[20px]">
       <input
         type="file"
         id="media"
