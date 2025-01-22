@@ -98,6 +98,9 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
   return (
     <>
       <div className="mt-4">
+        <div className="text-sm text-muted-foreground mb-2">
+          {mediaItems.length} {mediaItems.length === 1 ? 'item' : 'items'}
+        </div>
         <Carousel className="w-[55%] mx-auto">
           <CarouselContent>
             {mediaItems.map((media) => {
@@ -158,6 +161,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
                         className="w-full h-full object-cover"
                         controls
                         poster={`${data.publicUrl}#t=0.1`}
+                        preload="metadata"
                       >
                         Your browser does not support the video tag.
                       </video>
