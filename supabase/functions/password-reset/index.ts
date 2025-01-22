@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders } from '../_shared/cors.ts'
-import { Twilio } from 'npm:twilio@4.19.3'
+import twilio from 'npm:twilio@4.19.3'
 
 interface RequestBody {
   action: 'request' | 'reset'
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
 
       console.log('Initializing Twilio client...')
       // Initialize Twilio client
-      const twilioClient = new Twilio(
+      const twilioClient = twilio(
         Deno.env.get('TWILIO_ACCOUNT_SID') ?? '',
         Deno.env.get('TWILIO_AUTH_TOKEN') ?? ''
       )
