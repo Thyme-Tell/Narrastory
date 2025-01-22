@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       // Find the profile
       const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
-        .select('id')
+        .select('id, first_name')
         .eq('phone_number', phoneNumber)
         .single()
 
@@ -62,7 +62,8 @@ Deno.serve(async (req) => {
         })
 
       if (tokenError) {
-        throw tokenError
+        console.error('Token insertion error:', tokenError)
+        throw new Error('Failed to create reset token')
       }
 
       // Initialize Twilio client
@@ -87,7 +88,11 @@ Deno.serve(async (req) => {
 
       return new Response(
         JSON.stringify({ 
-          message: 'Reset code sent to your phone number'
+          message: 'Reset code sent successfully',
+          profile: {
+            firstName: profile.first_name,
+            phoneLastFour: phoneNumber.slice(-4)
+          }
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -124,7 +129,8 @@ Deno.serve(async (req) => {
         .eq('id', tokenData.profile_id)
 
       if (updateError) {
-        throw updateError
+        console.error('Password update error:', updateError)
+        throw new Error('Failed to update password')
       }
 
       // Mark token as used
