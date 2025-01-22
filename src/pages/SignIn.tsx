@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,10 @@ import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import Cookies from "js-cookie";
 
 const SignIn = () => {
+  useEffect(() => {
+    document.title = "Narra Story | Sign In";
+  }, []);
+
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);

@@ -21,14 +21,6 @@ const Profile = () => {
   const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check for existing authorization cookie
-    const authCookie = Cookies.get('profile_authorized');
-    if (authCookie === 'true') {
-      setIsVerified(true);
-    }
-  }, []);
-
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
@@ -47,31 +39,22 @@ const Profile = () => {
     },
   });
 
-  const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
-    queryKey: ["stories", id],
-    queryFn: async () => {
-      if (!id || !isVerified) return [];
-      
-      const { data, error } = await supabase
-        .from("stories")
-        .select(`
-          id,
-          title,
-          content,
-          created_at
-        `)
-        .eq("profile_id", id)
-        .order("created_at", { ascending: false });
+  useEffect(() => {
+    // Set the page title when profile data is loaded
+    if (profile) {
+      document.title = `Narra Story | ${profile.first_name}'s Profile`;
+    } else {
+      document.title = "Narra Story | Profile";
+    }
+  }, [profile]);
 
-      if (error) {
-        console.error("Error fetching stories:", error);
-        return [];
-      }
-      
-      return data;
-    },
-    enabled: !!id && isVerified,
-  });
+  useEffect(() => {
+    // Check for existing authorization cookie
+    const authCookie = Cookies.get('profile_authorized');
+    if (authCookie === 'true') {
+      setIsVerified(true);
+    }
+  }, []);
 
   const handlePasswordVerify = async (password: string) => {
     if (!profile) return false;
