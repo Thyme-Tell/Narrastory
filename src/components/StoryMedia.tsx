@@ -4,6 +4,13 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface StoryMediaProps {
   storyId: string;
@@ -49,41 +56,47 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
 
   return (
     <>
-      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {mediaItems.map((media) => {
-          const { data } = supabase.storage
-            .from("story-media")
-            .getPublicUrl(media.file_path);
+      <div className="mt-4">
+        <Carousel className="w-[400px] mx-auto">
+          <CarouselContent>
+            {mediaItems.map((media) => {
+              const { data } = supabase.storage
+                .from("story-media")
+                .getPublicUrl(media.file_path);
 
-          if (media.content_type.startsWith("image/")) {
-            return (
-              <img
-                key={media.id}
-                src={data.publicUrl}
-                alt={media.file_name}
-                className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => handleImageClick(data.publicUrl)}
-              />
-            );
-          }
+              if (media.content_type.startsWith("image/")) {
+                return (
+                  <CarouselItem key={media.id}>
+                    <img
+                      src={data.publicUrl}
+                      alt={media.file_name}
+                      className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => handleImageClick(data.publicUrl)}
+                    />
+                  </CarouselItem>
+                );
+              }
 
-          // For other media types, show a placeholder with filename
-          return (
-            <div
-              key={media.id}
-              className="rounded-lg bg-muted p-4 flex items-center justify-center aspect-square"
-            >
-              <a
-                href={data.publicUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-center break-words hover:underline"
-              >
-                {media.file_name}
-              </a>
-            </div>
-          );
-        })}
+              // For other media types, show a placeholder with filename
+              return (
+                <CarouselItem key={media.id}>
+                  <div className="rounded-lg bg-muted p-4 flex items-center justify-center aspect-square">
+                    <a
+                      href={data.publicUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-center break-words hover:underline"
+                    >
+                      {media.file_name}
+                    </a>
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
 
       <Dialog open={!!selectedImage} onOpenChange={() => handleCloseDialog()}>
