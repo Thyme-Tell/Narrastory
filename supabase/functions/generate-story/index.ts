@@ -38,8 +38,10 @@ serve(async (req) => {
     const data = await response.json();
     console.log('Synthflow API response:', data);
 
-    // Process the generated text to extract title and content
-    const lines = data.text.split('\n');
+    // Split the generated text into lines
+    const lines = data.text.split('\n').filter(line => line.trim() !== '');
+    
+    // Extract title (first line) and content (remaining lines)
     const title = lines[0].trim();
     const content = lines.slice(1).join('\n').trim();
 
