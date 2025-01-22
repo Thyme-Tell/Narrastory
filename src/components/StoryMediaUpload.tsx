@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Plus } from "lucide-react";
 
 interface StoryMediaUploadProps {
   storyId: string;
@@ -62,7 +63,7 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
   };
 
   return (
-    <div className="flex justify-center mb-5 mt-[20px]">
+    <div className="flex justify-start mb-5 mt-[20px]">
       <input
         type="file"
         id="media"
@@ -73,12 +74,13 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       />
       <label htmlFor="media">
         <Button
-          variant="outline"
-          className="cursor-pointer"
+          variant="ghost"
+          className="cursor-pointer text-[#A33D29] hover:text-[#A33D29]/90 hover:bg-transparent p-0"
           disabled={uploading}
           asChild
         >
-          <span>
+          <span className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
             {uploading ? "Uploading..." : "Add Photos and Videos"}
           </span>
         </Button>
