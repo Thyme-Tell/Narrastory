@@ -79,7 +79,7 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
           asChild
         >
           <span>
-            {uploading ? "Uploading..." : "Add Media"}
+            {uploading ? "Uploading..." : "Add Photos and Videos"}
           </span>
         </Button>
       </label>
