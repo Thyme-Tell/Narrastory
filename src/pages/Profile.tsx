@@ -15,7 +15,11 @@ const Profile = () => {
         .eq("id", id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
       return data;
     },
   });
@@ -35,7 +39,11 @@ const Profile = () => {
         .eq("profile_id", id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching stories:", error);
+        return [];
+      }
+      
       return data;
     },
     enabled: !!id,
