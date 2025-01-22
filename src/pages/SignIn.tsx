@@ -84,7 +84,7 @@ const SignIn = () => {
           <img
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z"
             alt="Narra Logo"
-            className="mx-auto h-16 w-auto"
+            className="mx-auto h-16 w-auto mb-[30px]"
           />
           <h1 className="text-3xl font-bold">Sign In</h1>
           <p className="text-muted-foreground mt-2">
