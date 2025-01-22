@@ -166,7 +166,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
               if (media.content_type.startsWith("image/")) {
                 return (
                   <CarouselItem key={media.id} className="space-y-2">
-                    <div className="relative group">
+                    <div className="relative">
                       <img
                         src={data.publicUrl}
                         alt={media.file_name}
@@ -177,7 +177,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
                       <Button
                         size="icon"
                         variant="secondary"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2"
                         onClick={() => handleStartCrop(data.publicUrl, media.id)}
                       >
                         <Crop className="h-4 w-4" />
