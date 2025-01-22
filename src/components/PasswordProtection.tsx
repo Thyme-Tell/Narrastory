@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+import Cookies from "js-cookie";
 
 interface PasswordProtectionProps {
   onVerify: (password: string) => Promise<boolean>;
@@ -11,7 +12,16 @@ interface PasswordProtectionProps {
 const PasswordProtection = ({ onVerify }: PasswordProtectionProps) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for existing authorization cookie
+    const authCookie = Cookies.get('profile_authorized');
+    if (authCookie === 'true') {
+      setIsAuthorized(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +30,11 @@ const PasswordProtection = ({ onVerify }: PasswordProtectionProps) => {
     try {
       const isValid = await onVerify(password);
       
-      if (!isValid) {
+      if (isValid) {
+        // Set cookie to expire in 30 days
+        Cookies.set('profile_authorized', 'true', { expires: 30 });
+        setIsAuthorized(true);
+      } else {
         toast({
           variant: "destructive",
           title: "Incorrect Password",
@@ -38,6 +52,11 @@ const PasswordProtection = ({ onVerify }: PasswordProtectionProps) => {
       setLoading(false);
     }
   };
+
+  // If user is already authorized, don't show the password form
+  if (isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
