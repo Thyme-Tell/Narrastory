@@ -33,8 +33,8 @@ const ProfileHeader = ({ firstName, lastName }: ProfileHeaderProps) => {
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Menu className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="h-10 w-10">
+            <Menu className="h-8 w-8" />
             <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
