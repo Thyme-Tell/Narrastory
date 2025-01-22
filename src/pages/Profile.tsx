@@ -10,7 +10,7 @@ const Profile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select("id, first_name, last_name, created_at")
         .eq("id", id)
         .single();
 
@@ -42,10 +42,6 @@ const Profile = () => {
           <h1 className="text-3xl font-bold">
             {profile.first_name} {profile.last_name}
           </h1>
-          <p className="text-muted-foreground">
-            {profile.email && `Email: ${profile.email}`}
-          </p>
-          <p className="text-muted-foreground">Phone: {profile.phone_number}</p>
         </div>
         
         <div className="space-y-4">
