@@ -77,6 +77,10 @@ const Profile = () => {
             <h2 className="text-2xl font-semibold">Your Stories</h2>
           </div>
           
+          <p className="text-muted-foreground">
+            Call Narra at +1 (507) 200-3303 to create a new story.
+          </p>
+          
           {isLoadingStories ? (
             <p className="text-muted-foreground">Loading stories...</p>
           ) : stories && stories.length > 0 ? (
@@ -93,9 +97,7 @@ const Profile = () => {
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-muted-foreground">No stories found.</p>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
