@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import FormField from "@/components/FormField";
@@ -9,6 +10,7 @@ const PasswordResetRequest = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +48,9 @@ const PasswordResetRequest = () => {
         title: "Success",
         description: `A reset code has been sent to ${profile.first_name}'s phone (ending in ${lastFourDigits}) via text message.`,
       });
+
+      // Redirect to the password reset confirmation page
+      navigate("/reset-password/confirm");
     } catch (error) {
       console.error("Error:", error);
       toast({
