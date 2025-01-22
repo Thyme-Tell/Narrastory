@@ -3,4 +3,5 @@ export interface ProfileFormData {
   lastName: string;
   phoneNumber: string;
   email: string;
+  password: string;
 }

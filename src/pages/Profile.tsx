@@ -4,16 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
+import PasswordProtection from "@/components/PasswordProtection";
+import { useState } from "react";
 
 const Profile = () => {
   const { id } = useParams();
+  const [isVerified, setIsVerified] = useState(false);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, created_at")
+        .select("id, first_name, last_name, created_at, password")
         .eq("id", id)
         .maybeSingle();
 
@@ -29,7 +32,7 @@ const Profile = () => {
   const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
     queryKey: ["stories", id],
     queryFn: async () => {
-      if (!id) return [];
+      if (!id || !isVerified) return [];
       
       const { data, error } = await supabase
         .from("stories")
@@ -49,8 +52,18 @@ const Profile = () => {
       
       return data;
     },
-    enabled: !!id,
+    enabled: !!id && isVerified,
   });
+
+  const handlePasswordVerify = async (password: string) => {
+    if (!profile) return false;
+    
+    const isValid = profile.password === password;
+    if (isValid) {
+      setIsVerified(true);
+    }
+    return isValid;
+  };
 
   if (isLoadingProfile) {
     return (
@@ -71,6 +84,10 @@ const Profile = () => {
         </div>
       </div>
     );
+  }
+
+  if (!isVerified) {
+    return <PasswordProtection onVerify={handlePasswordVerify} />;
   }
 
   return (

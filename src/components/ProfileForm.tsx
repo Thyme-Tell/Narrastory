@@ -16,6 +16,7 @@ const ProfileForm = () => {
     lastName: "",
     phoneNumber: "",
     email: "",
+    password: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,6 +51,7 @@ const ProfileForm = () => {
             last_name: formData.lastName,
             phone_number: normalizedPhoneNumber,
             email: formData.email || null,
+            password: formData.password,
           },
         ])
         .select()
@@ -120,6 +122,16 @@ const ProfileForm = () => {
           value={formData.email}
           onChange={handleChange}
           placeholder="john@example.com"
+        />
+
+        <FormField
+          label="Password"
+          name="password"
+          type="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          placeholder="Enter a secure password"
         />
       </div>
 

@@ -16,6 +16,7 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
+          password: string
           phone_number: string
           updated_at: string
         }
@@ -25,6 +26,7 @@ export type Database = {
           first_name: string
           id?: string
           last_name: string
+          password: string
           phone_number: string
           updated_at?: string
         }
@@ -34,6 +36,7 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string
+          password?: string
           phone_number?: string
           updated_at?: string
         }
