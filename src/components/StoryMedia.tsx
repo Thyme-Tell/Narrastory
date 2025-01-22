@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ZoomIn, ZoomOut } from "lucide-react";
+import { ZoomIn, ZoomOut, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -114,6 +114,54 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
                       className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => handleImageClick(data.publicUrl)}
                     />
+                    {editingCaption === media.id ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value={captionText}
+                          onChange={(e) => setCaptionText(e.target.value)}
+                          placeholder="Add a caption..."
+                          className="flex-1"
+                        />
+                        <Button 
+                          size="sm"
+                          onClick={() => handleCaptionSubmit(media.id)}
+                        >
+                          Save
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline" 
+                          onClick={() => setEditingCaption(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div 
+                        className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
+                        onClick={() => startEditingCaption(media.id, media.caption)}
+                      >
+                        {media.caption || "Add a caption..."}
+                      </div>
+                    )}
+                  </CarouselItem>
+                );
+              }
+
+              // For video content
+              if (media.content_type.startsWith("video/")) {
+                return (
+                  <CarouselItem key={media.id} className="space-y-2">
+                    <div className="relative aspect-square rounded-lg overflow-hidden">
+                      <video
+                        src={data.publicUrl}
+                        className="w-full h-full object-cover"
+                        controls
+                        poster={`${data.publicUrl}#t=0.1`} // Generate thumbnail from the first frame
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
                     {editingCaption === media.id ? (
                       <div className="flex gap-2">
                         <Input
