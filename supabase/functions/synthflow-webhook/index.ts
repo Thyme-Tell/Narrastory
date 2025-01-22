@@ -81,13 +81,22 @@ Deno.serve(async (req) => {
 
     console.log('Found profile:', profile);
 
-    // Insert the story into the database
+    // Split the generated story into title and content
+    const lines = generated_story.split('\n').filter(line => line.trim() !== '');
+    const title = lines[0].trim();
+    const content = lines.slice(1).join('\n').trim();
+
+    console.log('Extracted title:', title);
+    console.log('Extracted content:', content);
+
+    // Insert the story into the database with title and content
     const { data: story, error: storyError } = await supabase
       .from('stories')
       .insert([
         {
           profile_id: profile.id,
-          content: generated_story,
+          title: title,
+          content: content,
         },
       ])
       .select()
