@@ -81,7 +81,7 @@ const Profile = () => {
             to="/" 
             className="text-primary hover:underline"
           >
-            Sign up for Narra
+            Not {profile.first_name}? Sign up
           </Link>
         </div>
         
