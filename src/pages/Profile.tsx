@@ -10,7 +10,7 @@ const Profile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, phone_number, created_at")
+        .select("id, first_name, last_name, created_at")
         .eq("id", id)
         .single();
 
@@ -20,27 +20,24 @@ const Profile = () => {
   });
 
   const { data: stories, isLoading: isLoadingStories } = useQuery({
-    queryKey: ["stories", profile?.phone_number],
+    queryKey: ["stories", id],
     queryFn: async () => {
-      if (!profile?.phone_number) return [];
+      if (!id) return [];
       
       const { data, error } = await supabase
         .from("stories")
         .select(`
           id,
           content,
-          created_at,
-          profiles!inner (
-            phone_number
-          )
+          created_at
         `)
-        .eq("profiles.phone_number", profile.phone_number)
+        .eq("profile_id", id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.phone_number,
+    enabled: !!id,
   });
 
   if (isLoadingProfile) {
@@ -66,9 +63,6 @@ const Profile = () => {
           <h1 className="text-3xl font-bold">
             {profile.first_name} {profile.last_name}
           </h1>
-          <p className="text-muted-foreground">
-            Phone: {profile.phone_number}
-          </p>
         </div>
         
         <div className="space-y-4">
@@ -93,7 +87,7 @@ const Profile = () => {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">No stories found for your phone number.</p>
+            <p className="text-muted-foreground">No stories found.</p>
           )}
         </div>
       </div>
