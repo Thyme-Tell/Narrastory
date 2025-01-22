@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 
 interface PasswordProtectionProps {
   onVerify: (password: string) => Promise<boolean>;
@@ -62,6 +63,15 @@ const PasswordProtection = ({ onVerify }: PasswordProtectionProps) => {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Verifying..." : "Continue"}
           </Button>
+
+          <div className="text-center">
+            <Link
+              to="/reset-password"
+              className="text-primary hover:underline text-sm"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </form>
       </div>
     </div>
