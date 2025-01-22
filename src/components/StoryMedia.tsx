@@ -2,12 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ZoomIn, ZoomOut } from "lucide-react";
+import { ZoomIn, ZoomOut, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
+import ImageCropper from "./ImageCropper";
 import {
   Carousel,
   CarouselContent,
@@ -25,6 +26,8 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [editingCaption, setEditingCaption] = useState<string | null>(null);
   const [captionText, setCaptionText] = useState("");
+  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
+  const [cropMediaId, setCropMediaId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -39,6 +42,45 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  const updateMedia = useMutation({
+    mutationFn: async ({ mediaId, file }: { mediaId: string; file: Blob }) => {
+      const fileExt = "jpg";
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("story-media")
+        .upload(filePath, file, {
+          contentType: "image/jpeg",
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { error: updateError } = await supabase
+        .from("story_media")
+        .update({ file_path: filePath })
+        .eq("id", mediaId);
+
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["story-media", storyId] });
+      toast({
+        title: "Success",
+        description: "Image updated successfully",
+      });
+      setCropImageUrl(null);
+      setCropMediaId(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update image",
+        variant: "destructive",
+      });
     },
   });
 
@@ -95,6 +137,17 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
     updateCaption.mutate({ mediaId, caption: captionText });
   };
 
+  const handleStartCrop = (imageUrl: string, mediaId: string) => {
+    setCropImageUrl(imageUrl);
+    setCropMediaId(mediaId);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (cropMediaId) {
+      updateMedia.mutate({ mediaId: cropMediaId, file: croppedBlob });
+    }
+  };
+
   if (!mediaItems?.length) return null;
 
   return (
@@ -113,13 +166,23 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
               if (media.content_type.startsWith("image/")) {
                 return (
                   <CarouselItem key={media.id} className="space-y-2">
-                    <img
-                      src={data.publicUrl}
-                      alt={media.file_name}
-                      className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => handleImageClick(data.publicUrl)}
-                      loading="lazy"
-                    />
+                    <div className="relative group">
+                      <img
+                        src={data.publicUrl}
+                        alt={media.file_name}
+                        className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => handleImageClick(data.publicUrl)}
+                        loading="lazy"
+                      />
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleStartCrop(data.publicUrl, media.id)}
+                      >
+                        <Crop className="h-4 w-4" />
+                      </Button>
+                    </div>
                     {editingCaption === media.id ? (
                       <div className="flex gap-2">
                         <Input
@@ -274,6 +337,18 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {cropImageUrl && (
+        <ImageCropper
+          imageUrl={cropImageUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={() => {
+            setCropImageUrl(null);
+            setCropMediaId(null);
+          }}
+          open={!!cropImageUrl}
+        />
+      )}
     </>
   );
 };
