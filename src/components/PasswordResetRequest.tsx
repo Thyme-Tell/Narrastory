@@ -24,13 +24,20 @@ const PasswordResetRequest = () => {
         .eq("phone_number", normalizedPhone)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        // Don't expose whether a profile exists or not for security
+        toast({
+          title: "Notice",
+          description: "If an account exists with this phone number, you will receive a reset code.",
+        });
+        return;
+      }
 
-      const { data, error } = await supabase.functions.invoke("password-reset", {
+      const { error: resetError } = await supabase.functions.invoke("password-reset", {
         body: { action: "request", phoneNumber: normalizedPhone },
       });
 
-      if (error) throw error;
+      if (resetError) throw resetError;
 
       // Get last 4 digits of phone number
       const lastFourDigits = normalizedPhone.slice(-4);
@@ -44,7 +51,7 @@ const PasswordResetRequest = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "There was a problem requesting the password reset.",
+        description: "There was a problem with the password reset request. Please try again later.",
       });
     } finally {
       setLoading(false);
