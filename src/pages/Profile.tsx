@@ -133,8 +133,8 @@ const Profile = () => {
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-10 w-10">
-              <Menu className="h-8 w-8" />
+            <Button variant="ghost" size="icon" className="h-20 w-20">
+              <Menu className="h-16 w-16" />
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
