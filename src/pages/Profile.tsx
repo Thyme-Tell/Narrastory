@@ -45,7 +45,7 @@ const Profile = () => {
         </div>
         
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Generated Stories</h2>
+          <h2 className="text-2xl font-semibold">Your Stories</h2>
           <p className="text-muted-foreground">No stories generated yet.</p>
         </div>
       </div>
