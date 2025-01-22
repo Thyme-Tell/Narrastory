@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,7 +29,7 @@ const Index = () => {
           phone_number: formData.phoneNumber,
           email: formData.email || null,
         },
-      ]);
+      ]).select().single();
 
       if (error) throw error;
 
@@ -36,13 +38,9 @@ const Index = () => {
         description: "Your profile has been created.",
       });
 
-      // Clear form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        email: "",
-      });
+      // Redirect to profile page
+      navigate(`/profile/${data.id}`);
+
     } catch (error) {
       console.error("Error:", error);
       toast({
