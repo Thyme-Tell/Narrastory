@@ -31,8 +31,8 @@ const PasswordProtection = ({ onVerify }: PasswordProtectionProps) => {
       const isValid = await onVerify(password);
       
       if (isValid) {
-        // Set cookie to expire in 30 days
-        Cookies.set('profile_authorized', 'true', { expires: 30 });
+        // Set cookie to expire in 365 days
+        Cookies.set('profile_authorized', 'true', { expires: 365 });
         setIsAuthorized(true);
       } else {
         toast({
