@@ -100,7 +100,15 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div 
+      className="min-h-screen bg-background p-4"
+      style={{
+        backgroundImage: `url('/lovable-uploads/e730ede5-8b2e-436e-a398-0c62ea70f30c.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       <div className="max-w-2xl mx-auto space-y-6">
         <ProfileHeader 
           firstName={profile.first_name} 
