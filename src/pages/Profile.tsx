@@ -39,6 +39,32 @@ const Profile = () => {
     },
   });
 
+  const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
+    queryKey: ["stories", id],
+    queryFn: async () => {
+      if (!id || !isVerified) return [];
+      
+      const { data, error } = await supabase
+        .from("stories")
+        .select(`
+          id,
+          title,
+          content,
+          created_at
+        `)
+        .eq("profile_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching stories:", error);
+        return [];
+      }
+      
+      return data;
+    },
+    enabled: !!id && isVerified,
+  });
+
   useEffect(() => {
     // Set the page title when profile data is loaded
     if (profile) {
