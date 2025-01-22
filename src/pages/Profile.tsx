@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const { id } = useParams();
@@ -59,10 +60,16 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="space-y-2">
+        <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">
             {profile.first_name} {profile.last_name}
           </h1>
+          <Link 
+            to="/" 
+            className="text-primary hover:underline"
+          >
+            Sign up for Narra
+          </Link>
         </div>
         
         <div className="space-y-4">
