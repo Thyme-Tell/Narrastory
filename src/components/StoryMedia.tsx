@@ -1,9 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Carousel,
   CarouselContent,
@@ -19,6 +21,10 @@ interface StoryMediaProps {
 const StoryMedia = ({ storyId }: StoryMediaProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [editingCaption, setEditingCaption] = useState<string | null>(null);
+  const [captionText, setCaptionText] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: mediaItems } = useQuery({
     queryKey: ["story-media", storyId],
@@ -31,6 +37,32 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  const updateCaption = useMutation({
+    mutationFn: async ({ mediaId, caption }: { mediaId: string; caption: string }) => {
+      const { error } = await supabase
+        .from("story_media")
+        .update({ caption })
+        .eq("id", mediaId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["story-media", storyId] });
+      toast({
+        title: "Success",
+        description: "Caption updated successfully",
+      });
+      setEditingCaption(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update caption",
+        variant: "destructive",
+      });
     },
   });
 
@@ -52,6 +84,15 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
     setZoomLevel(1); // Reset zoom when closing
   };
 
+  const startEditingCaption = (mediaId: string, currentCaption: string | null) => {
+    setEditingCaption(mediaId);
+    setCaptionText(currentCaption || "");
+  };
+
+  const handleCaptionSubmit = (mediaId: string) => {
+    updateCaption.mutate({ mediaId, caption: captionText });
+  };
+
   if (!mediaItems?.length) return null;
 
   return (
@@ -66,13 +107,43 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
 
               if (media.content_type.startsWith("image/")) {
                 return (
-                  <CarouselItem key={media.id}>
+                  <CarouselItem key={media.id} className="space-y-2">
                     <img
                       src={data.publicUrl}
                       alt={media.file_name}
                       className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => handleImageClick(data.publicUrl)}
                     />
+                    {editingCaption === media.id ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value={captionText}
+                          onChange={(e) => setCaptionText(e.target.value)}
+                          placeholder="Add a caption..."
+                          className="flex-1"
+                        />
+                        <Button 
+                          size="sm"
+                          onClick={() => handleCaptionSubmit(media.id)}
+                        >
+                          Save
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline" 
+                          onClick={() => setEditingCaption(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div 
+                        className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
+                        onClick={() => startEditingCaption(media.id, media.caption)}
+                      >
+                        {media.caption || "Add a caption..."}
+                      </div>
+                    )}
                   </CarouselItem>
                 );
               }

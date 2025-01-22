@@ -76,6 +76,7 @@ export type Database = {
       }
       story_media: {
         Row: {
+          caption: string | null
           content_type: string
           created_at: string
           file_name: string
@@ -84,6 +85,7 @@ export type Database = {
           story_id: string | null
         }
         Insert: {
+          caption?: string | null
           content_type: string
           created_at?: string
           file_name: string
@@ -92,6 +94,7 @@ export type Database = {
           story_id?: string | null
         }
         Update: {
+          caption?: string | null
           content_type?: string
           created_at?: string
           file_name?: string
