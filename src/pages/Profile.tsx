@@ -1,16 +1,25 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import PasswordProtection from "@/components/PasswordProtection";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import { Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const Profile = () => {
   const { id } = useParams();
   const [isVerified, setIsVerified] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check for existing authorization cookie
@@ -64,14 +73,11 @@ const Profile = () => {
     enabled: !!id && isVerified,
   });
 
-  const handlePasswordVerify = async (password: string) => {
-    if (!profile) return false;
-    
-    const isValid = profile.password === password;
-    if (isValid) {
-      setIsVerified(true);
-    }
-    return isValid;
+  const handleLogout = async () => {
+    // Remove the authorization cookie
+    Cookies.remove('profile_authorized');
+    // Navigate back to home
+    navigate('/');
   };
 
   if (isLoadingProfile) {
@@ -109,12 +115,30 @@ const Profile = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="w-full flex justify-center py-4 bg-white/80">
+      <div className="w-full flex justify-between items-center py-4 px-4 bg-white/80">
         <img 
           src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
           alt="Narra Logo"
           className="h-11"
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-10 w-10">
+              <Menu className="h-8 w-8" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={handleLogout}>
+              Not {profile.first_name}? Log Out
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/">
+                Sign Up for Narra
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
