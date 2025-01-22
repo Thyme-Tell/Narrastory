@@ -101,7 +101,7 @@ const Profile = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background p-4"
+      className="min-h-screen bg-background"
       style={{
         backgroundImage: `url('/lovable-uploads/e730ede5-8b2e-436e-a398-0c62ea70f30c.png')`,
         backgroundSize: 'cover',
@@ -109,26 +109,35 @@ const Profile = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="max-w-2xl mx-auto space-y-6">
-        <ProfileHeader 
-          firstName={profile.first_name} 
-          lastName={profile.last_name} 
+      <div className="w-full flex justify-center py-4 bg-white/80">
+        <img 
+          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
+          alt="Narra Logo"
+          className="h-8"
         />
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold font-sans">Your Stories</h2>
-          </div>
-          
-          <p className="text-muted-foreground">
-            Call Narra at +1 (507) 200-3303 to create a new story.
-          </p>
-          
-          <StoriesList 
-            stories={stories || []}
-            isLoading={isLoadingStories}
-            onUpdate={refetchStories}
+      </div>
+      <div className="p-4">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <ProfileHeader 
+            firstName={profile.first_name} 
+            lastName={profile.last_name} 
           />
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold font-sans">Your Stories</h2>
+            </div>
+            
+            <p className="text-muted-foreground">
+              Call Narra at +1 (507) 200-3303 to create a new story.
+            </p>
+            
+            <StoriesList 
+              stories={stories || []}
+              isLoading={isLoadingStories}
+              onUpdate={refetchStories}
+            />
+          </div>
         </div>
       </div>
     </div>
