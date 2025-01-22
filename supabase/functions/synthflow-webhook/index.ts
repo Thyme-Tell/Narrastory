@@ -21,12 +21,16 @@ Deno.serve(async (req) => {
   try {
     console.log('Webhook received request');
     
-    // Parse the URL and get query parameters
+    // Parse the URL and extract query parameters
     const url = new URL(req.url);
-    const phone_number = url.searchParams.get('phone_number')?.trim();
-    const generated_story = url.searchParams.get('generated_story')?.trim();
+    const rawPhoneNumber = url.searchParams.get('phone_number') || '';
+    const rawGeneratedStory = url.searchParams.get('generated_story') || '';
 
-    console.log('Received query parameters:', { phone_number, generated_story });
+    // Clean up the parameters
+    const phone_number = rawPhoneNumber.split('=').pop()?.trim();
+    const generated_story = rawGeneratedStory.split('=').pop()?.trim();
+
+    console.log('Parsed parameters:', { phone_number, generated_story });
 
     if (!phone_number || !generated_story) {
       console.error('Missing required parameters');
