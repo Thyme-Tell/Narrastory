@@ -68,7 +68,6 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
-            aspect={1}
           >
             <img
               ref={imageRef}
