@@ -12,10 +12,7 @@ const ProfileForm = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
-    firstName: "",
-    lastName: "",
     phoneNumber: "",
-    email: "",
     password: "",
   });
 
@@ -37,9 +34,9 @@ const ProfileForm = () => {
       if (existingProfile) {
         toast({
           title: "Profile Found!",
-          description: "Redirecting you to your existing profile.",
+          description: "This phone number is already registered. Please sign in instead.",
+          variant: "destructive",
         });
-        navigate(`/profile/${existingProfile.id}`);
         return;
       }
 
@@ -47,10 +44,7 @@ const ProfileForm = () => {
         .from("profiles")
         .insert([
           {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
             phone_number: normalizedPhoneNumber,
-            email: formData.email || null,
             password: formData.password,
           },
         ])
@@ -88,24 +82,6 @@ const ProfileForm = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <FormField
-          label="First Name"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
-          required
-          placeholder="John"
-        />
-
-        <FormField
-          label="Last Name"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-          required
-          placeholder="Doe"
-        />
-
-        <FormField
           label="Phone Number"
           name="phoneNumber"
           type="tel"
@@ -113,15 +89,6 @@ const ProfileForm = () => {
           onChange={handleChange}
           required
           placeholder="+1 (555) 000-0000"
-        />
-
-        <FormField
-          label="Email (Optional)"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="john@example.com"
         />
 
         <FormField
@@ -136,7 +103,7 @@ const ProfileForm = () => {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Processing..." : "Continue"}
+        {loading ? "Processing..." : "Sign Up"}
       </Button>
     </form>
   );
