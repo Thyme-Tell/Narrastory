@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormData } from "@/types/profile";
+import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
 const ProfileForm = () => {
   const navigate = useNavigate();
@@ -21,11 +22,13 @@ const ProfileForm = () => {
     e.preventDefault();
     setLoading(true);
 
+    const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
+
     try {
       const { data: existingProfile, error: searchError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("phone_number", formData.phoneNumber)
+        .eq("phone_number", normalizedPhoneNumber)
         .maybeSingle();
 
       if (searchError) throw searchError;
@@ -45,7 +48,7 @@ const ProfileForm = () => {
           {
             first_name: formData.firstName,
             last_name: formData.lastName,
-            phone_number: formData.phoneNumber,
+            phone_number: normalizedPhoneNumber,
             email: formData.email || null,
           },
         ])
