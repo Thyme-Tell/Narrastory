@@ -13,28 +13,41 @@ const synthflowApiKey = Deno.env.get('SYNTHFLOW_API_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 Deno.serve(async (req) => {
+  console.log('=== START OF REQUEST ===');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Webhook received request');
+    console.log('Starting webhook request processing');
     
-    // Parse the URL and extract query parameters
+    // Parse URL and get parameters
     const url = new URL(req.url);
-    const rawPhoneNumber = url.searchParams.get('phone_number') || '';
-    const rawGeneratedStory = url.searchParams.get('generated_story') || '';
-
-    // Clean up the parameters
-    const phone_number = rawPhoneNumber.split('=').pop()?.trim();
-    const generated_story = rawGeneratedStory.split('=').pop()?.trim();
-
-    console.log('Parsed parameters:', { phone_number, generated_story });
+    console.log('Raw URL:', url.toString());
+    
+    // Get parameters directly from URL search params
+    const phone_number = url.searchParams.get('phone_number');
+    const generated_story = url.searchParams.get('generated_story');
+    
+    console.log('Received parameters:', { phone_number, generated_story });
 
     if (!phone_number || !generated_story) {
       console.error('Missing required parameters');
-      throw new Error('Missing required query parameters: phone_number and generated_story are required');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Missing required parameters', 
+          received: { phone_number, generated_story } 
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
     }
 
     // Find the profile with the matching phone number
@@ -46,12 +59,24 @@ Deno.serve(async (req) => {
 
     if (profileError) {
       console.error('Error finding profile:', profileError);
-      throw profileError;
+      return new Response(
+        JSON.stringify({ error: 'Error finding profile', details: profileError }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        }
+      );
     }
 
     if (!profile) {
       console.error('No profile found for phone number:', phone_number);
-      throw new Error(`Profile not found for phone number: ${phone_number}`);
+      return new Response(
+        JSON.stringify({ error: 'Profile not found' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 404,
+        }
+      );
     }
 
     console.log('Found profile:', profile);
@@ -70,7 +95,13 @@ Deno.serve(async (req) => {
 
     if (storyError) {
       console.error('Error inserting story:', storyError);
-      throw storyError;
+      return new Response(
+        JSON.stringify({ error: 'Error inserting story', details: storyError }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        }
+      );
     }
 
     console.log('Successfully stored story:', story);
@@ -90,7 +121,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: error.message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' ? 401 : 400,
+        status: 500,
       }
     );
   }
