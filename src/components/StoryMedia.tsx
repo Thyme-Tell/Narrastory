@@ -57,7 +57,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
   return (
     <>
       <div className="mt-4">
-        <Carousel className="w-[80vw] mx-auto">
+        <Carousel className="w-[60vw] mx-auto">
           <CarouselContent>
             {mediaItems.map((media) => {
               const { data } = supabase.storage
