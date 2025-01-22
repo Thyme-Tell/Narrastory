@@ -133,23 +133,27 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   return (
     <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2">
       {isEditing ? (
-        <div className="space-y-4">
-          <Input
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            placeholder="Story title"
-            className="w-full"
-          />
-          <Textarea
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            className="w-full min-h-[100px]"
-          />
-          <div className="flex space-x-2">
-            <Button onClick={handleSave}>Save</Button>
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
-              Cancel
-            </Button>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="fixed inset-x-0 top-0 z-50 bg-background p-6 shadow-lg h-screen overflow-y-auto">
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Story title"
+                className="w-full"
+              />
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full min-h-[calc(100vh-200px)]"
+              />
+              <div className="flex space-x-2">
+                <Button onClick={handleSave}>Save</Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
