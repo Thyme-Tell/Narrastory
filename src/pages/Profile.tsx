@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import StoryMediaUpload from "@/components/StoryMediaUpload";
+import StoryMedia from "@/components/StoryMedia";
 
 const Profile = () => {
   const { id } = useParams();
@@ -125,13 +127,13 @@ const Profile = () => {
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">
-            {profile.first_name} {profile.last_name}
+            {profile?.first_name} {profile?.last_name}
           </h1>
           <Link 
             to="/" 
             className="text-primary hover:underline"
           >
-            Not {profile.first_name}? Sign up
+            Not {profile?.first_name}? Sign up
           </Link>
         </div>
         
@@ -192,6 +194,11 @@ const Profile = () => {
                         <h3 className="font-semibold text-lg">{story.title}</h3>
                       )}
                       <p className="whitespace-pre-wrap">{story.content}</p>
+                      <StoryMedia storyId={story.id} />
+                      <StoryMediaUpload 
+                        storyId={story.id}
+                        onUploadComplete={() => refetchStories()}
+                      />
                     </>
                   )}
                 </div>

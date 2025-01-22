@@ -74,6 +74,41 @@ export type Database = {
           },
         ]
       }
+      story_media: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_path: string
+          id: string
+          story_id: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          file_path: string
+          id?: string
+          story_id?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          story_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_media_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
