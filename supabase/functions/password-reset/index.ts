@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders } from '../_shared/cors.ts'
-import { Twilio } from 'npm:twilio'
+import { Twilio } from 'npm:twilio@4.19.3'
 
 interface RequestBody {
   action: 'request' | 'reset'
@@ -9,6 +9,8 @@ interface RequestBody {
   newPassword?: string
 }
 
+console.log('Edge function starting...')
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -16,6 +18,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('Creating Supabase client...')
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -28,12 +31,14 @@ Deno.serve(async (req) => {
     )
 
     const { action, phoneNumber, token, newPassword } = await req.json() as RequestBody
+    console.log('Received action:', action)
 
     if (action === 'request') {
       if (!phoneNumber) {
         throw new Error('Phone number is required')
       }
 
+      console.log('Finding profile for phone number...')
       // Find the profile
       const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
@@ -42,6 +47,7 @@ Deno.serve(async (req) => {
         .single()
 
       if (profileError || !profile) {
+        console.error('Profile error:', profileError)
         throw new Error('Profile not found')
       }
 
@@ -52,6 +58,7 @@ Deno.serve(async (req) => {
       const expiresAt = new Date()
       expiresAt.setHours(expiresAt.getHours() + 1)
 
+      console.log('Inserting reset token...')
       // Insert the token
       const { error: tokenError } = await supabaseClient
         .from('password_reset_tokens')
@@ -66,21 +73,23 @@ Deno.serve(async (req) => {
         throw new Error('Failed to create reset token')
       }
 
+      console.log('Initializing Twilio client...')
       // Initialize Twilio client
       const twilioClient = new Twilio(
-        Deno.env.get('TWILIO_ACCOUNT_SID'),
-        Deno.env.get('TWILIO_AUTH_TOKEN')
+        Deno.env.get('TWILIO_ACCOUNT_SID') ?? '',
+        Deno.env.get('TWILIO_AUTH_TOKEN') ?? ''
       )
 
       // Send SMS with reset token
       try {
+        console.log('Sending SMS...')
         await twilioClient.messages.create({
           body: `Your password reset code is: ${resetToken}. This code will expire in 1 hour.`,
           to: phoneNumber,
-          from: Deno.env.get('TWILIO_PHONE_NUMBER'),
+          from: Deno.env.get('TWILIO_PHONE_NUMBER') ?? '',
         })
 
-        console.log('SMS sent successfully to:', phoneNumber)
+        console.log('SMS sent successfully')
       } catch (error) {
         console.error('Error sending SMS:', error)
         throw new Error('Failed to send SMS. Please try again later.')
@@ -106,6 +115,7 @@ Deno.serve(async (req) => {
         throw new Error('Token and new password are required')
       }
 
+      console.log('Validating reset token...')
       // Find and validate token
       const { data: tokenData, error: tokenError } = await supabaseClient
         .from('password_reset_tokens')
@@ -115,6 +125,7 @@ Deno.serve(async (req) => {
         .single()
 
       if (tokenError || !tokenData) {
+        console.error('Token validation error:', tokenError)
         throw new Error('Invalid or expired token')
       }
 
@@ -122,6 +133,7 @@ Deno.serve(async (req) => {
         throw new Error('Token has expired')
       }
 
+      console.log('Updating password...')
       // Update the profile's password
       const { error: updateError } = await supabaseClient
         .from('profiles')
@@ -133,6 +145,7 @@ Deno.serve(async (req) => {
         throw new Error('Failed to update password')
       }
 
+      console.log('Marking token as used...')
       // Mark token as used
       await supabaseClient
         .from('password_reset_tokens')
@@ -150,7 +163,7 @@ Deno.serve(async (req) => {
 
     throw new Error('Invalid action')
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in edge function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
