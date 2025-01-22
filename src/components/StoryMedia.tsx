@@ -98,7 +98,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
   return (
     <>
       <div className="mt-4">
-        <Carousel className="w-[80%] mx-auto">
+        <Carousel className="w-[55%] mx-auto">
           <CarouselContent>
             {mediaItems.map((media) => {
               const { data } = supabase.storage
@@ -157,7 +157,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
                         src={data.publicUrl}
                         className="w-full h-full object-cover"
                         controls
-                        poster={`${data.publicUrl}#t=0.1`} // Generate thumbnail from the first frame
+                        poster={`${data.publicUrl}#t=0.1`}
                       >
                         Your browser does not support the video tag.
                       </video>
