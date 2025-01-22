@@ -113,7 +113,7 @@ const Profile = () => {
         <img 
           src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
           alt="Narra Logo"
-          className="h-8"
+          className="h-11"
         />
       </div>
       <div className="p-4">
