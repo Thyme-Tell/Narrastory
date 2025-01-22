@@ -117,7 +117,7 @@ const Profile = () => {
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Your Stories</h2>
+            <h2 className="text-xl font-semibold font-sans">Your Stories</h2>
           </div>
           
           <p className="text-muted-foreground">
