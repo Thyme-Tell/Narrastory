@@ -93,7 +93,7 @@ const ProfileForm = () => {
           value={formData.firstName}
           onChange={handleChange}
           required
-          placeholder="John"
+          placeholder="Jane"
         />
 
         <FormField
@@ -102,7 +102,7 @@ const ProfileForm = () => {
           value={formData.lastName}
           onChange={handleChange}
           required
-          placeholder="Doe"
+          placeholder="Brown"
         />
 
         <FormField
@@ -112,7 +112,7 @@ const ProfileForm = () => {
           value={formData.phoneNumber}
           onChange={handleChange}
           required
-          placeholder="+1 (555) 000-0000"
+          placeholder="(555) 000-0000"
         />
 
         <FormField
@@ -122,7 +122,7 @@ const ProfileForm = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          placeholder="john@example.com"
+          placeholder="jane@example.com"
         />
 
         <FormField
