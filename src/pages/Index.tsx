@@ -14,13 +14,16 @@ const Index = () => {
           <img
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z"
             alt="Narra Logo"
-            className="mx-auto h-16 w-auto mb-[50px]"
+            className="mx-auto h-16 w-auto mb-[50px] animate-fade-in"
+            style={{ animationDelay: '0ms' }}
           />
-          <h1 className="text-3xl font-bold">Sign Up</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold animate-fade-in" style={{ animationDelay: '200ms' }}>
+            Sign Up
+          </h1>
+          <p className="text-muted-foreground animate-fade-in" style={{ animationDelay: '400ms' }}>
             Start your story today with Narra
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '600ms' }}>
             Already have an account?{" "}
             <Link to="/signin" className="hover:underline">
               Sign in
@@ -28,7 +31,9 @@ const Index = () => {
           </p>
         </div>
 
-        <ProfileForm />
+        <div className="animate-fade-in" style={{ animationDelay: '800ms' }}>
+          <ProfileForm />
+        </div>
       </div>
     </div>
   );
