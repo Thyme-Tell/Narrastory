@@ -133,7 +133,7 @@ const Profile = () => {
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
               <Menu className="h-12 w-12" />
               <span className="sr-only">Open menu</span>
             </Button>
@@ -157,8 +157,8 @@ const Profile = () => {
             lastName={profile.last_name} 
           />
           
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
+          <div>
+            <p className="text-muted-foreground mt-2">
               Call Narra at +1 (507) 200-3303 to create a new story.
             </p>
             
