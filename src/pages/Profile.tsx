@@ -77,12 +77,12 @@ const Profile = () => {
               {stories.map((story) => (
                 <div 
                   key={story.id} 
-                  className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm"
+                  className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2"
                 >
-                  <p className="whitespace-pre-wrap">{story.content}</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-sm text-muted-foreground">
                     {new Date(story.created_at).toLocaleDateString()}
                   </p>
+                  <p className="whitespace-pre-wrap">{story.content}</p>
                 </div>
               ))}
             </div>
