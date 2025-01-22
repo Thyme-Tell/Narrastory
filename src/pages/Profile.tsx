@@ -158,7 +158,7 @@ const Profile = () => {
           />
           
           <div>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground">
               Call Narra at +1 (507) 200-3303 to create a new story.
             </p>
             
