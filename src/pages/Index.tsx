@@ -1,5 +1,4 @@
 import ProfileForm from "@/components/ProfileForm";
-import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -13,13 +12,6 @@ const Index = () => {
         </div>
 
         <ProfileForm />
-
-        <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link to="/signin" className="text-primary hover:underline">
-            Sign In
-          </Link>
-        </p>
       </div>
     </div>
   );
