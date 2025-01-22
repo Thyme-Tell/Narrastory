@@ -194,10 +194,12 @@ const Profile = () => {
                         <h3 className="font-semibold text-lg">{story.title}</h3>
                       )}
                       <p className="whitespace-pre-wrap">{story.content}</p>
-                      <StoryMediaUpload 
-                        storyId={story.id}
-                        onUploadComplete={() => refetchStories()}
-                      />
+                      <div className="mt-[30px] mb-[20px]">
+                        <StoryMediaUpload 
+                          storyId={story.id}
+                          onUploadComplete={() => refetchStories()}
+                        />
+                      </div>
                       <StoryMedia storyId={story.id} />
                     </>
                   )}
