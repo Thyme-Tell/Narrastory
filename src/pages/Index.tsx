@@ -22,14 +22,37 @@ const Index = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.from("profiles").insert([
-        {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone_number: formData.phoneNumber,
-          email: formData.email || null,
-        },
-      ]).select().single();
+      // First, check if a profile with this phone number already exists
+      const { data: existingProfile, error: searchError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("phone_number", formData.phoneNumber)
+        .maybeSingle();
+
+      if (searchError) throw searchError;
+
+      if (existingProfile) {
+        toast({
+          title: "Profile Found!",
+          description: "Redirecting you to your existing profile.",
+        });
+        navigate(`/profile/${existingProfile.id}`);
+        return;
+      }
+
+      // If no existing profile, create a new one
+      const { data, error } = await supabase
+        .from("profiles")
+        .insert([
+          {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone_number: formData.phoneNumber,
+            email: formData.email || null,
+          },
+        ])
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -40,13 +63,12 @@ const Index = () => {
 
       // Redirect to profile page
       navigate(`/profile/${data.id}`);
-
     } catch (error) {
       console.error("Error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "There was a problem creating your profile.",
+        description: "There was a problem with your request.",
       });
     } finally {
       setLoading(false);
@@ -127,7 +149,7 @@ const Index = () => {
             className="w-full"
             disabled={loading}
           >
-            {loading ? "Creating Profile..." : "Create Profile"}
+            {loading ? "Processing..." : "Continue"}
           </Button>
         </form>
       </div>
