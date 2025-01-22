@@ -2,9 +2,18 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const Profile = () => {
   const { id } = useParams();
+  const { toast } = useToast();
+  const [editingStoryId, setEditingStoryId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
@@ -24,7 +33,7 @@ const Profile = () => {
     },
   });
 
-  const { data: stories, isLoading: isLoadingStories } = useQuery({
+  const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
     queryKey: ["stories", id],
     queryFn: async () => {
       if (!id) return [];
@@ -33,6 +42,7 @@ const Profile = () => {
         .from("stories")
         .select(`
           id,
+          title,
           content,
           created_at
         `)
@@ -48,6 +58,46 @@ const Profile = () => {
     },
     enabled: !!id,
   });
+
+  const startEditing = (story: any) => {
+    setEditingStoryId(story.id);
+    setEditTitle(story.title || "");
+    setEditContent(story.content);
+  };
+
+  const cancelEditing = () => {
+    setEditingStoryId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+
+  const saveStory = async (storyId: string) => {
+    const { error } = await supabase
+      .from("stories")
+      .update({
+        title: editTitle,
+        content: editContent,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", storyId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update story",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Story updated successfully",
+    });
+    
+    cancelEditing();
+    refetchStories();
+  };
 
   if (isLoadingProfile) {
     return (
@@ -103,10 +153,47 @@ const Profile = () => {
                   key={story.id} 
                   className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2"
                 >
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(story.created_at).toLocaleDateString()}
-                  </p>
-                  <p className="whitespace-pre-wrap">{story.content}</p>
+                  {editingStoryId === story.id ? (
+                    <div className="space-y-4">
+                      <Input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Story title"
+                        className="w-full"
+                      />
+                      <Textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full min-h-[100px]"
+                      />
+                      <div className="flex space-x-2">
+                        <Button onClick={() => saveStory(story.id)}>
+                          Save
+                        </Button>
+                        <Button variant="outline" onClick={cancelEditing}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(story.created_at).toLocaleDateString()}
+                        </p>
+                        <Button 
+                          variant="ghost" 
+                          onClick={() => startEditing(story)}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                      {story.title && (
+                        <h3 className="font-semibold text-lg">{story.title}</h3>
+                      )}
+                      <p className="whitespace-pre-wrap">{story.content}</p>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
