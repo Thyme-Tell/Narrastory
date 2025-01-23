@@ -46,20 +46,13 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [editContent, setEditContent] = useState(story.content);
   const { toast } = useToast();
 
-  // Fetch storybooks for the current user
+  // Fetch all storybooks
   const { data: storybooks } = useQuery({
     queryKey: ["storybooks"],
     queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user?.id) {
-        console.log("No authenticated user found");
-        return [];
-      }
-
       const { data, error } = await supabase
         .from("storybooks")
         .select("*")
-        .eq("profile_id", session.session.user.id)
         .order("created_at", { ascending: false });
 
       if (error) {
