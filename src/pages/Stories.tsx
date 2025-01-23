@@ -8,6 +8,7 @@ import PasswordProtection from "@/components/PasswordProtection";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { Menu } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,10 +22,14 @@ const Profile = () => {
   const { id } = useParams();
   const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+  console.log("Profile ID from params:", id); // Debug log
+
+  const { data: profile, isLoading: isLoadingProfile, error: profileError } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
+      console.log("Fetching profile for ID:", id); // Debug log
       const { data, error } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, created_at, password")
@@ -33,18 +38,25 @@ const Profile = () => {
 
       if (error) {
         console.error("Error fetching profile:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load profile data",
+        });
         return null;
       }
       
+      console.log("Profile data received:", data); // Debug log
       return data;
     },
   });
 
-  const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
+  const { data: stories, isLoading: isLoadingStories, error: storiesError, refetch: refetchStories } = useQuery({
     queryKey: ["stories", id],
     queryFn: async () => {
       if (!id || !isVerified) return [];
       
+      console.log("Fetching stories for profile:", id); // Debug log
       const { data, error } = await supabase
         .from("stories")
         .select(`
@@ -58,16 +70,21 @@ const Profile = () => {
 
       if (error) {
         console.error("Error fetching stories:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load stories",
+        });
         return [];
       }
       
+      console.log("Stories data received:", data); // Debug log
       return data;
     },
     enabled: !!id && isVerified,
   });
 
   useEffect(() => {
-    // Set the page title when profile data is loaded
     if (profile) {
       document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
@@ -76,8 +93,8 @@ const Profile = () => {
   }, [profile]);
 
   useEffect(() => {
-    // Check for existing authorization cookie
     const authCookie = Cookies.get('profile_authorized');
+    console.log("Auth cookie value:", authCookie); // Debug log
     if (authCookie === 'true') {
       setIsVerified(true);
     }
@@ -86,6 +103,7 @@ const Profile = () => {
   const handlePasswordVerify = async (password: string) => {
     if (!profile) return false;
     
+    console.log("Verifying password"); // Debug log
     const isValid = profile.password === password;
     if (isValid) {
       setIsVerified(true);
@@ -94,9 +112,7 @@ const Profile = () => {
   };
 
   const handleLogout = async () => {
-    // Remove the authorization cookie
     Cookies.remove('profile_authorized');
-    // Navigate back to home
     navigate('/');
   };
 
@@ -104,6 +120,19 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-lg">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-lg text-destructive">Error loading profile</p>
+          <Link to="/" className="text-primary hover:underline">
+            Return to Home
+          </Link>
+        </div>
       </div>
     );
   }
@@ -175,11 +204,15 @@ const Profile = () => {
             {profile && <Storybooks profileId={profile.id} />}
             
             <div className="mt-8">
-              <StoriesList 
-                stories={stories || []}
-                isLoading={isLoadingStories}
-                onUpdate={refetchStories}
-              />
+              {storiesError ? (
+                <p className="text-destructive">Error loading stories</p>
+              ) : (
+                <StoriesList 
+                  stories={stories || []}
+                  isLoading={isLoadingStories}
+                  onUpdate={refetchStories}
+                />
+              )}
             </div>
           </div>
         </div>
