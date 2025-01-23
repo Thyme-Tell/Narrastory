@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface StorybooksListProps {
   profileId: string;
@@ -74,7 +75,12 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
           key={storybook.id}
           className="p-6 rounded-lg border bg-card text-card-foreground"
         >
-          <h3 className="font-semibold text-lg">{storybook.title}</h3>
+          <Link 
+            to={`/storybook/${storybook.id}`}
+            className="hover:underline"
+          >
+            <h3 className="font-semibold text-lg">{storybook.title}</h3>
+          </Link>
           {storybook.description && (
             <p className="text-sm text-muted-foreground mt-1">
               {storybook.description}
