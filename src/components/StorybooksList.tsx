@@ -11,9 +11,11 @@ interface StorybooksListProps {
 const StorybooksList = ({ profileId }: StorybooksListProps) => {
   const { toast } = useToast();
   
-  const { data: storybooks, isLoading } = useQuery({
+  const { data: storybooks, isLoading, error } = useQuery({
     queryKey: ["storybooks", profileId],
     queryFn: async () => {
+      console.log("Fetching storybooks for profile:", profileId);
+      
       // First, fetch the storybooks
       const { data: storybooksData, error: storybooksError } = await supabase
         .from("storybooks")
@@ -25,6 +27,8 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         console.error("Error fetching storybooks:", storybooksError);
         throw storybooksError;
       }
+
+      console.log("Fetched storybooks:", storybooksData);
 
       // Then, for each storybook, fetch the story count
       const storybooksWithCounts = await Promise.all(
@@ -43,9 +47,15 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         })
       );
 
+      console.log("Storybooks with counts:", storybooksWithCounts);
       return storybooksWithCounts;
     },
   });
+
+  if (error) {
+    console.error("Query error:", error);
+    return <p className="text-red-500">Error loading storybooks. Please try again.</p>;
+  }
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading storybooks...</p>;
