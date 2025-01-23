@@ -6,7 +6,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, BookPlus } from "lucide-react";
+import { useStorybooks } from "@/hooks/useStorybooks";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface StoryCardProps {
   story: {
@@ -39,7 +46,12 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(story.title || "");
   const [editContent, setEditContent] = useState(story.content);
+  const [isAddToStorybookOpen, setIsAddToStorybookOpen] = useState(false);
   const { toast } = useToast();
+
+  // Get the profile ID from the URL
+  const profileId = window.location.pathname.split('/')[2];
+  const { storybooks, addStoryToStorybook } = useStorybooks(profileId);
 
   const handleSave = async () => {
     const { error } = await supabase
@@ -130,6 +142,26 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     onUpdate();
   };
 
+  const handleAddToStorybook = async (storybookId: string) => {
+    try {
+      await addStoryToStorybook.mutateAsync({
+        storyId: story.id,
+        storybookId,
+      });
+      setIsAddToStorybookOpen(false);
+      toast({
+        title: "Success",
+        description: "Story added to storybook",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add story to storybook",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2">
       {isEditing ? (
@@ -173,6 +205,10 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                   <Pencil className="h-4 w-4 mr-2" />
                   Edit
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsAddToStorybookOpen(true)}>
+                  <BookPlus className="h-4 w-4 mr-2" />
+                  Add to Storybook
+                </DropdownMenuItem>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem
@@ -214,6 +250,26 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
           <StoryMedia storyId={story.id} />
         </>
       )}
+
+      <Dialog open={isAddToStorybookOpen} onOpenChange={setIsAddToStorybookOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add to Storybook</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {storybooks?.map((storybook) => (
+              <Button
+                key={storybook.id}
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => handleAddToStorybook(storybook.id)}
+              >
+                {storybook.title}
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
