@@ -37,7 +37,10 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         .from("storybook_collaborators")
         .select(`
           storybook:storybooks (
-            *,
+            id,
+            title,
+            description,
+            created_at,
             stories_storybooks (
               story:stories (
                 id
@@ -64,6 +67,7 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         new Map(allStorybooks.map(book => [book.id, book])).values()
       );
 
+      console.log("Fetched storybooks:", uniqueStorybooks); // Debug log
       return uniqueStorybooks;
     },
   });
