@@ -13,6 +13,7 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
   const { data: storybooks, isLoading } = useQuery({
     queryKey: ["storybooks", profileId],
     queryFn: async () => {
+      console.log("Fetching storybooks for profile:", profileId);
       const { data, error } = await supabase
         .from("storybooks")
         .select(`
@@ -26,7 +27,17 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         .eq("profile_id", profileId)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching storybooks:", error);
+        toast({
+          variant: "destructive",
+          title: "Error loading storybooks",
+          description: "Please try again.",
+        });
+        throw error;
+      }
+      
+      console.log("Fetched storybooks:", data);
       return data;
     },
   });
