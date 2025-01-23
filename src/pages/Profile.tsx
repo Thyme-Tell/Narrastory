@@ -1,11 +1,9 @@
 import { useParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
-import CreateStorybook from "@/components/CreateStorybook";
-import StorybooksList from "@/components/StorybooksList";
 import PasswordProtection from "@/components/PasswordProtection";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
@@ -22,7 +20,6 @@ const Profile = () => {
   const { id } = useParams();
   const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
@@ -69,6 +66,7 @@ const Profile = () => {
   });
 
   useEffect(() => {
+    // Set the page title when profile data is loaded
     if (profile) {
       document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
@@ -77,6 +75,7 @@ const Profile = () => {
   }, [profile]);
 
   useEffect(() => {
+    // Check for existing authorization cookie
     const authCookie = Cookies.get('profile_authorized');
     if (authCookie === 'true') {
       setIsVerified(true);
@@ -94,12 +93,10 @@ const Profile = () => {
   };
 
   const handleLogout = async () => {
+    // Remove the authorization cookie
     Cookies.remove('profile_authorized');
+    // Navigate back to home
     navigate('/');
-  };
-
-  const handleStorybookCreated = () => {
-    queryClient.invalidateQueries({ queryKey: ["storybooks", id] });
   };
 
   if (isLoadingProfile) {
@@ -169,27 +166,16 @@ const Profile = () => {
             lastName={profile.last_name} 
           />
           
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Storybooks</h2>
-              <CreateStorybook profileId={id} onStorybookCreated={handleStorybookCreated} />
-              <div className="mt-4">
-                <StorybooksList profileId={id} />
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Stories</h2>
-              <p className="text-muted-foreground mb-[15px]">
-                Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
-              </p>
-              
-              <StoriesList 
-                stories={stories || []}
-                isLoading={isLoadingStories}
-                onUpdate={refetchStories}
-              />
-            </div>
+          <div>
+            <p className="text-muted-foreground mb-[15px]">
+              Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
+            </p>
+            
+            <StoriesList 
+              stories={stories || []}
+              isLoading={isLoadingStories}
+              onUpdate={refetchStories}
+            />
           </div>
         </div>
       </div>
