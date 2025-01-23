@@ -14,7 +14,9 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
     queryKey: ["storybooks", profileId],
     queryFn: async () => {
       console.log("Fetching storybooks for profile:", profileId);
-      const { data, error } = await supabase
+      
+      // First, fetch storybooks where the user is the owner
+      const { data: ownedStorybooks, error: ownedError } = await supabase
         .from("storybooks")
         .select(`
           *,
@@ -27,18 +29,53 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         .eq("profile_id", profileId)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching storybooks:", error);
+      if (ownedError) {
+        console.error("Error fetching owned storybooks:", ownedError);
         toast({
           variant: "destructive",
           title: "Error loading storybooks",
           description: "Please try again.",
         });
-        throw error;
+        throw ownedError;
       }
+
+      // Then, fetch storybooks where the user is a collaborator
+      const { data: collaborativeStorybooks, error: collabError } = await supabase
+        .from("storybook_collaborators")
+        .select(`
+          storybook:storybooks (
+            *,
+            stories_storybooks (
+              story:stories (
+                id
+              )
+            )
+          )
+        `)
+        .eq("profile_id", profileId);
+
+      if (collabError) {
+        console.error("Error fetching collaborative storybooks:", collabError);
+        toast({
+          variant: "destructive",
+          title: "Error loading storybooks",
+          description: "Please try again.",
+        });
+        throw collabError;
+      }
+
+      // Combine and deduplicate storybooks
+      const collaborativeBooks = collaborativeStorybooks
+        .map(({ storybook }) => storybook)
+        .filter(Boolean);
       
-      console.log("Fetched storybooks:", data);
-      return data;
+      const allStorybooks = [...(ownedStorybooks || []), ...collaborativeBooks];
+      const uniqueStorybooks = Array.from(
+        new Map(allStorybooks.map(book => [book.id, book])).values()
+      );
+
+      console.log("All fetched storybooks:", uniqueStorybooks);
+      return uniqueStorybooks;
     },
   });
 
