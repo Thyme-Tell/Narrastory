@@ -231,6 +231,45 @@ export type Database = {
           },
         ]
       }
+      storybook_collaborators: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          role: string
+          storybook_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          role?: string
+          storybook_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          role?: string
+          storybook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storybook_collaborators_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storybook_collaborators_storybook_id_fkey"
+            columns: ["storybook_id"]
+            isOneToOne: false
+            referencedRelation: "storybooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storybooks: {
         Row: {
           created_at: string
