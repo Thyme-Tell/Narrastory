@@ -10,27 +10,33 @@ interface StorybooksListProps {
 const StorybooksList = ({ profileId }: StorybooksListProps) => {
   const { toast } = useToast();
   
-  const { data: storybooks, isLoading } = useQuery({
+  const { data: storybooks, isLoading, error } = useQuery({
     queryKey: ["storybooks", profileId],
     queryFn: async () => {
+      console.log("Fetching storybooks for profile:", profileId); // Debug log
+
       // First, fetch storybooks owned by the user
       const { data: ownedStorybooks, error: ownedError } = await supabase
         .from("storybooks")
         .select(`
-          *,
+          id,
+          title,
+          description,
+          created_at,
           stories_storybooks (
             story:stories (
               id
             )
           )
         `)
-        .eq("profile_id", profileId)
-        .order("created_at", { ascending: false });
+        .eq("profile_id", profileId);
 
       if (ownedError) {
         console.error("Error fetching owned storybooks:", ownedError);
         throw ownedError;
       }
+
+      console.log("Owned storybooks:", ownedStorybooks); // Debug log
 
       // Then, fetch storybooks where the user is a collaborator
       const { data: collaborativeStorybooks, error: collabError } = await supabase
@@ -55,6 +61,8 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         throw collabError;
       }
 
+      console.log("Collaborative storybooks:", collaborativeStorybooks); // Debug log
+
       // Combine and deduplicate storybooks
       const collaborativeStorybooksData = collaborativeStorybooks
         .map(item => item.storybook)
@@ -67,10 +75,15 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         new Map(allStorybooks.map(book => [book.id, book])).values()
       );
 
-      console.log("Fetched storybooks:", uniqueStorybooks); // Debug log
+      console.log("Final unique storybooks:", uniqueStorybooks); // Debug log
       return uniqueStorybooks;
     },
   });
+
+  if (error) {
+    console.error("Error in StorybooksList:", error);
+    return <p className="text-destructive">Error loading storybooks. Please try again.</p>;
+  }
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading storybooks...</p>;
