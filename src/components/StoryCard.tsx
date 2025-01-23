@@ -141,32 +141,18 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
 
   const handleAddToStorybook = async (storybookId: string) => {
     try {
-      // First check if we have an authenticated session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('Current session:', session);
-      
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        throw new Error('Authentication error');
-      }
-
-      if (!session) {
-        console.error('No active session');
-        throw new Error('No active session');
-      }
-
       console.log('Attempting to add story to storybook:', {
         storyId: story.id,
         storybookId,
-        profileId,
-        userId: session.user.id
+        profileId
       });
 
-      // Verify storybook exists and user has access
+      // Verify storybook exists and belongs to the current profile
       const { data: storybook, error: storybookError } = await supabase
         .from('storybooks')
         .select('profile_id, title')
         .eq('id', storybookId)
+        .eq('profile_id', profileId)
         .maybeSingle();
 
       console.log('Storybook query result:', { storybook, storybookError });
@@ -177,8 +163,8 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       }
 
       if (!storybook) {
-        console.error('Storybook not found');
-        throw new Error('Storybook not found');
+        console.error('Storybook not found or access denied');
+        throw new Error('Storybook not found or access denied');
       }
 
       // Check if story is already in the storybook
