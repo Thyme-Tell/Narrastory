@@ -21,10 +21,7 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
           *,
           stories_storybooks (
             story:stories (
-              id,
-              title,
-              content,
-              created_at
+              id
             )
           )
         `)
@@ -87,36 +84,9 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
             </p>
           )}
           
-          <div className="mt-4 space-y-4">
-            {storybook.stories_storybooks?.map(({ story }) => story && (
-              <div key={story.id} className="p-4 rounded border bg-background">
-                <div className="flex justify-between items-start gap-4">
-                  <div>
-                    {story.title && (
-                      <h4 className="font-medium">{story.title}</h4>
-                    )}
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {story.content.length > 150
-                        ? `${story.content.slice(0, 150)}...`
-                        : story.content}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveStory(story.id, storybook.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {!storybook.stories_storybooks?.length && (
-              <p className="text-sm text-muted-foreground">
-                No stories in this storybook yet.
-              </p>
-            )}
-          </div>
+          <p className="text-sm text-muted-foreground mt-4">
+            {storybook.stories_storybooks?.length || 0} {storybook.stories_storybooks?.length === 1 ? 'story' : 'stories'}
+          </p>
         </div>
       ))}
     </div>
