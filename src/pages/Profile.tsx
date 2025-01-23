@@ -1,6 +1,12 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link, useNavigate } from "react-router-dom";
+import ProfileHeader from "@/components/ProfileHeader";
+import StoriesList from "@/components/StoriesList";
+import PasswordProtection from "@/components/PasswordProtection";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import { Menu } from "lucide-react";
 import {
   DropdownMenu,
@@ -9,12 +15,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import StorybooksGrid from "@/components/Storybooks";
-import Cookies from "js-cookie";
-import { useState, useEffect } from "react";
-import PasswordProtection from "@/components/PasswordProtection";
+import Storybooks from "@/components/Storybooks";
 
-const StorybooksPage = () => {
+const Profile = () => {
   const { id } = useParams();
   const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
@@ -37,15 +40,43 @@ const StorybooksPage = () => {
     },
   });
 
+  const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
+    queryKey: ["stories", id],
+    queryFn: async () => {
+      if (!id || !isVerified) return [];
+      
+      const { data, error } = await supabase
+        .from("stories")
+        .select(`
+          id,
+          title,
+          content,
+          created_at
+        `)
+        .eq("profile_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching stories:", error);
+        return [];
+      }
+      
+      return data;
+    },
+    enabled: !!id && isVerified,
+  });
+
   useEffect(() => {
+    // Set the page title when profile data is loaded
     if (profile) {
-      document.title = `Narra Story | ${profile.first_name}'s Storybooks`;
+      document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
-      document.title = "Narra Story | Storybooks";
+      document.title = "Narra Story | Profile";
     }
   }, [profile]);
 
   useEffect(() => {
+    // Check for existing authorization cookie
     const authCookie = Cookies.get('profile_authorized');
     if (authCookie === 'true') {
       setIsVerified(true);
@@ -63,7 +94,9 @@ const StorybooksPage = () => {
   };
 
   const handleLogout = async () => {
+    // Remove the authorization cookie
     Cookies.remove('profile_authorized');
+    // Navigate back to home
     navigate('/');
   };
 
@@ -108,43 +141,51 @@ const StorybooksPage = () => {
           alt="Narra Logo"
           className="h-11"
         />
-        <div className="flex items-center gap-4">
-          <Link 
-            to={`/stories/${id}`}
-            className="text-[#A33D29] hover:underline"
-          >
-            View Stories
-          </Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Menu className="h-12 w-12" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
-                Not {profile?.first_name}? Log Out
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/">
-                  Sign Up for Narra
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Menu className="h-12 w-12" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
+              Not {profile?.first_name}? Log Out
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/">
+                Sign Up for Narra
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
-          <h1 className="text-3xl font-bold">
-            {profile.first_name}'s Storybooks
-          </h1>
-          {profile && <StorybooksGrid profileId={profile.id} />}
+          <ProfileHeader 
+            firstName={profile?.first_name || ""} 
+            lastName={profile?.last_name || ""} 
+          />
+          
+          <div>
+            <p className="text-muted-foreground mb-[15px]">
+              Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
+            </p>
+            
+            {profile && <Storybooks profileId={profile.id} />}
+            
+            <div className="mt-8">
+              <StoriesList 
+                stories={stories || []}
+                isLoading={isLoadingStories}
+                onUpdate={refetchStories}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default StorybooksPage;
+export default Profile;
