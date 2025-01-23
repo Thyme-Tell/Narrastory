@@ -51,7 +51,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const { toast } = useToast();
 
   const profileId = window.location.pathname.split('/')[2];
-  const { storybooks, addStoryToStorybook } = useStorybooks(profileId);
+  const { storybooks } = useStorybooks(profileId);
 
   const handleSave = async () => {
     const { error } = await supabase
@@ -141,31 +141,62 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
 
   const handleAddToStorybook = async (storybookId: string) => {
     try {
+      // First check if we have an authenticated session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Current session:', session);
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error('Authentication error');
+      }
+
+      if (!session) {
+        console.error('No active session');
+        throw new Error('No active session');
+      }
+
       console.log('Attempting to add story to storybook:', {
         storyId: story.id,
         storybookId,
-        profileId
+        profileId,
+        userId: session.user.id
       });
 
-      const { data: storybook } = await supabase
+      // Verify storybook exists and user has access
+      const { data: storybook, error: storybookError } = await supabase
         .from('storybooks')
-        .select('profile_id')
+        .select('profile_id, title')
         .eq('id', storybookId)
-        .single();
+        .maybeSingle();
 
-      console.log('Storybook data:', storybook);
+      console.log('Storybook query result:', { storybook, storybookError });
+
+      if (storybookError) {
+        console.error('Error fetching storybook:', storybookError);
+        throw new Error('Failed to verify storybook access');
+      }
 
       if (!storybook) {
         console.error('Storybook not found');
-        toast({
-          title: "Error",
-          description: "Storybook not found",
-          variant: "destructive",
-        });
-        return;
+        throw new Error('Storybook not found');
       }
 
-      const { error } = await supabase
+      // Check if story is already in the storybook
+      const { data: existingEntry, error: checkError } = await supabase
+        .from('stories_storybooks')
+        .select('*')
+        .eq('story_id', story.id)
+        .eq('storybook_id', storybookId)
+        .maybeSingle();
+
+      console.log('Existing entry check:', { existingEntry, checkError });
+
+      if (existingEntry) {
+        throw new Error('Story is already in this storybook');
+      }
+
+      // Add story to storybook
+      const { error: insertError } = await supabase
         .from('stories_storybooks')
         .insert([
           {
@@ -174,15 +205,17 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
           },
         ]);
 
-      if (error) {
-        console.error('Error adding story to storybook:', error);
-        throw error;
+      console.log('Insert result:', { insertError });
+
+      if (insertError) {
+        console.error('Error adding story to storybook:', insertError);
+        throw insertError;
       }
 
       setIsAddToStorybookOpen(false);
       toast({
         title: "Success",
-        description: "Story added to storybook",
+        description: `Story added to storybook "${storybook.title}"`,
       });
     } catch (error) {
       console.error('Error in handleAddToStorybook:', error);
