@@ -14,21 +14,36 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
   const { data: storybooks, isLoading } = useQuery({
     queryKey: ["storybooks", profileId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, fetch the storybooks
+      const { data: storybooksData, error: storybooksError } = await supabase
         .from("storybooks")
-        .select(`
-          *,
-          stories_storybooks (
-            story:stories (
-              id
-            )
-          )
-        `)
+        .select("*")
         .eq("profile_id", profileId)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (storybooksError) {
+        console.error("Error fetching storybooks:", storybooksError);
+        throw storybooksError;
+      }
+
+      // Then, for each storybook, fetch the story count
+      const storybooksWithCounts = await Promise.all(
+        storybooksData.map(async (storybook) => {
+          const { count, error: countError } = await supabase
+            .from("stories_storybooks")
+            .select("*", { count: 'exact', head: true })
+            .eq("storybook_id", storybook.id);
+
+          if (countError) {
+            console.error("Error fetching story count:", countError);
+            return { ...storybook, storyCount: 0 };
+          }
+
+          return { ...storybook, storyCount: count || 0 };
+        })
+      );
+
+      return storybooksWithCounts;
     },
   });
 
@@ -57,7 +72,7 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
               )}
               
               <p className="text-sm text-muted-foreground mt-4">
-                {storybook.stories_storybooks?.length || 0} {storybook.stories_storybooks?.length === 1 ? 'story' : 'stories'}
+                {storybook.storyCount} {storybook.storyCount === 1 ? 'story' : 'stories'}
               </p>
             </div>
           </Link>
