@@ -168,7 +168,7 @@ const Profile = () => {
           
           <div>
             <p className="text-muted-foreground mb-[15px]">
-              Call Narra at +1 (507) 200-3303 to create a new story.
+              Call Narra at <a href="tel:+15072003303" className="text-primary hover:underline">+1 (507) 200-3303</a> to create a new story.
             </p>
             
             <StoriesList 
