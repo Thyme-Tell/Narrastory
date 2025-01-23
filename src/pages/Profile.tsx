@@ -7,7 +7,7 @@ import StoriesList from "@/components/StoriesList";
 import PasswordProtection from "@/components/PasswordProtection";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Menu } from "lucide-react";
+import { Menu, Book } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import Storybooks from "@/components/Storybooks";
 
 const Profile = () => {
   const { id } = useParams();
@@ -67,7 +66,6 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    // Set the page title when profile data is loaded
     if (profile) {
       document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
@@ -76,7 +74,6 @@ const Profile = () => {
   }, [profile]);
 
   useEffect(() => {
-    // Check for existing authorization cookie
     const authCookie = Cookies.get('profile_authorized');
     if (authCookie === 'true') {
       setIsVerified(true);
@@ -94,9 +91,7 @@ const Profile = () => {
   };
 
   const handleLogout = async () => {
-    // Remove the authorization cookie
     Cookies.remove('profile_authorized');
-    // Navigate back to home
     navigate('/');
   };
 
@@ -172,7 +167,13 @@ const Profile = () => {
               Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
             </p>
             
-            {profile && <Storybooks profileId={profile.id} />}
+            <Link 
+              to={`/profile/${profile.id}/storybooks`}
+              className="inline-flex items-center gap-2 mb-6 text-[#A33D29] hover:underline"
+            >
+              <Book className="h-5 w-5" />
+              View Storybooks
+            </Link>
             
             <div className="mt-8">
               <StoriesList 
