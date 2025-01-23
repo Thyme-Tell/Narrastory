@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { MoreVertical, Pencil, Trash2, BookPlus } from "lucide-react";
-import { useStorybooks } from "@/hooks/useStorybooks";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,13 +24,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 interface StoryCardProps {
   story: {
@@ -47,11 +39,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(story.title || "");
   const [editContent, setEditContent] = useState(story.content);
-  const [isAddToStorybookOpen, setIsAddToStorybookOpen] = useState(false);
   const { toast } = useToast();
-
-  const profileId = window.location.pathname.split('/')[2];
-  const { storybooks } = useStorybooks(profileId);
 
   const handleSave = async () => {
     const { error } = await supabase
@@ -82,6 +70,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   };
 
   const handleDelete = async () => {
+    // First, get the story details
     const { data: storyData, error: storyError } = await supabase
       .from("stories")
       .select("*, profiles(id)")
@@ -97,6 +86,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       return;
     }
 
+    // Insert into deleted_stories
     const { error: insertError } = await supabase
       .from("deleted_stories")
       .insert({
@@ -117,6 +107,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       return;
     }
 
+    // Delete from stories
     const { error: deleteError } = await supabase
       .from("stories")
       .delete()
@@ -137,80 +128,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     });
     
     onUpdate();
-  };
-
-  const handleAddToStorybook = async (storybookId: string) => {
-    try {
-      console.log('Attempting to add story to storybook:', {
-        storyId: story.id,
-        storybookId,
-        profileId
-      });
-
-      // Verify storybook exists and belongs to the current profile
-      const { data: storybook, error: storybookError } = await supabase
-        .from('storybooks')
-        .select('profile_id, title')
-        .eq('id', storybookId)
-        .eq('profile_id', profileId)
-        .maybeSingle();
-
-      console.log('Storybook query result:', { storybook, storybookError });
-
-      if (storybookError) {
-        console.error('Error fetching storybook:', storybookError);
-        throw new Error('Failed to verify storybook access');
-      }
-
-      if (!storybook) {
-        console.error('Storybook not found or access denied');
-        throw new Error('Storybook not found or access denied');
-      }
-
-      // Check if story is already in the storybook
-      const { data: existingEntry, error: checkError } = await supabase
-        .from('stories_storybooks')
-        .select('*')
-        .eq('story_id', story.id)
-        .eq('storybook_id', storybookId)
-        .maybeSingle();
-
-      console.log('Existing entry check:', { existingEntry, checkError });
-
-      if (existingEntry) {
-        throw new Error('Story is already in this storybook');
-      }
-
-      // Add story to storybook
-      const { error: insertError } = await supabase
-        .from('stories_storybooks')
-        .insert([
-          {
-            story_id: story.id,
-            storybook_id: storybookId,
-          },
-        ]);
-
-      console.log('Insert result:', { insertError });
-
-      if (insertError) {
-        console.error('Error adding story to storybook:', insertError);
-        throw insertError;
-      }
-
-      setIsAddToStorybookOpen(false);
-      toast({
-        title: "Success",
-        description: `Story added to storybook "${storybook.title}"`,
-      });
-    } catch (error) {
-      console.error('Error in handleAddToStorybook:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add story to storybook",
-        variant: "destructive",
-      });
-    }
   };
 
   return (
@@ -256,10 +173,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                   <Pencil className="h-4 w-4 mr-2" />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAddToStorybookOpen(true)}>
-                  <BookPlus className="h-4 w-4 mr-2" />
-                  Add to Storybook
-                </DropdownMenuItem>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem
@@ -301,29 +214,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
           <StoryMedia storyId={story.id} />
         </>
       )}
-
-      <Dialog open={isAddToStorybookOpen} onOpenChange={setIsAddToStorybookOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add to Storybook</DialogTitle>
-            <DialogDescription>
-              Choose a storybook to add this story to.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {storybooks?.map((storybook) => (
-              <Button
-                key={storybook.id}
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => handleAddToStorybook(storybook.id)}
-              >
-                {storybook.title}
-              </Button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

@@ -7,7 +7,7 @@ import StoriesList from "@/components/StoriesList";
 import PasswordProtection from "@/components/PasswordProtection";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Menu, Book } from "lucide-react";
+import { Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,6 +66,7 @@ const Profile = () => {
   });
 
   useEffect(() => {
+    // Set the page title when profile data is loaded
     if (profile) {
       document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
@@ -74,6 +75,7 @@ const Profile = () => {
   }, [profile]);
 
   useEffect(() => {
+    // Check for existing authorization cookie
     const authCookie = Cookies.get('profile_authorized');
     if (authCookie === 'true') {
       setIsVerified(true);
@@ -91,7 +93,9 @@ const Profile = () => {
   };
 
   const handleLogout = async () => {
+    // Remove the authorization cookie
     Cookies.remove('profile_authorized');
+    // Navigate back to home
     navigate('/');
   };
 
@@ -145,7 +149,7 @@ const Profile = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
-              Not {profile?.first_name}? Log Out
+              Not {profile.first_name}? Log Out
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/">
@@ -158,8 +162,8 @@ const Profile = () => {
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
           <ProfileHeader 
-            firstName={profile?.first_name || ""} 
-            lastName={profile?.last_name || ""} 
+            firstName={profile.first_name} 
+            lastName={profile.last_name} 
           />
           
           <div>
@@ -167,21 +171,11 @@ const Profile = () => {
               Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
             </p>
             
-            <Link 
-              to={`/profile/${profile.id}/storybooks`}
-              className="inline-flex items-center gap-2 mb-6 text-[#A33D29] hover:underline"
-            >
-              <Book className="h-5 w-5" />
-              View Storybooks
-            </Link>
-            
-            <div className="mt-8">
-              <StoriesList 
-                stories={stories || []}
-                isLoading={isLoadingStories}
-                onUpdate={refetchStories}
-              />
-            </div>
+            <StoriesList 
+              stories={stories || []}
+              isLoading={isLoadingStories}
+              onUpdate={refetchStories}
+            />
           </div>
         </div>
       </div>
