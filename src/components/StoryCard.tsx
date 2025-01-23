@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
@@ -28,6 +28,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -49,7 +50,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [isAddToStorybookOpen, setIsAddToStorybookOpen] = useState(false);
   const { toast } = useToast();
 
-  // Get the profile ID from the URL
   const profileId = window.location.pathname.split('/')[2];
   const { storybooks, addStoryToStorybook } = useStorybooks(profileId);
 
@@ -82,7 +82,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   };
 
   const handleDelete = async () => {
-    // First, get the story details
     const { data: storyData, error: storyError } = await supabase
       .from("stories")
       .select("*, profiles(id)")
@@ -98,7 +97,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       return;
     }
 
-    // Insert into deleted_stories
     const { error: insertError } = await supabase
       .from("deleted_stories")
       .insert({
@@ -119,7 +117,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       return;
     }
 
-    // Delete from stories
     const { error: deleteError } = await supabase
       .from("stories")
       .delete()
@@ -144,19 +141,54 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
 
   const handleAddToStorybook = async (storybookId: string) => {
     try {
-      await addStoryToStorybook.mutateAsync({
+      console.log('Attempting to add story to storybook:', {
         storyId: story.id,
         storybookId,
+        profileId
       });
+
+      const { data: storybook } = await supabase
+        .from('storybooks')
+        .select('profile_id')
+        .eq('id', storybookId)
+        .single();
+
+      console.log('Storybook data:', storybook);
+
+      if (!storybook) {
+        console.error('Storybook not found');
+        toast({
+          title: "Error",
+          description: "Storybook not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('stories_storybooks')
+        .insert([
+          {
+            story_id: story.id,
+            storybook_id: storybookId,
+          },
+        ]);
+
+      if (error) {
+        console.error('Error adding story to storybook:', error);
+        throw error;
+      }
+
       setIsAddToStorybookOpen(false);
       toast({
         title: "Success",
         description: "Story added to storybook",
       });
     } catch (error) {
+      console.error('Error in handleAddToStorybook:', error);
       toast({
         title: "Error",
-        description: "Failed to add story to storybook",
+        description: error instanceof Error ? error.message : "Failed to add story to storybook",
         variant: "destructive",
       });
     }
@@ -255,6 +287,9 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add to Storybook</DialogTitle>
+            <DialogDescription>
+              Choose a storybook to add this story to.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {storybooks?.map((storybook) => (
