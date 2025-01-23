@@ -15,11 +15,25 @@ const queryClient = new QueryClient({
   },
 })
 
-// Initialize PostHog
-posthog.init('phc_Elh2xuN6zexUVDoZhrqZZsxRYpGSZln10MyhRKN4zwC', {
-  api_host: 'https://us.i.posthog.com',
-  person_profiles: 'identified_only'
-})
+// Initialize PostHog with error handling
+try {
+  posthog.init('phc_Elh2xuN6zexUVDoZhrqZZsxRYpGSZln10MyhRKN4zwC', {
+    api_host: 'https://us.i.posthog.com',
+    person_profiles: 'identified_only',
+    loaded: (posthog) => {
+      // Optional: Add success logging
+      console.log('PostHog loaded successfully');
+    },
+    bootstrap: {
+      distinctID: 'anonymous-user',
+    },
+    autocapture: false, // Disable autocapture if not needed
+    capture_pageview: false, // Disable automatic pageview capture if not needed
+  });
+} catch (error) {
+  // Log the error but don't let it crash the app
+  console.warn('PostHog initialization failed:', error);
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
