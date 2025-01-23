@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
@@ -46,21 +46,33 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [editContent, setEditContent] = useState(story.content);
   const { toast } = useToast();
 
-  // Fetch storybooks
+  // Fetch storybooks for the current user
   const { data: storybooks } = useQuery({
     queryKey: ["storybooks"],
     queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user?.id) {
+        console.log("No authenticated user found");
+        return [];
+      }
+
       const { data, error } = await supabase
         .from("storybooks")
         .select("*")
+        .eq("profile_id", session.session.user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching storybooks:", error);
+        throw error;
+      }
       return data || [];
     },
   });
 
   const handleAddToStorybook = async (storybookId: string) => {
+    console.log("Adding story to storybook:", { storyId: story.id, storybookId });
+    
     const { error } = await supabase
       .from("stories_storybooks")
       .insert([
@@ -71,6 +83,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       ]);
 
     if (error) {
+      console.error("Error adding story to storybook:", error);
       if (error.code === "23505") { // Unique violation
         toast({
           title: "Already Added",
@@ -240,6 +253,11 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                           {storybook.title}
                         </DropdownMenuItem>
                       ))}
+                      {!storybooks?.length && (
+                        <DropdownMenuItem disabled>
+                          No storybooks available
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuSubContent>
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
