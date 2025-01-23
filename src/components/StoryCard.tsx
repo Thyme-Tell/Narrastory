@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { MoreVertical, Pencil, Trash2, BookPlus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,10 +23,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 
 interface StoryCardProps {
@@ -45,59 +40,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [editTitle, setEditTitle] = useState(story.title || "");
   const [editContent, setEditContent] = useState(story.content);
   const { toast } = useToast();
-
-  // Fetch all storybooks
-  const { data: storybooks } = useQuery({
-    queryKey: ["storybooks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("storybooks")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching storybooks:", error);
-        throw error;
-      }
-      return data || [];
-    },
-  });
-
-  const handleAddToStorybook = async (storybookId: string) => {
-    console.log("Adding story to storybook:", { storyId: story.id, storybookId });
-    
-    const { error } = await supabase
-      .from("stories_storybooks")
-      .insert([
-        {
-          story_id: story.id,
-          storybook_id: storybookId,
-        },
-      ]);
-
-    if (error) {
-      console.error("Error adding story to storybook:", error);
-      if (error.code === "23505") { // Unique violation
-        toast({
-          title: "Already Added",
-          description: "This story is already in the selected storybook.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to add story to storybook",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Story added to storybook",
-    });
-  };
 
   const handleSave = async () => {
     const { error } = await supabase
@@ -231,29 +173,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                   <Pencil className="h-4 w-4 mr-2" />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <BookPlus className="h-4 w-4 mr-2" />
-                    Add to Storybook
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      {storybooks?.map((storybook) => (
-                        <DropdownMenuItem
-                          key={storybook.id}
-                          onClick={() => handleAddToStorybook(storybook.id)}
-                        >
-                          {storybook.title}
-                        </DropdownMenuItem>
-                      ))}
-                      {!storybooks?.length && (
-                        <DropdownMenuItem disabled>
-                          No storybooks available
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem

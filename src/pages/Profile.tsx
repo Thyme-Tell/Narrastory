@@ -1,9 +1,11 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
+import CreateStorybook from "@/components/CreateStorybook";
+import StorybooksList from "@/components/StorybooksList";
 import PasswordProtection from "@/components/PasswordProtection";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
@@ -20,6 +22,7 @@ const Profile = () => {
   const { id } = useParams();
   const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
@@ -95,6 +98,10 @@ const Profile = () => {
     navigate('/');
   };
 
+  const handleStorybookCreated = () => {
+    queryClient.invalidateQueries({ queryKey: ["storybooks", id] });
+  };
+
   if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -152,11 +159,6 @@ const Profile = () => {
                 Sign Up for Narra
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to={`/storybooks/${id}`}>
-                View Storybooks
-              </Link>
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -168,6 +170,14 @@ const Profile = () => {
           />
           
           <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Storybooks</h2>
+              <CreateStorybook profileId={id} onStorybookCreated={handleStorybookCreated} />
+              <div className="mt-4">
+                <StorybooksList profileId={id} />
+              </div>
+            </div>
+
             <div>
               <h2 className="text-lg font-semibold mb-4">Stories</h2>
               <p className="text-muted-foreground mb-[15px]">
