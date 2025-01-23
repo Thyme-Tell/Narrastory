@@ -16,23 +16,44 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
     queryFn: async () => {
       console.log("Fetching storybooks for profile:", profileId);
       
-      // First, fetch the storybooks
-      const { data: storybooksData, error: storybooksError } = await supabase
+      // Fetch storybooks owned by the user
+      const { data: ownedStorybooks, error: ownedError } = await supabase
         .from("storybooks")
         .select("*")
-        .eq("profile_id", profileId)
-        .order("created_at", { ascending: false });
+        .eq("profile_id", profileId);
 
-      if (storybooksError) {
-        console.error("Error fetching storybooks:", storybooksError);
-        throw storybooksError;
+      if (ownedError) {
+        console.error("Error fetching owned storybooks:", ownedError);
+        throw ownedError;
       }
 
-      console.log("Fetched storybooks:", storybooksData);
+      // Fetch storybooks where user is a collaborator
+      const { data: collaborativeStorybooks, error: collabError } = await supabase
+        .from("storybook_collaborators")
+        .select("storybook:storybooks(*)")
+        .eq("profile_id", profileId);
 
-      // Then, for each storybook, fetch the story count
+      if (collabError) {
+        console.error("Error fetching collaborative storybooks:", collabError);
+        throw collabError;
+      }
+
+      // Combine and deduplicate storybooks
+      const allStorybooks = [
+        ...ownedStorybooks,
+        ...collaborativeStorybooks.map(cb => cb.storybook)
+      ].filter((sb): sb is NonNullable<typeof sb> => sb !== null);
+
+      // Remove duplicates based on storybook id
+      const uniqueStorybooks = Array.from(
+        new Map(allStorybooks.map(book => [book.id, book])).values()
+      );
+
+      console.log("Combined storybooks:", uniqueStorybooks);
+
+      // Fetch story counts for each storybook
       const storybooksWithCounts = await Promise.all(
-        storybooksData.map(async (storybook) => {
+        uniqueStorybooks.map(async (storybook) => {
           const { count, error: countError } = await supabase
             .from("stories_storybooks")
             .select("*", { count: 'exact', head: true })
