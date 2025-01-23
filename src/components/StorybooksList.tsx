@@ -13,7 +13,8 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
   const { data: storybooks, isLoading } = useQuery({
     queryKey: ["storybooks", profileId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, fetch storybooks owned by the user
+      const { data: ownedStorybooks, error: ownedError } = await supabase
         .from("storybooks")
         .select(`
           *,
@@ -26,8 +27,44 @@ const StorybooksList = ({ profileId }: StorybooksListProps) => {
         .eq("profile_id", profileId)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (ownedError) {
+        console.error("Error fetching owned storybooks:", ownedError);
+        throw ownedError;
+      }
+
+      // Then, fetch storybooks where the user is a collaborator
+      const { data: collaborativeStorybooks, error: collabError } = await supabase
+        .from("storybook_collaborators")
+        .select(`
+          storybook:storybooks (
+            *,
+            stories_storybooks (
+              story:stories (
+                id
+              )
+            )
+          )
+        `)
+        .eq("profile_id", profileId);
+
+      if (collabError) {
+        console.error("Error fetching collaborative storybooks:", collabError);
+        throw collabError;
+      }
+
+      // Combine and deduplicate storybooks
+      const collaborativeStorybooksData = collaborativeStorybooks
+        .map(item => item.storybook)
+        .filter(Boolean);
+
+      const allStorybooks = [...(ownedStorybooks || []), ...(collaborativeStorybooksData || [])];
+      
+      // Remove duplicates based on storybook id
+      const uniqueStorybooks = Array.from(
+        new Map(allStorybooks.map(book => [book.id, book])).values()
+      );
+
+      return uniqueStorybooks;
     },
   });
 
