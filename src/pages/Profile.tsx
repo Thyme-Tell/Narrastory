@@ -4,9 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
-import PasswordProtection from "@/components/PasswordProtection";
-import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
 import { Menu } from "lucide-react";
 import {
   DropdownMenu,
@@ -18,7 +15,6 @@ import { Button } from "@/components/ui/button";
 
 const Profile = () => {
   const { id } = useParams();
-  const [isVerified, setIsVerified] = useState(false);
   const navigate = useNavigate();
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
@@ -26,7 +22,7 @@ const Profile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, created_at, password")
+        .select("id, first_name, last_name, created_at")
         .eq("id", id)
         .maybeSingle();
 
@@ -42,7 +38,7 @@ const Profile = () => {
   const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
     queryKey: ["stories", id],
     queryFn: async () => {
-      if (!id || !isVerified) return [];
+      if (!id) return [];
       
       const { data, error } = await supabase
         .from("stories")
@@ -62,7 +58,7 @@ const Profile = () => {
       
       return data;
     },
-    enabled: !!id && isVerified,
+    enabled: !!id,
   });
 
   useEffect(() => {
@@ -74,27 +70,7 @@ const Profile = () => {
     }
   }, [profile]);
 
-  useEffect(() => {
-    // Check for existing authorization cookie
-    const authCookie = Cookies.get('profile_authorized');
-    if (authCookie === 'true') {
-      setIsVerified(true);
-    }
-  }, []);
-
-  const handlePasswordVerify = async (password: string) => {
-    if (!profile) return false;
-    
-    const isValid = profile.password === password;
-    if (isValid) {
-      setIsVerified(true);
-    }
-    return isValid;
-  };
-
   const handleLogout = async () => {
-    // Remove the authorization cookie
-    Cookies.remove('profile_authorized');
     // Navigate back to home
     navigate('/');
   };
@@ -118,10 +94,6 @@ const Profile = () => {
         </div>
       </div>
     );
-  }
-
-  if (!isVerified) {
-    return <PasswordProtection onVerify={handlePasswordVerify} />;
   }
 
   return (
