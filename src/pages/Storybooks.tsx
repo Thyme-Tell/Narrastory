@@ -61,15 +61,23 @@ const Storybooks = () => {
 
   const handleCreateStorybook = async () => {
     try {
-      const { data: session } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      if (!session) {
+        throw new Error("No active session found");
+      }
+
       const { data: newStorybook, error } = await supabase
         .from("storybooks")
         .insert([
           {
             title: "New Storybook",
             description: "A collection of memories",
-            profile_id: session.session.user.id
+            profile_id: session.user.id
           }
         ])
         .select()
