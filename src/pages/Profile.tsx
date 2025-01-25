@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
+import Storybooks from "@/components/Storybooks";
 import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
@@ -63,7 +64,6 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    // Set the page title when profile data is loaded
     if (profile) {
       document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
@@ -72,7 +72,6 @@ const Profile = () => {
   }, [profile]);
 
   const handleLogout = async () => {
-    // Navigate back to home
     navigate('/');
   };
 
@@ -150,6 +149,8 @@ const Profile = () => {
               onUpdate={refetchStories}
             />
           </div>
+
+          <Storybooks profileId={profile.id} />
         </div>
       </div>
     </div>
