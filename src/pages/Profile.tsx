@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
-import { Menu, BookOpen, Book } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
   DropdownMenu,
@@ -13,13 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
 
 const Profile = () => {
   const { id } = useParams();
@@ -70,6 +63,7 @@ const Profile = () => {
   });
 
   useEffect(() => {
+    // Set the page title when profile data is loaded
     if (profile) {
       document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
@@ -78,6 +72,7 @@ const Profile = () => {
   }, [profile]);
 
   const handleLogout = async () => {
+    // Navigate back to home
     navigate('/');
   };
 
@@ -113,27 +108,11 @@ const Profile = () => {
       }}
     >
       <div className="w-full flex justify-between items-center py-4 px-4 bg-white/80">
-        <div className="flex items-center gap-4">
-          <img 
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
-            alt="Narra Logo"
-            className="h-11"
-          />
-          <Menubar className="border-none bg-transparent">
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">
-                <BookOpen className="h-4 w-4 mr-2" />
-                Stories
-              </MenubarTrigger>
-            </MenubarMenu>
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer" onClick={() => navigate('/storybooks')}>
-                <Book className="h-4 w-4 mr-2" />
-                Storybooks
-              </MenubarTrigger>
-            </MenubarMenu>
-          </Menubar>
-        </div>
+        <img 
+          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
+          alt="Narra Logo"
+          className="h-11"
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -144,11 +123,6 @@ const Profile = () => {
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/storybooks">
-                View Storybooks
-              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/">
