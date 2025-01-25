@@ -3,9 +3,30 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Storybooks = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Check authentication on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to view and create storybooks.",
+        variant: "destructive",
+      });
+      navigate("/signin");
+      return;
+    }
+  };
 
   const { data: storybooks, isLoading } = useQuery({
     queryKey: ["storybooks"],
@@ -59,8 +80,13 @@ const Storybooks = () => {
 
   const handleCreateStorybook = async () => {
     try {
-      const { data: profile } = await supabase.auth.getUser();
-      if (!profile.user) {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to create a storybook.",
+          variant: "destructive",
+        });
         navigate("/signin");
         return;
       }
@@ -71,18 +97,28 @@ const Storybooks = () => {
           {
             title: "New Storybook",
             description: "A collection of memories",
-            profile_id: profile.user.id
+            profile_id: session.session.user.id
           }
         ])
         .select()
         .single();
 
       if (error) throw error;
+      
       if (newStorybook) {
+        toast({
+          title: "Success",
+          description: "Storybook created successfully.",
+        });
         navigate(`/storybook/${newStorybook.id}`);
       }
     } catch (error) {
       console.error("Error creating storybook:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create storybook. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
