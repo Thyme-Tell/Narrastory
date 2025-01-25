@@ -160,39 +160,6 @@ export type Database = {
           },
         ]
       }
-      stories_storybooks: {
-        Row: {
-          added_at: string
-          story_id: string
-          storybook_id: string
-        }
-        Insert: {
-          added_at?: string
-          story_id: string
-          storybook_id: string
-        }
-        Update: {
-          added_at?: string
-          story_id?: string
-          storybook_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "stories_storybooks_story_id_fkey"
-            columns: ["story_id"]
-            isOneToOne: false
-            referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "stories_storybooks_storybook_id_fkey"
-            columns: ["storybook_id"]
-            isOneToOne: false
-            referencedRelation: "storybooks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       story_media: {
         Row: {
           caption: string | null
@@ -227,80 +194,6 @@ export type Database = {
             columns: ["story_id"]
             isOneToOne: false
             referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      storybook_collaborators: {
-        Row: {
-          created_at: string
-          id: string
-          profile_id: string
-          role: string
-          storybook_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          profile_id: string
-          role?: string
-          storybook_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          profile_id?: string
-          role?: string
-          storybook_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "storybook_collaborators_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "storybook_collaborators_storybook_id_fkey"
-            columns: ["storybook_id"]
-            isOneToOne: false
-            referencedRelation: "storybooks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      storybooks: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          profile_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          profile_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          profile_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "storybooks_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

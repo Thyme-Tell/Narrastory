@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
-import Storybooks from "@/components/Storybooks";
 import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
@@ -120,11 +119,6 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link to="/storybooks">
-                View All Storybooks
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
             </DropdownMenuItem>
@@ -154,8 +148,6 @@ const Profile = () => {
               onUpdate={refetchStories}
             />
           </div>
-
-          <Storybooks profileId={profile.id} />
         </div>
       </div>
     </div>
