@@ -20,6 +20,7 @@ const Storybooks = () => {
   const { data: storybooks, isLoading } = useQuery({
     queryKey: ["storybooks-all"],
     queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
       const { data, error } = await supabase
         .from("storybooks")
         .select(`
@@ -32,7 +33,7 @@ const Storybooks = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Storybook[];
+      return { data, userId: userData?.user?.id };
     },
   });
 
@@ -64,14 +65,14 @@ const Storybooks = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {storybooks?.map((storybook) => (
+            {storybooks?.data?.map((storybook) => (
               <div
                 key={storybook.id}
                 className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    {storybook.profile_id === supabase.auth.getUser()?.data.user?.id ? (
+                    {storybook.profile_id === storybooks.userId ? (
                       <Book className="h-5 w-5 text-primary" />
                     ) : (
                       <Share className="h-5 w-5 text-muted-foreground" />

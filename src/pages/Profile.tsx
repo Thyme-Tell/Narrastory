@@ -120,6 +120,11 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem asChild>
+              <Link to="/storybooks">
+                View All Storybooks
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
             </DropdownMenuItem>
