@@ -72,7 +72,7 @@ const Storybooks = () => {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    {storybook.profile_id === storybooks.userId ? (
+                    {storybook.profile_id === storybooks?.userId ? (
                       <Book className="h-5 w-5 text-primary" />
                     ) : (
                       <Share className="h-5 w-5 text-muted-foreground" />
