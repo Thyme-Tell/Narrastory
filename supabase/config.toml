@@ -1,3 +1,7 @@
 project_id = "pohnhzxqorelllbfnqyj"
 [functions.synthflow-webhook]
 verify_jwt = false
+[functions.rpi-print-order]
+verify_jwt = false
+[functions.rpi-print-webhook]
+verify_jwt = false
