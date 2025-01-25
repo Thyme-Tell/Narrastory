@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Storybooks = () => {
   const navigate = useNavigate();
@@ -61,23 +61,30 @@ const Storybooks = () => {
 
   const handleCreateStorybook = async () => {
     try {
+      // First get the current user's auth session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError) {
-        throw sessionError;
-      }
+      if (sessionError) throw sessionError;
+      if (!session) throw new Error("No active session found");
 
-      if (!session) {
-        throw new Error("No active session found");
-      }
+      // Get the user's profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', session.user.email)
+        .single();
 
+      if (profileError) throw profileError;
+      if (!profile) throw new Error("Profile not found");
+
+      // Create the storybook with the profile id
       const { data: newStorybook, error } = await supabase
         .from("storybooks")
         .insert([
           {
             title: "New Storybook",
             description: "A collection of memories",
-            profile_id: session.user.id
+            profile_id: profile.id
           }
         ])
         .select()
