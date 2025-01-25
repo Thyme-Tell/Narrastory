@@ -5,7 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Book, Printer } from "lucide-react";
+import { useRPIPrint } from "@/hooks/useRPIPrint";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ const Storybooks = ({ profileId }: { profileId: string }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { toast } = useToast();
+  const { createOrder } = useRPIPrint();
 
   const { data: storybooks, refetch } = useQuery({
     queryKey: ["storybooks", profileId],
@@ -65,6 +67,54 @@ const Storybooks = ({ profileId }: { profileId: string }) => {
       toast({
         title: "Error",
         description: "Failed to create storybook",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePrintStorybook = async (storybook: Storybook) => {
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", profileId)
+        .maybeSingle();
+
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const orderData = {
+        destination: {
+          name: `${profile.first_name} ${profile.last_name}`,
+          address1: "123 Main St", // This should come from user input
+          city: "New York", // This should come from user input
+          state: "NY", // This should come from user input
+          postal: "10001", // This should come from user input
+          country: "US",
+          phone: profile.phone_number,
+          email: profile.email || "",
+        },
+        orderItems: [
+          {
+            sku: "STORYBOOK-HARDCOVER",
+            quantity: 1,
+            retailPrice: "29.99",
+            itemDescription: `Storybook: ${storybook.title}`,
+            product: {
+              coverUrl: "https://example.com/cover.pdf", // This should be generated
+              gutsUrl: "https://example.com/content.pdf", // This should be generated
+            },
+          },
+        ],
+      };
+
+      await createOrder.mutateAsync(orderData);
+    } catch (error) {
+      console.error("Error printing storybook:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create print order",
         variant: "destructive",
       });
     }
@@ -114,15 +164,31 @@ const Storybooks = ({ profileId }: { profileId: string }) => {
             key={storybook.id}
             className="p-4 rounded-lg border bg-card text-card-foreground"
           >
-            <h3 className="font-semibold">{storybook.title}</h3>
-            {storybook.description && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {storybook.description}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground mt-2">
-              Created {new Date(storybook.created_at).toLocaleDateString()}
-            </p>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Book className="h-4 w-4" />
+                  {storybook.title}
+                </h3>
+                {storybook.description && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {storybook.description}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-2">
+                  Created {new Date(storybook.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handlePrintStorybook(storybook)}
+                className="h-8 w-8"
+              >
+                <Printer className="h-4 w-4" />
+                <span className="sr-only">Print storybook</span>
+              </Button>
+            </div>
           </div>
         ))}
       </div>
