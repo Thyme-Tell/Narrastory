@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { BookOpen, PlusCircle, MinusCircle } from "lucide-react";
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -43,7 +44,25 @@ interface Storybook {
 const Storybooks = () => {
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("email", "mia@narrastory.com")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+      return data;
+    },
+  });
 
   const { data: storybooks, refetch: refetchStorybooks } = useQuery({
     queryKey: ["storybooks"],
@@ -84,16 +103,10 @@ const Storybooks = () => {
       return;
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select()
-      .eq("email", "mia@narrastory.com")
-      .single();
-
-    if (!profile) {
+    if (!profile?.id) {
       toast({
         title: "Error",
-        description: "Profile not found",
+        description: "You must be logged in to create a storybook",
         variant: "destructive",
       });
       return;
@@ -106,9 +119,10 @@ const Storybooks = () => {
     });
 
     if (error) {
+      console.error("Error creating storybook:", error);
       toast({
         title: "Error",
-        description: "Failed to create storybook",
+        description: "Failed to create storybook: " + error.message,
         variant: "destructive",
       });
       return;
@@ -120,6 +134,7 @@ const Storybooks = () => {
     });
     setNewTitle("");
     setNewDescription("");
+    setIsDialogOpen(false);
     refetchStorybooks();
   };
 
@@ -190,13 +205,16 @@ const Storybooks = () => {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Storybooks</h1>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>Create New Storybook</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New Storybook</DialogTitle>
+              <DialogDescription>
+                Create a new storybook to organize your stories.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <Input
@@ -267,9 +285,7 @@ const Storybooks = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      handleRemoveStory(storybook.id, story.id)
-                    }
+                    onClick={() => handleRemoveStory(storybook.id, story.id)}
                   >
                     <MinusCircle className="h-4 w-4" />
                   </Button>
@@ -297,9 +313,7 @@ const Storybooks = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            handleAddStory(storybook.id, story.id)
-                          }
+                          onClick={() => handleAddStory(storybook.id, story.id)}
                         >
                           <PlusCircle className="h-4 w-4" />
                         </Button>
