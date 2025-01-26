@@ -6,7 +6,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +27,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface StoryCardProps {
   story: {
@@ -39,6 +47,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(story.title || "");
   const [editContent, setEditContent] = useState(story.content);
+  const [date, setDate] = useState<Date>(new Date(story.created_at));
   const { toast } = useToast();
 
   const handleSave = async () => {
@@ -47,6 +56,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       .update({
         title: editTitle,
         content: editContent,
+        created_at: date.toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", story.id);
@@ -147,6 +157,28 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                 onChange={(e) => setEditContent(e.target.value)}
                 className="w-full min-h-[calc(100vh-200px)] text-left"
               />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(newDate) => newDate && setDate(newDate)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <div className="flex space-x-2">
                 <Button onClick={handleSave}>Save</Button>
                 <Button variant="outline" onClick={() => setIsEditing(false)}>
