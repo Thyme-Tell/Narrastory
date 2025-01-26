@@ -84,9 +84,25 @@ const Storybooks = () => {
       return;
     }
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select()
+      .eq("email", "mia@narrastory.com")
+      .single();
+
+    if (!profile) {
+      toast({
+        title: "Error",
+        description: "Profile not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { error } = await supabase.from("storybooks").insert({
       title: newTitle,
       description: newDescription,
+      profile_id: profile.id,
     });
 
     if (error) {

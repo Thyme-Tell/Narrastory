@@ -1,22 +1,27 @@
-import { BookOpen } from "lucide-react";
+import { Home, LogIn, User, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent as ShadcnSidebarContent,
+  SidebarGroup as ShadcnSidebarGroup,
+  SidebarGroupContent as ShadcnSidebarGroupContent,
+} from "@/components/ui/shadcn-sidebar";
 
 export function AppSidebar() {
   const menuItems = [
     {
       title: "Home",
-      icon: HomeIcon,
+      icon: Home,
       to: "/",
     },
     {
       title: "Sign In",
-      icon: SignInIcon,
+      icon: LogIn,
       to: "/signin",
     },
     {
       title: "Profile",
-      icon: UserIcon,
+      icon: User,
       to: "/profile",
     },
     {
@@ -27,19 +32,19 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
+    <ShadcnSidebar>
+      <ShadcnSidebarContent>
+        <ShadcnSidebarGroup>
+          <ShadcnSidebarGroupContent>
             {menuItems.map((item) => (
               <Link key={item.title} to={item.to}>
                 <item.icon />
                 <span>{item.title}</span>
               </Link>
             ))}
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+          </ShadcnSidebarGroupContent>
+        </ShadcnSidebarGroup>
+      </ShadcnSidebarContent>
+    </ShadcnSidebar>
   );
 }
