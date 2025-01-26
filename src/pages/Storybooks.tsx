@@ -47,29 +47,47 @@ const Storybooks = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: profile } = useQuery({
-    queryKey: ["profile"],
+  // First get the authenticated user's email
+  const { data: session } = useQuery({
+    queryKey: ["session"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("email", "mia@narrastory.com")
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-      return data;
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return session;
     },
   });
 
-  const { data: storybooks, refetch: refetchStorybooks } = useQuery({
-    queryKey: ["storybooks"],
+  // Then get the profile using the authenticated user's email
+  const { data: profile } = useQuery({
+    queryKey: ["profile", session?.user?.email],
     queryFn: async () => {
+      if (!session?.user?.email) {
+        throw new Error("No authenticated user");
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("email", session.user.email)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("Profile not found");
+      
+      return data;
+    },
+    enabled: !!session?.user?.email,
+  });
+
+  const { data: storybooks, refetch: refetchStorybooks } = useQuery({
+    queryKey: ["storybooks", profile?.id],
+    queryFn: async () => {
+      if (!profile?.id) throw new Error("No profile ID available");
+
       const { data: storybooksData, error: storybooksError } = await supabase
         .from("storybooks")
-        .select("*, storybook_stories(story_id, stories(*))");
+        .select("*, storybook_stories(story_id, stories(*))")
+        .eq("profile_id", profile.id);
 
       if (storybooksError) throw storybooksError;
 
@@ -78,19 +96,24 @@ const Storybooks = () => {
         stories: storybook.storybook_stories.map((ss: any) => ss.stories),
       }));
     },
+    enabled: !!profile?.id,
   });
 
   const { data: availableStories } = useQuery({
-    queryKey: ["available-stories"],
+    queryKey: ["available-stories", profile?.id],
     queryFn: async () => {
+      if (!profile?.id) throw new Error("No profile ID available");
+
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
         .select("*")
+        .eq("profile_id", profile.id)
         .order("created_at", { ascending: false });
 
       if (storiesError) throw storiesError;
       return storiesData;
     },
+    enabled: !!profile?.id,
   });
 
   const handleCreateStorybook = async () => {
@@ -115,7 +138,7 @@ const Storybooks = () => {
     const { error } = await supabase.from("storybooks").insert({
       title: newTitle,
       description: newDescription,
-      profile_id: profile.id, // This is the key change - ensuring profile_id is set
+      profile_id: profile.id,
     });
 
     if (error) {
