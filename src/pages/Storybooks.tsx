@@ -1,14 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import CreateStorybookDialog from "@/components/CreateStorybookDialog";
 
 const Storybooks = () => {
   const { toast } = useToast();
   
-  const { data: storybooks, isLoading } = useQuery({
+  const { data: storybooks, isLoading, refetch } = useQuery({
     queryKey: ["storybooks"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -62,10 +61,7 @@ const Storybooks = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-semibold">Storybooks</h1>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Storybook
-            </Button>
+            <CreateStorybookDialog onStorybookCreated={refetch} />
           </div>
           
           {storybooks?.length === 0 ? (
