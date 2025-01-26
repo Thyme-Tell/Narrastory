@@ -115,7 +115,7 @@ const Storybooks = () => {
     const { error } = await supabase.from("storybooks").insert({
       title: newTitle,
       description: newDescription,
-      profile_id: profile.id,
+      profile_id: profile.id, // This is the key change - ensuring profile_id is set
     });
 
     if (error) {
