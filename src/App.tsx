@@ -19,7 +19,7 @@ function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/storybooks" element={<Storybooks />} />
-          <Route path="/storybook/:id" element={<Storybook />} />
+          <Route path="/storybooks/:id" element={<Storybook />} />
         </Routes>
       </Router>
       <Toaster />
