@@ -41,23 +41,19 @@ const Profile = () => {
     queryFn: async () => {
       if (!id) return [];
       
-      const { data, error } = await supabase
+      const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
-        .select(`
-          id,
-          title,
-          content,
-          created_at
-        `)
+        .select("id, title, content, created_at")
         .eq("profile_id", id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching stories:", error);
+      if (storiesError) {
+        console.error("Error fetching stories:", storiesError);
         return [];
       }
-      
-      return data;
+
+      console.log("Fetched stories:", storiesData);
+      return storiesData;
     },
     enabled: !!id,
   });
@@ -71,6 +67,11 @@ const Profile = () => {
   }, [profile]);
 
   const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
+      return;
+    }
     navigate('/');
   };
 
