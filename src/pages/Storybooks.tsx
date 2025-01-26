@@ -73,7 +73,7 @@ const Storybooks = () => {
               {storybooks?.map((storybook) => (
                 <div
                   key={storybook.id}
-                  className="p-4 rounded-lg border bg-card text-card-foreground"
+                  className="p-4 rounded-lg border bg-card text-card-foreground text-left"
                 >
                   <h3 className="font-semibold text-lg">{storybook.title}</h3>
                   {storybook.description && (
