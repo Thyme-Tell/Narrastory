@@ -28,7 +28,7 @@ const Layout = ({ children }: LayoutProps) => {
     },
     {
       title: "Your Memories",
-      path: "/profile",
+      path: "/profile/11111111-1111-1111-1111-111111111111",
       icon: Image,
     },
     {
