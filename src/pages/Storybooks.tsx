@@ -71,20 +71,23 @@ const Storybooks = () => {
           ) : (
             <div className="grid gap-4">
               {storybooks?.map((storybook) => (
-                <div
+                <Link
                   key={storybook.id}
-                  className="p-4 rounded-lg border bg-card text-card-foreground text-left"
+                  to={`/storybooks/${storybook.id}`}
+                  className="block"
                 >
-                  <h3 className="font-semibold text-lg">{storybook.title}</h3>
-                  {storybook.description && (
-                    <p className="text-muted-foreground mt-1">
-                      {storybook.description}
+                  <div className="p-4 rounded-lg border bg-card text-card-foreground text-left hover:bg-accent transition-colors">
+                    <h3 className="font-semibold text-lg">{storybook.title}</h3>
+                    {storybook.description && (
+                      <p className="text-muted-foreground mt-1">
+                        {storybook.description}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {storybook.storybook_stories.length} stories
                     </p>
-                  )}
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {storybook.storybook_stories.length} stories
-                  </p>
-                </div>
+                  </div>
+                </Link>
               ))}
             </div>
           )}
