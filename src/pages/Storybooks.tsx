@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, PlusCircle, MinusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,23 @@ const Storybooks = () => {
   const [newDescription, setNewDescription] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (!session || error) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to access storybooks",
+          variant: "destructive",
+        });
+        navigate("/signin");
+      }
+    };
+    checkAuth();
+  }, [navigate, toast]);
 
   // First get the authenticated user's email
   const { data: session } = useQuery({
@@ -53,6 +71,7 @@ const Storybooks = () => {
     queryFn: async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) throw error;
+      if (!session) throw new Error("No authenticated session");
       return session;
     },
   });
@@ -117,6 +136,16 @@ const Storybooks = () => {
   });
 
   const handleCreateStorybook = async () => {
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to create a storybook",
+        variant: "destructive",
+      });
+      navigate("/signin");
+      return;
+    }
+
     if (!newTitle.trim()) {
       toast({
         title: "Error",
@@ -129,7 +158,7 @@ const Storybooks = () => {
     if (!profile?.id) {
       toast({
         title: "Error",
-        description: "You must be logged in to create a storybook",
+        description: "Profile not found",
         variant: "destructive",
       });
       return;
