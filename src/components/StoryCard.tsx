@@ -140,12 +140,12 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="Story title"
-                className="w-full"
+                className="w-full text-left"
               />
               <Textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full min-h-[calc(100vh-200px)]"
+                className="w-full min-h-[calc(100vh-200px)] text-left"
               />
               <div className="flex space-x-2">
                 <Button onClick={handleSave}>Save</Button>
@@ -159,7 +159,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       ) : (
         <>
           <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground text-left">
               {new Date(story.created_at).toLocaleDateString()}
             </p>
             <DropdownMenu>
@@ -205,9 +205,9 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             </DropdownMenu>
           </div>
           {story.title && (
-            <h3 className="font-semibold text-lg">{story.title}</h3>
+            <h3 className="font-semibold text-lg text-left">{story.title}</h3>
           )}
-          <p className="whitespace-pre-wrap text-atlantic">{story.content}</p>
+          <p className="whitespace-pre-wrap text-atlantic text-left">{story.content}</p>
           <div className="mt-[30px] mb-[20px]">
             <StoryMediaUpload storyId={story.id} onUploadComplete={onUpdate} />
           </div>
