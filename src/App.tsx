@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import TopNav from "@/components/TopNav";
 import Index from "@/pages/Index";
 import SignIn from "@/pages/SignIn";
 import Profile from "@/pages/Profile";
@@ -14,6 +15,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
+        <TopNav />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/sign-in" element={<SignIn />} />
