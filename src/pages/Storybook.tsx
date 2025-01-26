@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import StoriesList from "@/components/StoriesList";
@@ -11,13 +11,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 const Storybook = () => {
   const { id } = useParams();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isAddingStory, setIsAddingStory] = useState(false);
 
   const { data: storybook, refetch: refetchStorybook } = useQuery({
@@ -87,29 +86,6 @@ const Storybook = () => {
     refetchStories();
   };
 
-  const handleDelete = async () => {
-    const { error } = await supabase
-      .from("storybooks")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete storybook. Only the creator can delete their storybooks.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Storybook deleted successfully",
-    });
-
-    navigate("/storybooks");
-  };
-
   if (!storybook) {
     return <div>Loading...</div>;
   }
@@ -132,45 +108,39 @@ const Storybook = () => {
                 <p className="text-muted-foreground mt-1">{storybook.description}</p>
               )}
             </div>
-            <div className="flex gap-2">
-              <Dialog open={isAddingStory} onOpenChange={setIsAddingStory}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Story
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Story to Storybook</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    {availableStories?.map((story) => (
-                      <div
-                        key={story.id}
-                        className="p-4 rounded-lg border bg-card text-card-foreground text-left cursor-pointer hover:bg-accent"
-                        onClick={() => handleAddStory(story.id)}
-                      >
-                        {story.title && <h3 className="font-semibold">{story.title}</h3>}
-                        <p className="line-clamp-2">{story.content}</p>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {new Date(story.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    ))}
-                    {(!availableStories || availableStories.length === 0) && (
-                      <p className="text-muted-foreground text-center py-8">
-                        No stories available to add
+            <Dialog open={isAddingStory} onOpenChange={setIsAddingStory}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Story
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Story to Storybook</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  {availableStories?.map((story) => (
+                    <div
+                      key={story.id}
+                      className="p-4 rounded-lg border bg-card text-card-foreground text-left cursor-pointer hover:bg-accent"
+                      onClick={() => handleAddStory(story.id)}
+                    >
+                      {story.title && <h3 className="font-semibold">{story.title}</h3>}
+                      <p className="line-clamp-2">{story.content}</p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {new Date(story.created_at).toLocaleDateString()}
                       </p>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Button variant="destructive" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </div>
+                    </div>
+                  ))}
+                  {(!availableStories || availableStories.length === 0) && (
+                    <p className="text-muted-foreground text-center py-8">
+                      No stories available to add
+                    </p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {storybook.storybook_stories?.length === 0 ? (
