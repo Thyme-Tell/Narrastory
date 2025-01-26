@@ -13,6 +13,8 @@ const Profile = () => {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, created_at")
@@ -33,6 +35,14 @@ const Profile = () => {
     queryFn: async () => {
       if (!id) return [];
       
+      // First authenticate as the profile owner to see their stories
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user?.id) {
+        console.log("No authenticated user");
+        return [];
+      }
+
+      console.log("Fetching stories for profile:", id);
       const { data, error } = await supabase
         .from("stories")
         .select(`
@@ -49,6 +59,7 @@ const Profile = () => {
         return [];
       }
       
+      console.log("Found stories:", data);
       return data;
     },
     enabled: !!id,
