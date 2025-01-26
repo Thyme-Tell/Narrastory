@@ -4,7 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
+import { Menu } from "lucide-react";
 import { useEffect } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const Profile = () => {
   const { id } = useParams();
@@ -13,8 +21,6 @@ const Profile = () => {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      
       const { data, error } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, created_at")
@@ -35,14 +41,6 @@ const Profile = () => {
     queryFn: async () => {
       if (!id) return [];
       
-      // First authenticate as the profile owner to see their stories
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user?.id) {
-        console.log("No authenticated user");
-        return [];
-      }
-
-      console.log("Fetching stories for profile:", id);
       const { data, error } = await supabase
         .from("stories")
         .select(`
@@ -59,7 +57,6 @@ const Profile = () => {
         return [];
       }
       
-      console.log("Found stories:", data);
       return data;
     },
     enabled: !!id,
@@ -108,6 +105,36 @@ const Profile = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
+      <div className="w-full flex justify-between items-center py-4 px-4 bg-white/80">
+        <img 
+          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
+          alt="Narra Logo"
+          className="h-11"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Menu className="h-12 w-12" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
+              Not {profile?.first_name}? Log Out
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/storybooks">
+                Storybooks
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/">
+                Sign Up for Narra
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
           <ProfileHeader 
