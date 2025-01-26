@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,10 +20,41 @@ const CreateStorybookDialog = ({ onStorybookCreated }: CreateStorybookDialogProp
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [profileId, setProfileId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", "mia@narrastory.com")
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+
+      if (data) {
+        setProfileId(data.id);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!profileId) {
+      toast({
+        title: "Error",
+        description: "Profile not found",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const { error } = await supabase
       .from("storybooks")
@@ -31,7 +62,7 @@ const CreateStorybookDialog = ({ onStorybookCreated }: CreateStorybookDialogProp
         {
           title,
           description: description || null,
-          profile_id: "11111111-1111-1111-1111-111111111111", // Hardcoded for now
+          profile_id: profileId,
         },
       ]);
 
