@@ -3,19 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import CreateStorybookDialog from "@/components/CreateStorybookDialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const Storybooks = () => {
   const { toast } = useToast();
@@ -53,29 +40,6 @@ const Storybooks = () => {
     },
   });
 
-  const handleDelete = async (storybookId: string) => {
-    const { error } = await supabase
-      .from("storybooks")
-      .delete()
-      .eq("id", storybookId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete storybook",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Storybook deleted successfully",
-    });
-    
-    refetch();
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -107,56 +71,23 @@ const Storybooks = () => {
           ) : (
             <div className="grid gap-4">
               {storybooks?.map((storybook) => (
-                <div key={storybook.id} className="relative">
-                  <Link
-                    to={`/storybooks/${storybook.id}`}
-                    className="block"
-                  >
-                    <div className="p-4 rounded-lg border bg-card text-card-foreground text-left hover:bg-accent transition-colors">
-                      <h3 className="font-semibold text-lg">{storybook.title}</h3>
-                      {storybook.description && (
-                        <p className="text-muted-foreground mt-1">
-                          {storybook.description}
-                        </p>
-                      )}
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {storybook.storybook_stories.length} stories
+                <Link
+                  key={storybook.id}
+                  to={`/storybooks/${storybook.id}`}
+                  className="block"
+                >
+                  <div className="p-4 rounded-lg border bg-card text-card-foreground text-left hover:bg-accent transition-colors">
+                    <h3 className="font-semibold text-lg">{storybook.title}</h3>
+                    {storybook.description && (
+                      <p className="text-muted-foreground mt-1">
+                        {storybook.description}
                       </p>
-                    </div>
-                  </Link>
-                  <div className="absolute top-4 right-4">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete this storybook
-                            and remove it from our servers.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(storybook.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    )}
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {storybook.storybook_stories.length} stories
+                    </p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
