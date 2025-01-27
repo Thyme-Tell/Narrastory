@@ -154,10 +154,18 @@ const Profile = () => {
           />
           
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col items-center space-y-4 mb-6">
               <p className="text-muted-foreground">
                 Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
               </p>
+              <div className="relative w-full text-center">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="border-t border-gray-300 w-full"></div>
+                </div>
+                <span className="relative px-4 bg-white/80 text-sm text-gray-500 font-medium">
+                  or
+                </span>
+              </div>
               <CreateStoryForm profileId={id} onStoryCreated={refetchStories} />
             </div>
             
