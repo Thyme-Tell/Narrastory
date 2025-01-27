@@ -32,7 +32,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
       body: JSON.stringify({
-        transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx', // You'll need to replace this with your actual Loops transactional ID
+        transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx', // Replace with your actual Loops transactional ID
         email: 'mia@narrastory.com,richard@narrastory.com',
         dataVariables: {
           userId: profileId,
@@ -42,10 +42,13 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Loops API error:', errorData);
       throw new Error(`Failed to send email: ${response.statusText}`);
     }
 
-    console.log('Email sent successfully');
+    const data = await response.json();
+    console.log('Email sent successfully:', data);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
