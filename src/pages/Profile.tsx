@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import BookProgress from "@/components/BookProgress";
-import { Menu, BookOpen, Book } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
   DropdownMenu,
@@ -53,7 +53,6 @@ const Profile = () => {
         return [];
       }
 
-      console.log("Fetched stories:", storiesData);
       return storiesData;
     },
     enabled: !!id,
@@ -108,11 +107,13 @@ const Profile = () => {
       }}
     >
       <div className="w-full flex justify-between items-center py-4 px-4 bg-white/80">
-        <img 
-          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
-          alt="Narra Logo"
-          className="h-11"
-        />
+        <Link to="/">
+          <img 
+            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
+            alt="Narra Logo"
+            className="h-11"
+          />
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -121,25 +122,8 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link to="/storybooks" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                <span>Storybooks</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to={`/profile/${id}`} className="flex items-center gap-2">
-                <Book className="h-4 w-4" />
-                <span>Stories</span>
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/">
-                Sign Up for Narra
-              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -149,12 +133,14 @@ const Profile = () => {
           <BookProgress profileId={id} />
           <ProfileHeader 
             firstName={profile.first_name} 
-            lastName={profile.last_name} 
+            lastName={profile.last_name}
+            profileId={profile.id}
+            onUpdate={refetchStories}
           />
           
           <div>
             <p className="text-muted-foreground mb-[15px] text-left">
-              Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
+              or call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> for a friendly interview.
             </p>
             
             <StoriesList 
