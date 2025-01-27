@@ -30,11 +30,11 @@ serve(async (req) => {
       email: 'mia@narrastory.com',
       dataVariables: {
         userId: profileId,
-        userEmail: userEmail,
+        userEmail: userEmail || 'Not provided',
       },
     };
 
-    console.log('Sending request to Loops');
+    console.log('Sending request to Loops with payload:', loopsPayload);
 
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
@@ -45,19 +45,19 @@ serve(async (req) => {
       body: JSON.stringify(loopsPayload),
     });
 
-    const responseText = await response.text();
+    const responseData = await response.text();
     console.log('Loops API response:', {
       status: response.status,
       statusText: response.statusText,
-      body: responseText,
+      body: responseData,
     });
 
     if (!response.ok) {
-      throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${responseText}`);
+      throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${responseData}`);
     }
 
     return new Response(
-      JSON.stringify({ success: true, response: responseText }),
+      JSON.stringify({ success: true, response: responseData }),
       { 
         headers: { 
           ...corsHeaders,
