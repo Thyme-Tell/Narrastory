@@ -80,7 +80,7 @@ const CreateStoryForm = ({ profileId, onStoryCreated }: CreateStoryFormProps) =>
           className="text-[#A33D29] hover:text-[#A33D29]/90 hover:bg-transparent p-0"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Create Story
+          Write a new story
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
