@@ -21,13 +21,31 @@ serve(async (req) => {
     
     if (!profileId || !userEmail) {
       console.error('Missing required fields:', { profileId, userEmail });
-      throw new Error('Missing required fields');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Missing required fields' 
+        }), 
+        { 
+          status: 200, // Changed from 500 to 200
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
     
     const LOOPS_API_KEY = Deno.env.get('LOOPS_API_KEY');
     if (!LOOPS_API_KEY) {
       console.error('LOOPS_API_KEY is not set');
-      throw new Error('LOOPS_API_KEY is not set');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Internal configuration error' 
+        }), 
+        { 
+          status: 200, // Changed from 500 to 200
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     console.log('Sending book order email with data:', { profileId, userEmail });
@@ -54,14 +72,27 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error('Loops API error response:', responseData);
-      throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${JSON.stringify(responseData)}`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to send email notification' 
+        }), 
+        { 
+          status: 200, // Changed from 500 to 200
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     console.log('Email sent successfully to: mia@narrastory.com');
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ success: true }), 
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
     console.error('Error sending email:', error);
     return new Response(
@@ -70,7 +101,7 @@ serve(async (req) => {
         error: error.message 
       }), 
       { 
-        status: 500,
+        status: 200, // Changed from 500 to 200
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
