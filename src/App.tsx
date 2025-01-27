@@ -1,33 +1,53 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import Home from "@/pages/Home";
+import Layout from "@/components/Layout";
+import Index from "@/pages/Index";
 import Profile from "@/pages/Profile";
+import SignIn from "@/pages/SignIn";
 import Storybooks from "@/pages/Storybooks";
-import SharedStory from "@/pages/SharedStory";
+import Storybook from "@/pages/Storybook";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
-function App() {
+const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile/:id" element={<Profile />} />
-          <Route path="/storybooks" element={<Storybooks />} />
-          <Route path="/shared/:token" element={<SharedStory />} />
-        </Routes>
-      </BrowserRouter>
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Layout>
+              <Index />
+            </Layout>
+          }
+        />
+        <Route
+          path="/profile/:id"
+          element={
+            <Layout>
+              <Profile />
+            </Layout>
+          }
+        />
+        <Route path="/sign-in" element={<SignIn />} />
+        <Route
+          path="/storybooks"
+          element={
+            <Layout>
+              <Storybooks />
+            </Layout>
+          }
+        />
+        <Route
+          path="/storybooks/:id"
+          element={
+            <Layout>
+              <Storybook />
+            </Layout>
+          }
+        />
+      </Routes>
       <Toaster />
-    </QueryClientProvider>
+    </Router>
   );
-}
+};
 
 export default App;

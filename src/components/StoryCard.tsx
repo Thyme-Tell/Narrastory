@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { MoreVertical, Pencil, Trash2, Calendar as CalendarIcon, Share2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -21,14 +21,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,7 +39,6 @@ interface StoryCardProps {
     title: string | null;
     content: string;
     created_at: string;
-    share_token?: string;
   };
   onUpdate: () => void;
 }
@@ -57,7 +48,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [editTitle, setEditTitle] = useState(story.title || "");
   const [editContent, setEditContent] = useState(story.content);
   const [date, setDate] = useState<Date>(new Date(story.created_at));
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleSave = async () => {
@@ -87,41 +77,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     
     setIsEditing(false);
     onUpdate();
-  };
-
-  const handleShare = async () => {
-    // If there's no share token, generate one
-    if (!story.share_token) {
-      const { data, error } = await supabase
-        .from("stories")
-        .update({ share_token: crypto.randomUUID() })
-        .eq("id", story.id)
-        .select()
-        .single();
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to generate share link",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Update the local story object with the new share token
-      story.share_token = data.share_token;
-    }
-
-    setIsShareDialogOpen(true);
-  };
-
-  const handleCopyLink = () => {
-    const shareUrl = `${window.location.origin}/shared/${story.share_token}`;
-    navigator.clipboard.writeText(shareUrl);
-    toast({
-      title: "Success",
-      description: "Share link copied to clipboard",
-    });
   };
 
   const handleDelete = async () => {
@@ -250,10 +205,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                   <Pencil className="h-4 w-4 mr-2" />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleShare}>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </DropdownMenuItem>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem
@@ -295,31 +246,6 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
           <StoryMedia storyId={story.id} />
         </>
       )}
-
-      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share Story</DialogTitle>
-            <DialogDescription>
-              Anyone with this link can view the story
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center space-x-2">
-            <Input
-              readOnly
-              value={`${window.location.origin}/shared/${story.share_token}`}
-            />
-            <Button onClick={handleCopyLink}>
-              Copy
-            </Button>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
