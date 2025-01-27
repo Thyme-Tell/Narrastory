@@ -35,7 +35,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
-        email: 'mia@narrastory.com',
+        email: userEmail, // Send to the user's email instead of hardcoded address
         dataVariables: {
           userId: profileId,
         },
@@ -46,10 +46,11 @@ serve(async (req) => {
     console.log('Loops API response:', responseData);
 
     if (!response.ok) {
+      console.error('Loops API error response:', responseData);
       throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${JSON.stringify(responseData)}`);
     }
 
-    console.log('Email sent successfully');
+    console.log('Email sent successfully to:', userEmail);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
