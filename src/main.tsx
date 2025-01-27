@@ -1,5 +1,5 @@
 import React from 'react'
-import * as ReactDOM from 'react-dom/client'
+import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import posthog from 'posthog-js'
 import App from './App.tsx'
