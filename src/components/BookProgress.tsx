@@ -49,15 +49,15 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
 
   return (
     <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm">
-      <div className="flex items-center gap-6">
+      <div className="flex flex-col">
         <img
           src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/hand-heart.png?t=2025-01-27T11%3A17%3A37.419Z"
           alt="Hand holding a heart"
-          className="h-16 w-16 object-contain"
+          className="h-32 w-32 object-contain mx-auto mb-6"
         />
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold text-atlantic mb-2">Keep it up!</h2>
-          <p className="text-atlantic mb-4">
+        <div>
+          <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Keep it up!</h2>
+          <p className="text-atlantic mb-4 text-left">
             You have {currentPages} {currentPages === 1 ? 'page' : 'pages'} in your book.
             {remainingPages > 0 ? (
               ` You need ${remainingPages} more ${remainingPages === 1 ? 'page' : 'pages'} to order your book.`
