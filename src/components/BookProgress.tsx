@@ -49,10 +49,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   }
 
   return (
-    <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm relative">
+    <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative overflow-hidden">
       <button 
         onClick={() => setIsHidden(true)}
-        className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic"
+        className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic z-10"
       >
         <X className="h-5 w-5" />
         <span className="sr-only">Close</span>
@@ -61,9 +61,9 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <img
           src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
           alt="Book illustration"
-          className="h-64 w-64 object-contain mx-auto mb-6"
+          className="w-full h-64 object-cover"
         />
-        <div>
+        <div className="p-6">
           <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Keep it up!</h2>
           <p className="text-atlantic mb-4 text-left">
             You have {currentPages} {currentPages === 1 ? 'page' : 'pages'} in your book.
@@ -78,7 +78,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       </div>
       <button 
         onClick={() => setIsHidden(true)}
-        className="w-full text-center mt-4 text-sm text-atlantic/70 hover:text-atlantic"
+        className="w-full text-center pb-4 text-sm text-atlantic/70 hover:text-atlantic"
       >
         Remind me later
       </button>
