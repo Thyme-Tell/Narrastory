@@ -129,7 +129,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
               {currentPages < 3 ? "Wonderful start!" : "Great progress!"}
             </h2>
             <p className="text-atlantic mb-4 text-left">
-              You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
+              You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. You can keep adding more stories or order your book.
               {currentPages < requiredPages && (
                 <> Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!</>
               )}
