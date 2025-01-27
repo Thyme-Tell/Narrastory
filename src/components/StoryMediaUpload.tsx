@@ -58,10 +58,11 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       // Set progress to 100% after database update
       setProgress(100);
 
-      // Optimistically update the cache
-      await queryClient.invalidateQueries({
-        queryKey: ["story-media", storyId],
-      });
+      // Get the current media items from the cache
+      const previousData = queryClient.getQueryData(["story-media", storyId]) || [];
+
+      // Update the cache with the new media item
+      queryClient.setQueryData(["story-media", storyId], [newMedia, ...previousData]);
 
       toast({
         title: "Success",
