@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface BookProgressProps {
   profileId: string;
@@ -18,6 +19,7 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const { toast } = useToast();
   
   const { data: stories } = useQuery({
     queryKey: ["stories", profileId],
@@ -36,6 +38,20 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     },
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ["profile", profileId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", profileId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const calculatePages = (stories: { content: string }[] | undefined) => {
     if (!stories) return 0;
     
@@ -45,6 +61,28 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
 
     // Using 1500 characters per page as a conservative estimate
     return Math.ceil(totalCharacters / 1500);
+  };
+
+  const handleOrderBook = async () => {
+    try {
+      const { error } = await supabase.functions.invoke('send-book-order-email', {
+        body: {
+          profileId,
+          userEmail: profile?.email,
+        },
+      });
+
+      if (error) throw error;
+      
+      setShowSuccessDialog(true);
+    } catch (error) {
+      console.error('Error ordering book:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was a problem ordering your book. Please try again.",
+      });
+    }
   };
 
   const currentPages = calculatePages(stories);
@@ -100,7 +138,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
                 <Button 
                   className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
                   size="lg"
-                  onClick={() => setShowSuccessDialog(true)}
+                  onClick={handleOrderBook}
                 >
                   Order Book
                 </Button>
