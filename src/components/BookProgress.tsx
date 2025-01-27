@@ -43,7 +43,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("email")
+        .select("first_name, email")
         .eq("id", profileId)
         .single();
 
@@ -124,12 +124,14 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           </div>
           <div className="p-6">
             <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">
-              {currentPages < 3 ? "Wonderful start!" : "Great progress!"}
+              {currentPages < 3 ? `Wonderful start${profile?.first_name ? `, ${profile.first_name}` : ''}!` : `Great progress${profile?.first_name ? `, ${profile.first_name}` : ''}!`}
             </h2>
             <p className="text-atlantic mb-4 text-left">
               You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
-              {currentPages < requiredPages && (
+              {currentPages < requiredPages ? (
                 <> Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!</>
+              ) : (
+                " You can keep adding more stories or order your book."
               )}
             </p>
             <Progress value={progressPercentage} className="h-2" />
