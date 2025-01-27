@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, PlusCircle, MinusCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -47,23 +46,6 @@ const Storybooks = () => {
   const [newDescription, setNewDescription] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (!session || error) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to access storybooks",
-          variant: "destructive",
-        });
-        navigate("/signin");
-      }
-    };
-    checkAuth();
-  }, [navigate, toast]);
 
   // First get the authenticated user's email
   const { data: session } = useQuery({
@@ -71,7 +53,6 @@ const Storybooks = () => {
     queryFn: async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) throw error;
-      if (!session) throw new Error("No authenticated session");
       return session;
     },
   });
@@ -81,7 +62,7 @@ const Storybooks = () => {
     queryKey: ["profile", session?.user?.email],
     queryFn: async () => {
       if (!session?.user?.email) {
-        throw new Error("No authenticated user");
+        return null;
       }
 
       const { data, error } = await supabase
@@ -91,8 +72,6 @@ const Storybooks = () => {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) throw new Error("Profile not found");
-      
       return data;
     },
     enabled: !!session?.user?.email,
@@ -101,7 +80,7 @@ const Storybooks = () => {
   const { data: storybooks, refetch: refetchStorybooks } = useQuery({
     queryKey: ["storybooks", profile?.id],
     queryFn: async () => {
-      if (!profile?.id) throw new Error("No profile ID available");
+      if (!profile?.id) return [];
 
       const { data: storybooksData, error: storybooksError } = await supabase
         .from("storybooks")
@@ -121,7 +100,7 @@ const Storybooks = () => {
   const { data: availableStories } = useQuery({
     queryKey: ["available-stories", profile?.id],
     queryFn: async () => {
-      if (!profile?.id) throw new Error("No profile ID available");
+      if (!profile?.id) return [];
 
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
@@ -136,13 +115,12 @@ const Storybooks = () => {
   });
 
   const handleCreateStorybook = async () => {
-    if (!session) {
+    if (!profile?.id) {
       toast({
-        title: "Authentication required",
+        title: "Error",
         description: "Please sign in to create a storybook",
         variant: "destructive",
       });
-      navigate("/signin");
       return;
     }
 
@@ -150,15 +128,6 @@ const Storybooks = () => {
       toast({
         title: "Error",
         description: "Title is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!profile?.id) {
-      toast({
-        title: "Error",
-        description: "Profile not found",
         variant: "destructive",
       });
       return;
