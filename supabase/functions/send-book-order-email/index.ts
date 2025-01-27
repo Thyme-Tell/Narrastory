@@ -27,7 +27,7 @@ serve(async (req) => {
           error: 'Missing required fields' 
         }), 
         { 
-          status: 200, // Changed from 500 to 200
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
@@ -42,7 +42,7 @@ serve(async (req) => {
           error: 'Internal configuration error' 
         }), 
         { 
-          status: 200, // Changed from 500 to 200
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
@@ -50,7 +50,7 @@ serve(async (req) => {
 
     console.log('Sending book order email with data:', { profileId, userEmail });
 
-    // Send email using Loops
+    // Send email using Loops - Modified to use transactionalData instead of dataVariables
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
@@ -59,10 +59,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
-        email: 'mia@narrastory.com', // Always send to admin
-        dataVariables: {
+        email: 'mia@narrastory.com',
+        transactionalData: {
           userId: profileId,
-          userEmail: userEmail, // Pass the user's email as a variable
+          userEmail: userEmail,
         },
       }),
     });
@@ -75,10 +75,10 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Failed to send email notification' 
+          error: responseData.message || 'Failed to send email notification' 
         }), 
         { 
-          status: 200, // Changed from 500 to 200
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
@@ -101,7 +101,7 @@ serve(async (req) => {
         error: error.message 
       }), 
       { 
-        status: 200, // Changed from 500 to 200
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
