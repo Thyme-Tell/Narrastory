@@ -59,8 +59,8 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       </button>
       <div className="flex flex-col">
         <img
-          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/hand-heart.png?t=2025-01-27T11%3A17%3A37.419Z"
-          alt="Hand holding a heart"
+          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
+          alt="Book illustration"
           className="h-64 w-64 object-contain mx-auto mb-6"
         />
         <div>
