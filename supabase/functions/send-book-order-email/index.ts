@@ -36,7 +36,6 @@ serve(async (req) => {
       body: JSON.stringify({
         transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx',
         email: 'mia@narrastory.com',
-        // Only include the required data variables without any contact properties
         dataVariables: {
           userId: profileId,
         },
