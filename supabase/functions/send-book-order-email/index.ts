@@ -19,6 +19,11 @@ serve(async (req) => {
   try {
     const { profileId, userEmail } = await req.json() as BookOrderRequest;
     
+    if (!profileId || !userEmail) {
+      console.error('Missing required fields:', { profileId, userEmail });
+      throw new Error('Missing required fields');
+    }
+    
     const LOOPS_API_KEY = Deno.env.get('LOOPS_API_KEY');
     if (!LOOPS_API_KEY) {
       console.error('LOOPS_API_KEY is not set');
@@ -60,7 +65,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error sending email:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: error.message 
+      }), 
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -65,22 +65,33 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
 
   const handleOrderBook = async () => {
     try {
-      const { error } = await supabase.functions.invoke('send-book-order-email', {
+      if (!profile?.email) {
+        throw new Error('User email is required');
+      }
+
+      const { data, error } = await supabase.functions.invoke('send-book-order-email', {
         body: {
           profileId,
-          userEmail: profile?.email,
+          userEmail: profile.email,
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
+
+      if (!data?.success) {
+        throw new Error('Failed to send order email');
+      }
       
       setShowSuccessDialog(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error ordering book:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "There was a problem ordering your book. Please try again.",
+        description: error.message || "There was a problem ordering your book. Please try again.",
       });
     }
   };
