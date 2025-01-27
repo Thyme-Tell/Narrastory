@@ -9,7 +9,7 @@ const ProfileHeader = ({ firstName, lastName }: ProfileHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <h1 className="text-2xl font-semibold font-sans text-gray-900">
-        Welcome, {firstName}!
+        Hi, {firstName}!
       </h1>
     </div>
   );
