@@ -34,7 +34,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
       body: JSON.stringify({
-        transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx',
+        transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
         email: 'mia@narrastory.com',
         dataVariables: {
           userId: profileId,
