@@ -68,7 +68,7 @@ serve(async (req) => {
 
     console.log('Sending book order email with data:', { profileId, profile });
 
-    // Send email using Loops with full name in message
+    // Send email using Loops - removing all contact properties
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
@@ -79,10 +79,7 @@ serve(async (req) => {
         transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
         email: userEmail,
         dataVariables: {
-          profileId,
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          fullName: `${profile.first_name} ${profile.last_name}`
+          profileId
         }
       }),
     });
