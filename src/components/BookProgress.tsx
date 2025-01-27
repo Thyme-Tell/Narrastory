@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
+import { X } from "lucide-react";
 
 interface BookProgressProps {
   profileId: string;
@@ -48,7 +49,14 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   }
 
   return (
-    <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm">
+    <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm relative">
+      <button 
+        onClick={() => setIsHidden(true)}
+        className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic"
+      >
+        <X className="h-5 w-5" />
+        <span className="sr-only">Close</span>
+      </button>
       <div className="flex flex-col">
         <img
           src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/hand-heart.png?t=2025-01-27T11%3A17%3A37.419Z"
