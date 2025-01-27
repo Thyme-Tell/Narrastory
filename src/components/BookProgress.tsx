@@ -19,6 +19,7 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [hasOrderedBook, setHasOrderedBook] = useState(false);
   const { toast } = useToast();
   
   const { data: stories } = useQuery({
@@ -75,6 +76,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       if (error) throw error;
       
       setShowSuccessDialog(true);
+      setHasOrderedBook(true);
     } catch (error) {
       console.error('Error ordering book:', error);
       toast({
@@ -136,11 +138,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
             {currentPages >= requiredPages && (
               <div className="mt-4">
                 <Button 
-                  className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+                  className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   size="lg"
                   onClick={handleOrderBook}
+                  disabled={hasOrderedBook}
                 >
-                  Order Book
+                  {hasOrderedBook ? "Your book has been requested" : "Order Book"}
                 </Button>
               </div>
             )}
