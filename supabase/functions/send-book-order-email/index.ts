@@ -18,6 +18,7 @@ serve(async (req) => {
 
   try {
     const { profileId, userEmail } = await req.json() as BookOrderRequest;
+    console.log('Received request:', { profileId, userEmail });
     
     const LOOPS_API_KEY = Deno.env.get('LOOPS_API_KEY');
     if (!LOOPS_API_KEY) {
@@ -25,41 +26,59 @@ serve(async (req) => {
     }
 
     // Send email using Loops
+    const loopsPayload = {
+      transactionalId: 'cm6f1iwei00hzr8a0co3pef2t',
+      email: 'mia@narrastory.com,richard@narrastory.com',
+      dataVariables: {
+        userId: profileId,
+        userEmail: userEmail,
+      },
+    };
+
+    console.log('Sending request to Loops:', loopsPayload);
+
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
-      body: JSON.stringify({
-        transactionalId: 'cm6f1iwei00hzr8a0co3pef2t',
-        email: 'mia@narrastory.com,richard@narrastory.com',
-        dataVariables: {
-          userId: profileId,
-          userEmail: userEmail,
-        },
-      }),
+      body: JSON.stringify(loopsPayload),
+    });
+
+    const responseText = await response.text();
+    console.log('Loops API response:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: responseText,
     });
 
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Loops API error:', errorData);
-      throw new Error(`Failed to send email: ${response.statusText}`);
+      throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${responseText}`);
     }
 
-    const data = await response.json();
-    console.log('Email sent successfully:', data);
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    console.error('Error sending email:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ success: true }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+      }
+    );
+  } catch (error) {
+    console.error('Error in send-book-order-email:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: error.toString()
+      }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
       }
     );
   }
