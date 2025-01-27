@@ -70,9 +70,9 @@ serve(async (req) => {
       transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
       email: userEmail,
       dataVariables: {
-        profileId,
-        firstName: profile.first_name,
-        lastName: profile.last_name
+        'profileId-1': profileId,
+        'firstName-1': profile.first_name,
+        'lastName-1': profile.last_name
       }
     };
 
