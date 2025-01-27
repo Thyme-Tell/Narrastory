@@ -50,7 +50,7 @@ serve(async (req) => {
 
     console.log('Sending book order email with data:', { profileId, userEmail });
 
-    // Send email using Loops - without any contact properties
+    // Send email using Loops - simplified request without contact properties
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
@@ -61,7 +61,7 @@ serve(async (req) => {
         transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
         email: userEmail,
         dataVariables: {
-          profileId: profileId,
+          profileId,
         }
       }),
     });
@@ -71,16 +71,7 @@ serve(async (req) => {
 
     if (!response.ok || !responseData.success) {
       console.error('Loops API error response:', responseData);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Failed to send email: ${responseData.message || 'Unknown error'}` 
-        }), 
-        { 
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      throw new Error(responseData.message || 'Failed to send email');
     }
 
     console.log('Email sent successfully to:', userEmail);
@@ -92,7 +83,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending email:', error);
     return new Response(
       JSON.stringify({ 
