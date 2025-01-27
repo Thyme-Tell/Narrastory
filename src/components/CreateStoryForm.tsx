@@ -76,8 +76,8 @@ const CreateStoryForm = ({ profileId, onStoryCreated }: CreateStoryFormProps) =>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="ghost"
-          className="text-[#A33D29] hover:text-[#A33D29]/90 hover:bg-transparent p-0"
+          variant="default"
+          className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Write a new story

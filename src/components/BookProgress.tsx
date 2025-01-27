@@ -2,8 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface BookProgressProps {
   profileId: string;
@@ -11,6 +17,7 @@ interface BookProgressProps {
 
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   
   const { data: stories } = useQuery({
     queryKey: ["stories", profileId],
@@ -60,52 +67,71 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   }
 
   return (
-    <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative">
-      <button 
-        onClick={() => setIsHidden(true)}
-        className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic z-10"
-      >
-        <X className="h-5 w-5" />
-        <span className="sr-only">Close</span>
-      </button>
-      <div className="flex flex-col">
-        <div className="w-full h-64 relative">
-          <img
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
-            alt="Book progress illustration"
-            className="w-full h-full object-cover rounded-t-lg"
-          />
-        </div>
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">
-            {currentPages < 3 ? "Wonderful start!" : "Great progress!"}
-          </h2>
-          <p className="text-atlantic mb-4 text-left">
-            You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
-            {currentPages < requiredPages && (
-              <> Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!</>
+    <>
+      <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative">
+        <button 
+          onClick={() => setIsHidden(true)}
+          className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic z-10"
+        >
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </button>
+        <div className="flex flex-col">
+          <div className="w-full h-64 relative">
+            <img
+              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
+              alt="Book progress illustration"
+              className="w-full h-full object-cover rounded-t-lg"
+            />
+          </div>
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">
+              {currentPages < 3 ? "Wonderful start!" : "Great progress!"}
+            </h2>
+            <p className="text-atlantic mb-4 text-left">
+              You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
+              {currentPages < requiredPages && (
+                <> Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!</>
+              )}
+            </p>
+            <Progress value={progressPercentage} className="h-2" />
+            {currentPages >= requiredPages && (
+              <div className="mt-4">
+                <Button 
+                  className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+                  size="lg"
+                  onClick={() => setShowSuccessDialog(true)}
+                >
+                  Order Book
+                </Button>
+              </div>
             )}
-          </p>
-          <Progress value={progressPercentage} className="h-2" />
-          {currentPages >= requiredPages && (
-            <div className="mt-4">
-              <Button 
-                className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
-                size="lg"
-              >
-                Order Book
-              </Button>
-            </div>
-          )}
+          </div>
         </div>
+        <button 
+          onClick={() => setIsHidden(true)}
+          className="w-full text-center p-4 text-sm text-atlantic/70 hover:text-atlantic"
+        >
+          {currentPages >= requiredPages ? "Remind me later" : "Dismiss"}
+        </button>
       </div>
-      <button 
-        onClick={() => setIsHidden(true)}
-        className="w-full text-center p-4 text-sm text-atlantic/70 hover:text-atlantic"
-      >
-        {currentPages >= requiredPages ? "Remind me later" : "Dismiss"}
-      </button>
-    </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-6 w-6 text-green-500" />
+              Book Request Received
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-atlantic">
+              You have successfully requested a book. We'll reach out to you directly through email and/or a call.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
