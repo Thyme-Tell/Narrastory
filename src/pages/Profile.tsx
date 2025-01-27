@@ -23,6 +23,7 @@ const Profile = () => {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
+      console.log("Fetching profile for ID:", id);
       const { data, error } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, created_at")
@@ -34,6 +35,7 @@ const Profile = () => {
         return null;
       }
       
+      console.log("Fetched profile data:", data);
       return data;
     },
   });
@@ -97,6 +99,8 @@ const Profile = () => {
       </div>
     );
   }
+
+  console.log("Rendering profile with data:", profile);
 
   return (
     <div 
