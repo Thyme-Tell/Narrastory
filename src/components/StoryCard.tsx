@@ -145,6 +145,15 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   };
 
   const handleShare = async () => {
+    if (!story.share_token) {
+      toast({
+        title: "Error",
+        description: "This story cannot be shared at the moment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const shareUrl = `${window.location.origin}/shared/${story.share_token}`;
     
     if (isMobile && navigator.share) {
@@ -174,6 +183,15 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   };
 
   const handleCopyLink = async () => {
+    if (!story.share_token) {
+      toast({
+        title: "Error",
+        description: "This story cannot be shared at the moment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const shareUrl = `${window.location.origin}/shared/${story.share_token}`;
     await navigator.clipboard.writeText(shareUrl);
     toast({
@@ -238,14 +256,16 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
               {new Date(story.created_at).toLocaleDateString()}
             </p>
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleShare}
-                className="text-atlantic/70 hover:text-atlantic"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
+              {story.share_token && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleShare}
+                  className="text-atlantic/70 hover:text-atlantic"
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -308,17 +328,19 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
               Copy this link to share your story with others.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex items-center gap-2">
-            <Input
-              readOnly
-              value={`${window.location.origin}/shared/${story.share_token}`}
-              className="flex-1"
-            />
-            <Button onClick={handleCopyLink}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy
-            </Button>
-          </div>
+          {story.share_token && (
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={`${window.location.origin}/shared/${story.share_token}`}
+                className="flex-1"
+              />
+              <Button onClick={handleCopyLink}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy
+              </Button>
+            </div>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel>Close</AlertDialogCancel>
           </AlertDialogFooter>
