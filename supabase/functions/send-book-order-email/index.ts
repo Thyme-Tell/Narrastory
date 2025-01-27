@@ -51,6 +51,7 @@ serve(async (req) => {
     console.log('Sending book order email with data:', { profileId, userEmail });
 
     // Send email using Loops - Using the most basic request structure possible
+    // Note: We're using a different transactional email template that doesn't have contact properties
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
@@ -58,15 +59,15 @@ serve(async (req) => {
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
       body: JSON.stringify({
-        transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
-        email: userEmail
+        transactionalId: 'clrw0aqtb00kllp5i6yvq8n5q', // Using a simpler template without contact properties
+        email: userEmail,
       }),
     });
 
     const responseData = await response.json();
     console.log('Loops API response:', responseData);
 
-    if (!response.ok) {
+    if (!response.ok || !responseData.success) {
       console.error('Loops API error response:', responseData);
       return new Response(
         JSON.stringify({ 
