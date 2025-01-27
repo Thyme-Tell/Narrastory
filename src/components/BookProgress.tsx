@@ -97,7 +97,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   };
 
   const currentPages = calculatePages(stories);
-  const requiredPages = 25;
+  const requiredPages = 50;
   const remainingPages = Math.max(0, requiredPages - currentPages);
   const progressPercentage = Math.min((currentPages / requiredPages) * 100, 100);
 
