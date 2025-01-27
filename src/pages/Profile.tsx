@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import BookProgress from "@/components/BookProgress";
+import CreateStoryForm from "@/components/CreateStoryForm";
 import { Menu, BookOpen, Book } from "lucide-react";
 import { useEffect } from "react";
 import {
@@ -153,9 +154,12 @@ const Profile = () => {
           />
           
           <div>
-            <p className="text-muted-foreground mb-[15px] text-left">
-              Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
-            </p>
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-muted-foreground">
+                Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
+              </p>
+              <CreateStoryForm profileId={id} onStoryCreated={refetchStories} />
+            </div>
             
             <StoriesList 
               stories={stories || []}
