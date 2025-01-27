@@ -23,7 +23,6 @@ const Profile = () => {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
-      console.log("Fetching profile for ID:", id);
       const { data, error } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, created_at")
@@ -32,13 +31,11 @@ const Profile = () => {
 
       if (error) {
         console.error("Error fetching profile:", error);
-        throw error;
+        return null;
       }
       
-      console.log("Fetched profile data:", data);
       return data;
     },
-    retry: false,
   });
 
   const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
@@ -64,7 +61,7 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    if (profile?.first_name) {
+    if (profile) {
       document.title = `Narra Story | ${profile.first_name}'s Profile`;
     } else {
       document.title = "Narra Story | Profile";
@@ -152,8 +149,8 @@ const Profile = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <BookProgress profileId={id} />
           <ProfileHeader 
-            firstName={profile.first_name || ''} 
-            lastName={profile.last_name || ''} 
+            firstName={profile.first_name} 
+            lastName={profile.last_name} 
           />
           
           <div>

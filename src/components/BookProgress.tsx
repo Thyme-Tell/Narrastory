@@ -19,7 +19,6 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [hasOrderedBook, setHasOrderedBook] = useState(false);
   const { toast } = useToast();
   
   const { data: stories } = useQuery({
@@ -76,7 +75,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       if (error) throw error;
       
       setShowSuccessDialog(true);
-      setHasOrderedBook(true);
     } catch (error) {
       console.error('Error ordering book:', error);
       toast({
@@ -129,7 +127,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
               {currentPages < 3 ? "Wonderful start!" : "Great progress!"}
             </h2>
             <p className="text-atlantic mb-4 text-left">
-              You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. You can keep adding more stories or order your book.
+              You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
               {currentPages < requiredPages && (
                 <> Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!</>
               )}
@@ -138,12 +136,11 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
             {currentPages >= requiredPages && (
               <div className="mt-4">
                 <Button 
-                  className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
                   size="lg"
                   onClick={handleOrderBook}
-                  disabled={hasOrderedBook}
                 >
-                  {hasOrderedBook ? "Your book has been requested" : "Order Book"}
+                  Order Book
                 </Button>
               </div>
             )}

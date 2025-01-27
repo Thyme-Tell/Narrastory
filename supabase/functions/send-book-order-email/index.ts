@@ -18,66 +18,45 @@ serve(async (req) => {
 
   try {
     const { profileId, userEmail } = await req.json() as BookOrderRequest;
-    console.log('Received request:', { profileId, userEmail });
     
     const LOOPS_API_KEY = Deno.env.get('LOOPS_API_KEY');
     if (!LOOPS_API_KEY) {
       throw new Error('LOOPS_API_KEY is not set');
     }
 
-    const loopsPayload = {
-      transactionalId: 'cm6f1iwei00hzr8a0co3pef2t',
-      email: 'mia@narrastory.com',
-      dataVariables: {
-        userId: profileId,
-        userEmail: userEmail,
-      },
-    };
-
-    console.log('Sending request to Loops');
-
+    // Send email using Loops
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
-      body: JSON.stringify(loopsPayload),
-    });
-
-    const responseText = await response.text();
-    console.log('Loops API response:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: responseText,
+      body: JSON.stringify({
+        transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx', // You'll need to replace this with your actual Loops transactional ID
+        email: 'mia@narrastory.com,richard@narrastory.com',
+        dataVariables: {
+          userId: profileId,
+          userEmail: userEmail,
+        },
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${responseText}`);
+      throw new Error(`Failed to send email: ${response.statusText}`);
     }
 
-    return new Response(
-      JSON.stringify({ success: true, response: responseText }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        },
-      }
-    );
+    console.log('Email sent successfully');
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    console.error('Error in send-book-order-email:', error);
+    console.error('Error sending email:', error);
     return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        details: error.toString()
-      }),
+      JSON.stringify({ error: error.message }),
       { 
         status: 500,
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }
