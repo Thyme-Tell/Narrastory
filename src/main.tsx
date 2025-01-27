@@ -34,14 +34,10 @@ try {
   // Continue app execution even if PostHog fails
 }
 
-const container = document.getElementById('root')
-if (!container) throw new Error('Failed to find the root element')
-const root = createRoot(container)
-
-root.render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
     </QueryClientProvider>
   </StrictMode>
-)
+);
