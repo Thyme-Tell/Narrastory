@@ -21,6 +21,7 @@ serve(async (req) => {
     
     const LOOPS_API_KEY = Deno.env.get('LOOPS_API_KEY');
     if (!LOOPS_API_KEY) {
+      console.error('LOOPS_API_KEY is not set');
       throw new Error('LOOPS_API_KEY is not set');
     }
 
@@ -35,9 +36,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
-        email: userEmail, // Send to the user's email instead of hardcoded address
+        email: 'mia@narrastory.com', // Always send to admin
         dataVariables: {
           userId: profileId,
+          userEmail: userEmail, // Pass the user's email as a variable
         },
       }),
     });
@@ -50,7 +52,7 @@ serve(async (req) => {
       throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${JSON.stringify(responseData)}`);
     }
 
-    console.log('Email sent successfully to:', userEmail);
+    console.log('Email sent successfully to: mia@narrastory.com');
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
