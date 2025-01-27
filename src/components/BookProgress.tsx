@@ -56,15 +56,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           className="h-16 w-16 object-contain"
         />
         <div className="flex-1">
-          <div className="flex justify-between items-start mb-2">
-            <h2 className="text-xl font-semibold text-atlantic">Keep it up!</h2>
-            <button 
-              onClick={() => setIsHidden(true)}
-              className="text-sm text-atlantic/70 hover:text-atlantic"
-            >
-              Remind me later
-            </button>
-          </div>
+          <h2 className="text-xl font-semibold text-atlantic mb-2">Keep it up!</h2>
           <p className="text-atlantic mb-4">
             You have {currentPages} {currentPages === 1 ? 'page' : 'pages'} in your book.
             {remainingPages > 0 ? (
@@ -76,6 +68,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           <Progress value={progressPercentage} className="h-2" />
         </div>
       </div>
+      <button 
+        onClick={() => setIsHidden(true)}
+        className="w-full text-center mt-4 text-sm text-atlantic/70 hover:text-atlantic"
+      >
+        Remind me later
+      </button>
     </div>
   );
 };
