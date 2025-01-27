@@ -1,7 +1,16 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProfileHeaderProps {
   firstName: string;
@@ -11,14 +20,17 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHeaderProps & { onUpdate: () => void }) => {
   const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   const handleCreateStory = async () => {
     const { data, error } = await supabase
       .from("stories")
       .insert([
         {
-          content: "",
-          title: "",
+          content: content,
+          title: title,
           profile_id: profileId
         }
       ])
@@ -39,6 +51,9 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
       description: "New story created",
     });
     
+    setIsDialogOpen(false);
+    setTitle("");
+    setContent("");
     onUpdate();
   };
 
@@ -49,10 +64,45 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
       </h1>
       <Button 
         className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
-        onClick={handleCreateStory}
+        onClick={() => setIsDialogOpen(true)}
       >
         Write a New Story
       </Button>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Write a New Story</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title (Optional)</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter a title for your story"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="content">Story</Label>
+              <Textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write your story here..."
+                className="min-h-[200px]"
+              />
+            </div>
+            <Button 
+              className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+              onClick={handleCreateStory}
+            >
+              Save Story
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
