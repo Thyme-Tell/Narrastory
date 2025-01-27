@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -48,7 +49,24 @@ serve(async (req) => {
       );
     }
 
-    console.log('Sending book order email with data:', { profileId, userEmail });
+    // Create Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch user's profile information
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', profileId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Error fetching profile:', profileError);
+      throw new Error('Could not fetch user profile');
+    }
+
+    console.log('Sending book order email with data:', { profileId, profile });
 
     // Send email using Loops - simplified request without contact properties
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
@@ -62,6 +80,8 @@ serve(async (req) => {
         email: userEmail,
         dataVariables: {
           profileId,
+          firstName: profile.first_name,
+          lastName: profile.last_name
         }
       }),
     });
