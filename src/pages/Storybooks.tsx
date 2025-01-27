@@ -1,7 +1,5 @@
 import { Link, useParams } from "react-router-dom";
 import { Menu, BookOpen, Book } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,29 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const Storybooks = () => {
   const { id } = useParams();
-
-  const { data: storybooks, isLoading } = useQuery({
-    queryKey: ["storybooks", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("storybooks")
-        .select("*")
-        .eq("profile_id", id)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching storybooks:", error);
-        return [];
-      }
-
-      return data;
-    },
-    enabled: !!id,
-  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,39 +43,9 @@ const Storybooks = () => {
         </DropdownMenu>
       </div>
       <div className="container mx-auto py-8">
-        {isLoading ? (
-          <p className="text-center">Loading storybooks...</p>
-        ) : storybooks && storybooks.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {storybooks.map((storybook) => (
-              <Card key={storybook.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle>{storybook.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    {storybook.description || "No description available"}
-                  </p>
-                  <div className="mt-4">
-                    <Link 
-                      to={`/storybooks/${storybook.id}`}
-                      className="text-[#A33D29] hover:underline"
-                    >
-                      View Storybook
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center space-y-4">
-            <p>No storybooks yet.</p>
-            <p>Create your first storybook by selecting stories from your collection.</p>
-          </div>
-        )}
+        <p className="text-center">Storybooks are coming soon.</p>
         <div className="text-center mt-8">
-          <Link to={`/profile/${id}`} className="text-[#A33D29] hover:underline">
+          <Link to={`/profile/${id}`} className="text-primary hover:underline">
             Go back to stories
           </Link>
         </div>
