@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface BookProgressProps {
   profileId: string;
@@ -67,6 +68,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           />
           <div className="p-6">
             <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Share your first story</h2>
+            <Button 
+              className="w-full mb-4 bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+              onClick={() => window.location.href = `tel:+15072003303`}
+            >
+              Create a New Story
+            </Button>
             <p className="text-atlantic mb-4 text-left">
               Call <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a><br />
               One phone call, one memory at a time.
@@ -100,6 +107,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         />
         <div className="p-6">
           <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Great progress!</h2>
+          <Button 
+            className="w-full mb-4 bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+            onClick={() => window.location.href = `tel:+15072003303`}
+          >
+            Create a New Story
+          </Button>
           <p className="text-atlantic mb-4 text-left">
             You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story.
           </p>
