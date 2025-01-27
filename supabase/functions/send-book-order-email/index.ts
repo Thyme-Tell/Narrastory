@@ -66,24 +66,26 @@ serve(async (req) => {
       throw new Error('Could not fetch user profile');
     }
 
-    console.log('Sending book order email with data:', { profileId, profile });
+    const loopsPayload = {
+      transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
+      email: userEmail,
+      dataVariables: {
+        profileId,
+        firstName: profile.first_name,
+        lastName: profile.last_name
+      }
+    };
 
-    // Send email using Loops - including name in data variables
+    console.log('Sending to Loops with payload:', JSON.stringify(loopsPayload, null, 2));
+
+    // Send email using Loops
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
-      body: JSON.stringify({
-        transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
-        email: userEmail,
-        dataVariables: {
-          profileId,
-          firstName: profile.first_name,
-          lastName: profile.last_name
-        }
-      }),
+      body: JSON.stringify(loopsPayload),
     });
 
     const responseData = await response.json();
