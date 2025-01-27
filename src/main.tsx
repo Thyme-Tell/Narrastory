@@ -1,5 +1,5 @@
 import React from 'react'
-import * as ReactDOM from 'react-dom/client'
+import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import posthog from 'posthog-js'
 import App from './App.tsx'
@@ -37,9 +37,7 @@ try {
 const rootElement = document.getElementById('root')
 if (!rootElement) throw new Error('Root element not found')
 
-const root = ReactDOM.createRoot(rootElement)
-
-root.render(
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
