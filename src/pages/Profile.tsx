@@ -132,6 +132,7 @@ const Profile = () => {
           <ProfileHeader 
             firstName={profile.first_name} 
             lastName={profile.last_name}
+            profileId={profile.id}
             onUpdate={refetchStories}
           />
           

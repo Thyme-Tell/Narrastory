@@ -6,9 +6,10 @@ import { useToast } from "@/components/ui/use-toast";
 interface ProfileHeaderProps {
   firstName: string;
   lastName: string;
+  profileId: string;
 }
 
-const ProfileHeader = ({ firstName, lastName, onUpdate }: ProfileHeaderProps & { onUpdate: () => void }) => {
+const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHeaderProps & { onUpdate: () => void }) => {
   const { toast } = useToast();
 
   const handleCreateStory = async () => {
@@ -18,7 +19,7 @@ const ProfileHeader = ({ firstName, lastName, onUpdate }: ProfileHeaderProps & {
         {
           content: "",
           title: "",
-          profile_id: firstName // This is safe because we're already on their profile page
+          profile_id: profileId
         }
       ])
       .select()
