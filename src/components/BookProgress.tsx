@@ -53,7 +53,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <img
           src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/hand-heart.png?t=2025-01-27T11%3A17%3A37.419Z"
           alt="Hand holding a heart"
-          className="h-32 w-32 object-contain mx-auto mb-6"
+          className="h-64 w-64 object-contain mx-auto mb-6"
         />
         <div>
           <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Keep it up!</h2>
