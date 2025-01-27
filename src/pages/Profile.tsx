@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
+import BookProgress from "@/components/BookProgress";
 import { Menu, BookOpen, Book } from "lucide-react";
 import { useEffect } from "react";
 import {
@@ -145,6 +146,7 @@ const Profile = () => {
       </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
+          <BookProgress profileId={id} />
           <ProfileHeader 
             firstName={profile.first_name} 
             lastName={profile.last_name} 
