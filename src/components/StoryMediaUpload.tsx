@@ -11,6 +11,16 @@ interface StoryMediaUploadProps {
   onUploadComplete?: () => void;
 }
 
+interface StoryMedia {
+  id: string;
+  story_id: string;
+  file_path: string;
+  file_name: string;
+  content_type: string;
+  created_at: string;
+  caption: string | null;
+}
+
 const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -59,10 +69,10 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       setProgress(100);
 
       // Get the current media items from the cache
-      const previousData = queryClient.getQueryData(["story-media", storyId]) || [];
+      const previousData = queryClient.getQueryData<StoryMedia[]>(["story-media", storyId]) || [];
 
       // Update the cache with the new media item
-      queryClient.setQueryData(["story-media", storyId], [newMedia, ...previousData]);
+      queryClient.setQueryData<StoryMedia[]>(["story-media", storyId], [newMedia, ...previousData]);
 
       toast({
         title: "Success",
