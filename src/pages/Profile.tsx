@@ -107,11 +107,13 @@ const Profile = () => {
       }}
     >
       <div className="w-full flex justify-between items-center py-4 px-4 bg-white/80">
-        <img 
-          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
-          alt="Narra Logo"
-          className="h-11"
-        />
+        <Link to="/">
+          <img 
+            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg?t=2025-01-22T21%3A53%3A58.812Z" 
+            alt="Narra Logo"
+            className="h-11"
+          />
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
