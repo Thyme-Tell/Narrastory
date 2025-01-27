@@ -157,7 +157,7 @@ const Profile = () => {
             <div className="flex flex-col items-start space-y-4 mb-6">
               <CreateStoryForm profileId={id} onStoryCreated={refetchStories} />
               <p className="text-muted-foreground">
-                or call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> to create a new story.
+                or call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> for a friendly interview.
               </p>
             </div>
             
