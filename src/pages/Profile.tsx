@@ -53,7 +53,6 @@ const Profile = () => {
         return [];
       }
 
-      console.log("Fetched stories:", storiesData);
       return storiesData;
     },
     enabled: !!id,
@@ -132,7 +131,8 @@ const Profile = () => {
           <BookProgress profileId={id} />
           <ProfileHeader 
             firstName={profile.first_name} 
-            lastName={profile.last_name} 
+            lastName={profile.last_name}
+            onUpdate={refetchStories}
           />
           
           <div>
