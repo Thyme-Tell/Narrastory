@@ -27,22 +27,17 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       const fileExt = file.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-      // Create upload event handler
-      const uploadTask = supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('story-media')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      // Track upload progress using XMLHttpRequest
-      const xhr = (uploadTask as any).data.xhr;
-      if (xhr) {
-        xhr.upload.onprogress = (event: ProgressEvent) => {
-          const percent = (event.loaded / event.total) * 100;
-          setProgress(percent);
-        };
-      }
-
-      const { error: uploadError } = await uploadTask;
       if (uploadError) throw uploadError;
+
+      // Set progress to 100% after successful upload
+      setProgress(100);
 
       // Create media record in database
       const { error: dbError } = await supabase
