@@ -90,7 +90,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         onClick={() => setIsHidden(true)}
         className="w-full text-center p-4 text-sm text-atlantic/70 hover:text-atlantic"
       >
-        Remind me later
+        Dismiss
       </button>
     </div>
   );
