@@ -48,37 +48,45 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     return null;
   }
 
+  if (!stories?.length) {
+    return (
+      <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm text-center">
+        <h2 className="text-2xl font-semibold text-atlantic mb-2">Share your first story</h2>
+        <p className="text-atlantic mb-2">Call <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a></p>
+        <p className="text-atlantic text-sm">One phone call, one memory at a time.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm relative">
+    <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative">
       <button 
         onClick={() => setIsHidden(true)}
-        className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic"
+        className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic z-10"
       >
         <X className="h-5 w-5" />
         <span className="sr-only">Close</span>
       </button>
       <div className="flex flex-col">
-        <img
-          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/hand-heart.png?t=2025-01-27T11%3A17%3A37.419Z"
-          alt="Hand holding a heart"
-          className="h-64 w-64 object-contain mx-auto mb-6"
-        />
-        <div>
-          <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Keep it up!</h2>
+        <div className="w-full h-64 relative">
+          <img
+            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
+            alt="Book progress illustration"
+            className="w-full h-full object-cover rounded-t-lg"
+          />
+        </div>
+        <div className="p-6">
+          <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Great progress!</h2>
           <p className="text-atlantic mb-4 text-left">
-            You have {currentPages} {currentPages === 1 ? 'page' : 'pages'} in your book.
-            {remainingPages > 0 ? (
-              ` You need ${remainingPages} more ${remainingPages === 1 ? 'page' : 'pages'} to order your book.`
-            ) : (
-              " You have enough pages to order your book!"
-            )}
+            You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
+            Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!
           </p>
           <Progress value={progressPercentage} className="h-2" />
         </div>
       </div>
       <button 
         onClick={() => setIsHidden(true)}
-        className="w-full text-center mt-4 text-sm text-atlantic/70 hover:text-atlantic"
+        className="w-full text-center p-4 text-sm text-atlantic/70 hover:text-atlantic"
       >
         Remind me later
       </button>
