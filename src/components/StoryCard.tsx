@@ -6,10 +6,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { MoreVertical, Pencil, Trash2, Calendar as CalendarIcon, Share2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, Calendar as CalendarIcon, Share2, Copy } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +52,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [date, setDate] = useState<Date>(new Date(story.created_at));
   const { toast } = useToast();
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleSave = async () => {
     const { error } = await supabase
@@ -144,6 +146,40 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
 
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/shared/${story.share_token}`;
+    
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({
+          title: story.title || 'Shared Story',
+          text: 'Check out this story!',
+          url: shareUrl,
+        });
+        toast({
+          title: "Success",
+          description: "Story shared successfully",
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Error sharing:', error);
+          toast({
+            title: "Error",
+            description: "Failed to share story",
+            variant: "destructive",
+          });
+        }
+      }
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link copied!",
+        description: "Share this link with others to let them view your story.",
+      });
+    }
+    setShowShareDialog(false);
+  };
+
+  const handleCopyLink = async () => {
+    const shareUrl = `${window.location.origin}/shared/${story.share_token}`;
     await navigator.clipboard.writeText(shareUrl);
     toast({
       title: "Link copied!",
@@ -210,7 +246,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setShowShareDialog(true)}
+                onClick={handleShare}
                 className="text-atlantic/70 hover:text-atlantic"
               >
                 <Share2 className="h-4 w-4" />
@@ -274,7 +310,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Share your story</AlertDialogTitle>
             <AlertDialogDescription>
-              Copy this link to share your story with others. Anyone with this link can view your story.
+              Share this story or copy the link to share it with others.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex items-center gap-2">
@@ -283,8 +319,9 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
               value={`${window.location.origin}/shared/${story.share_token}`}
               className="flex-1"
             />
-            <Button onClick={handleShare}>
-              Copy Link
+            <Button onClick={handleCopyLink}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copy
             </Button>
           </div>
           <AlertDialogFooter>
