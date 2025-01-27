@@ -169,13 +169,8 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
         }
       }
     } else {
-      await navigator.clipboard.writeText(shareUrl);
-      toast({
-        title: "Link copied!",
-        description: "Share this link with others to let them view your story.",
-      });
+      setShowShareDialog(true);
     }
-    setShowShareDialog(false);
   };
 
   const handleCopyLink = async () => {
@@ -310,7 +305,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Share your story</AlertDialogTitle>
             <AlertDialogDescription>
-              Share this story or copy the link to share it with others.
+              Copy this link to share your story with others.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex items-center gap-2">
