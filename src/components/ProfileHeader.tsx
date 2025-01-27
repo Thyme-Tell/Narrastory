@@ -49,6 +49,7 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
     toast({
       title: "Success",
       description: "New story created",
+      variant: "success",
     });
     
     setIsDialogOpen(false);
