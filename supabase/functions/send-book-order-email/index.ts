@@ -54,6 +54,8 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    console.log('Fetching profile for ID:', profileId);
+
     // Fetch user's profile information
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -65,6 +67,8 @@ serve(async (req) => {
       console.error('Error fetching profile:', profileError);
       throw new Error('Could not fetch user profile');
     }
+
+    console.log('Retrieved profile:', profile);
 
     const loopsPayload = {
       transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
