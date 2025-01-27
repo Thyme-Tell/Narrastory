@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Menu, BookOpen, Book } from "lucide-react";
 import {
   DropdownMenu,
@@ -9,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 
 const Storybooks = () => {
+  const { id } = useParams();
+
   return (
     <div className="min-h-screen bg-background">
       <div className="w-full flex justify-between items-center py-4 px-4 bg-white/80">
@@ -32,7 +34,7 @@ const Storybooks = () => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/profile" className="flex items-center gap-2">
+              <Link to={`/profile/${id}`} className="flex items-center gap-2">
                 <Book className="h-4 w-4" />
                 <span>Stories</span>
               </Link>
@@ -43,7 +45,7 @@ const Storybooks = () => {
       <div className="container mx-auto py-8">
         <p className="text-center">Storybooks are coming soon.</p>
         <div className="text-center mt-8">
-          <Link to="/profile" className="text-primary hover:underline">
+          <Link to={`/profile/${id}`} className="text-primary hover:underline">
             Go back to stories
           </Link>
         </div>
