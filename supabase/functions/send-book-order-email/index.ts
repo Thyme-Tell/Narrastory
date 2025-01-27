@@ -80,7 +80,8 @@ serve(async (req) => {
         email: userEmail,
         dataVariables: {
           profileId,
-          name: `${profile.first_name} ${profile.last_name}`
+          firstName: profile.first_name,
+          lastName: profile.last_name
         }
       }),
     });
