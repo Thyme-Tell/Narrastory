@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Progress } from "@/components/ui/progress";
 
 interface BookProgressProps {
   profileId: string;
@@ -37,6 +38,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const currentPages = calculatePages(stories);
   const requiredPages = 25;
   const remainingPages = Math.max(0, requiredPages - currentPages);
+  const progressPercentage = Math.min((currentPages / requiredPages) * 100, 100);
 
   return (
     <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm">
@@ -46,9 +48,9 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           alt="Hand holding a heart"
           className="h-16 w-16 object-contain"
         />
-        <div>
+        <div className="flex-1">
           <h2 className="text-xl font-semibold text-atlantic mb-2">Keep it up!</h2>
-          <p className="text-atlantic">
+          <p className="text-atlantic mb-4">
             You have {currentPages} {currentPages === 1 ? 'page' : 'pages'} in your book.
             {remainingPages > 0 ? (
               ` You need ${remainingPages} more ${remainingPages === 1 ? 'page' : 'pages'} to order your book.`
@@ -56,6 +58,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
               " You have enough pages to order your book!"
             )}
           </p>
+          <Progress value={progressPercentage} className="h-2" />
         </div>
       </div>
     </div>
