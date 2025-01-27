@@ -25,46 +25,39 @@ serve(async (req) => {
       throw new Error('LOOPS_API_KEY is not set');
     }
 
-    // Send email using Loops - now sending to each recipient separately
-    const recipients = ['mia@narrastory.com', 'richard@narrastory.com'];
-    
-    const responses = await Promise.all(recipients.map(async (recipient) => {
-      const loopsPayload = {
-        transactionalId: 'cm6f1iwei00hzr8a0co3pef2t',
-        email: recipient,
-        dataVariables: {
-          userId: profileId,
-          userEmail: userEmail,
-        },
-      };
+    const loopsPayload = {
+      transactionalId: 'cm6f1iwei00hzr8a0co3pef2t',
+      email: 'mia@narrastory.com',
+      dataVariables: {
+        userId: profileId,
+        userEmail: userEmail,
+      },
+    };
 
-      console.log('Sending request to Loops for recipient:', recipient);
+    console.log('Sending request to Loops');
 
-      const response = await fetch('https://app.loops.so/api/v1/transactional', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${LOOPS_API_KEY}`,
-        },
-        body: JSON.stringify(loopsPayload),
-      });
+    const response = await fetch('https://app.loops.so/api/v1/transactional', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${LOOPS_API_KEY}`,
+      },
+      body: JSON.stringify(loopsPayload),
+    });
 
-      const responseText = await response.text();
-      console.log('Loops API response for', recipient, ':', {
-        status: response.status,
-        statusText: response.statusText,
-        body: responseText,
-      });
+    const responseText = await response.text();
+    console.log('Loops API response:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: responseText,
+    });
 
-      if (!response.ok) {
-        throw new Error(`Loops API error for ${recipient}: ${response.status} ${response.statusText} - ${responseText}`);
-      }
-
-      return responseText;
-    }));
+    if (!response.ok) {
+      throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${responseText}`);
+    }
 
     return new Response(
-      JSON.stringify({ success: true, responses }),
+      JSON.stringify({ success: true, response: responseText }),
       { 
         headers: { 
           ...corsHeaders,
