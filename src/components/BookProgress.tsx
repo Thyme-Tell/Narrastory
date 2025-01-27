@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
 
 interface BookProgressProps {
   profileId: string;
 }
 
 const BookProgress = ({ profileId }: BookProgressProps) => {
+  const [isHidden, setIsHidden] = useState(false);
+  
   const { data: stories } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
@@ -40,6 +43,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const remainingPages = Math.max(0, requiredPages - currentPages);
   const progressPercentage = Math.min((currentPages / requiredPages) * 100, 100);
 
+  if (isHidden) {
+    return null;
+  }
+
   return (
     <div className="mb-6 rounded-lg bg-white/50 p-6 shadow-sm">
       <div className="flex items-center gap-6">
@@ -49,7 +56,15 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           className="h-16 w-16 object-contain"
         />
         <div className="flex-1">
-          <h2 className="text-xl font-semibold text-atlantic mb-2">Keep it up!</h2>
+          <div className="flex justify-between items-start mb-2">
+            <h2 className="text-xl font-semibold text-atlantic">Keep it up!</h2>
+            <button 
+              onClick={() => setIsHidden(true)}
+              className="text-sm text-atlantic/70 hover:text-atlantic"
+            >
+              Remind me later
+            </button>
+          </div>
           <p className="text-atlantic mb-4">
             You have {currentPages} {currentPages === 1 ? 'page' : 'pages'} in your book.
             {remainingPages > 0 ? (
