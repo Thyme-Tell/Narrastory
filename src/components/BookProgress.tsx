@@ -43,7 +43,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name, email")
+        .select("email")
         .eq("id", profileId)
         .single();
 
@@ -65,39 +65,28 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
 
   const handleOrderBook = async () => {
     try {
-      if (!profile?.email) {
-        throw new Error('User email is required');
-      }
-
-      const { data, error } = await supabase.functions.invoke('send-book-order-email', {
+      const { error } = await supabase.functions.invoke('send-book-order-email', {
         body: {
           profileId,
-          userEmail: profile.email,
+          userEmail: profile?.email,
         },
       });
 
-      if (error) {
-        console.error('Edge function error:', error);
-        throw error;
-      }
-
-      if (!data?.success) {
-        throw new Error('Failed to send order email');
-      }
+      if (error) throw error;
       
       setShowSuccessDialog(true);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error ordering book:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "There was a problem ordering your book. Please try again.",
+        description: "There was a problem ordering your book. Please try again.",
       });
     }
   };
 
   const currentPages = calculatePages(stories);
-  const requiredPages = 50;
+  const requiredPages = 25;
   const remainingPages = Math.max(0, requiredPages - currentPages);
   const progressPercentage = Math.min((currentPages / requiredPages) * 100, 100);
 
@@ -135,14 +124,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           </div>
           <div className="p-6">
             <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">
-              {currentPages < 3 ? `Wonderful start${profile?.first_name ? `, ${profile.first_name}` : ''}!` : `Great progress${profile?.first_name ? `, ${profile.first_name}` : ''}!`}
+              {currentPages < 3 ? "Wonderful start!" : "Great progress!"}
             </h2>
             <p className="text-atlantic mb-4 text-left">
               You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
-              {currentPages < requiredPages ? (
+              {currentPages < requiredPages && (
                 <> Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!</>
-              ) : (
-                " You can keep adding more stories or order your book."
               )}
             </p>
             <Progress value={progressPercentage} className="h-2" />
