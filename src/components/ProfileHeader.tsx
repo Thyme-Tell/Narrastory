@@ -9,7 +9,7 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({ firstName, lastName }: ProfileHeaderProps) => {
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold font-sans">
+      <h1 className="text-xl font-semibold font-sans text-left">
         {firstName} {lastName}'s Stories
       </h1>
       <Button 
