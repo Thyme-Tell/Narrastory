@@ -45,7 +45,7 @@ const Storybooks = () => {
       <div className="container mx-auto py-8">
         <p className="text-center">Storybooks are coming soon.</p>
         <div className="text-center mt-8">
-          <Link to={`/profile/${id}`} className="text-primary hover:underline">
+          <Link to={`/profile/${id}`}>
             Go back to stories
           </Link>
         </div>
