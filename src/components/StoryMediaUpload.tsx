@@ -51,11 +51,11 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       // Set progress to 50% after storage upload
       setProgress(50);
 
-      // Create media record in database
+      // Create media record in database with the specific story_id
       const { data: newMedia, error: dbError } = await supabase
         .from('story_media')
         .insert({
-          story_id: storyId,
+          story_id: storyId, // Ensure we're using the correct storyId
           file_path: filePath,
           file_name: file.name,
           content_type: file.type,
@@ -100,13 +100,13 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       <div className="flex justify-start mb-5 mt-[20px]">
         <input
           type="file"
-          id="media"
+          id={`media-${storyId}`} // Make the ID unique per story
           className="hidden"
           onChange={handleFileUpload}
           accept="image/*,video/*,audio/*"
           disabled={uploading}
         />
-        <label htmlFor="media">
+        <label htmlFor={`media-${storyId}`}>
           <Button
             variant="ghost"
             className="cursor-pointer text-[#A33D29] hover:text-[#A33D29]/90 hover:bg-transparent p-0"
