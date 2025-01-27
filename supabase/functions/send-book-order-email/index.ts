@@ -24,6 +24,8 @@ serve(async (req) => {
       throw new Error('LOOPS_API_KEY is not set');
     }
 
+    console.log('Sending book order email with data:', { profileId, userEmail });
+
     // Send email using Loops
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
@@ -32,17 +34,20 @@ serve(async (req) => {
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
       body: JSON.stringify({
-        transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx', // You'll need to replace this with your actual Loops transactional ID
-        email: 'mia@narrastory.com,richard@narrastory.com',
+        transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx',
+        email: 'mia@narrastory.com',
+        // Only include the required data variables without any contact properties
         dataVariables: {
           userId: profileId,
-          userEmail: userEmail,
         },
       }),
     });
 
+    const responseData = await response.json();
+    console.log('Loops API response:', responseData);
+
     if (!response.ok) {
-      throw new Error(`Failed to send email: ${response.statusText}`);
+      throw new Error(`Loops API error: ${response.status} ${response.statusText} - ${JSON.stringify(responseData)}`);
     }
 
     console.log('Email sent successfully');
