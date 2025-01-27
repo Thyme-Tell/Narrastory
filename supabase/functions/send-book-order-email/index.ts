@@ -50,7 +50,7 @@ serve(async (req) => {
 
     console.log('Sending book order email with data:', { profileId, userEmail });
 
-    // Send email using Loops - Using minimal request structure
+    // Send email using Loops - Using the most basic request structure possible
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
@@ -59,7 +59,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
-        email: 'mia@narrastory.com'
+        email: userEmail
       }),
     });
 
@@ -71,7 +71,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: `Failed to send email: ${responseData.message}` 
+          error: `Failed to send email: ${responseData.message || 'Unknown error'}` 
         }), 
         { 
           status: 200,
@@ -80,7 +80,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Email sent successfully to: mia@narrastory.com');
+    console.log('Email sent successfully to:', userEmail);
 
     return new Response(
       JSON.stringify({ success: true }), 
