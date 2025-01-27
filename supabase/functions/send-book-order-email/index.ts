@@ -50,7 +50,7 @@ serve(async (req) => {
 
     console.log('Sending book order email with data:', { profileId, userEmail });
 
-    // Send email using Loops - Simplified request structure
+    // Send email using Loops - Removing contact property and using simple data structure
     const response = await fetch('https://app.loops.so/api/v1/transactional', {
       method: 'POST',
       headers: {
@@ -60,10 +60,8 @@ serve(async (req) => {
       body: JSON.stringify({
         transactionalId: 'cm6f2c1qz023i125irpb4aq2u',
         email: 'mia@narrastory.com',
-        data: {
-          userId: profileId,
-          userEmail: userEmail,
-        },
+        userId: profileId,
+        userEmail: userEmail
       }),
     });
 
@@ -75,7 +73,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: responseData.message || 'Failed to send email notification' 
+          error: `Loops API error: ${response.status} ${response.statusText} - ${JSON.stringify(responseData)}` 
         }), 
         { 
           status: 200,
