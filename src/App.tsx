@@ -21,7 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile/:id" element={<Profile />} />
-          <Route path="/storybooks/:id" element={<Storybooks />} />
+          <Route path="/storybooks" element={<Storybooks />} />
           <Route path="/shared/:token" element={<SharedStory />} />
         </Routes>
       </BrowserRouter>
