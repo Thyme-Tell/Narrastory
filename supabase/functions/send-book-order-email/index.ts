@@ -32,7 +32,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${LOOPS_API_KEY}`,
       },
       body: JSON.stringify({
-        transactionalId: 'clrz4aqxm00cjpj0fxvqxqxqx', // Replace with your actual Loops transactional ID
+        transactionalId: 'cm6f1iwei00hzr8a0co3pef2t',
         email: 'mia@narrastory.com,richard@narrastory.com',
         dataVariables: {
           userId: profileId,
