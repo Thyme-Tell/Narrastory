@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface BookProgressProps {
   profileId: string;
@@ -81,9 +82,21 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           </h2>
           <p className="text-atlantic mb-4 text-left">
             You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story. 
-            Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!
+            {currentPages < requiredPages && (
+              <> Just {remainingPages} more {remainingPages === 1 ? 'page' : 'pages'} until your book is ready to print!</>
+            )}
           </p>
           <Progress value={progressPercentage} className="h-2" />
+          {currentPages >= requiredPages && (
+            <div className="mt-4">
+              <Button 
+                className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+                size="lg"
+              >
+                Order Book
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <button 
