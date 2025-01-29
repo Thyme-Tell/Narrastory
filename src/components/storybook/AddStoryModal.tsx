@@ -35,11 +35,23 @@ export const AddStoryModal = ({ storyBookId, onSuccess }: AddStoryModalProps) =>
   });
 
   const handleAddStory = async (storyId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add stories",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { error } = await supabase
       .from("storybook_stories")
       .insert({
         storybook_id: storyBookId,
         story_id: storyId,
+        added_by: user.id,
       });
 
     if (error) {
