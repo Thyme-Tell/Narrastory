@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 import StoryEditForm from "./StoryEditForm";
 import StoryActions from "./StoryActions";
 import StoryContent from "./StoryContent";
@@ -29,6 +30,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleSave = async (title: string, content: string, date: Date) => {
     const { error } = await supabase
@@ -137,7 +139,28 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
       
       onUpdate();
     }
-    setShowShareDialog(true);
+
+    const shareUrl = `${window.location.origin}/stories/${story.share_token}`;
+
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({
+          title: story.title || "My Story",
+          text: "Check out my story on Narra",
+          url: shareUrl,
+        });
+        toast({
+          title: "Success",
+          description: "Story shared successfully",
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          setShowShareDialog(true);
+        }
+      }
+    } else {
+      setShowShareDialog(true);
+    }
   };
 
   const shareUrl = story.share_token 
