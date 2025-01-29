@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EditStoryBookModal } from "@/components/storybook/EditStoryBookModal";
+import { StoryList } from "@/components/storybook/StoryList";
 
 export default function StoryBook() {
   const { id } = useParams();
@@ -19,14 +20,6 @@ export default function StoryBook() {
             profiles!storybook_members_profile_id_fkey (
               first_name,
               last_name
-            )
-          ),
-          storybook_stories (
-            stories (
-              id,
-              title,
-              content,
-              created_at
             )
           )
         `)
@@ -60,19 +53,7 @@ export default function StoryBook() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <h2 className="text-2xl font-semibold mb-4">Stories</h2>
-          <div className="space-y-4">
-            {storybook.storybook_stories?.map((story) => (
-              <div key={story.stories.id} className="border rounded-lg p-4">
-                <h3 className="text-xl font-medium mb-2">
-                  {story.stories.title}
-                </h3>
-                <p className="text-gray-600 line-clamp-3">
-                  {story.stories.content}
-                </p>
-              </div>
-            ))}
-          </div>
+          <StoryList storyBookId={storybook.id} />
         </div>
 
         <div>
