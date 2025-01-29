@@ -1,26 +1,27 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { StoryBookList } from "@/components/storybook/StoryBookList";
 import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
-export default function StoryBooks() {
+const StoryBooks = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast({
           title: "Authentication required",
-          description: "Please sign in to view your storybooks",
+          description: "Please sign in to view storybooks",
           variant: "destructive",
         });
-        navigate("/signin");
+        navigate("/sign-in");
       }
     };
     checkAuth();
@@ -30,28 +31,15 @@ export default function StoryBooks() {
     queryKey: ["storybooks"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) {
-        throw new Error("Not authenticated");
+      if (!session) {
+        throw new Error("No session");
       }
-
       const { data, error } = await supabase
         .from("storybooks")
-        .select(`
-          id,
-          title,
-          description,
-          created_at,
-          storybook_members!inner (
-            role,
-            profile_id
-          )
-        `)
-        .eq("storybook_members.profile_id", session.user.id);
-
+        .select("*");
       if (error) throw error;
       return data;
     },
-    enabled: true, // The query will automatically wait for auth state
   });
 
   if (error) {
@@ -63,13 +51,19 @@ export default function StoryBooks() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My Storybooks</h1>
-        <CreateStoryBookModal onSuccess={() => refetch()} />
+        <h1 className="text-3xl font-bold">Your Storybooks</h1>
+        <CreateStoryBookModal onSuccess={() => refetch()}>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Storybook
+          </Button>
+        </CreateStoryBookModal>
       </div>
-
       <StoryBookList storybooks={storybooks || []} isLoading={isLoading} />
     </div>
   );
-}
+};
+
+export default StoryBooks;
