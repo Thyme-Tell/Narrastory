@@ -1,11 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { EditStoryBookModal } from "@/components/storybook/EditStoryBookModal";
 
 export default function StoryBook() {
   const { id } = useParams();
 
-  const { data: storybook, isLoading } = useQuery({
+  const { data: storybook, isLoading, refetch } = useQuery({
     queryKey: ["storybook", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -15,7 +16,7 @@ export default function StoryBook() {
           storybook_members!inner (
             profile_id,
             role,
-            profiles (
+            profiles:profile_id (
               first_name,
               last_name
             )
@@ -30,7 +31,7 @@ export default function StoryBook() {
           )
         `)
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -38,19 +39,22 @@ export default function StoryBook() {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="container mx-auto p-6">Loading...</div>;
   }
 
   if (!storybook) {
-    return <div>Storybook not found</div>;
+    return <div className="container mx-auto p-6">Storybook not found</div>;
   }
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{storybook.title}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">{storybook.title}</h1>
+          <EditStoryBookModal storybook={storybook} onSuccess={refetch} />
+        </div>
         {storybook.description && (
-          <p className="text-gray-600">{storybook.description}</p>
+          <p className="text-gray-600 mt-2">{storybook.description}</p>
         )}
       </div>
 
