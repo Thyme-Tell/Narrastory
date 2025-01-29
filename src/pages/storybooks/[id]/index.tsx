@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditStoryBookModal } from "@/components/storybook/EditStoryBookModal";
 import { StoryList } from "@/components/storybook/StoryList";
 import { MemberManagement } from "@/components/storybook/MemberManagement";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function StoryBook() {
   const { id } = useParams();
@@ -45,7 +48,15 @@ export default function StoryBook() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{storybook.title}</h1>
-          <EditStoryBookModal storybook={storybook} onSuccess={refetch} />
+          <div className="flex items-center gap-2">
+            <EditStoryBookModal storybook={storybook} onSuccess={refetch} />
+            <Button variant="ghost" size="icon" asChild>
+              <Link to={`/storybooks/${storybook.id}/settings`}>
+                <Settings className="h-4 w-4" />
+                <span className="sr-only">Settings</span>
+              </Link>
+            </Button>
+          </div>
         </div>
         {storybook.description && (
           <p className="text-gray-600 mt-2">{storybook.description}</p>
