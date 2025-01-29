@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Cookies from "js-cookie";
 
 const Storybooks = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
+  const profileId = searchParams.get('profile');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -16,11 +18,18 @@ const Storybooks = () => {
         navigate("/sign-in");
         return;
       }
+
+      if (!profileId) {
+        console.error("No profile ID provided");
+        navigate("/sign-in");
+        return;
+      }
+
       setIsLoading(false);
     };
 
     checkAuth();
-  }, [navigate]);
+  }, [navigate, profileId]);
 
   if (isLoading) {
     return (
