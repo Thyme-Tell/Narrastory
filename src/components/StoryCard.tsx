@@ -118,10 +118,12 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
 
   const handleShare = async () => {
     if (!story.share_token) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("stories")
         .update({ share_token: crypto.randomUUID() })
-        .eq("id", story.id);
+        .eq("id", story.id)
+        .select('share_token')
+        .single();
 
       if (error) {
         toast({
@@ -131,6 +133,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
         });
         return;
       }
+      
       onUpdate();
     }
     setShowShareDialog(true);
@@ -141,11 +144,26 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     : null;
 
   const copyShareLink = async () => {
-    if (shareUrl) {
+    if (!shareUrl) {
+      toast({
+        title: "Error",
+        description: "Share link not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
       await navigator.clipboard.writeText(shareUrl);
       toast({
         title: "Success",
         description: "Share link copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link to clipboard",
+        variant: "destructive",
       });
     }
   };
