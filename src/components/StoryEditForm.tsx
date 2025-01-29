@@ -40,7 +40,7 @@ const StoryEditForm = ({
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full min-h-[calc(100vh-200px)] text-left"
+            className="w-full h-[calc(100vh-280px)] text-left"
           />
           <Popover>
             <PopoverTrigger asChild>
