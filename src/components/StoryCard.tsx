@@ -44,7 +44,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     : null;
 
   return (
-    <div className="p-4 pb-6 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2">
+    <div className="p-4 pb-12 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2">
       {isEditing ? (
         <StoryEditForm
           initialTitle={story.title || ""}
