@@ -17,7 +17,7 @@ export function AppSidebar() {
     {
       title: "Sign In",
       icon: LogIn,
-      to: "/signin",
+      to: "/sign-in",
     },
     {
       title: "Profile",
