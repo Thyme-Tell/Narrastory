@@ -11,16 +11,19 @@ const Storybooks = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const profileAuthorized = Cookies.get("profile_authorized");
+      // Check for either a valid session OR a profile authorization cookie
       const { data: { session } } = await supabase.auth.getSession();
+      const profileAuthorized = Cookies.get("profile_authorized");
 
-      if (!session && !profileAuthorized) {
+      if (!profileId) {
+        console.error("No profile ID provided");
         navigate("/sign-in");
         return;
       }
 
-      if (!profileId) {
-        console.error("No profile ID provided");
+      // Allow access if either the user is logged in OR has a valid profile authorization
+      if (!session && !profileAuthorized) {
+        console.log("No valid session or profile authorization found");
         navigate("/sign-in");
         return;
       }
