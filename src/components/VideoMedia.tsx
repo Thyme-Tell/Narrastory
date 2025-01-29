@@ -26,9 +26,10 @@ interface VideoMediaProps {
   };
   onCaptionUpdate: (mediaId: string, caption: string) => void;
   onDelete?: () => void;
+  onVideoClick?: (url: string) => void;
 }
 
-const VideoMedia = ({ media, onCaptionUpdate, onDelete }: VideoMediaProps) => {
+const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMediaProps) => {
   const { toast } = useToast();
   const { data } = supabase.storage
     .from("story-media")
@@ -81,7 +82,10 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete }: VideoMediaProps) => {
   return (
     <div className="space-y-2">
       <div className="relative">
-        <div className="aspect-square rounded-lg overflow-hidden">
+        <div 
+          className="aspect-square rounded-lg overflow-hidden cursor-pointer"
+          onClick={() => onVideoClick?.(data.publicUrl)}
+        >
           <Plyr
             source={{
               type: "video",

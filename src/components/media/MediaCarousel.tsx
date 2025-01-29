@@ -8,6 +8,11 @@ import {
 import ImageMedia from "@/components/ImageMedia";
 import VideoMedia from "@/components/VideoMedia";
 import { StoryMediaItem } from "@/types/media";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 interface MediaCarouselProps {
   mediaItems: StoryMediaItem[];
@@ -16,11 +21,12 @@ interface MediaCarouselProps {
 }
 
 const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselProps) => {
+  const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+
   if (!mediaItems.length) return null;
 
-  // Placeholder functions for required ImageMedia props
   const handleImageClick = (url: string) => {
-    console.log("Image clicked:", url);
+    setSelectedMedia(url);
   };
 
   const handleStartCrop = (url: string, mediaId: string) => {
@@ -65,6 +71,18 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
+
+      <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+          {selectedMedia && (
+            <img
+              src={selectedMedia}
+              alt="Enlarged view"
+              className="w-full h-full object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
