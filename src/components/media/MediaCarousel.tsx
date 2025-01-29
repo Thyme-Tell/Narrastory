@@ -13,6 +13,9 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
+import ImageCropper from "@/components/ImageCropper";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface MediaCarouselProps {
   mediaItems: StoryMediaItem[];
@@ -22,6 +25,8 @@ interface MediaCarouselProps {
 
 const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselProps) => {
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+  const [cropData, setCropData] = useState<{ url: string; mediaId: string } | null>(null);
+  const { toast } = useToast();
 
   if (!mediaItems.length) return null;
 
@@ -30,7 +35,54 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
   };
 
   const handleStartCrop = (url: string, mediaId: string) => {
-    console.log("Start crop:", url, mediaId);
+    setCropData({ url, mediaId });
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!cropData) return;
+
+    try {
+      // Upload the cropped image
+      const fileExt = 'jpeg';
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('story-media')
+        .upload(filePath, croppedBlob, {
+          contentType: 'image/jpeg',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Update the media record with the new file path
+      const { error: updateError } = await supabase
+        .from('story_media')
+        .update({ file_path: filePath })
+        .eq('id', cropData.mediaId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Image cropped successfully",
+      });
+
+      // Close the crop dialog
+      setCropData(null);
+
+      // Trigger a refresh if onDelete is provided (it's used as a refetch trigger)
+      if (onDelete) {
+        onDelete();
+      }
+    } catch (error) {
+      console.error('Error updating cropped image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update cropped image",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -89,6 +141,15 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
           )}
         </DialogContent>
       </Dialog>
+
+      {cropData && (
+        <ImageCropper
+          imageUrl={cropData.url}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setCropData(null)}
+          open={!!cropData}
+        />
+      )}
     </div>
   );
 };
