@@ -16,6 +16,19 @@ import {
 import ImageCropper from "@/components/ImageCropper";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Crop, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface MediaCarouselProps {
   mediaItems: StoryMediaItem[];
@@ -25,17 +38,22 @@ interface MediaCarouselProps {
 
 const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselProps) => {
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+  const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const [cropData, setCropData] = useState<{ url: string; mediaId: string } | null>(null);
   const { toast } = useToast();
 
   if (!mediaItems.length) return null;
 
-  const handleImageClick = (url: string) => {
+  const handleImageClick = (url: string, mediaId: string) => {
     setSelectedMedia(url);
+    setSelectedMediaId(mediaId);
   };
 
-  const handleStartCrop = (url: string, mediaId: string) => {
-    setCropData({ url, mediaId });
+  const handleStartCrop = () => {
+    if (selectedMedia && selectedMediaId) {
+      setCropData({ url: selectedMedia, mediaId: selectedMediaId });
+      setSelectedMedia(null); // Close the viewer modal
+    }
   };
 
   const handleCropComplete = async (croppedBlob: Blob) => {
@@ -85,6 +103,48 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
     }
   };
 
+  const handleDelete = async () => {
+    if (!selectedMediaId) return;
+
+    try {
+      const mediaToDelete = mediaItems.find(m => m.id === selectedMediaId);
+      if (!mediaToDelete) return;
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from("story-media")
+        .remove([mediaToDelete.file_path]);
+
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from("story_media")
+        .delete()
+        .eq("id", selectedMediaId);
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Success",
+        description: "Media deleted successfully",
+      });
+
+      setSelectedMedia(null); // Close the viewer modal
+
+      if (onDelete) {
+        onDelete();
+      }
+    } catch (error) {
+      console.error("Error deleting media:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete media",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="mb-8">
       <div className="text-sm text-muted-foreground mb-2 text-center">
@@ -106,8 +166,8 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
                     media={media}
                     onCaptionUpdate={onCaptionUpdate}
                     onDelete={onDelete}
-                    onImageClick={handleImageClick}
-                    onStartCrop={handleStartCrop}
+                    onImageClick={(url) => handleImageClick(url, media.id)}
+                    onStartCrop={(url) => handleImageClick(url, media.id)}
                   />
                 </CarouselItem>
               );
@@ -137,11 +197,49 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
       <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>
         <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
           {selectedMedia && (
-            <img
-              src={selectedMedia}
-              alt="Enlarged view"
-              className="w-full h-full object-contain"
-            />
+            <div className="relative">
+              <img
+                src={selectedMedia}
+                alt="Enlarged view"
+                className="w-full h-full object-contain"
+              />
+              <div className="absolute top-2 right-2 flex gap-2">
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  onClick={handleStartCrop}
+                >
+                  <Crop className="h-4 w-4" />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete this media.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
