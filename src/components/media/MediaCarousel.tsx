@@ -126,8 +126,12 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
             return null;
           })}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        {mediaItems.length > 1 && (
+          <>
+            <CarouselPrevious />
+            <CarouselNext />
+          </>
+        )}
       </Carousel>
 
       <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>
