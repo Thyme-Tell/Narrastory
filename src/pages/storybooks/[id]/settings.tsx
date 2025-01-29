@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { MemberManagement } from "@/components/storybook/MemberManagement";
 import { EditStoryBookModal } from "@/components/storybook/EditStoryBookModal";
+import { withStoryBookAccess } from "@/components/storybook/withStoryBookAccess";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,9 +18,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
 
-export default function StoryBookSettings() {
+function StoryBookSettings() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -27,6 +28,8 @@ export default function StoryBookSettings() {
   const { data: storybook, isLoading } = useQuery({
     queryKey: ["storybook", id],
     queryFn: async () => {
+      if (!id) throw new Error("No storybook ID provided");
+
       const { data, error } = await supabase
         .from("storybooks")
         .select(`
@@ -36,8 +39,7 @@ export default function StoryBookSettings() {
             role,
             profiles!storybook_members_profile_id_fkey (
               first_name,
-              last_name,
-              email
+              last_name
             )
           )
         `)
@@ -51,6 +53,8 @@ export default function StoryBookSettings() {
 
   const handleDelete = async () => {
     try {
+      if (!id) return;
+
       const { error } = await supabase
         .from("storybooks")
         .delete()
@@ -73,7 +77,11 @@ export default function StoryBookSettings() {
   };
 
   if (isLoading) {
-    return <div className="container mx-auto p-6">Loading...</div>;
+    return (
+      <div className="container mx-auto p-6 flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
   }
 
   if (!storybook) {
@@ -90,7 +98,6 @@ export default function StoryBookSettings() {
       </div>
 
       <div className="grid gap-8">
-        {/* Basic Information */}
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
@@ -109,7 +116,6 @@ export default function StoryBookSettings() {
           </CardContent>
         </Card>
 
-        {/* Member Management */}
         <Card>
           <CardHeader>
             <CardTitle>Member Management</CardTitle>
@@ -122,7 +128,6 @@ export default function StoryBookSettings() {
           </CardContent>
         </Card>
 
-        {/* Danger Zone */}
         <Card className="border-red-200">
           <CardHeader>
             <CardTitle className="text-red-600">Danger Zone</CardTitle>
@@ -157,3 +162,5 @@ export default function StoryBookSettings() {
     </div>
   );
 }
+
+export default withStoryBookAccess(StoryBookSettings);
