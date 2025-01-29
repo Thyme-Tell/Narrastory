@@ -34,11 +34,11 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
   };
 
   return (
-    <div>
+    <div className="mb-8">
       <div className="text-sm text-muted-foreground mb-2 text-center">
         {mediaItems.length} {mediaItems.length === 1 ? 'item' : 'items'}
       </div>
-      <Carousel className="w-[65%] mx-auto">
+      <Carousel className="w-[75%] mx-auto">
         <CarouselContent>
           {mediaItems.map((media) => {
             if (media.content_type.startsWith("image/")) {
