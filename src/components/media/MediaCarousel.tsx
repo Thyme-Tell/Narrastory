@@ -4,6 +4,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import ImageMedia from "@/components/ImageMedia";
 import VideoMedia from "@/components/VideoMedia";
@@ -29,7 +30,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useCarousel } from "@/components/ui/carousel";
 
 interface MediaCarouselProps {
   mediaItems: StoryMediaItem[];
@@ -46,7 +46,7 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(({ mediaI
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const [cropData, setCropData] = useState<{ url: string; mediaId: string } | null>(null);
   const { toast } = useToast();
-  const [carouselApi, setCarouselApi] = useState<any>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
 
   useImperativeHandle(ref, () => ({
     scrollToIndex: (index: number) => {
@@ -169,8 +169,8 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(({ mediaI
         opts={{
           align: "start",
           containScroll: false,
-          onInit: (api) => setCarouselApi(api),
         }}
+        setApi={setCarouselApi}
       >
         <CarouselContent className="-ml-2">
           {mediaItems.map((media) => {
