@@ -18,6 +18,15 @@ interface MediaCarouselProps {
 const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselProps) => {
   if (!mediaItems.length) return null;
 
+  // Placeholder functions for required ImageMedia props
+  const handleImageClick = (url: string) => {
+    console.log("Image clicked:", url);
+  };
+
+  const handleStartCrop = (url: string, mediaId: string) => {
+    console.log("Start crop:", url, mediaId);
+  };
+
   return (
     <div>
       <div className="text-sm text-muted-foreground mb-2 text-center">
@@ -33,6 +42,8 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
                     media={media}
                     onCaptionUpdate={onCaptionUpdate}
                     onDelete={onDelete}
+                    onImageClick={handleImageClick}
+                    onStartCrop={handleStartCrop}
                   />
                 </CarouselItem>
               );
