@@ -83,7 +83,7 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
     <div className="space-y-2">
       <div className="relative">
         <div 
-          className="aspect-square rounded-lg overflow-hidden cursor-pointer"
+          className="rounded-lg overflow-hidden cursor-pointer"
           onClick={() => onVideoClick?.(data.publicUrl)}
         >
           <Plyr

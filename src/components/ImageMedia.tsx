@@ -75,7 +75,7 @@ const ImageMedia = ({ media, onImageClick, onStartCrop, onCaptionUpdate, onDelet
         <img
           src={data.publicUrl}
           alt={media.file_name}
-          className="rounded-lg object-cover aspect-square w-full cursor-pointer hover:opacity-90 transition-opacity"
+          className="rounded-lg object-cover w-full cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => onImageClick(data.publicUrl)}
           loading="lazy"
         />
