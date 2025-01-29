@@ -72,13 +72,15 @@ const ImageMedia = ({ media, onImageClick, onStartCrop, onCaptionUpdate, onDelet
   return (
     <div className="space-y-2">
       <div className="relative">
-        <img
-          src={data.publicUrl}
-          alt={media.file_name}
-          className="rounded-lg object-cover w-full cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={() => onImageClick(data.publicUrl)}
-          loading="lazy"
-        />
+        <div className="max-h-[550px] overflow-hidden rounded-lg">
+          <img
+            src={data.publicUrl}
+            alt={media.file_name}
+            className="w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => onImageClick(data.publicUrl)}
+            loading="lazy"
+          />
+        </div>
         <div className="absolute top-2 right-2 flex gap-2">
           <Button
             size="icon"
