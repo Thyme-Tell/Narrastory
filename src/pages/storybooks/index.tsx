@@ -26,7 +26,7 @@ export default function StoryBooks() {
     checkAuth();
   }, [navigate, toast]);
 
-  const { data: storybooks, isLoading, error } = useQuery({
+  const { data: storybooks, isLoading, error, refetch } = useQuery({
     queryKey: ["storybooks"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
