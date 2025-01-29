@@ -38,12 +38,18 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
       <div className="text-sm text-muted-foreground mb-2 text-center">
         {mediaItems.length} {mediaItems.length === 1 ? 'item' : 'items'}
       </div>
-      <Carousel className="w-[75%] mx-auto">
-        <CarouselContent>
+      <Carousel 
+        className="w-[75%] mx-auto"
+        opts={{
+          align: "start",
+          containScroll: false,
+        }}
+      >
+        <CarouselContent className="-ml-2">
           {mediaItems.map((media) => {
             if (media.content_type.startsWith("image/")) {
               return (
-                <CarouselItem key={media.id}>
+                <CarouselItem key={media.id} className="pl-2 basis-[95%]">
                   <ImageMedia
                     media={media}
                     onCaptionUpdate={onCaptionUpdate}
@@ -56,7 +62,7 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
             }
             if (media.content_type.startsWith("video/")) {
               return (
-                <CarouselItem key={media.id}>
+                <CarouselItem key={media.id} className="pl-2 basis-[95%]">
                   <VideoMedia
                     media={media}
                     onCaptionUpdate={onCaptionUpdate}

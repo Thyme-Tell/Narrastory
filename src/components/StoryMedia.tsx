@@ -18,7 +18,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
         .from("story_media")
         .select("*")
         .eq("story_id", storyId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: true }); // Changed to ascending order
 
       if (error) {
         console.error("Error fetching media:", error);
