@@ -16,7 +16,7 @@ export default function StoryBook() {
           storybook_members!inner (
             profile_id,
             role,
-            profiles:profile_id (
+            profiles!storybook_members_profile_id_fkey (
               first_name,
               last_name
             )
