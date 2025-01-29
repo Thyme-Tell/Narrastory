@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import BookProgress from "@/components/BookProgress";
-import { Menu } from "lucide-react";
+import { Menu, BookOpen } from "lucide-react";
 import { useEffect } from "react";
 import {
   DropdownMenu,
@@ -125,6 +125,12 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem asChild>
+              <Link to="/storybooks" className="flex items-center">
+                <BookOpen className="mr-2 h-4 w-4" />
+                Storybooks
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
             </DropdownMenuItem>
