@@ -9,12 +9,20 @@ interface StoryContentProps {
 }
 
 const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) => {
+  const paragraphs = content.split('\n').filter(p => p.trim() !== '');
+
   return (
     <>
       {title && (
         <h3 className="font-semibold text-lg text-left">{title}</h3>
       )}
-      <p className="whitespace-pre-wrap text-atlantic text-left space-y-[10px]">{content}</p>
+      <div className="text-atlantic text-left">
+        {paragraphs.map((paragraph, index) => (
+          <p key={index} className="whitespace-pre-wrap mb-[10px]">
+            {paragraph}
+          </p>
+        ))}
+      </div>
       <div className="mt-[30px] mb-[20px]">
         <StoryMediaUpload storyId={storyId} onUploadComplete={onUpdate} />
       </div>
