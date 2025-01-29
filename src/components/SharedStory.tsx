@@ -13,7 +13,10 @@ const SharedStory = () => {
     const fetchStory = async () => {
       const { data, error } = await supabase
         .from("stories")
-        .select("*")
+        .select(`
+          *,
+          profile:profiles(first_name, last_name)
+        `)
         .eq("share_token", shareToken)
         .single();
 
@@ -38,6 +41,11 @@ const SharedStory = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
+      {story.profile && (
+        <p className="text-muted-foreground mb-4">
+          Shared by {story.profile.first_name} {story.profile.last_name}
+        </p>
+      )}
       <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm">
         <p className="text-sm text-muted-foreground mb-4">
           {new Date(story.created_at).toLocaleDateString()}
