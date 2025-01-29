@@ -32,22 +32,22 @@ const StoryActions = ({ onEdit, onDelete, onShare }: StoryActionsProps) => {
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onShare}>
-          <Share2 className="h-4 w-4 mr-2" />
+      <DropdownMenuContent align="end" className="min-w-[180px]">
+        <DropdownMenuItem onClick={onShare} className="py-3 text-base">
+          <Share2 className="h-5 w-5 mr-3" />
           Share
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onEdit}>
-          <Pencil className="h-4 w-4 mr-2" />
+        <DropdownMenuItem onClick={onEdit} className="py-3 text-base">
+          <Pencil className="h-5 w-5 mr-3" />
           Edit
         </DropdownMenuItem>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <DropdownMenuItem
               onSelect={(e) => e.preventDefault()}
-              className="text-destructive"
+              className="text-destructive py-3 text-base"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-5 w-5 mr-3" />
               Delete
             </DropdownMenuItem>
           </AlertDialogTrigger>
