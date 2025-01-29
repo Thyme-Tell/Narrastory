@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, PlusCircle, MinusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import {
   Dialog,
   DialogContent,
@@ -53,13 +54,15 @@ const Storybooks = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (!session || error) {
+      const profileAuthorized = Cookies.get('profile_authorized') === 'true';
+      
+      if ((!session && !profileAuthorized) || error) {
         toast({
           title: "Authentication required",
           description: "Please sign in to access storybooks",
           variant: "destructive",
         });
-        navigate("/signin");
+        navigate("/sign-in");
       }
     };
     checkAuth();
