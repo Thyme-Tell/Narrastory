@@ -19,6 +19,11 @@ const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
