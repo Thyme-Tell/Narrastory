@@ -101,7 +101,7 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
           {mediaItems.map((media) => {
             if (media.content_type.startsWith("image/")) {
               return (
-                <CarouselItem key={media.id} className="pl-2 basis-[95%]">
+                <CarouselItem key={media.id} className="pl-2 basis-[85%]">
                   <ImageMedia
                     media={media}
                     onCaptionUpdate={onCaptionUpdate}
@@ -114,7 +114,7 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
             }
             if (media.content_type.startsWith("video/")) {
               return (
-                <CarouselItem key={media.id} className="pl-2 basis-[95%]">
+                <CarouselItem key={media.id} className="pl-2 basis-[85%]">
                   <VideoMedia
                     media={media}
                     onCaptionUpdate={onCaptionUpdate}
