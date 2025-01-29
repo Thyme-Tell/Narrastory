@@ -27,6 +27,7 @@ interface StoryCardProps {
 const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
   const handleSave = async (title: string, content: string, date: Date) => {
@@ -155,10 +156,16 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
 
     try {
       await navigator.clipboard.writeText(shareUrl);
+      setIsCopied(true);
       toast({
         title: "Success",
         description: "Share link copied to clipboard",
       });
+      
+      // Reset the button text after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
     } catch (err) {
       toast({
         title: "Error",
@@ -212,7 +219,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
                 className="flex-1"
               />
               <Button onClick={copyShareLink}>
-                Copy
+                {isCopied ? "Copied" : "Copy"}
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
