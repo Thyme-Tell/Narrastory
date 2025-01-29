@@ -195,7 +195,7 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
       </Carousel>
 
       <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0" hideCloseButton>
           {selectedMedia && (
             <div className="relative">
               <img
