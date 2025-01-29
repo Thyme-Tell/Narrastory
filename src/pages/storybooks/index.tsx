@@ -7,7 +7,11 @@ export default function StoryBooks() {
   const { data: storybooks, isLoading, refetch } = useQuery({
     queryKey: ["storybooks"],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
       const { data, error } = await supabase
         .from("storybooks")
         .select(`
@@ -20,7 +24,7 @@ export default function StoryBooks() {
             profile_id
           )
         `)
-        .eq("storybook_members.profile_id", user.user?.id);
+        .eq("storybook_members.profile_id", userData.user.id);
 
       if (error) throw error;
       return data;

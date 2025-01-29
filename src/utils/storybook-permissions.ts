@@ -5,7 +5,8 @@ type StoryBookRole = Database["public"]["Enums"]["storybook_role"];
 
 export async function isStoryBookOwner(userId: string, storyBookId: string): Promise<boolean> {
   const { data } = await supabase
-    .from(".select("role")
+    .from("storybook_members")
+    .select("role")
     .eq("storybook_id", storyBookId)
     .eq("profile_id", userId)
     .single();
