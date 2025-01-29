@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import SignIn from "./pages/SignIn";
@@ -12,7 +12,6 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/signin" element={<Navigate to="/sign-in" replace />} />
         <Route path="/storybooks" element={<Storybooks />} />
         <Route path="/stories/:shareToken" element={<SharedStory />} />
       </Routes>

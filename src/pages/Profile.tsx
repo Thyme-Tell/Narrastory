@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import BookProgress from "@/components/BookProgress";
-import { Menu, BookOpen } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
   DropdownMenu,
@@ -125,14 +125,8 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link to={`/storybooks?profile=${id}`} className="flex items-center">
-                <BookOpen className="mr-2 h-4 w-4" />
-                Storybooks
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
-              Not {profile?.first_name}? Log Out
+              Not {profile.first_name}? Log Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -141,9 +135,9 @@ const Profile = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <BookProgress profileId={id} />
           <ProfileHeader 
-            firstName={profile?.first_name} 
-            lastName={profile?.last_name}
-            profileId={profile?.id}
+            firstName={profile.first_name} 
+            lastName={profile.last_name}
+            profileId={profile.id}
             onUpdate={refetchStories}
           />
           
