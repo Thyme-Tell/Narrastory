@@ -3,4 +3,5 @@ export interface StoryMediaItem {
   file_path: string;
   content_type: string;
   caption: string | null;
+  file_name: string;
 }
