@@ -44,7 +44,7 @@ const Profile = () => {
       
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
-        .select("id, title, content, created_at")
+        .select("id, title, content, created_at, share_token")
         .eq("profile_id", id)
         .order("created_at", { ascending: false });
 
