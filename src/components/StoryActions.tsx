@@ -1,4 +1,4 @@
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,9 +21,10 @@ import {
 interface StoryActionsProps {
   onEdit: () => void;
   onDelete: () => void;
+  onShare: () => void;
 }
 
-const StoryActions = ({ onEdit, onDelete }: StoryActionsProps) => {
+const StoryActions = ({ onEdit, onDelete, onShare }: StoryActionsProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -32,6 +33,10 @@ const StoryActions = ({ onEdit, onDelete }: StoryActionsProps) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={onShare}>
+          <Share2 className="h-4 w-4 mr-2" />
+          Share
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={onEdit}>
           <Pencil className="h-4 w-4 mr-2" />
           Edit

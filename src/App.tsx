@@ -1,24 +1,21 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Index from "@/pages/Index";
-import SignIn from "@/pages/SignIn";
-import Profile from "@/pages/Profile";
-import Storybooks from "@/pages/Storybooks";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as SonnerToaster } from "@/components/ui/sonner";
-import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Profile from "./pages/Profile";
+import SignIn from "./pages/SignIn";
+import Storybooks from "./pages/Storybooks";
+import SharedStory from "./components/SharedStory";
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/signin" element={<SignIn />} />
         <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/sign-in" element={<SignIn />} />
         <Route path="/storybooks" element={<Storybooks />} />
+        <Route path="/stories/:shareToken" element={<SharedStory />} />
       </Routes>
-      <Toaster />
-      <SonnerToaster />
-    </Router>
+    </BrowserRouter>
   );
 }
 

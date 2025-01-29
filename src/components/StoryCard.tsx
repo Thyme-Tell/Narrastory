@@ -4,6 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import StoryEditForm from "./StoryEditForm";
 import StoryActions from "./StoryActions";
 import StoryContent from "./StoryContent";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface StoryCardProps {
   story: {
@@ -11,12 +19,14 @@ interface StoryCardProps {
     title: string | null;
     content: string;
     created_at: string;
+    share_token: string | null;
   };
   onUpdate: () => void;
 }
 
 const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const { toast } = useToast();
 
   const handleSave = async (title: string, content: string, date: Date) => {
@@ -106,6 +116,40 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     onUpdate();
   };
 
+  const handleShare = async () => {
+    if (!story.share_token) {
+      const { error } = await supabase
+        .from("stories")
+        .update({ share_token: crypto.randomUUID() })
+        .eq("id", story.id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to generate share link",
+          variant: "destructive",
+        });
+        return;
+      }
+      onUpdate();
+    }
+    setShowShareDialog(true);
+  };
+
+  const shareUrl = story.share_token 
+    ? `${window.location.origin}/stories/${story.share_token}`
+    : null;
+
+  const copyShareLink = async () => {
+    if (shareUrl) {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Success",
+        description: "Share link copied to clipboard",
+      });
+    }
+  };
+
   return (
     <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm space-y-2">
       {isEditing ? (
@@ -125,6 +169,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             <StoryActions
               onEdit={() => setIsEditing(true)}
               onDelete={handleDelete}
+              onShare={handleShare}
             />
           </div>
           <StoryContent
@@ -135,6 +180,29 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
           />
         </>
       )}
+
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Story</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex space-x-2">
+              <Input
+                value={shareUrl || ""}
+                readOnly
+                className="flex-1"
+              />
+              <Button onClick={copyShareLink}>
+                Copy
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Anyone with this link can view this story
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
