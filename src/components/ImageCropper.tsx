@@ -81,12 +81,11 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
 
   return (
     <Dialog open={open} onOpenChange={() => onCancel()}>
-      <DialogContent className="max-w-[90vw] w-fit">
+      <DialogContent className="max-w-[90vw] w-fit p-6" hideCloseButton>
         <div className="space-y-4">
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
-            aspect={1}
           >
             <img
               ref={imageRef}
