@@ -29,7 +29,7 @@ const StoryEditForm = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-      <div className="fixed inset-x-0 top-0 z-50 bg-background p-6 shadow-lg h-screen overflow-y-auto">
+      <div className="fixed inset-x-0 top-0 z-50 bg-background p-6 shadow-lg h-[80vh] overflow-y-auto">
         <div className="space-y-4 max-w-2xl mx-auto">
           <Input
             value={title}
@@ -40,7 +40,7 @@ const StoryEditForm = ({
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full min-h-[calc(100vh-200px)] text-left"
+            className="w-full max-h-[350px] min-h-[200px] text-left"
           />
           <Popover>
             <PopoverTrigger asChild>
