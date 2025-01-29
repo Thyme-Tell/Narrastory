@@ -5,7 +5,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import ImageMedia from "./ImageMedia";
+import ImageMedia from "@/components/ImageMedia";
 import VideoMedia from "@/components/VideoMedia";
 import { StoryMediaItem } from "@/types/media";
 
