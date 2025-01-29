@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import MediaCarousel from "./media/MediaCarousel";
+import { useToast } from "@/hooks/use-toast";
+import MediaCarousel, { MediaCarouselRef } from "./media/MediaCarousel";
 import { StoryMediaItem } from "@/types/media";
+import { useRef } from "react";
 
 interface StoryMediaProps {
   storyId: string;
@@ -10,6 +11,7 @@ interface StoryMediaProps {
 
 const StoryMedia = ({ storyId }: StoryMediaProps) => {
   const { toast } = useToast();
+  const carouselRef = useRef<MediaCarouselRef>(null);
 
   const { data: mediaItems = [], refetch } = useQuery({
     queryKey: ["story-media", storyId],
@@ -18,7 +20,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
         .from("story_media")
         .select("*")
         .eq("story_id", storyId)
-        .order("created_at", { ascending: true }); // Changed to ascending order
+        .order("created_at", { ascending: true });
 
       if (error) {
         console.error("Error fetching media:", error);
@@ -57,11 +59,21 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
     refetch();
   };
 
+  const handleRefetch = () => {
+    refetch().then(() => {
+      // After refetching, scroll to the last item
+      if (carouselRef.current && mediaItems.length > 0) {
+        carouselRef.current.scrollToIndex(mediaItems.length);
+      }
+    });
+  };
+
   return (
     <MediaCarousel
+      ref={carouselRef}
       mediaItems={mediaItems}
       onCaptionUpdate={handleCaptionUpdate}
-      onDelete={refetch}
+      onDelete={handleRefetch}
     />
   );
 };

@@ -8,7 +8,7 @@ import {
 import ImageMedia from "@/components/ImageMedia";
 import VideoMedia from "@/components/VideoMedia";
 import { StoryMediaItem } from "@/types/media";
-import { useState } from "react";
+import { useState, useImperativeHandle, forwardRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useCarousel } from "@/components/ui/carousel";
 
 interface MediaCarouselProps {
   mediaItems: StoryMediaItem[];
@@ -36,13 +37,24 @@ interface MediaCarouselProps {
   onDelete?: () => void;
 }
 
-const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselProps) => {
+export interface MediaCarouselRef {
+  scrollToIndex: (index: number) => void;
+}
+
+const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(({ mediaItems, onCaptionUpdate, onDelete }, ref) => {
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const [cropData, setCropData] = useState<{ url: string; mediaId: string } | null>(null);
   const { toast } = useToast();
+  const [carouselApi, setCarouselApi] = useState<any>(null);
 
-  if (!mediaItems.length) return null;
+  useImperativeHandle(ref, () => ({
+    scrollToIndex: (index: number) => {
+      if (carouselApi) {
+        carouselApi.scrollTo(index);
+      }
+    }
+  }));
 
   const handleImageClick = (url: string, mediaId: string) => {
     setSelectedMedia(url);
@@ -145,6 +157,8 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
     }
   };
 
+  if (!mediaItems.length) return null;
+
   return (
     <div className="mb-8">
       <div className="text-sm text-muted-foreground mb-2 text-center">
@@ -155,6 +169,7 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
         opts={{
           align: "start",
           containScroll: false,
+          onInit: (api) => setCarouselApi(api),
         }}
       >
         <CarouselContent className="-ml-2">
@@ -261,6 +276,8 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
       )}
     </div>
   );
-};
+});
+
+MediaCarousel.displayName = "MediaCarousel";
 
 export default MediaCarousel;
