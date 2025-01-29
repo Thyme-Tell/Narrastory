@@ -55,7 +55,7 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       const { data: newMedia, error: dbError } = await supabase
         .from('story_media')
         .insert({
-          story_id: storyId,
+          story_id: storyId, // Ensure we're using the correct storyId
           file_path: filePath,
           file_name: file.name,
           content_type: file.type,
@@ -71,8 +71,8 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       // Get the current media items from the cache
       const previousData = queryClient.getQueryData<StoryMedia[]>(["story-media", storyId]) || [];
 
-      // Update the cache with the new media item appended to the end
-      queryClient.setQueryData<StoryMedia[]>(["story-media", storyId], [...previousData, newMedia]);
+      // Update the cache with the new media item
+      queryClient.setQueryData<StoryMedia[]>(["story-media", storyId], [newMedia, ...previousData]);
 
       toast({
         title: "Success",
@@ -100,7 +100,7 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       <div className="flex justify-start mb-5 mt-[20px]">
         <input
           type="file"
-          id={`media-${storyId}`}
+          id={`media-${storyId}`} // Make the ID unique per story
           className="hidden"
           onChange={handleFileUpload}
           accept="image/*,video/*,audio/*"

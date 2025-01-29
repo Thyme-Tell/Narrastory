@@ -4,12 +4,11 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
 import ImageMedia from "@/components/ImageMedia";
 import VideoMedia from "@/components/VideoMedia";
 import { StoryMediaItem } from "@/types/media";
-import { useState, useImperativeHandle, forwardRef } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,24 +36,13 @@ interface MediaCarouselProps {
   onDelete?: () => void;
 }
 
-export interface MediaCarouselRef {
-  scrollToIndex: (index: number) => void;
-}
-
-const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(({ mediaItems, onCaptionUpdate, onDelete }, ref) => {
+const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselProps) => {
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const [cropData, setCropData] = useState<{ url: string; mediaId: string } | null>(null);
   const { toast } = useToast();
-  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
 
-  useImperativeHandle(ref, () => ({
-    scrollToIndex: (index: number) => {
-      if (carouselApi) {
-        carouselApi.scrollTo(index);
-      }
-    }
-  }));
+  if (!mediaItems.length) return null;
 
   const handleImageClick = (url: string, mediaId: string) => {
     setSelectedMedia(url);
@@ -157,8 +145,6 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(({ mediaI
     }
   };
 
-  if (!mediaItems.length) return null;
-
   return (
     <div className="mb-8">
       <div className="text-sm text-muted-foreground mb-2 text-center">
@@ -170,7 +156,6 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(({ mediaI
           align: "start",
           containScroll: false,
         }}
-        setApi={setCarouselApi}
       >
         <CarouselContent className="-ml-2">
           {mediaItems.map((media) => {
@@ -276,8 +261,6 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(({ mediaI
       )}
     </div>
   );
-});
-
-MediaCarousel.displayName = "MediaCarousel";
+};
 
 export default MediaCarousel;
