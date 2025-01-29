@@ -1,4 +1,4 @@
-import { StoryActions } from "@/components/StoryActions";
+import StoryActions from "@/components/StoryActions";
 
 interface StoryHeaderProps {
   date: string;
