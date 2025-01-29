@@ -201,6 +201,125 @@ export type Database = {
           },
         ]
       }
+      storybook_members: {
+        Row: {
+          added_at: string
+          added_by: string
+          id: string
+          profile_id: string
+          role: Database["public"]["Enums"]["storybook_role"]
+          storybook_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by: string
+          id?: string
+          profile_id: string
+          role: Database["public"]["Enums"]["storybook_role"]
+          storybook_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string
+          id?: string
+          profile_id?: string
+          role?: Database["public"]["Enums"]["storybook_role"]
+          storybook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storybook_members_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storybook_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storybook_members_storybook_id_fkey"
+            columns: ["storybook_id"]
+            isOneToOne: false
+            referencedRelation: "storybooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storybook_stories: {
+        Row: {
+          added_at: string
+          added_by: string
+          id: string
+          story_id: string
+          storybook_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by: string
+          id?: string
+          story_id: string
+          storybook_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string
+          id?: string
+          story_id?: string
+          storybook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storybook_stories_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storybook_stories_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storybook_stories_storybook_id_fkey"
+            columns: ["storybook_id"]
+            isOneToOne: false
+            referencedRelation: "storybooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storybooks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -209,7 +328,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      storybook_role: "owner" | "contributor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never

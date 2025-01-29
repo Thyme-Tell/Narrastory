@@ -1,4 +1,4 @@
-import { Home, LogIn, User, BookOpen } from "lucide-react";
+import { Home, LogIn, User, BookOpen, Library } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar as ShadcnSidebar,
@@ -26,8 +26,13 @@ export function AppSidebar() {
     },
     {
       title: "Storybooks",
-      icon: BookOpen,
+      icon: Library,
       to: "/storybooks",
+    },
+    {
+      title: "Stories",
+      icon: BookOpen,
+      to: "/stories",
     },
   ];
 
