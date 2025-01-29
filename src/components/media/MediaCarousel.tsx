@@ -17,7 +17,7 @@ import ImageCropper from "@/components/ImageCropper";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Crop, Trash2 } from "lucide-react";
+import { Crop, Trash2, X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -238,6 +238,13 @@ const MediaCarousel = ({ mediaItems, onCaptionUpdate, onDelete }: MediaCarouselP
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  onClick={() => setSelectedMedia(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           )}
