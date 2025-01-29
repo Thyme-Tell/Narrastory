@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EditStoryBookModal } from "@/components/storybook/EditStoryBookModal";
 import { StoryList } from "@/components/storybook/StoryList";
+import { MemberManagement } from "@/components/storybook/MemberManagement";
 
 export default function StoryBook() {
   const { id } = useParams();
@@ -56,23 +57,8 @@ export default function StoryBook() {
           <StoryList storyBookId={storybook.id} />
         </div>
 
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Members</h2>
-          <div className="space-y-2">
-            {storybook.storybook_members?.map((member) => (
-              <div
-                key={member.profile_id}
-                className="flex items-center justify-between p-2 bg-gray-50 rounded"
-              >
-                <span>
-                  {member.profiles.first_name} {member.profiles.last_name}
-                </span>
-                <span className="text-sm text-gray-500 capitalize">
-                  {member.role}
-                </span>
-              </div>
-            ))}
-          </div>
+        <div className="space-y-8">
+          <MemberManagement storyBookId={storybook.id} />
         </div>
       </div>
     </div>
