@@ -6,10 +6,19 @@ import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModa
 import { supabase } from "@/integrations/supabase/client";
 import Cookies from "js-cookie";
 
+interface StoryBook {
+  id: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+}
+
 const StoryBooks = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -35,7 +44,37 @@ const StoryBooks = () => {
     };
 
     checkAuth();
+    fetchStorybooks();
   }, [navigate, toast]);
+
+  const fetchStorybooks = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('phone_number', Cookies.get('phone_number') || '')
+        .maybeSingle();
+
+      if (profile) {
+        const { data, error } = await supabase
+          .from('storybooks')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setStorybooks(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching storybooks:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load storybooks",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateStoryBook = async () => {
     try {
@@ -78,13 +117,15 @@ const StoryBooks = () => {
         </button>
       </div>
 
-      <StoryBookList />
+      <StoryBookList storybooks={storybooks} isLoading={isLoading} />
 
       {showCreateModal && (
         <CreateStoryBookModal
-          open={showCreateModal}
+          onSuccess={fetchStorybooks}
           onOpenChange={setShowCreateModal}
-        />
+        >
+          <div />
+        </CreateStoryBookModal>
       )}
     </div>
   );
