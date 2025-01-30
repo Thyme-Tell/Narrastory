@@ -6,8 +6,6 @@ import SharedStory from "./components/SharedStory";
 import StoryBooks from "./pages/storybooks";
 import StoryBook from "./pages/storybooks/[id]";
 import StoryBookSettings from "./pages/storybooks/[id]/settings";
-import PasswordResetRequest from "./components/PasswordResetRequest";
-import PasswordResetConfirm from "./components/PasswordResetConfirm";
 
 // Wrapper component to pass the storyBookId from URL params
 const StoryBookSettingsWrapper = () => {
@@ -26,8 +24,6 @@ function App() {
         <Route path="/storybooks" element={<StoryBooks />} />
         <Route path="/storybooks/:id" element={<StoryBook />} />
         <Route path="/storybooks/:id/settings" element={<StoryBookSettingsWrapper />} />
-        <Route path="/reset-password" element={<PasswordResetRequest />} />
-        <Route path="/reset-password/confirm" element={<PasswordResetConfirm />} />
       </Routes>
     </BrowserRouter>
   );
