@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +33,17 @@ const SignIn = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+      });
+      setLoading(false);
+      return;
+    }
 
     const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
     const email = `${normalizedPhoneNumber}@narrastory.com`;
@@ -86,7 +97,19 @@ const SignIn = () => {
           },
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          // Handle specific signup errors
+          if (signUpError.message.includes("weak_password")) {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Password must be at least 6 characters long.",
+            });
+            setLoading(false);
+            return;
+          }
+          throw signUpError;
+        }
 
         // Try signing in again
         const { error: retryError } = await supabase.auth.signInWithPassword({
