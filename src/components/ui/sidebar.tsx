@@ -1,5 +1,6 @@
-import { Home, LogIn, User, BookOpen, Library } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Home, LogIn, User, Library } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent as ShadcnSidebarContent,
@@ -8,6 +9,19 @@ import {
 } from "@/components/ui/shadcn-sidebar";
 
 export function AppSidebar() {
+  const navigate = useNavigate();
+  const profileId = Cookies.get('profile_id');
+  const isAuthorized = Cookies.get('profile_authorized');
+
+  const handleStoryBooksClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!profileId || !isAuthorized) {
+      navigate('/sign-in');
+    } else {
+      navigate('/storybooks');
+    }
+  };
+
   const menuItems = [
     {
       title: "Home",
@@ -27,12 +41,8 @@ export function AppSidebar() {
     {
       title: "Storybooks",
       icon: Library,
-      to: "/storybooks",
-    },
-    {
-      title: "Stories",
-      icon: BookOpen,
-      to: "/stories",
+      onClick: handleStoryBooksClick,
+      to: "#",
     },
   ];
 
@@ -45,6 +55,7 @@ export function AppSidebar() {
               <Link 
                 key={item.title} 
                 to={item.to}
+                onClick={item.onClick}
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
               >
                 <item.icon className="h-4 w-4" />

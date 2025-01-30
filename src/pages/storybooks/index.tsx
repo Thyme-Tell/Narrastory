@@ -23,10 +23,9 @@ const StoryBooks = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const profileId = Cookies.get('profile_id');
-      const phoneNumber = Cookies.get('phone_number');
       const isAuthorized = Cookies.get('profile_authorized');
 
-      if (!profileId || !phoneNumber || !isAuthorized) {
+      if (!profileId || !isAuthorized) {
         toast({
           title: "Authentication required",
           description: "Please sign in to view storybooks",
@@ -40,12 +39,10 @@ const StoryBooks = () => {
         .from('profiles')
         .select('id')
         .eq('id', profileId)
-        .eq('phone_number', phoneNumber)
         .maybeSingle();
 
       if (error || !profile) {
         Cookies.remove('profile_id');
-        Cookies.remove('phone_number');
         Cookies.remove('profile_authorized');
         toast({
           title: "Authentication required",
