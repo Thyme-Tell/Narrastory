@@ -35,8 +35,10 @@ const SignIn = () => {
     setLoading(true);
 
     const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
+    const email = `${normalizedPhoneNumber}@narrastory.com`;
 
     try {
+      // First check if user exists in profiles
       const { data: profile, error: searchError } = await supabase
         .from("profiles")
         .select("id, password")
@@ -51,6 +53,7 @@ const SignIn = () => {
           title: "Error",
           description: "No account found with this phone number.",
         });
+        setLoading(false);
         return;
       }
 
@@ -60,16 +63,39 @@ const SignIn = () => {
           title: "Error",
           description: "Invalid password.",
         });
+        setLoading(false);
         return;
       }
 
-      // Set auth session
+      // Try to sign in with Supabase Auth
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${normalizedPhoneNumber}@narrastory.com`,
+        email,
         password: formData.password,
       });
 
-      if (signInError) throw signInError;
+      // If sign in fails, we need to create the auth user first
+      if (signInError) {
+        // Create auth user
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password: formData.password,
+          options: {
+            data: {
+              phone_number: normalizedPhoneNumber,
+            },
+          },
+        });
+
+        if (signUpError) throw signUpError;
+
+        // Try signing in again
+        const { error: retryError } = await supabase.auth.signInWithPassword({
+          email,
+          password: formData.password,
+        });
+
+        if (retryError) throw retryError;
+      }
 
       // Set cookies to expire in 365 days
       Cookies.set('profile_authorized', 'true', { expires: 365 });
