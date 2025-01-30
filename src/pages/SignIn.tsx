@@ -32,8 +32,7 @@ const SignIn = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
+    
     // Validate password length
     if (formData.password.length < 6) {
       toast({
@@ -41,14 +40,15 @@ const SignIn = () => {
         title: "Error",
         description: "Password must be at least 6 characters long.",
       });
-      setLoading(false);
       return;
     }
 
-    const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
-    const email = `${normalizedPhoneNumber}@narrastory.com`;
+    setLoading(true);
 
     try {
+      const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
+      const email = `${normalizedPhoneNumber}@narrastory.com`;
+
       // First check if user exists in profiles
       const { data: profile, error: searchError } = await supabase
         .from("profiles")
@@ -86,29 +86,56 @@ const SignIn = () => {
 
       // If sign in fails, we need to create the auth user first
       if (signInError) {
-        // Create auth user
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password: formData.password,
-          options: {
-            data: {
-              phone_number: normalizedPhoneNumber,
-            },
-          },
-        });
+        // Handle rate limit error specifically
+        if (signInError.message.includes("rate limit") || signInError.status === 429) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Please wait a minute before trying again.",
+          });
+          setLoading(false);
+          return;
+        }
 
-        if (signUpError) {
-          // Handle specific signup errors
-          if (signUpError.message.includes("weak_password")) {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Password must be at least 6 characters long.",
+        // Create auth user with retry mechanism
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+          try {
+            const { error: signUpError } = await supabase.auth.signUp({
+              email,
+              password: formData.password,
+              options: {
+                data: {
+                  phone_number: normalizedPhoneNumber,
+                },
+              },
             });
-            setLoading(false);
-            return;
+
+            if (!signUpError) break;
+
+            if (signUpError.status === 429) {
+              await new Promise(resolve => setTimeout(resolve, 60000)); // Wait 60 seconds
+              retryCount++;
+              continue;
+            }
+
+            throw signUpError;
+          } catch (error) {
+            console.error("Retry error:", error);
+            retryCount++;
           }
-          throw signUpError;
+        }
+
+        if (retryCount === maxRetries) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Unable to complete sign in. Please try again later.",
+          });
+          setLoading(false);
+          return;
         }
 
         // Try signing in again
