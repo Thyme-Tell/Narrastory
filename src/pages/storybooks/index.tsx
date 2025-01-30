@@ -18,12 +18,13 @@ const StoryBooks = () => {
       
       if (!session) {
         // Check if user has a profile (old authentication method)
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('id')
-          .single();
+          .eq('phone_number', localStorage.getItem('phone_number') || '')
+          .maybeSingle();
 
-        if (!profile) {
+        if (error || !profile) {
           toast({
             title: "Authentication required",
             description: "Please sign in to view storybooks",
@@ -43,12 +44,13 @@ const StoryBooks = () => {
       
       // If no session, check for profile
       if (!session) {
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('id')
-          .single();
+          .eq('phone_number', localStorage.getItem('phone_number') || '')
+          .maybeSingle();
           
-        if (!profile) {
+        if (error || !profile) {
           throw new Error("No authentication");
         }
       }
