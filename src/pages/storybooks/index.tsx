@@ -15,13 +15,22 @@ const StoryBooks = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to view storybooks",
-          variant: "destructive",
-        });
-        navigate("/sign-in");
+        // Check if user has a profile (old authentication method)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .single();
+
+        if (!profile) {
+          toast({
+            title: "Authentication required",
+            description: "Please sign in to view storybooks",
+            variant: "destructive",
+          });
+          navigate("/sign-in");
+        }
       }
     };
     checkAuth();
@@ -31,9 +40,19 @@ const StoryBooks = () => {
     queryKey: ["storybooks"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      
+      // If no session, check for profile
       if (!session) {
-        throw new Error("No session");
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .single();
+          
+        if (!profile) {
+          throw new Error("No authentication");
+        }
       }
+
       const { data, error } = await supabase
         .from("storybooks")
         .select("*");
