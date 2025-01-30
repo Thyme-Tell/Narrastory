@@ -7,18 +7,39 @@ import {
   SidebarGroup as ShadcnSidebarGroup,
   SidebarGroupContent as ShadcnSidebarGroupContent,
 } from "@/components/ui/shadcn-sidebar";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const profileId = Cookies.get('profile_id');
   const isAuthorized = Cookies.get('profile_authorized');
 
-  const handleStoryBooksClick = (e: React.MouseEvent) => {
+  const handleStoryBooksClick = async (e: React.MouseEvent) => {
     e.preventDefault();
+    
     if (!profileId || !isAuthorized) {
       navigate('/sign-in');
-    } else {
+      return;
+    }
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', profileId)
+        .maybeSingle();
+
+      if (error || !profile) {
+        Cookies.remove('profile_id');
+        Cookies.remove('profile_authorized');
+        navigate('/sign-in');
+        return;
+      }
+
       navigate('/storybooks');
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      navigate('/sign-in');
     }
   };
 

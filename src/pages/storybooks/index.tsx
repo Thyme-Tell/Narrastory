@@ -34,20 +34,25 @@ const StoryBooks = () => {
         return;
       }
 
-      // Verify the profile exists and is valid
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', profileId)
-        .maybeSingle();
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', profileId)
+          .maybeSingle();
 
-      if (error || !profile) {
-        Cookies.remove('profile_id');
-        Cookies.remove('profile_authorized');
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to view storybooks",
-        });
+        if (error || !profile) {
+          Cookies.remove('profile_id');
+          Cookies.remove('profile_authorized');
+          toast({
+            title: "Authentication required",
+            description: "Please sign in to view storybooks",
+          });
+          navigate("/sign-in");
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking profile:', error);
         navigate("/sign-in");
         return;
       }
