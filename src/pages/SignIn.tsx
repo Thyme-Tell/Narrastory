@@ -187,12 +187,19 @@ const SignIn = () => {
             {loading ? "Processing..." : "Sign In"}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/" className="text-primary hover:underline">
-              Sign up for Narra
-            </Link>
-          </p>
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link to="/" className="text-primary hover:underline">
+                Sign up for Narra
+              </Link>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              <Link to="/reset-password" className="text-primary hover:underline">
+                Forgot your password?
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>
