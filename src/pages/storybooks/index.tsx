@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import StoryBookList from "@/components/storybook/StoryBookList";
-import CreateStoryBookModal from "@/components/storybook/CreateStoryBookModal";
+import { StoryBookList } from "@/components/storybook/StoryBookList";
+import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
 import { supabase } from "@/integrations/supabase/client";
 import Cookies from "js-cookie";
 
