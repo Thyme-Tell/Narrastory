@@ -24,10 +24,6 @@ const StoryBooks = () => {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to view storybooks",
-        });
         navigate("/sign-in");
         return;
       }
@@ -36,21 +32,37 @@ const StoryBooks = () => {
     };
 
     checkAuth();
-  }, [navigate, toast]);
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        navigate("/sign-in");
+      } else if (event === 'SIGNED_IN' && session) {
+        fetchStorybooks();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const fetchStorybooks = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (session) {
-        const { data, error } = await supabase
-          .from('storybooks')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setStorybooks(data || []);
+      if (!session) {
+        navigate("/sign-in");
+        return;
       }
+
+      const { data, error } = await supabase
+        .from('storybooks')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setStorybooks(data || []);
     } catch (error) {
       console.error('Error fetching storybooks:', error);
       toast({
