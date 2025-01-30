@@ -10,6 +10,16 @@ import Cookies from "js-cookie";
 const SignIn = () => {
   useEffect(() => {
     document.title = "Narra Story | Sign In";
+    
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/storybooks");
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const navigate = useNavigate();
@@ -53,12 +63,20 @@ const SignIn = () => {
         return;
       }
 
+      // Set auth session
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: `${normalizedPhoneNumber}@narrastory.com`,
+        password: formData.password,
+      });
+
+      if (signInError) throw signInError;
+
       // Set cookies to expire in 365 days
       Cookies.set('profile_authorized', 'true', { expires: 365 });
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
       Cookies.set('profile_id', profile.id, { expires: 365 });
 
-      navigate(`/profile/${profile.id}`);
+      navigate("/storybooks");
     } catch (error) {
       console.error("Error:", error);
       toast({
