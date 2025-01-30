@@ -53,8 +53,10 @@ const SignIn = () => {
         return;
       }
 
-      // Set cookie to expire in 365 days
+      // Set cookies to expire in 365 days
       Cookies.set('profile_authorized', 'true', { expires: 365 });
+      Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
+      Cookies.set('profile_id', profile.id, { expires: 365 });
 
       navigate(`/profile/${profile.id}`);
     } catch (error) {

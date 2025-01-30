@@ -1,53 +1,52 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import StoryBookList from "@/components/storybook/StoryBookList";
+import CreateStoryBookModal from "@/components/storybook/CreateStoryBookModal";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { StoryBookList } from "@/components/storybook/StoryBookList";
-import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import Cookies from "js-cookie";
 
 const StoryBooks = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         // Check if user has a profile (old authentication method)
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('id')
-          .eq('phone_number', localStorage.getItem('phone_number') || '')
+          .eq('phone_number', Cookies.get('phone_number') || '')
           .maybeSingle();
 
         if (error || !profile) {
           toast({
             title: "Authentication required",
             description: "Please sign in to view storybooks",
-            variant: "destructive",
           });
           navigate("/sign-in");
+          return;
         }
       }
     };
+
     checkAuth();
   }, [navigate, toast]);
 
-  const { data: storybooks, isLoading, error, refetch } = useQuery({
-    queryKey: ["storybooks"],
-    queryFn: async () => {
+  const handleCreateStoryBook = async () => {
+    try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       // If no session, check for profile
       if (!session) {
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('id')
-          .eq('phone_number', localStorage.getItem('phone_number') || '')
+          .eq('phone_number', Cookies.get('phone_number') || '')
           .maybeSingle();
           
         if (error || !profile) {
@@ -55,34 +54,38 @@ const StoryBooks = () => {
         }
       }
 
-      const { data, error } = await supabase
-        .from("storybooks")
-        .select("*");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  if (error) {
-    toast({
-      title: "Error loading storybooks",
-      description: error.message,
-      variant: "destructive",
-    });
-  }
+      setShowCreateModal(true);
+    } catch (error) {
+      console.error("Error:", error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please sign in to create a storybook",
+      });
+      navigate("/sign-in");
+    }
+  };
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Your Storybooks</h1>
-        <CreateStoryBookModal onSuccess={() => refetch()}>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Storybook
-          </Button>
-        </CreateStoryBookModal>
+        <button
+          onClick={handleCreateStoryBook}
+          className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition-colors"
+        >
+          Create New Storybook
+        </button>
       </div>
-      <StoryBookList storybooks={storybooks || []} isLoading={isLoading} />
+
+      <StoryBookList />
+
+      {showCreateModal && (
+        <CreateStoryBookModal
+          open={showCreateModal}
+          onOpenChange={setShowCreateModal}
+        />
+      )}
     </div>
   );
 };
