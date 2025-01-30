@@ -15,24 +15,43 @@ const queryClient = new QueryClient({
   },
 })
 
-// Initialize PostHog with error handling
-try {
-  posthog.init('phc_Elh2xuN6zexUVDoZhrqZZsxRYpGSZln10MyhRKN4zwC', {
-    api_host: 'https://us.i.posthog.com',
-    person_profiles: 'identified_only',
-    loaded: (posthog) => {
-      if (process.env.NODE_ENV === 'development') {
-        // Disable posthog in development
-        posthog.opt_out_capturing()
-      }
-    },
-    capture_pageview: false, // Disable automatic pageview capture
-    autocapture: false, // Disable automatic event capture
-  })
-} catch (error) {
-  console.warn('PostHog initialization failed:', error)
-  // Continue app execution even if PostHog fails
+// Initialize PostHog with better error handling
+const initPostHog = () => {
+  try {
+    // Only initialize PostHog in production
+    if (process.env.NODE_ENV === 'production') {
+      posthog.init('phc_Elh2xuN6zexUVDoZhrqZZsxRYpGSZln10MyhRKN4zwC', {
+        api_host: 'https://us.i.posthog.com',
+        loaded: (posthog) => {
+          // Additional initialization if needed
+          console.log('PostHog loaded successfully')
+        },
+        bootstrap: {
+          distinctID: 'anonymous-user',
+        },
+        autocapture: false, // Disable automatic event capture
+        capture_pageview: false, // Disable automatic pageview capture
+        persistence: 'memory', // Use memory persistence to avoid localStorage issues
+        advanced_disable_decide: true, // Disable decide endpoint calls which can fail
+      })
+    } else {
+      // In development, create a mock PostHog instance
+      console.log('PostHog disabled in development mode')
+      posthog.opt_out_capturing()
+    }
+  } catch (error) {
+    console.warn('PostHog initialization failed:', error)
+    // Ensure PostHog is disabled if initialization fails
+    try {
+      posthog.opt_out_capturing()
+    } catch {
+      // Ignore any errors from opt_out_capturing
+    }
+  }
 }
+
+// Initialize PostHog
+initPostHog()
 
 const container = document.getElementById('root')
 if (!container) throw new Error('Root element not found')
