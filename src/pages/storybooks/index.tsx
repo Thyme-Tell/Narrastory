@@ -4,7 +4,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { StoryBookList } from "@/components/storybook/StoryBookList";
 import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
 import { supabase } from "@/integrations/supabase/client";
-import Cookies from "js-cookie";
 
 interface StoryBook {
   id: string;
@@ -22,10 +21,9 @@ const StoryBooks = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const profileId = Cookies.get('profile_id');
-      const isAuthorized = Cookies.get('profile_authorized');
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (!profileId || !isAuthorized) {
+      if (!session) {
         toast({
           title: "Authentication required",
           description: "Please sign in to view storybooks",
@@ -34,39 +32,17 @@ const StoryBooks = () => {
         return;
       }
 
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', profileId)
-          .maybeSingle();
-
-        if (error || !profile) {
-          Cookies.remove('profile_id');
-          Cookies.remove('profile_authorized');
-          toast({
-            title: "Authentication required",
-            description: "Please sign in to view storybooks",
-          });
-          navigate("/sign-in");
-          return;
-        }
-      } catch (error) {
-        console.error('Error checking profile:', error);
-        navigate("/sign-in");
-        return;
-      }
+      fetchStorybooks();
     };
 
     checkAuth();
-    fetchStorybooks();
   }, [navigate, toast]);
 
   const fetchStorybooks = async () => {
     try {
-      const profileId = Cookies.get('profile_id');
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (profileId) {
+      if (session) {
         const { data, error } = await supabase
           .from('storybooks')
           .select('*')
@@ -88,8 +64,8 @@ const StoryBooks = () => {
   };
 
   const handleCreateStoryBook = async () => {
-    const profileId = Cookies.get('profile_id');
-    if (!profileId) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       toast({
         variant: "destructive",
         title: "Authentication Required",
