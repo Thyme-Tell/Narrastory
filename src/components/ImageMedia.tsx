@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Crop, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import MediaCaption from "./MediaCaption";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -81,14 +81,7 @@ const ImageMedia = ({ media, onImageClick, onStartCrop, onCaptionUpdate, onDelet
             loading="lazy"
           />
         </div>
-        <div className="absolute top-2 right-2 flex gap-2">
-          <Button
-            size="icon"
-            variant="secondary"
-            onClick={() => onStartCrop(data.publicUrl, media.id)}
-          >
-            <Crop className="h-4 w-4" />
-          </Button>
+        <div className="absolute top-2 right-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
