@@ -22,24 +22,37 @@ const StoryBooks = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const profileId = Cookies.get('profile_id');
+      const phoneNumber = Cookies.get('phone_number');
+      const isAuthorized = Cookies.get('profile_authorized');
 
-      if (!session) {
-        // Check if user has a profile (old authentication method)
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('phone_number', Cookies.get('phone_number') || '')
-          .maybeSingle();
+      if (!profileId || !phoneNumber || !isAuthorized) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to view storybooks",
+        });
+        navigate("/sign-in");
+        return;
+      }
 
-        if (error || !profile) {
-          toast({
-            title: "Authentication required",
-            description: "Please sign in to view storybooks",
-          });
-          navigate("/sign-in");
-          return;
-        }
+      // Verify the profile exists and is valid
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', profileId)
+        .eq('phone_number', phoneNumber)
+        .maybeSingle();
+
+      if (error || !profile) {
+        Cookies.remove('profile_id');
+        Cookies.remove('phone_number');
+        Cookies.remove('profile_authorized');
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to view storybooks",
+        });
+        navigate("/sign-in");
+        return;
       }
     };
 
@@ -49,13 +62,9 @@ const StoryBooks = () => {
 
   const fetchStorybooks = async () => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('phone_number', Cookies.get('phone_number') || '')
-        .maybeSingle();
-
-      if (profile) {
+      const profileId = Cookies.get('profile_id');
+      
+      if (profileId) {
         const { data, error } = await supabase
           .from('storybooks')
           .select('*')
@@ -77,32 +86,17 @@ const StoryBooks = () => {
   };
 
   const handleCreateStoryBook = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      // If no session, check for profile
-      if (!session) {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('phone_number', Cookies.get('phone_number') || '')
-          .maybeSingle();
-          
-        if (error || !profile) {
-          throw new Error("No authentication");
-        }
-      }
-
-      setShowCreateModal(true);
-    } catch (error) {
-      console.error("Error:", error);
+    const profileId = Cookies.get('profile_id');
+    if (!profileId) {
       toast({
         variant: "destructive",
         title: "Authentication Required",
         description: "Please sign in to create a storybook",
       });
       navigate("/sign-in");
+      return;
     }
+    setShowCreateModal(true);
   };
 
   return (
