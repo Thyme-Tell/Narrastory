@@ -116,7 +116,6 @@ const StoryBooks = () => {
       {showCreateModal && (
         <CreateStoryBookModal
           onSuccess={fetchStorybooks}
-          onOpenChange={setShowCreateModal}
         >
           <div />
         </CreateStoryBookModal>
