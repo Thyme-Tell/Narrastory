@@ -1,5 +1,6 @@
 import { Home, LogIn, User, Library } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent as ShadcnSidebarContent,
@@ -10,18 +11,36 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function AppSidebar() {
   const navigate = useNavigate();
+  const profileId = Cookies.get('profile_id');
+  const isAuthorized = Cookies.get('profile_authorized');
 
   const handleStoryBooksClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
+    if (!profileId || !isAuthorized) {
       navigate('/sign-in');
       return;
     }
 
-    navigate('/storybooks');
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', profileId)
+        .maybeSingle();
+
+      if (error || !profile) {
+        Cookies.remove('profile_id');
+        Cookies.remove('profile_authorized');
+        navigate('/sign-in');
+        return;
+      }
+
+      navigate('/storybooks');
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      navigate('/sign-in');
+    }
   };
 
   const menuItems = [
