@@ -21,65 +21,48 @@ const StoryBooks = () => {
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [firstName, setFirstName] = useState("");
-  const { isAuthenticated, profileId, checkAuth } = useAuth();
+  const { isAuthenticated, profileId, loading } = useAuth();
 
   useEffect(() => {
-    const init = async () => {
-      const isAuthed = await checkAuth();
-      if (!isAuthed) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to view storybooks",
-        });
-        navigate("/sign-in", { state: { redirectTo: "/storybooks" } });
-        return;
-      }
+    if (!loading && !isAuthenticated) {
+      return;
+    }
 
+    const fetchData = async () => {
       try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('first_name')
-          .eq('id', profileId)
-          .maybeSingle();
+        if (profileId) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name')
+            .eq('id', profileId)
+            .maybeSingle();
 
-        if (error || !profile) {
-          throw error;
+          if (profile) {
+            setFirstName(profile.first_name);
+          }
+
+          const { data, error } = await supabase
+            .from('storybooks')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          setStorybooks(data || []);
         }
-
-        setFirstName(profile.first_name);
       } catch (error) {
-        console.error('Error checking profile:', error);
-        navigate("/sign-in");
-        return;
+        console.error('Error fetching data:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load storybooks",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    init();
-    fetchStorybooks();
-  }, [navigate, toast, checkAuth, profileId]);
-
-  const fetchStorybooks = async () => {
-    try {
-      if (profileId) {
-        const { data, error } = await supabase
-          .from('storybooks')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setStorybooks(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching storybooks:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load storybooks",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    fetchData();
+  }, [profileId, isAuthenticated, loading, toast]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -89,6 +72,14 @@ const StoryBooks = () => {
     }
     navigate('/');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -133,7 +124,10 @@ const StoryBooks = () => {
         </Link>
         <div className="flex justify-between items-center mb-8 mt-4">
           <h1 className="text-3xl font-bold">Your Storybooks</h1>
-          <CreateStoryBookModal onSuccess={fetchStorybooks}>
+          <CreateStoryBookModal onSuccess={() => {
+            setIsLoading(true);
+            fetchStorybooks();
+          }}>
             <Button
               className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
             >
