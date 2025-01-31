@@ -19,51 +19,86 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title.trim()) {
+      toast({
+        title: "Error",
+        description: "Title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("User not authenticated");
+      // Get the current user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        throw new Error("Failed to get user data: " + userError.message);
+      }
+      
+      if (!userData.user) {
+        throw new Error("User not authenticated");
+      }
 
-      const { data: storybook, error } = await supabase
+      console.log("Creating storybook with title:", title);
+      
+      // Create the storybook
+      const { data: storybook, error: storybookError } = await supabase
         .from("storybooks")
-        .insert({ title, description })
+        .insert({ 
+          title: title.trim(),
+          description: description.trim() || null,
+        })
         .select()
         .single();
 
-      if (error) throw error;
-
-      if (storybook) {
-        // Create owner membership
-        const { error: memberError } = await supabase
-          .from("storybook_members")
-          .insert({
-            storybook_id: storybook.id,
-            profile_id: userData.user.id,
-            role: "owner",
-            added_by: userData.user.id,
-          });
-
-        if (memberError) throw memberError;
-
-        toast({
-          title: "Success",
-          description: "Storybook created successfully",
-        });
-        
-        // Reset form and close modal
-        setTitle("");
-        setDescription("");
-        setOpen(false);
-        
-        // Notify parent component to refresh the list
-        onSuccess();
+      if (storybookError) {
+        console.error("Error creating storybook:", storybookError);
+        throw storybookError;
       }
+
+      if (!storybook) {
+        throw new Error("No storybook data returned after creation");
+      }
+
+      console.log("Storybook created:", storybook);
+
+      // Create owner membership
+      const { error: memberError } = await supabase
+        .from("storybook_members")
+        .insert({
+          storybook_id: storybook.id,
+          profile_id: userData.user.id,
+          role: "owner",
+          added_by: userData.user.id,
+        });
+
+      if (memberError) {
+        console.error("Error creating storybook membership:", memberError);
+        throw memberError;
+      }
+
+      console.log("Storybook membership created successfully");
+
+      toast({
+        title: "Success",
+        description: "Storybook created successfully",
+      });
+      
+      // Reset form and close modal
+      setTitle("");
+      setDescription("");
+      setOpen(false);
+      
+      // Notify parent component to refresh the list
+      onSuccess();
     } catch (error) {
-      console.error("Error creating storybook:", error);
+      console.error("Error in storybook creation:", error);
       toast({
         title: "Error",
-        description: "Failed to create storybook",
+        description: error instanceof Error ? error.message : "Failed to create storybook",
         variant: "destructive",
       });
     } finally {
