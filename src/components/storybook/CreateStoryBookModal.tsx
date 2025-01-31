@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface CreateStoryBookModalProps {
   onSuccess: () => void;
@@ -16,6 +17,49 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check authentication status when the modal opens
+  useEffect(() => {
+    if (open) {
+      checkAuth();
+    }
+  }, [open]);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log("Current session:", session);
+      
+      if (error) {
+        throw error;
+      }
+
+      if (!session) {
+        // Try to refresh the session before giving up
+        const { data: { session: refreshedSession }, error: refreshError } = 
+          await supabase.auth.refreshSession();
+        
+        if (refreshError || !refreshedSession) {
+          throw new Error("No valid session found");
+        }
+        
+        return true;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Auth error:", error);
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a storybook",
+        variant: "destructive",
+      });
+      setOpen(false);
+      navigate("/sign-in"); // Note: Changed from /signin to /sign-in to match your routes
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,18 +77,17 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
     try {
       console.log("Starting storybook creation process...");
       
-      // Get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      console.log("Auth check result:", { user, userError });
+      // Check authentication before proceeding
+      const isAuthenticated = await checkAuth();
+      if (!isAuthenticated) return;
+
+      // Get the current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log("Session check result:", { session, sessionError });
       
-      if (userError) {
-        console.error("Auth error:", userError);
-        throw new Error("Failed to get user data: " + userError.message);
-      }
-      
-      if (!user) {
-        console.error("No user found");
-        throw new Error("User not authenticated");
+      if (sessionError || !session?.user) {
+        console.error("Session error:", sessionError);
+        throw new Error("Authentication required");
       }
 
       console.log("Creating storybook with data:", {
@@ -79,9 +122,9 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
         .from("storybook_members")
         .insert({
           storybook_id: storybook.id,
-          profile_id: user.id,
+          profile_id: session.user.id,
           role: "owner",
-          added_by: user.id,
+          added_by: session.user.id,
         });
 
       if (memberError) {
