@@ -31,18 +31,26 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
     setIsLoading(true);
 
     try {
+      console.log("Starting storybook creation process...");
+      
       // Get the current user
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log("Auth check result:", { user, userError });
       
       if (userError) {
+        console.error("Auth error:", userError);
         throw new Error("Failed to get user data: " + userError.message);
       }
       
-      if (!userData.user) {
+      if (!user) {
+        console.error("No user found");
         throw new Error("User not authenticated");
       }
 
-      console.log("Creating storybook with title:", title);
+      console.log("Creating storybook with data:", {
+        title: title.trim(),
+        description: description.trim() || null,
+      });
       
       // Create the storybook
       const { data: storybook, error: storybookError } = await supabase
@@ -60,19 +68,20 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
       }
 
       if (!storybook) {
+        console.error("No storybook data returned");
         throw new Error("No storybook data returned after creation");
       }
 
-      console.log("Storybook created:", storybook);
+      console.log("Storybook created successfully:", storybook);
 
       // Create owner membership
       const { error: memberError } = await supabase
         .from("storybook_members")
         .insert({
           storybook_id: storybook.id,
-          profile_id: userData.user.id,
+          profile_id: user.id,
           role: "owner",
-          added_by: userData.user.id,
+          added_by: user.id,
         });
 
       if (memberError) {
