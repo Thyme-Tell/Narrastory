@@ -23,25 +23,22 @@ const initPostHog = () => {
       posthog.init('phc_Elh2xuN6zexUVDoZhrqZZsxRYpGSZln10MyhRKN4zwC', {
         api_host: 'https://us.i.posthog.com',
         loaded: (posthog) => {
-          // Additional initialization if needed
           console.log('PostHog loaded successfully')
         },
         bootstrap: {
           distinctID: 'anonymous-user',
         },
-        autocapture: false, // Disable automatic event capture
-        capture_pageview: false, // Disable automatic pageview capture
-        persistence: 'memory', // Use memory persistence to avoid localStorage issues
-        advanced_disable_decide: true, // Disable decide endpoint calls which can fail
+        autocapture: false,
+        capture_pageview: false,
+        persistence: 'memory',
+        advanced_disable_decide: true,
       })
     } else {
-      // In development, create a mock PostHog instance
       console.log('PostHog disabled in development mode')
       posthog.opt_out_capturing()
     }
   } catch (error) {
     console.warn('PostHog initialization failed:', error)
-    // Ensure PostHog is disabled if initialization fails
     try {
       posthog.opt_out_capturing()
     } catch {
