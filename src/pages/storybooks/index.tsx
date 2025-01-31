@@ -5,7 +5,7 @@ import { StoryBookList } from "@/components/storybook/StoryBookList";
 import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, Library } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import Cookies from "js-cookie";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { StoryBook } from "@/types/supabase";
+
+interface StoryBook {
+  id: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+}
 
 const StoryBooks = () => {
   const navigate = useNavigate();
@@ -21,48 +27,75 @@ const StoryBooks = () => {
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [firstName, setFirstName] = useState("");
-  const { isAuthenticated, profileId, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      return;
-    }
+    const checkAuth = async () => {
+      const profileId = Cookies.get('profile_id');
+      const isAuthorized = Cookies.get('profile_authorized');
 
-    const fetchData = async () => {
-      try {
-        if (profileId) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name')
-            .eq('id', profileId)
-            .maybeSingle();
-
-          if (profile) {
-            setFirstName(profile.first_name);
-          }
-
-          const { data, error } = await supabase
-            .from('storybooks')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-          if (error) throw error;
-          setStorybooks(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      if (!profileId || !isAuthorized) {
         toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load storybooks",
+          title: "Authentication required",
+          description: "Please sign in to view storybooks",
         });
-      } finally {
-        setIsLoading(false);
+        navigate("/sign-in");
+        return;
+      }
+
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('id, first_name')
+          .eq('id', profileId)
+          .maybeSingle();
+
+        if (error || !profile) {
+          Cookies.remove('profile_id');
+          Cookies.remove('profile_authorized');
+          toast({
+            title: "Authentication required",
+            description: "Please sign in to view storybooks",
+          });
+          navigate("/sign-in");
+          return;
+        }
+
+        setFirstName(profile.first_name);
+      } catch (error) {
+        console.error('Error checking profile:', error);
+        navigate("/sign-in");
+        return;
       }
     };
 
-    fetchData();
-  }, [profileId, isAuthenticated, loading, toast]);
+    checkAuth();
+    fetchStorybooks();
+  }, [navigate, toast]);
+
+  const fetchStorybooks = async () => {
+    try {
+      const profileId = Cookies.get('profile_id');
+      
+      if (profileId) {
+        const { data, error } = await supabase
+          .from('storybooks')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setStorybooks(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching storybooks:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load storybooks",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -72,14 +105,6 @@ const StoryBooks = () => {
     }
     navigate('/');
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
 
   return (
     <div 
@@ -124,10 +149,7 @@ const StoryBooks = () => {
         </Link>
         <div className="flex justify-between items-center mb-8 mt-4">
           <h1 className="text-3xl font-bold">Your Storybooks</h1>
-          <CreateStoryBookModal onSuccess={() => {
-            setIsLoading(true);
-            fetchStorybooks();
-          }}>
+          <CreateStoryBookModal onSuccess={fetchStorybooks}>
             <Button
               className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
             >

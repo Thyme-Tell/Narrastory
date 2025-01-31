@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface CreateStoryBookModalProps {
   onSuccess: () => void;
@@ -18,14 +16,6 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const { isAuthenticated, profileId, checkAuth } = useAuth();
-
-  useEffect(() => {
-    if (open) {
-      checkAuth();
-    }
-  }, [open, checkAuth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,25 +28,31 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
       return;
     }
 
-    if (!isAuthenticated || !profileId) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create a storybook",
-        variant: "destructive",
-      });
-      setOpen(false);
-      navigate("/sign-in", { state: { redirectTo: "/storybooks" } });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
+      console.log("Starting storybook creation process...");
+      
+      // Get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log("Auth check result:", { user, userError });
+      
+      if (userError) {
+        console.error("Auth error:", userError);
+        throw new Error("Failed to get user data: " + userError.message);
+      }
+      
+      if (!user) {
+        console.error("No user found");
+        throw new Error("User not authenticated");
+      }
+
       console.log("Creating storybook with data:", {
         title: title.trim(),
         description: description.trim() || null,
       });
       
+      // Create the storybook
       const { data: storybook, error: storybookError } = await supabase
         .from("storybooks")
         .insert({ 
@@ -78,13 +74,14 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
 
       console.log("Storybook created successfully:", storybook);
 
+      // Create owner membership
       const { error: memberError } = await supabase
         .from("storybook_members")
         .insert({
           storybook_id: storybook.id,
-          profile_id: profileId,
+          profile_id: user.id,
           role: "owner",
-          added_by: profileId,
+          added_by: user.id,
         });
 
       if (memberError) {
@@ -99,9 +96,12 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
         description: "Storybook created successfully",
       });
       
+      // Reset form and close modal
       setTitle("");
       setDescription("");
       setOpen(false);
+      
+      // Notify parent component to refresh the list
       onSuccess();
     } catch (error) {
       console.error("Error in storybook creation:", error);

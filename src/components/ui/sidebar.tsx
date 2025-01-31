@@ -6,16 +6,37 @@ import {
   SidebarGroup as ShadcnSidebarGroup,
   SidebarGroupContent as ShadcnSidebarGroupContent,
 } from "@/components/ui/shadcn-sidebar";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { isAuthenticated, profileId } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleStoryBooksClick = (e: React.MouseEvent) => {
+  useEffect(() => {
+    // Check authentication state when component mounts
+    checkAuth();
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsAuthenticated(!!session);
+  };
+
+  const handleStoryBooksClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     
     if (!isAuthenticated) {
+      // Add the current path as a redirect parameter
       navigate('/sign-in?redirectTo=/storybooks');
       return;
     }
@@ -32,7 +53,7 @@ export function AppSidebar() {
     {
       title: isAuthenticated ? "Profile" : "Sign In",
       icon: isAuthenticated ? User : LogIn,
-      to: isAuthenticated ? `/profile/${profileId}` : "/sign-in",
+      to: isAuthenticated ? `/profile/${Cookies.get('profile_id')}` : "/sign-in",
     },
     {
       title: "Storybooks",
