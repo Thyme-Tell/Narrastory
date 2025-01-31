@@ -39,18 +39,40 @@ const SignIn = () => {
       if (!profile) {
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "No account found with this phone number.",
+          title: "Account Not Found",
+          description: (
+            <div className="space-y-2">
+              <p>No account found with this phone number.</p>
+              <p>
+                Please check your phone number or{" "}
+                <Link to="/" className="text-primary hover:underline">
+                  sign up for a new account
+                </Link>
+              </p>
+            </div>
+          ),
         });
+        setLoading(false);
         return;
       }
 
       if (profile.password !== formData.password) {
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Invalid password.",
+          title: "Incorrect Password",
+          description: (
+            <div className="space-y-2">
+              <p>The password you entered is incorrect.</p>
+              <p>
+                <Link to="/reset-password" className="text-primary hover:underline">
+                  Reset your password
+                </Link>{" "}
+                if you've forgotten it.
+              </p>
+            </div>
+          ),
         });
+        setLoading(false);
         return;
       }
 
@@ -67,7 +89,7 @@ const SignIn = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "There was a problem signing in.",
+        description: "There was a problem signing in. Please try again.",
       });
     } finally {
       setLoading(false);
