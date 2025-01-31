@@ -1,9 +1,8 @@
-import { Home, LogIn, User, Library } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { LogIn, Home, BookOpen, User } from "lucide-react";
 import Cookies from "js-cookie";
 import {
   Sidebar as ShadcnSidebar,
-  SidebarContent as ShadcnSidebarContent,
   SidebarGroup as ShadcnSidebarGroup,
   SidebarGroupContent as ShadcnSidebarGroupContent,
 } from "@/components/ui/shadcn-sidebar";
@@ -37,7 +36,8 @@ export function AppSidebar() {
     e.preventDefault();
     
     if (!isAuthenticated) {
-      navigate('/sign-in');
+      // Add the current path as a redirect parameter
+      navigate('/sign-in?redirectTo=/storybooks');
       return;
     }
 
@@ -57,31 +57,27 @@ export function AppSidebar() {
     },
     {
       title: "Storybooks",
-      icon: Library,
+      icon: BookOpen,
       onClick: handleStoryBooksClick,
-      to: "#",
     },
   ];
 
   return (
     <ShadcnSidebar>
-      <ShadcnSidebarContent>
-        <ShadcnSidebarGroup>
-          <ShadcnSidebarGroupContent>
-            {menuItems.map((item) => (
-              <Link 
-                key={item.title} 
-                to={item.to}
-                onClick={item.onClick}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-              >
-                <item.icon className="h-4 w-4" />
-                <span>{item.title}</span>
-              </Link>
-            ))}
-          </ShadcnSidebarGroupContent>
-        </ShadcnSidebarGroup>
-      </ShadcnSidebarContent>
+      <ShadcnSidebarGroup>
+        <ShadcnSidebarGroupContent>
+          {menuItems.map((item, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent rounded-lg transition-colors"
+              onClick={item.onClick || (() => navigate(item.to))}
+            >
+              {item.icon && <item.icon className="h-4 w-4" />}
+              <span>{item.title}</span>
+            </div>
+          ))}
+        </ShadcnSidebarGroupContent>
+      </ShadcnSidebarGroup>
     </ShadcnSidebar>
   );
 }
