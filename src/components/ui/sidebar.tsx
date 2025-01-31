@@ -8,39 +8,40 @@ import {
   SidebarGroupContent as ShadcnSidebarGroupContent,
 } from "@/components/ui/shadcn-sidebar";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const profileId = Cookies.get('profile_id');
-  const isAuthorized = Cookies.get('profile_authorized');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check authentication state when component mounts
+    checkAuth();
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsAuthenticated(!!session);
+  };
 
   const handleStoryBooksClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     
-    if (!profileId || !isAuthorized) {
+    if (!isAuthenticated) {
       navigate('/sign-in');
       return;
     }
 
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', profileId)
-        .maybeSingle();
-
-      if (error || !profile) {
-        Cookies.remove('profile_id');
-        Cookies.remove('profile_authorized');
-        navigate('/sign-in');
-        return;
-      }
-
-      navigate('/storybooks');
-    } catch (error) {
-      console.error('Error checking profile:', error);
-      navigate('/sign-in');
-    }
+    navigate('/storybooks');
   };
 
   const menuItems = [
@@ -50,14 +51,9 @@ export function AppSidebar() {
       to: "/",
     },
     {
-      title: "Sign In",
-      icon: LogIn,
-      to: "/sign-in",
-    },
-    {
-      title: "Profile",
-      icon: User,
-      to: "/profile",
+      title: isAuthenticated ? "Profile" : "Sign In",
+      icon: isAuthenticated ? User : LogIn,
+      to: isAuthenticated ? `/profile/${Cookies.get('profile_id')}` : "/sign-in",
     },
     {
       title: "Storybooks",
