@@ -145,7 +145,10 @@ const StoryBooks = () => {
       </div>
 
       <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-8">
+        <Link to="/" className="text-[#A33D29] hover:underline mb-4 inline-block">
+          ← Back to Stories
+        </Link>
+        <div className="flex justify-between items-center mb-8 mt-4">
           <h1 className="text-3xl font-bold">Your Storybooks</h1>
           <Button
             onClick={() => setShowCreateModal(true)}
@@ -158,10 +161,10 @@ const StoryBooks = () => {
         <StoryBookList storybooks={storybooks} isLoading={isLoading} />
 
         <CreateStoryBookModal
-          open={showCreateModal}
-          onOpenChange={setShowCreateModal}
           onSuccess={fetchStorybooks}
-        />
+        >
+          <div />
+        </CreateStoryBookModal>
       </div>
     </div>
   );
