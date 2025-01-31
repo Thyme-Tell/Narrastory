@@ -10,8 +10,8 @@ export type StoryBook = {
   id: string;
   title: string;
   description: string | null;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;  // Changed from optional to required
+  updated_at: string;
 };
 
 export type StoryMedia = {
