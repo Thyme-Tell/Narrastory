@@ -8,41 +8,66 @@ import {
 } from "@/components/ui/shadcn-sidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Check authentication state when component mounts
-    checkAuth();
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
 
-    // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log("Auth state changed:", event, !!session);
+          setIsAuthenticated(!!session);
+        });
 
-    return () => {
-      subscription.unsubscribe();
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+        setIsAuthenticated(false);
+      }
     };
-  }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setIsAuthenticated(!!session);
-  };
+    checkAuth();
+  }, []);
 
   const handleStoryBooksClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     
-    if (!isAuthenticated) {
-      // Add the current path as a redirect parameter
+    // Only redirect to sign-in if we're sure the user isn't authenticated
+    if (isAuthenticated === false) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access storybooks",
+      });
       navigate('/sign-in?redirectTo=/storybooks');
       return;
     }
 
     navigate('/storybooks');
   };
+
+  // Don't render menu items until we know the auth state
+  if (isAuthenticated === null) {
+    return (
+      <ShadcnSidebar>
+        <ShadcnSidebarGroup>
+          <ShadcnSidebarGroupContent>
+            <div className="flex items-center justify-center h-screen">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          </ShadcnSidebarGroupContent>
+        </ShadcnSidebarGroup>
+      </ShadcnSidebar>
+    );
+  }
 
   const menuItems = [
     {
