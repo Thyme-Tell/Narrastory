@@ -49,6 +49,9 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
       });
       setOpen(false);
       onSuccess();
+      // Reset form
+      setTitle("");
+      setDescription("");
     } catch (error) {
       toast({
         title: "Error",

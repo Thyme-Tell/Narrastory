@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { StoryBookList } from "@/components/storybook/StoryBookList";
 import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +24,6 @@ interface StoryBook {
 const StoryBooks = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [firstName, setFirstName] = useState("");
@@ -150,21 +149,16 @@ const StoryBooks = () => {
         </Link>
         <div className="flex justify-between items-center mb-8 mt-4">
           <h1 className="text-3xl font-bold">Your Storybooks</h1>
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
-          >
-            Create New Storybook
-          </Button>
+          <CreateStoryBookModal onSuccess={fetchStorybooks}>
+            <Button
+              className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+            >
+              Create New Storybook
+            </Button>
+          </CreateStoryBookModal>
         </div>
 
         <StoryBookList storybooks={storybooks} isLoading={isLoading} />
-
-        <CreateStoryBookModal
-          onSuccess={fetchStorybooks}
-        >
-          <div />
-        </CreateStoryBookModal>
       </div>
     </div>
   );
