@@ -23,44 +23,45 @@ const StoryBooks = () => {
   const [firstName, setFirstName] = useState("");
   const { isAuthenticated, profileId, loading } = useAuth();
 
-  const fetchStorybooks = async () => {
-    try {
-      if (profileId) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('first_name')
-          .eq('id', profileId)
-          .maybeSingle();
-
-        if (profile) {
-          setFirstName(profile.first_name);
-        }
-
-        const { data, error } = await supabase
-          .from('storybooks')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setStorybooks(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load storybooks",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       return;
     }
-    fetchStorybooks();
+
+    const fetchData = async () => {
+      try {
+        if (profileId) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name')
+            .eq('id', profileId)
+            .maybeSingle();
+
+          if (profile) {
+            setFirstName(profile.first_name);
+          }
+
+          const { data, error } = await supabase
+            .from('storybooks')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          setStorybooks(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load storybooks",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, [profileId, isAuthenticated, loading, toast]);
 
   const handleLogout = async () => {
