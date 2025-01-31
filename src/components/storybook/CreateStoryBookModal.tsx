@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CreateStoryBookModalProps {
   onSuccess: () => void;
@@ -18,48 +19,13 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAuthenticated, profileId, checkAuth } = useAuth();
 
-  // Check authentication status when the modal opens
   useEffect(() => {
     if (open) {
       checkAuth();
     }
-  }, [open]);
-
-  const checkAuth = async () => {
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      console.log("Current session:", session);
-      
-      if (error) {
-        throw error;
-      }
-
-      if (!session) {
-        // Try to refresh the session before giving up
-        const { data: { session: refreshedSession }, error: refreshError } = 
-          await supabase.auth.refreshSession();
-        
-        if (refreshError || !refreshedSession) {
-          throw new Error("No valid session found");
-        }
-        
-        return true;
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Auth error:", error);
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create a storybook",
-        variant: "destructive",
-      });
-      setOpen(false);
-      navigate("/sign-in"); // Note: Changed from /signin to /sign-in to match your routes
-      return false;
-    }
-  };
+  }, [open, checkAuth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,30 +38,25 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
       return;
     }
 
+    if (!isAuthenticated || !profileId) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a storybook",
+        variant: "destructive",
+      });
+      setOpen(false);
+      navigate("/sign-in", { state: { redirectTo: "/storybooks" } });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      console.log("Starting storybook creation process...");
-      
-      // Check authentication before proceeding
-      const isAuthenticated = await checkAuth();
-      if (!isAuthenticated) return;
-
-      // Get the current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log("Session check result:", { session, sessionError });
-      
-      if (sessionError || !session?.user) {
-        console.error("Session error:", sessionError);
-        throw new Error("Authentication required");
-      }
-
       console.log("Creating storybook with data:", {
         title: title.trim(),
         description: description.trim() || null,
       });
       
-      // Create the storybook
       const { data: storybook, error: storybookError } = await supabase
         .from("storybooks")
         .insert({ 
@@ -117,14 +78,13 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
 
       console.log("Storybook created successfully:", storybook);
 
-      // Create owner membership
       const { error: memberError } = await supabase
         .from("storybook_members")
         .insert({
           storybook_id: storybook.id,
-          profile_id: session.user.id,
+          profile_id: profileId,
           role: "owner",
-          added_by: session.user.id,
+          added_by: profileId,
         });
 
       if (memberError) {
@@ -139,12 +99,9 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
         description: "Storybook created successfully",
       });
       
-      // Reset form and close modal
       setTitle("");
       setDescription("");
       setOpen(false);
-      
-      // Notify parent component to refresh the list
       onSuccess();
     } catch (error) {
       console.error("Error in storybook creation:", error);

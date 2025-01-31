@@ -5,7 +5,7 @@ import { StoryBookList } from "@/components/storybook/StoryBookList";
 import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, Library } from "lucide-react";
-import Cookies from "js-cookie";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,13 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-
-interface StoryBook {
-  id: string;
-  title: string;
-  description: string | null;
-  created_at: string;
-}
+import { StoryBook } from "@/types/supabase";
 
 const StoryBooks = () => {
   const navigate = useNavigate();
@@ -27,37 +21,29 @@ const StoryBooks = () => {
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [firstName, setFirstName] = useState("");
+  const { isAuthenticated, profileId, checkAuth } = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const profileId = Cookies.get('profile_id');
-      const isAuthorized = Cookies.get('profile_authorized');
-
-      if (!profileId || !isAuthorized) {
+    const init = async () => {
+      const isAuthed = await checkAuth();
+      if (!isAuthed) {
         toast({
           title: "Authentication required",
           description: "Please sign in to view storybooks",
         });
-        navigate("/sign-in");
+        navigate("/sign-in", { state: { redirectTo: "/storybooks" } });
         return;
       }
 
       try {
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('id, first_name')
+          .select('first_name')
           .eq('id', profileId)
           .maybeSingle();
 
         if (error || !profile) {
-          Cookies.remove('profile_id');
-          Cookies.remove('profile_authorized');
-          toast({
-            title: "Authentication required",
-            description: "Please sign in to view storybooks",
-          });
-          navigate("/sign-in");
-          return;
+          throw error;
         }
 
         setFirstName(profile.first_name);
@@ -68,14 +54,12 @@ const StoryBooks = () => {
       }
     };
 
-    checkAuth();
+    init();
     fetchStorybooks();
-  }, [navigate, toast]);
+  }, [navigate, toast, checkAuth, profileId]);
 
   const fetchStorybooks = async () => {
     try {
-      const profileId = Cookies.get('profile_id');
-      
       if (profileId) {
         const { data, error } = await supabase
           .from('storybooks')
