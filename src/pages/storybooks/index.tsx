@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { StoryBookList } from "@/components/storybook/StoryBookList";
 import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,20 +16,21 @@ interface StoryBook {
 const StoryBooks = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       const profileId = Cookies.get('profile_id');
+      const isAuthorized = Cookies.get('profile_authorized');
 
-      if (!user || !profileId) {
+      if (!profileId || !isAuthorized) {
         toast({
           title: "Authentication required",
           description: "Please sign in to view storybooks",
         });
-        navigate("/sign-in?redirectTo=/storybooks");
+        navigate("/sign-in");
         return;
       }
 
@@ -47,12 +48,12 @@ const StoryBooks = () => {
             title: "Authentication required",
             description: "Please sign in to view storybooks",
           });
-          navigate("/sign-in?redirectTo=/storybooks");
+          navigate("/sign-in");
           return;
         }
       } catch (error) {
         console.error('Error checking profile:', error);
-        navigate("/sign-in?redirectTo=/storybooks");
+        navigate("/sign-in");
         return;
       }
     };
@@ -86,20 +87,41 @@ const StoryBooks = () => {
     }
   };
 
+  const handleCreateStoryBook = async () => {
+    const profileId = Cookies.get('profile_id');
+    if (!profileId) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please sign in to create a storybook",
+      });
+      navigate("/sign-in");
+      return;
+    }
+    setShowCreateModal(true);
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Your Storybooks</h1>
-        <CreateStoryBookModal onSuccess={fetchStorybooks}>
-          <button
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition-colors"
-          >
-            Create New Storybook
-          </button>
-        </CreateStoryBookModal>
+        <button
+          onClick={handleCreateStoryBook}
+          className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition-colors"
+        >
+          Create New Storybook
+        </button>
       </div>
 
       <StoryBookList storybooks={storybooks} isLoading={isLoading} />
+
+      {showCreateModal && (
+        <CreateStoryBookModal
+          onSuccess={fetchStorybooks}
+        >
+          <div />
+        </CreateStoryBookModal>
+      )}
     </div>
   );
 };

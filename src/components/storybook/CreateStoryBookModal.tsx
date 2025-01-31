@@ -3,8 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import Cookies from "js-cookie";
 
 interface CreateStoryBookModalProps {
   onSuccess: () => void;
@@ -23,11 +21,6 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
     setIsLoading(true);
 
     try {
-      const profileId = Cookies.get('profile_id');
-      if (!profileId) {
-        throw new Error("User not authenticated");
-      }
-
       const { data: storybook, error } = await supabase
         .from("storybooks")
         .insert({ title, description })
@@ -42,9 +35,9 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
           .from("storybook_members")
           .insert({
             storybook_id: storybook.id,
-            profile_id: profileId,
+            profile_id: (await supabase.auth.getUser()).data.user?.id,
             role: "owner",
-            added_by: profileId,
+            added_by: (await supabase.auth.getUser()).data.user?.id,
           });
 
         if (memberError) throw memberError;
@@ -55,11 +48,8 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
         description: "Storybook created successfully",
       });
       setOpen(false);
-      setTitle("");
-      setDescription("");
       onSuccess();
     } catch (error) {
-      console.error('Error creating storybook:', error);
       toast({
         title: "Error",
         description: "Failed to create storybook",
@@ -94,13 +84,13 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional description"
           />
-          <Button
+          <button
             type="submit"
-            className="w-full"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             disabled={isLoading}
           >
             {isLoading ? "Creating..." : "Create Storybook"}
-          </Button>
+          </button>
         </form>
       </DialogContent>
     </Dialog>
