@@ -1,19 +1,35 @@
-import { Database } from "@/integrations/supabase/types";
+export type Story = {
+  id: string;
+  title: string | null;
+  content: string;
+  created_at: string;
+  share_token: string | null;
+};
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
-export type StorybookRole = Enums<'storybook_role'>;
+export type StoryBook = {
+  id: string;
+  title: string;
+  description: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
 
-// Define specific table types
-export type Profile = Tables<'profiles'>;
-export type Story = Tables<'stories'>;
-export type StoryMedia = Tables<'story_media'>;
-export type Storybook = Tables<'storybooks'>;
-export type StorybookMember = Tables<'storybook_members'>;
-export type StorybookStory = Tables<'storybook_stories'>;
-export type DeletedStory = Tables<'deleted_stories'>;
-export type PasswordResetToken = Tables<'password_reset_tokens'>;
+export type StoryMedia = {
+  id: string;
+  story_id: string;
+  file_path: string;
+  file_name: string;
+  content_type: string;
+  created_at: string;
+  caption: string | null;
+};
 
-// Helper type for Supabase query responses
-export type DbResult<T> = T extends PromiseLike<infer U> ? U : never;
-export type DbResultOk<T> = T extends PromiseLike<{ data: infer U }> ? Exclude<U, null> : never;
+export type Member = {
+  profile_id: string;
+  role: 'owner' | 'contributor' | 'viewer';
+  profiles: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+};
