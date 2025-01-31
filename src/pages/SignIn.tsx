@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,13 +28,17 @@ const SignIn = () => {
     const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
 
     try {
+      // First, find the profile
       const { data: profile, error: searchError } = await supabase
         .from("profiles")
-        .select("id, password")
+        .select("id, password, first_name")
         .eq("phone_number", normalizedPhoneNumber)
         .maybeSingle();
 
-      if (searchError) throw searchError;
+      if (searchError) {
+        console.error("Profile search error:", searchError);
+        throw new Error("Error finding account");
+      }
 
       if (!profile) {
         toast({
@@ -76,14 +80,34 @@ const SignIn = () => {
         return;
       }
 
-      // Set cookies to expire in 365 days
-      Cookies.set('profile_authorized', 'true', { expires: 365 });
-      Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
-      Cookies.set('profile_id', profile.id, { expires: 365 });
+      // Set cookies with proper expiration and path
+      Cookies.set('profile_authorized', 'true', { 
+        expires: 365,
+        path: '/',
+        sameSite: 'Strict'
+      });
+      
+      Cookies.set('phone_number', normalizedPhoneNumber, { 
+        expires: 365,
+        path: '/',
+        sameSite: 'Strict'
+      });
+      
+      Cookies.set('profile_id', profile.id, { 
+        expires: 365,
+        path: '/',
+        sameSite: 'Strict'
+      });
+
+      // Show success toast
+      toast({
+        title: "Welcome back!",
+        description: `Successfully signed in as ${profile.first_name}`,
+      });
 
       // Get the redirect path from URL params, default to profile page if none exists
       const redirectTo = searchParams.get('redirectTo') || `/profile/${profile.id}`;
-      navigate(redirectTo);
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error("Error:", error);
       toast({
