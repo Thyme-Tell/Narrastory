@@ -27,10 +27,28 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
   }, [open]);
 
   const checkAuth = async () => {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    console.log("Current session:", session);
-    
-    if (error || !session) {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log("Current session:", session);
+      
+      if (error) {
+        throw error;
+      }
+
+      if (!session) {
+        // Try to refresh the session before giving up
+        const { data: { session: refreshedSession }, error: refreshError } = 
+          await supabase.auth.refreshSession();
+        
+        if (refreshError || !refreshedSession) {
+          throw new Error("No valid session found");
+        }
+        
+        return true;
+      }
+
+      return true;
+    } catch (error) {
       console.error("Auth error:", error);
       toast({
         title: "Authentication Required",
@@ -38,10 +56,9 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
         variant: "destructive",
       });
       setOpen(false);
-      navigate("/signin");
+      navigate("/sign-in"); // Note: Changed from /signin to /sign-in to match your routes
       return false;
     }
-    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
