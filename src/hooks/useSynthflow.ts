@@ -10,16 +10,26 @@ export const useSynthflow = () => {
     setError(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('synthflow', {
+      console.log('Calling synthflow function with text:', text);
+      const { data, error: functionError } = await supabase.functions.invoke('synthflow', {
         body: { text },
       });
 
-      if (error) throw error;
+      if (functionError) {
+        console.error('Supabase function error:', functionError);
+        throw new Error(functionError.message);
+      }
 
+      if (!data) {
+        throw new Error('No data received from synthesis');
+      }
+
+      console.log('Synthesis successful:', data);
       return data;
     } catch (err) {
-      setError(err.message);
-      console.error('Synthflow error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to synthesize text';
+      console.error('Synthflow error:', errorMessage);
+      setError(errorMessage);
       return null;
     } finally {
       setIsLoading(false);

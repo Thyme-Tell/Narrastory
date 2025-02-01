@@ -1,27 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders } from "../_shared/cors.ts"
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 const SYNTHFLOW_API_KEY = Deno.env.get('SYNTHFLOW_API_KEY')
 const SYNTHFLOW_API_URL = 'https://api.synthflow.ai/v1'
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { text } = await req.json()
+    console.log('Received text for synthesis:', text);
 
     if (!text) {
+      console.error('No text provided');
       return new Response(
         JSON.stringify({ error: 'Text is required' }),
         { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
 
+    console.log('Making request to Synthflow API');
     const response = await fetch(`${SYNTHFLOW_API_URL}/synthesize`, {
       method: 'POST',
       headers: {
@@ -30,17 +38,19 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         text,
-        voice_id: 'en-US-Neural2-F', // Default voice
+        voice_id: 'en-US-Neural2-F',
         output_format: 'mp3',
       }),
     })
 
     if (!response.ok) {
       const error = await response.text()
+      console.error('Synthflow API error:', error);
       throw new Error(error)
     }
 
     const data = await response.json()
+    console.log('Successfully received response from Synthflow');
 
     return new Response(
       JSON.stringify(data),
@@ -50,6 +60,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error in synthflow function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
