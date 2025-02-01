@@ -6,7 +6,7 @@ const corsHeaders = {
 }
 
 const SYNTHFLOW_API_KEY = Deno.env.get('SYNTHFLOW_API_KEY')
-const SYNTHFLOW_API_URL = 'https://api.synthflow.ai/v1'
+const SYNTHFLOW_API_URL = 'https://api.synthflow.com/v1'
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -43,13 +43,21 @@ serve(async (req) => {
       }),
     })
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('Synthflow API error:', error);
-      throw new Error(error)
+    const responseText = await response.text()
+    let data
+    
+    try {
+      data = JSON.parse(responseText)
+    } catch (e) {
+      console.error('Failed to parse response:', responseText)
+      throw new Error('Invalid response from Synthflow API')
     }
 
-    const data = await response.json()
+    if (!response.ok) {
+      console.error('Synthflow API error:', data);
+      throw new Error(data.error || data.message || 'Synthflow API error')
+    }
+
     console.log('Successfully received response from Synthflow');
 
     return new Response(
@@ -62,7 +70,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in synthflow function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.details || 'No additional details available'
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
