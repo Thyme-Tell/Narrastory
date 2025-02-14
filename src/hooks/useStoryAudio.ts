@@ -63,10 +63,18 @@ export const useStoryAudio = (storyId: string) => {
 
   const updatePlaybackStats = useCallback(async () => {
     try {
+      // Get current playback count
+      const { data: currentStats } = await supabase
+        .from('story_audio')
+        .select('playback_count')
+        .eq('story_id', storyId)
+        .single();
+
+      // Update with incremented count
       await supabase
         .from('story_audio')
         .update({
-          playback_count: supabase.sql`playback_count + 1`,
+          playback_count: (currentStats?.playback_count || 0) + 1,
           last_played_at: new Date().toISOString(),
         })
         .eq('story_id', storyId);
