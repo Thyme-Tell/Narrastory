@@ -44,10 +44,7 @@ serve(async (req) => {
     console.log('Making request to Synthflow API');
     
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-      // Log request details (without sensitive info)
+      // Create request body
       const requestBody = {
         text,
         voice_id: 'en-US-Neural2-F',
@@ -55,8 +52,8 @@ serve(async (req) => {
       };
       console.log('Request body:', JSON.stringify(requestBody));
 
-      // Make the request with fetch
-      const response = await fetch(`${SYNTHFLOW_API_URL}/synthesize`, {
+      // Create request options
+      const requestOptions = {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
@@ -64,48 +61,70 @@ serve(async (req) => {
           'Accept': 'application/json',
         },
         body: JSON.stringify(requestBody),
-        signal: controller.signal,
-      }).catch(error => {
-        console.error('Fetch error:', error);
-        throw error;
-      });
+      };
 
-      clearTimeout(timeoutId);
+      // Log the request URL
+      console.log('Request URL:', `${SYNTHFLOW_API_URL}/synthesize`);
 
-      if (!response) {
-        throw new Error('No response received from Synthflow API');
-      }
-
-      console.log('Synthflow API response status:', response.status);
+      // Make the request
+      const response = await fetch(`${SYNTHFLOW_API_URL}/synthesize`, requestOptions);
       
-      // Read response as text first
-      const responseText = await response.text().catch(error => {
-        console.error('Error reading response text:', error);
-        throw new Error('Failed to read response from Synthflow API');
-      });
-      
-      console.log('Synthflow API raw response:', responseText);
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-      // Try to parse as JSON if we got a response
+      // Read response as text
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      // Try to parse the response
       let data;
       try {
-        data = responseText ? JSON.parse(responseText) : null;
+        data = JSON.parse(responseText);
       } catch (e) {
-        console.error('Failed to parse response as JSON:', e);
-        throw new Error('Invalid JSON response from Synthflow API');
+        console.error('JSON parse error:', e);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid response format',
+            details: responseText
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 502,
+          }
+        );
       }
 
+      // Check if response was successful
       if (!response.ok) {
-        console.error('Synthflow API error response:', data);
-        throw new Error(data?.error || data?.message || `Synthflow API error (${response.status})`);
+        console.error('API error response:', data);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Synthflow API error',
+            details: data?.error || data?.message || `Status ${response.status}`
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 502,
+          }
+        );
       }
 
-      if (!data || !data.audio_url) {
+      // Validate response data
+      if (!data?.audio_url) {
         console.error('Missing audio_url in response:', data);
-        throw new Error('Invalid response format from Synthflow API');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid response format',
+            details: 'Missing audio_url in response'
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 502,
+          }
+        );
       }
 
-      console.log('Successfully received response from Synthflow');
+      console.log('Successfully received audio URL:', data.audio_url);
       return new Response(
         JSON.stringify(data),
         { 
@@ -113,31 +132,19 @@ serve(async (req) => {
           status: 200,
         }
       );
-    } catch (fetchError) {
-      console.error('Detailed fetch error:', {
-        name: fetchError.name,
-        message: fetchError.message,
-        cause: fetchError.cause,
-        stack: fetchError.stack
-      });
 
-      if (fetchError.name === 'AbortError') {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Request timeout',
-            details: 'The request to Synthflow API timed out after 30 seconds'
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 504,
-          }
-        );
-      }
+    } catch (error) {
+      console.error('Request error:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause
+      });
 
       return new Response(
         JSON.stringify({ 
-          error: 'Synthflow API request failed',
-          details: fetchError.message
+          error: 'Network request failed',
+          details: error.message
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -146,11 +153,11 @@ serve(async (req) => {
       );
     }
   } catch (error) {
-    console.error('Error in synthflow function:', {
+    console.error('Function error:', {
       name: error.name,
       message: error.message,
-      cause: error.cause,
-      stack: error.stack
+      stack: error.stack,
+      cause: error.cause
     });
 
     return new Response(
