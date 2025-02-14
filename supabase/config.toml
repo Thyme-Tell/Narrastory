@@ -2,6 +2,8 @@
 project_id = "pohnhzxqorelllbfnqyj"
 [functions.story-edit]
 verify_jwt = false
+[functions.story-tts]
+verify_jwt = false
 [functions.synthflow-webhook]
 verify_jwt = false
 [functions.rpi-print-order]
