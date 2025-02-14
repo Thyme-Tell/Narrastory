@@ -41,55 +41,63 @@ serve(async (req) => {
       )
     }
 
-    console.log('Making request to Synthflow API');
-    const response = await fetch(`${SYNTHFLOW_API_URL}/synthesize`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        voice_id: 'en-US-Neural2-F',
-        output_format: 'mp3',
-      }),
-    })
-
-    const responseText = await response.text()
-    let data
+    console.log('Making request to Synthflow API with key:', SYNTHFLOW_API_KEY ? 'Present' : 'Missing');
     
     try {
-      data = JSON.parse(responseText)
-    } catch (e) {
-      console.error('Failed to parse response:', responseText)
-      throw new Error('Invalid response from Synthflow API')
+      const response = await fetch(`${SYNTHFLOW_API_URL}/synthesize`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          voice_id: 'en-US-Neural2-F',
+          output_format: 'mp3',
+        }),
+      });
+
+      console.log('Synthflow API response status:', response.status);
+      const responseText = await response.text();
+      console.log('Synthflow API raw response:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse response:', responseText);
+        throw new Error(`Invalid JSON response from Synthflow API: ${responseText}`);
+      }
+
+      if (!response.ok) {
+        console.error('Synthflow API error:', data);
+        throw new Error(data.error || data.message || 'Synthflow API error');
+      }
+
+      console.log('Successfully received response from Synthflow');
+      return new Response(
+        JSON.stringify(data),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    } catch (fetchError) {
+      console.error('Fetch error details:', fetchError);
+      throw new Error(`Synthflow API request failed: ${fetchError.message}`);
     }
-
-    if (!response.ok) {
-      console.error('Synthflow API error:', data);
-      throw new Error(data.error || data.message || 'Synthflow API error')
-    }
-
-    console.log('Successfully received response from Synthflow');
-
-    return new Response(
-      JSON.stringify(data),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      },
-    )
   } catch (error) {
     console.error('Error in synthflow function:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: error.details || 'No additional details available'
+        details: error.details || error.stack || 'No additional details available'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
-      },
-    )
+      }
+    );
   }
 })
