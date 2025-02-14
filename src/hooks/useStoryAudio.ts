@@ -47,7 +47,7 @@ export const useStoryAudio = (storyId: string) => {
           .from('story_audio')
           .select('audio_url')
           .eq('story_id', storyId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         if (data?.audio_url) {
@@ -68,16 +68,18 @@ export const useStoryAudio = (storyId: string) => {
         .from('story_audio')
         .select('playback_count')
         .eq('story_id', storyId)
-        .single();
+        .maybeSingle();
 
-      // Update with incremented count
-      await supabase
-        .from('story_audio')
-        .update({
-          playback_count: (currentStats?.playback_count || 0) + 1,
-          last_played_at: new Date().toISOString(),
-        })
-        .eq('story_id', storyId);
+      // Only update if the record exists
+      if (currentStats) {
+        await supabase
+          .from('story_audio')
+          .update({
+            playback_count: (currentStats.playback_count || 0) + 1,
+            last_played_at: new Date().toISOString(),
+          })
+          .eq('story_id', storyId);
+      }
     } catch (err) {
       console.error('Error updating playback stats:', err);
     }
