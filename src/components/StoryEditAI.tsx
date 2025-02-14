@@ -130,12 +130,21 @@ const StoryEditAI = ({ content, onSave, onCancel }: StoryEditAIProps) => {
       </div>
 
       <div className="space-y-4">
-        {previewContent && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border p-4 rounded-md space-y-2">
+            <Label>Original:</Label>
+            <div className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md h-[300px] overflow-y-auto">
+              {content}
+            </div>
+          </div>
+          
           <div className="border p-4 rounded-md space-y-2">
             <Label>Preview:</Label>
-            <div className="whitespace-pre-wrap text-sm">{previewContent}</div>
+            <div className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md h-[300px] overflow-y-auto">
+              {previewContent || "No preview generated yet"}
+            </div>
           </div>
-        )}
+        </div>
 
         <div className="flex space-x-2">
           <Button 
