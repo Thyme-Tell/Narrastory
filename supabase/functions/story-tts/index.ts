@@ -41,7 +41,7 @@ serve(async (req) => {
       .from('story_audio')
       .select('*')
       .eq('story_id', storyId)
-      .single()
+      .maybeSingle()
 
     if (existingAudio?.audio_url) {
       return new Response(
@@ -79,9 +79,7 @@ serve(async (req) => {
     }
 
     // Get the audio data
-    const audioBlob = await response.blob()
-    const audioBuffer = await audioBlob.arrayBuffer()
-    const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
+    const audioBuffer = await response.arrayBuffer()
 
     // Upload to Supabase Storage
     const fileName = `${storyId}-${Date.now()}.mp3`
@@ -110,6 +108,7 @@ serve(async (req) => {
         story_id: storyId,
         audio_url: publicUrl,
         voice_id: voiceId,
+        playback_count: 0,
       })
 
     if (metadataError) {
