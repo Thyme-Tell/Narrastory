@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Volume2 } from "lucide-react";
@@ -21,7 +22,7 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
 
   const handleSynthesize = async () => {
     const textToSynthesize = `${title ? title + '. ' : ''}${content}`;
-    const result = await synthesizeText(textToSynthesize);
+    const result = await synthesizeText(textToSynthesize, storyId);
     
     if (result?.audio_url) {
       setAudioUrl(result.audio_url);
