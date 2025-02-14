@@ -199,35 +199,6 @@ export type Database = {
         }
         Relationships: []
       }
-      story_audio: {
-        Row: {
-          audio_url: string
-          created_at: string
-          id: string
-          story_id: string | null
-        }
-        Insert: {
-          audio_url: string
-          created_at?: string
-          id?: string
-          story_id?: string | null
-        }
-        Update: {
-          audio_url?: string
-          created_at?: string
-          id?: string
-          story_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "story_audio_story_id_fkey"
-            columns: ["story_id"]
-            isOneToOne: false
-            referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       story_media: {
         Row: {
           caption: string | null
