@@ -163,6 +163,42 @@ export type Database = {
           },
         ]
       }
+      stories_richard: {
+        Row: {
+          created_at: string | null
+          first_name: string
+          id: number
+          last_name: string
+          media: string | null
+          story_content: string
+          story_date: string
+          story_title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          first_name: string
+          id?: number
+          last_name: string
+          media?: string | null
+          story_content: string
+          story_date?: string
+          story_title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          first_name?: string
+          id?: number
+          last_name?: string
+          media?: string | null
+          story_content?: string
+          story_date?: string
+          story_title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       story_media: {
         Row: {
           caption: string | null
