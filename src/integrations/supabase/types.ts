@@ -199,6 +199,50 @@ export type Database = {
         }
         Relationships: []
       }
+      story_audio: {
+        Row: {
+          audio_url: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          language: string | null
+          last_played_at: string | null
+          playback_count: number | null
+          story_id: string | null
+          voice_id: string | null
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          language?: string | null
+          last_played_at?: string | null
+          playback_count?: number | null
+          story_id?: string | null
+          voice_id?: string | null
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          language?: string | null
+          last_played_at?: string | null
+          playback_count?: number | null
+          story_id?: string | null
+          voice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_audio_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       story_media: {
         Row: {
           caption: string | null
