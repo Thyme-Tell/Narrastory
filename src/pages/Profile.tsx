@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +7,6 @@ import StoriesList from "@/components/StoriesList";
 import BookProgress from "@/components/BookProgress";
 import { Menu, Library } from "lucide-react";
 import { useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,22 +18,11 @@ import { Button } from "@/components/ui/button";
 const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, checkAuth } = useAuth();
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  useEffect(() => {
-    const init = async () => {
-      const isAuthed = await checkAuth();
-      if (!isAuthed) {
-        navigate("/sign-in", { state: { redirectTo: `/profile/${id}` } });
-      }
-    };
-    init();
-  }, [id, navigate, checkAuth]);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
@@ -53,7 +40,6 @@ const Profile = () => {
       
       return data;
     },
-    enabled: !!id && isAuthenticated,
   });
 
   const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
@@ -74,7 +60,7 @@ const Profile = () => {
 
       return storiesData;
     },
-    enabled: !!id && isAuthenticated,
+    enabled: !!id,
   });
 
   useEffect(() => {
