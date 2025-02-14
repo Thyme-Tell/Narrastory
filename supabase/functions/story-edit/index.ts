@@ -7,8 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SYNTHFLOW_API_KEY = Deno.env.get('SYNTHFLOW_API_KEY')
-const SYNTHFLOW_API_URL = 'https://api.synthflow.com/v1'
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
 
 type EditOption = 'shorten' | 'expand' | 'clarity' | 'tone' | 'grammar'
 
@@ -57,19 +56,20 @@ serve(async (req) => {
     systemPrompt += ' ' + instructions.join('. ') + '.'
     systemPrompt += ' Maintain the original voice and style where possible.'
 
-    const response = await fetch(`${SYNTHFLOW_API_URL}/generate`, {
+    console.log('Making request to OpenAI API');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: text }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
       }),
     })
 
@@ -85,10 +85,10 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error('AI service error:', data)
-      throw new Error(data.error || data.message || 'AI service error')
+      throw new Error(data.error?.message || 'AI service error')
     }
 
-    const editedText = data.text || data.choices?.[0]?.message?.content
+    const editedText = data.choices?.[0]?.message?.content
     if (!editedText) {
       throw new Error('No edited text received from AI service')
     }
