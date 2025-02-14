@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -25,6 +26,17 @@ serve(async (req) => {
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
+        }
+      )
+    }
+
+    if (!SYNTHFLOW_API_KEY) {
+      console.error('SYNTHFLOW_API_KEY not found in environment');
+      return new Response(
+        JSON.stringify({ error: 'Synthflow API key not configured' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
         }
       )
     }
