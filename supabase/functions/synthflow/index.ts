@@ -41,114 +41,116 @@ serve(async (req) => {
       )
     }
 
-    console.log('Making request to Synthflow API');
-    
     try {
-      // Create request body
-      const requestBody = {
-        text,
-        voice_id: 'en-US-Neural2-F',
-        output_format: 'mp3',
-      };
-      console.log('Request body:', JSON.stringify(requestBody));
+      console.log('Preparing request to Synthflow API');
+      
+      // Create request using URLSearchParams to ensure proper URL encoding
+      const url = new URL(`${SYNTHFLOW_API_URL}/synthesize`);
+      console.log('Request URL:', url.toString());
 
-      // Create request options
-      const requestOptions = {
+      const requestInit = {
         method: 'POST',
-        headers: {
+        headers: new Headers({
           'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
+          'User-Agent': 'Deno/1.0'
+        }),
+        body: JSON.stringify({
+          text,
+          voice_id: 'en-US-Neural2-F',
+          output_format: 'mp3'
+        }),
+        // Add Deno-specific TLS configuration
+        //@ts-ignore - Deno specific property
+        client: {
+          keepAlive: false,
+          http2: false
+        }
       };
 
-      // Log the request URL
-      console.log('Request URL:', `${SYNTHFLOW_API_URL}/synthesize`);
+      console.log('Making request to Synthflow API');
+      const response = await fetch(url.toString(), requestInit);
+      console.log('Response received:', response.status);
 
-      // Make the request
-      const response = await fetch(`${SYNTHFLOW_API_URL}/synthesize`, requestOptions);
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      const contentType = response.headers.get('content-type');
+      console.log('Response content-type:', contentType);
 
-      // Read response as text
       const responseText = await response.text();
-      console.log('Raw response:', responseText);
+      console.log('Response text length:', responseText.length);
+      console.log('Response text preview:', responseText.substring(0, 200));
 
-      // Try to parse the response
       let data;
       try {
         data = JSON.parse(responseText);
       } catch (e) {
-        console.error('JSON parse error:', e);
+        console.error('Failed to parse response:', e);
         return new Response(
           JSON.stringify({ 
             error: 'Invalid response format',
-            details: responseText
+            details: `Failed to parse response: ${e.message}`
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 502,
+            status: 502 
           }
         );
       }
 
-      // Check if response was successful
       if (!response.ok) {
-        console.error('API error response:', data);
+        console.error('API error:', data);
         return new Response(
           JSON.stringify({ 
-            error: 'Synthflow API error',
-            details: data?.error || data?.message || `Status ${response.status}`
+            error: 'API error',
+            details: data.error || data.message || `HTTP ${response.status}`
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 502,
+            status: response.status 
           }
         );
       }
 
-      // Validate response data
-      if (!data?.audio_url) {
-        console.error('Missing audio_url in response:', data);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Invalid response format',
-            details: 'Missing audio_url in response'
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 502,
-          }
-        );
-      }
-
-      console.log('Successfully received audio URL:', data.audio_url);
+      console.log('Processing successful response');
       return new Response(
         JSON.stringify(data),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
+          status: 200 
         }
       );
 
-    } catch (error) {
-      console.error('Request error:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-        cause: error.cause
+    } catch (fetchError) {
+      console.error('Fetch error:', {
+        name: fetchError.name,
+        message: fetchError.message,
+        cause: fetchError.cause,
+        stack: fetchError.stack
       });
+
+      // Check for specific network errors
+      const errorMessage = fetchError.message?.toLowerCase() || '';
+      if (errorMessage.includes('certificate')) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'SSL/TLS Error',
+            details: 'Failed to establish secure connection'
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 502 
+          }
+        );
+      }
 
       return new Response(
         JSON.stringify({ 
-          error: 'Network request failed',
-          details: error.message
+          error: 'API Connection Error',
+          details: fetchError.message
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 502,
+          status: 502 
         }
       );
     }
@@ -156,18 +158,18 @@ serve(async (req) => {
     console.error('Function error:', {
       name: error.name,
       message: error.message,
-      stack: error.stack,
-      cause: error.cause
+      cause: error.cause,
+      stack: error.stack
     });
 
     return new Response(
       JSON.stringify({ 
-        error: 'Internal server error',
+        error: 'Server Error',
         details: error.message
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 500 
       }
     );
   }
