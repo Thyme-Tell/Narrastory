@@ -41,9 +41,12 @@ serve(async (req) => {
       )
     }
 
-    console.log('Making request to Synthflow API with key:', SYNTHFLOW_API_KEY ? 'Present' : 'Missing');
+    console.log('Making request to Synthflow API');
     
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(`${SYNTHFLOW_API_URL}/synthesize`, {
         method: 'POST',
         headers: {
@@ -56,7 +59,10 @@ serve(async (req) => {
           voice_id: 'en-US-Neural2-F',
           output_format: 'mp3',
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       console.log('Synthflow API response status:', response.status);
       const responseText = await response.text();
@@ -67,7 +73,7 @@ serve(async (req) => {
         data = JSON.parse(responseText);
       } catch (e) {
         console.error('Failed to parse response:', responseText);
-        throw new Error(`Invalid JSON response from Synthflow API: ${responseText}`);
+        throw new Error('Invalid JSON response from Synthflow API');
       }
 
       if (!response.ok) {
@@ -85,6 +91,18 @@ serve(async (req) => {
       );
     } catch (fetchError) {
       console.error('Fetch error details:', fetchError);
+      if (fetchError.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Request timeout',
+            details: 'The request to Synthflow API timed out after 30 seconds'
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 504,
+          }
+        );
+      }
       throw new Error(`Synthflow API request failed: ${fetchError.message}`);
     }
   } catch (error) {
@@ -92,7 +110,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: error.details || error.stack || 'No additional details available'
+        details: error.stack || 'No additional details available'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
