@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { EditOption, useStoryEdit } from '@/hooks/useStoryEdit';
 import { Loader2 } from "lucide-react";
@@ -23,6 +24,7 @@ const StoryEditAI = ({ content, onSave, onCancel }: StoryEditAIProps) => {
   const [selectedOptions, setSelectedOptions] = useState<EditOption[]>([]);
   const [toneStyle, setToneStyle] = useState<string>('');
   const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { editStory, isLoading, error } = useStoryEdit();
   const { toast } = useToast();
 
@@ -52,6 +54,7 @@ const StoryEditAI = ({ content, onSave, onCancel }: StoryEditAIProps) => {
 
     if (editedText) {
       setPreviewContent(editedText);
+      setIsEditing(false);
     } else {
       toast({
         title: "Error",
@@ -65,6 +68,10 @@ const StoryEditAI = ({ content, onSave, onCancel }: StoryEditAIProps) => {
     if (previewContent) {
       onSave(previewContent);
     }
+  };
+
+  const handleEditPreview = () => {
+    setIsEditing(true);
   };
 
   return (
@@ -139,10 +146,29 @@ const StoryEditAI = ({ content, onSave, onCancel }: StoryEditAIProps) => {
           </div>
           
           <div className="border p-4 rounded-md space-y-2">
-            <Label>Preview:</Label>
-            <div className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md h-[300px] overflow-y-auto">
-              {previewContent || "No preview generated yet"}
+            <div className="flex justify-between items-center mb-2">
+              <Label>Preview:</Label>
+              {previewContent && !isEditing && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEditPreview}
+                >
+                  Edit
+                </Button>
+              )}
             </div>
+            {isEditing && previewContent ? (
+              <Textarea
+                value={previewContent}
+                onChange={(e) => setPreviewContent(e.target.value)}
+                className="h-[300px] resize-none"
+              />
+            ) : (
+              <div className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md h-[300px] overflow-y-auto">
+                {previewContent || "No preview generated yet"}
+              </div>
+            )}
           </div>
         </div>
 
