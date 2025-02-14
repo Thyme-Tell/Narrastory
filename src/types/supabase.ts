@@ -1,3 +1,4 @@
+
 export type Story = {
   id: string;
   title: string | null;
@@ -10,7 +11,7 @@ export type StoryBook = {
   id: string;
   title: string;
   description: string | null;
-  created_at: string;  // Changed from optional to required
+  created_at: string;
   updated_at: string;
 };
 

@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Volume2 } from "lucide-react";
-import { useSynthflow } from "@/hooks/useSynthflow";
+
+import { useState } from "react";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
-import { useToast } from "./ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Headphones } from "lucide-react";
+import AudioPlayer from "./AudioPlayer";
+import { useStoryAudio } from "@/hooks/useStoryAudio";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface StoryContentProps {
   title: string | null;
@@ -14,24 +16,15 @@ interface StoryContentProps {
 }
 
 const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) => {
+  const [showPlayer, setShowPlayer] = useState(false);
+  const { isLoading, audioUrl, generateAudio, updatePlaybackStats } = useStoryAudio(storyId);
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
-  const { synthesizeText, isLoading } = useSynthflow();
-  const { toast } = useToast();
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-  const handleSynthesize = async () => {
-    const textToSynthesize = `${title ? title + '. ' : ''}${content}`;
-    const result = await synthesizeText(textToSynthesize);
-    
-    if (result?.audio_url) {
-      setAudioUrl(result.audio_url);
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to generate audio. Please try again.",
-        variant: "destructive",
-      });
+  const handleListen = async () => {
+    if (!audioUrl) {
+      await generateAudio();
     }
+    setShowPlayer(true);
   };
 
   return (
@@ -43,25 +36,25 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         <Button
           variant="outline"
           size="sm"
-          onClick={handleSynthesize}
+          onClick={handleListen}
           disabled={isLoading}
           className="ml-auto"
         >
-          <Volume2 className="h-4 w-4 mr-2" />
-          {isLoading ? "Generating..." : "Listen"}
+          {isLoading ? (
+            <LoadingSpinner className="mr-2 h-4 w-4" />
+          ) : (
+            <Headphones className="mr-2 h-4 w-4" />
+          )}
+          Listen
         </Button>
       </div>
       
-      {audioUrl && (
-        <audio
-          controls
-          className="w-full mb-4"
-          src={audioUrl}
-        >
-          Your browser does not support the audio element.
-        </audio>
+      {showPlayer && audioUrl && (
+        <div className="mb-4">
+          <AudioPlayer audioUrl={audioUrl} onPlay={updatePlaybackStats} />
+        </div>
       )}
-
+      
       <div className="text-atlantic text-left">
         {paragraphs.map((paragraph, index) => (
           <p key={index} className="whitespace-pre-wrap mb-[10px]">
