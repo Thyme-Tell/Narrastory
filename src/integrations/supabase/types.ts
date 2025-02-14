@@ -163,6 +163,86 @@ export type Database = {
           },
         ]
       }
+      stories_richard: {
+        Row: {
+          created_at: string | null
+          first_name: string
+          id: number
+          last_name: string
+          media: string | null
+          story_content: string
+          story_date: string
+          story_title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          first_name: string
+          id?: number
+          last_name: string
+          media?: string | null
+          story_content: string
+          story_date?: string
+          story_title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          first_name?: string
+          id?: number
+          last_name?: string
+          media?: string | null
+          story_content?: string
+          story_date?: string
+          story_title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      story_audio: {
+        Row: {
+          audio_url: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          language: string | null
+          last_played_at: string | null
+          playback_count: number | null
+          story_id: string | null
+          voice_id: string | null
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          language?: string | null
+          last_played_at?: string | null
+          playback_count?: number | null
+          story_id?: string | null
+          voice_id?: string | null
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          language?: string | null
+          last_played_at?: string | null
+          playback_count?: number | null
+          story_id?: string | null
+          voice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_audio_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       story_media: {
         Row: {
           caption: string | null
