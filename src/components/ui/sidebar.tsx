@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import { LogIn, Home, User } from "lucide-react";
+import { LogIn, Home, BookOpen, User } from "lucide-react";
 import Cookies from "js-cookie";
 import {
   Sidebar as ShadcnSidebar,
@@ -33,6 +33,18 @@ export function AppSidebar() {
     setIsAuthenticated(!!session);
   };
 
+  const handleStoryBooksClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated) {
+      // Add the current path as a redirect parameter
+      navigate('/sign-in?redirectTo=/storybooks');
+      return;
+    }
+
+    navigate('/storybooks');
+  };
+
   const menuItems = [
     {
       title: "Home",
@@ -44,6 +56,11 @@ export function AppSidebar() {
       icon: isAuthenticated ? User : LogIn,
       to: isAuthenticated ? `/profile/${Cookies.get('profile_id')}` : "/sign-in",
     },
+    {
+      title: "Storybooks",
+      icon: BookOpen,
+      onClick: handleStoryBooksClick,
+    },
   ];
 
   return (
@@ -54,7 +71,7 @@ export function AppSidebar() {
             <div
               key={index}
               className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent rounded-lg transition-colors"
-              onClick={() => navigate(item.to)}
+              onClick={item.onClick || (() => navigate(item.to))}
             >
               {item.icon && <item.icon className="h-4 w-4" />}
               <span>{item.title}</span>
