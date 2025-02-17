@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,8 +35,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (error || !profile) {
+        console.error('Error validating auth:', error);
         Cookies.remove('profile_id');
         Cookies.remove('profile_authorized');
+        Cookies.remove('phone_number');
         setIsAuthenticated(false);
         setProfileId(null);
         return false;
@@ -54,6 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     checkAuth();
+    
+    // Recheck auth when cookies change
+    const handleCookieChange = () => {
+      checkAuth();
+    };
+
+    window.addEventListener('storage', handleCookieChange);
+    return () => window.removeEventListener('storage', handleCookieChange);
   }, []);
 
   return (
