@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import FormField from "@/components/FormField";
@@ -14,6 +15,7 @@ const SignIn = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -81,9 +83,12 @@ const SignIn = () => {
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
       Cookies.set('profile_id', profile.id, { expires: 365 });
 
-      // Get the redirect path from URL params, default to profile page if none exists
-      const redirectTo = searchParams.get('redirectTo') || `/profile/${profile.id}`;
-      navigate(redirectTo);
+      // Get the redirect path from URL params or location state
+      const redirectTo = searchParams.get('redirectTo') || 
+                        (location.state as { redirectTo?: string })?.redirectTo || 
+                        `/profile/${profile.id}`;
+      
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error("Error:", error);
       toast({

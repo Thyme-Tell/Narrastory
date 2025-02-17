@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { StoryBookList } from "@/components/storybook/StoryBookList";
 import { CreateStoryBookModal } from "@/components/storybook/CreateStoryBookModal";
@@ -18,6 +17,7 @@ import { StoryBook } from "@/types/supabase";
 
 const StoryBooks = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +31,10 @@ const StoryBooks = () => {
           title: "Authentication required",
           description: "Please sign in to view storybooks",
         });
-        navigate("/sign-in", { state: { redirectTo: "/storybooks" } });
+        navigate("/sign-in", { 
+          state: { redirectTo: location.pathname },
+          replace: true 
+        });
         return;
       }
 
@@ -58,7 +61,7 @@ const StoryBooks = () => {
     if (isAuthenticated) {
       fetchStorybooks();
     }
-  }, [navigate, toast, isAuthenticated, profileId]);
+  }, [navigate, toast, isAuthenticated, profileId, location.pathname]);
 
   const fetchStorybooks = async () => {
     try {
