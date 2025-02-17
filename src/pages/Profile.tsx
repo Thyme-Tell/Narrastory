@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import BookProgress from "@/components/BookProgress";
-import { Menu, Library } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
   DropdownMenu,
@@ -22,15 +21,12 @@ const Profile = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  // Validate UUID format
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-  // Only redirect to sign-in if we're not already there and we need authentication
   if (!isValidUUID && !window.location.pathname.includes('/sign-in')) {
     return <Navigate to="/sign-in" replace />;
   }
 
-  // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -139,12 +135,6 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link to="/storybooks" className="flex items-center gap-2">
-                <Library className="h-4 w-4" />
-                <span>Storybooks</span>
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
             </DropdownMenuItem>
