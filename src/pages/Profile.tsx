@@ -15,15 +15,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   // Validate UUID format
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-  if (!isValidUUID) {
+  // Only redirect to sign-in if we're not already there and we need authentication
+  if (!isValidUUID && !window.location.pathname.includes('/sign-in')) {
     return <Navigate to="/sign-in" replace />;
   }
 
@@ -35,6 +38,8 @@ const Profile = () => {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
+      if (!isValidUUID) return null;
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, created_at")
@@ -54,7 +59,7 @@ const Profile = () => {
   const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
     queryKey: ["stories", id],
     queryFn: async () => {
-      if (!id) return [];
+      if (!isValidUUID) return [];
       
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
@@ -97,7 +102,7 @@ const Profile = () => {
     );
   }
 
-  if (!profile) {
+  if (!profile && isValidUUID) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
