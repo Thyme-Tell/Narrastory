@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -21,12 +22,11 @@ const StoryBooks = () => {
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [firstName, setFirstName] = useState("");
-  const { isAuthenticated, profileId, checkAuth } = useAuth();
+  const { isAuthenticated, profileId } = useAuth();
 
   useEffect(() => {
     const init = async () => {
-      const isAuthed = await checkAuth();
-      if (!isAuthed) {
+      if (!isAuthenticated) {
         toast({
           title: "Authentication required",
           description: "Please sign in to view storybooks",
@@ -55,8 +55,10 @@ const StoryBooks = () => {
     };
 
     init();
-    fetchStorybooks();
-  }, [navigate, toast, checkAuth, profileId]);
+    if (isAuthenticated) {
+      fetchStorybooks();
+    }
+  }, [navigate, toast, isAuthenticated, profileId]);
 
   const fetchStorybooks = async () => {
     try {
