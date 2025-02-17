@@ -1,5 +1,5 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,6 +19,13 @@ import { Button } from "@/components/ui/button";
 const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // Validate UUID format
+  const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+  if (!isValidUUID) {
+    return <Navigate to="/sign-in" replace />;
+  }
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -41,6 +48,7 @@ const Profile = () => {
       
       return data;
     },
+    enabled: isValidUUID,
   });
 
   const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
@@ -61,7 +69,7 @@ const Profile = () => {
 
       return storiesData;
     },
-    enabled: !!id,
+    enabled: isValidUUID,
   });
 
   useEffect(() => {
