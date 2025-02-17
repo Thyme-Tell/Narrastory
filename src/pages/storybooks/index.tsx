@@ -31,10 +31,7 @@ const StoryBooks = () => {
           title: "Authentication required",
           description: "Please sign in to view storybooks",
         });
-        navigate("/sign-in", { 
-          state: { redirectTo: location.pathname },
-          replace: true 
-        });
+        navigate(`/sign-in?redirectTo=${encodeURIComponent(location.pathname)}`, { replace: true });
         return;
       }
 

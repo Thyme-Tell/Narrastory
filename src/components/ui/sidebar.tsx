@@ -1,7 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
 import { LogIn, Home, BookOpen, User } from "lucide-react";
-import Cookies from "js-cookie";
 import {
   Sidebar as ShadcnSidebar,
   SidebarGroup as ShadcnSidebarGroup,
@@ -17,8 +16,7 @@ export function AppSidebar() {
     e.preventDefault();
     
     if (!isAuthenticated) {
-      // Add the current path as a redirect parameter
-      navigate('/sign-in?redirectTo=/storybooks');
+      navigate(`/sign-in?redirectTo=${encodeURIComponent('/storybooks')}`, { replace: true });
       return;
     }
 
