@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import BookProgress from "@/components/BookProgress";
-import { Menu, Library } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
   DropdownMenu,
@@ -125,12 +126,6 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link to="/storybooks" className="flex items-center gap-2">
-                <Library className="h-4 w-4" />
-                <span>Storybooks</span>
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
             </DropdownMenuItem>
