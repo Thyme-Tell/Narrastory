@@ -55,7 +55,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative overflow-hidden">
         <button 
           onClick={() => setIsHidden(true)}
-          className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic z-10"
+          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full bg-white/50 text-atlantic/70 hover:text-atlantic z-10"
         >
           <X className="h-5 w-5" />
           <span className="sr-only">Close</span>
@@ -82,7 +82,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative overflow-hidden">
       <button 
         onClick={() => setIsHidden(true)}
-        className="absolute top-4 right-4 text-atlantic/70 hover:text-atlantic z-10"
+        className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full bg-white/50 text-atlantic/70 hover:text-atlantic z-10"
       >
         <X className="h-5 w-5" />
         <span className="sr-only">Close</span>
