@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
@@ -63,7 +64,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           <img
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
             alt="Book illustration"
-            className="w-full h-64 object-cover"
+            className="w-full h-32 object-cover"
           />
           <div className="p-6">
             <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Share your first story</h2>
@@ -73,12 +74,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
             </p>
           </div>
         </div>
-        <button 
-          onClick={() => setIsHidden(true)}
-          className="w-full text-center pb-4 text-sm text-atlantic/70 hover:text-atlantic"
-        >
-          Remind me later
-        </button>
       </div>
     );
   }
@@ -96,7 +91,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <img
           src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
           alt="Book illustration"
-          className="w-full h-64 object-cover"
+          className="w-full h-32 object-cover"
         />
         <div className="p-6">
           <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Great progress!</h2>
@@ -106,12 +101,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           <Progress value={progressPercentage} className="h-2" />
         </div>
       </div>
-      <button 
-        onClick={() => setIsHidden(true)}
-        className="w-full text-center pb-4 text-sm text-atlantic/70 hover:text-atlantic"
-      >
-        Remind me later
-      </button>
     </div>
   );
 };
