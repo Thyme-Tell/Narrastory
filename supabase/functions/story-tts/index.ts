@@ -7,10 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY')
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -21,8 +17,8 @@ serve(async (req) => {
 
     // Initialize Supabase client
     const supabase = createClient(
-      SUPABASE_URL!,
-      SUPABASE_SERVICE_ROLE_KEY!
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
     // Get story content
@@ -36,20 +32,6 @@ serve(async (req) => {
       throw new Error('Story not found')
     }
 
-    // Check if audio already exists
-    const { data: existingAudio } = await supabase
-      .from('story_audio')
-      .select('*')
-      .eq('story_id', storyId)
-      .maybeSingle()
-
-    if (existingAudio?.audio_url) {
-      return new Response(
-        JSON.stringify({ audioUrl: existingAudio.audio_url }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
     // Prepare text for TTS
     const text = `${story.title ? story.title + ". " : ""}${story.content}`
 
@@ -61,7 +43,7 @@ serve(async (req) => {
         headers: {
           'Accept': 'audio/mpeg',
           'Content-Type': 'application/json',
-          'xi-api-key': ELEVEN_LABS_API_KEY!,
+          'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY')!,
         },
         body: JSON.stringify({
           text,
@@ -75,7 +57,8 @@ serve(async (req) => {
     )
 
     if (!response.ok) {
-      throw new Error('Failed to generate audio')
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to generate audio')
     }
 
     // Get the audio data
