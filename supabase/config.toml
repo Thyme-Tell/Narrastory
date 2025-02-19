@@ -20,7 +20,6 @@ api_url = "http://localhost"
 
 [storage]
 enabled = true
-buckets_jwt_secret = "your-super-secret-jwt-token-with-at-least-32-characters-long"
 
 [auth]
 enabled = true
