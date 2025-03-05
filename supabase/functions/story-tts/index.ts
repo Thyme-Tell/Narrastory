@@ -6,6 +6,9 @@ import { saveAudioMetadata } from "./database-operations.ts"
 import { uploadAudioFile } from "./storage-operations.ts"
 import { fetchStoryContent } from "./story-operations.ts"
 
+// Standard voice ID to use for all stories
+const STANDARD_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -13,13 +16,15 @@ serve(async (req) => {
 
   try {
     console.log('Received request to generate audio');
-    const { storyId, voiceId = "21m00Tcm4TlvDq8ikWAM" } = await req.json()
+    const { storyId, voiceId } = await req.json()
 
     if (!storyId) {
       throw new Error('Story ID is required')
     }
 
-    console.log(`Generating audio for story: ${storyId} with voice: ${voiceId}`)
+    // Always use the standard voice ID to ensure consistency
+    const finalVoiceId = STANDARD_VOICE_ID;
+    console.log(`Generating audio for story: ${storyId} with voice: ${finalVoiceId}`)
 
     // Fetch story content from database
     const story = await fetchStoryContent(storyId)
@@ -35,15 +40,15 @@ serve(async (req) => {
     }
 
     // Generate audio using ElevenLabs API
-    console.log(`Calling ElevenLabs API with voice ID: ${voiceId}...`)
-    const audioBuffer = await generateAudio(story, voiceId)
+    console.log(`Calling ElevenLabs API with standard voice ID...`)
+    const audioBuffer = await generateAudio(story, finalVoiceId)
     
     // Upload to Supabase Storage
     const filename = `${storyId}-${Date.now()}.mp3`
     const publicUrl = await uploadAudioFile(filename, audioBuffer)
     
     // Save audio metadata
-    await saveAudioMetadata(storyId, publicUrl, voiceId)
+    await saveAudioMetadata(storyId, publicUrl, finalVoiceId)
 
     return new Response(
       JSON.stringify({ audioUrl: publicUrl }),

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
@@ -38,10 +37,8 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     
     if (!audioUrl) {
       console.log('No existing audio URL, generating new audio...');
-      // Use a specific voice ID from ElevenLabs
-      const voiceId = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
       try {
-        const generatedUrl = await generateAudio(voiceId);
+        const generatedUrl = await generateAudio();
         if (generatedUrl) {
           setShowPlayer(true);
         }

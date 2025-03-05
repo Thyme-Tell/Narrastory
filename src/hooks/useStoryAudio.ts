@@ -1,7 +1,9 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+
+// Standardized voice ID to use across the application
+const STANDARD_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
 
 export const useStoryAudio = (storyId: string) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,12 +11,12 @@ export const useStoryAudio = (storyId: string) => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const generateAudio = useCallback(async (voiceId?: string) => {
+  const generateAudio = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('Generating audio for story:', storyId, 'with voice:', voiceId || 'default');
+      console.log('Generating audio for story:', storyId, 'with standard voice');
       
       // First, check if the story exists and get its content
       const { data: storyData, error: storyError } = await supabase
@@ -39,13 +41,10 @@ export const useStoryAudio = (storyId: string) => {
         throw new Error('Story content is empty. Please add content before generating audio.');
       }
 
-      // Default voice ID if not provided
-      const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
-
       const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
         body: { 
           storyId, 
-          voiceId: voiceId || defaultVoiceId
+          voiceId: STANDARD_VOICE_ID
         },
       });
 
