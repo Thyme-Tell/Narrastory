@@ -26,10 +26,15 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     
     if (!audioUrl) {
       console.log('No existing audio URL, generating new audio...');
-      await generateAudio();
+      // Use a specific voice ID from ElevenLabs
+      const voiceId = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
+      const generatedUrl = await generateAudio(voiceId);
+      if (generatedUrl) {
+        setShowPlayer(true);
+      }
+    } else {
+      setShowPlayer(true);
     }
-    
-    setShowPlayer(true);
   };
 
   return (

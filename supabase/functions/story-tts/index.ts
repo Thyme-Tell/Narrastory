@@ -22,10 +22,14 @@ serve(async (req) => {
     console.log(`Generating audio for story: ${storyId} with voice: ${voiceId}`)
 
     // Initialize Supabase client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase environment variables')
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Get story content
     const { data: story, error: storyError } = await supabase
@@ -36,7 +40,7 @@ serve(async (req) => {
 
     if (storyError || !story) {
       console.error('Story fetch error:', storyError)
-      throw new Error('Story not found')
+      throw new Error(storyError?.message || 'Story not found')
     }
 
     // Prepare text for TTS
@@ -47,11 +51,11 @@ serve(async (req) => {
     console.log('Checking for existing audio...')
     const { data: existingAudio } = await supabase
       .from('story_audio')
-      .select('*')
+      .select('audio_url')
       .eq('story_id', storyId)
       .maybeSingle()
 
-    if (existingAudio) {
+    if (existingAudio?.audio_url) {
       console.log(`Found existing audio: ${existingAudio.audio_url}`)
       return new Response(
         JSON.stringify({ audioUrl: existingAudio.audio_url }),
@@ -60,6 +64,12 @@ serve(async (req) => {
     }
 
     console.log('No existing audio found, generating new audio...')
+
+    // Check if ELEVEN_LABS_API_KEY is set
+    const elevenLabsApiKey = Deno.env.get('ELEVEN_LABS_API_KEY')
+    if (!elevenLabsApiKey) {
+      throw new Error('ELEVEN_LABS_API_KEY environment variable is not set')
+    }
 
     // Generate audio using ElevenLabs API
     console.log('Calling ElevenLabs API...')
@@ -70,7 +80,7 @@ serve(async (req) => {
         headers: {
           'Accept': 'audio/mpeg',
           'Content-Type': 'application/json',
-          'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY')!,
+          'xi-api-key': elevenLabsApiKey,
         },
         body: JSON.stringify({
           text,
@@ -84,9 +94,9 @@ serve(async (req) => {
     )
 
     if (!response.ok) {
-      const errorData = await response.text()
-      console.error('ElevenLabs API error:', errorData)
-      throw new Error('Failed to generate audio: ' + errorData)
+      const errorText = await response.text()
+      console.error('ElevenLabs API error:', response.status, errorText)
+      throw new Error(`Failed to generate audio: ${response.status} ${errorText}`)
     }
 
     console.log('Audio generated successfully')
@@ -99,6 +109,27 @@ serve(async (req) => {
     const filename = `${storyId}-${Date.now()}.mp3`
     console.log(`Uploading audio to storage with filename: ${filename}`)
 
+    // Check if bucket exists
+    const { data: buckets } = await supabase
+      .storage
+      .listBuckets()
+      
+    const bucketExists = buckets?.some(bucket => bucket.name === 'story-audio')
+    
+    if (!bucketExists) {
+      console.log('Creating story-audio bucket')
+      const { error: createBucketError } = await supabase
+        .storage
+        .createBucket('story-audio', {
+          public: true,
+        })
+        
+      if (createBucketError) {
+        console.error('Failed to create storage bucket:', createBucketError)
+        throw new Error(`Failed to create storage bucket: ${createBucketError.message}`)
+      }
+    }
+
     const { error: uploadError } = await supabase
       .storage
       .from('story-audio')
@@ -109,7 +140,7 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError)
-      throw new Error('Failed to upload audio: ' + uploadError.message)
+      throw new Error(`Failed to upload audio: ${uploadError.message}`)
     }
 
     console.log('Audio uploaded successfully')
@@ -136,7 +167,7 @@ serve(async (req) => {
 
     if (metadataError) {
       console.error('Metadata save error:', metadataError)
-      throw new Error('Failed to save audio metadata: ' + metadataError.message)
+      throw new Error(`Failed to save audio metadata: ${metadataError.message}`)
     }
 
     console.log('Audio metadata saved successfully')

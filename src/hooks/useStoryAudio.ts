@@ -14,13 +14,17 @@ export const useStoryAudio = (storyId: string) => {
     setError(null);
 
     try {
-      console.log('Generating audio for story:', storyId, 'with voice:', voiceId);
+      console.log('Generating audio for story:', storyId, 'with voice:', voiceId || 'default');
       
       const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
-        body: { storyId, voiceId },
+        body: { 
+          storyId, 
+          voiceId: voiceId || "21m00Tcm4TlvDq8ikWAM" // Default ElevenLabs voice ID
+        },
       });
 
       if (invokeError) {
+        console.error('Function invocation error:', invokeError);
         throw new Error(`Function invocation error: ${invokeError.message}`);
       }
       
@@ -28,11 +32,11 @@ export const useStoryAudio = (storyId: string) => {
         throw new Error('No data returned from edge function');
       }
 
+      console.log('Audio generation response:', data);
+
       if (data.error) {
         throw new Error(data.error);
       }
-
-      console.log('Audio generation response:', data);
 
       if (data.audioUrl) {
         setAudioUrl(data.audioUrl);
@@ -41,10 +45,12 @@ export const useStoryAudio = (storyId: string) => {
           title: "Success",
           description: "Audio generated successfully",
         });
+        
+        return data.audioUrl;
       } else {
         throw new Error('No audio URL returned');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error generating audio:', err);
       setError(err.message);
       toast({
@@ -52,6 +58,7 @@ export const useStoryAudio = (storyId: string) => {
         description: `Failed to generate audio: ${err.message}`,
         variant: "destructive",
       });
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +75,10 @@ export const useStoryAudio = (storyId: string) => {
           .eq('story_id', storyId)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching audio:', error);
+          throw error;
+        }
         
         console.log('Existing audio data:', data);
         
@@ -95,6 +105,7 @@ export const useStoryAudio = (storyId: string) => {
         .maybeSingle();
 
       if (statsError) {
+        console.error('Error fetching playback stats:', statsError);
         throw statsError;
       }
 
@@ -103,13 +114,17 @@ export const useStoryAudio = (storyId: string) => {
         const newCount = (currentStats.playback_count || 0) + 1;
         console.log('Incrementing playback count to:', newCount);
         
-        await supabase
+        const { error: updateError } = await supabase
           .from('story_audio')
           .update({
             playback_count: newCount,
             last_played_at: new Date().toISOString(),
           })
           .eq('story_id', storyId);
+          
+        if (updateError) {
+          console.error('Error updating playback stats:', updateError);
+        }
       }
     } catch (err) {
       console.error('Error updating playback stats:', err);

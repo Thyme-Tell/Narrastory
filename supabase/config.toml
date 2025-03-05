@@ -34,5 +34,5 @@ enable_signup = true
 [realtime]
 enabled = true
 
-[functions."story-tts"]
+[functions.story-tts]
 verify_jwt = false
