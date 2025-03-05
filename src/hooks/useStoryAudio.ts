@@ -16,6 +16,29 @@ export const useStoryAudio = (storyId: string) => {
     try {
       console.log('Generating audio for story:', storyId, 'with voice:', voiceId || 'default');
       
+      // First, check if the story exists and get its content
+      const { data: storyData, error: storyError } = await supabase
+        .from('stories')
+        .select('content, title')
+        .eq('id', storyId)
+        .single();
+        
+      if (storyError) {
+        console.error('Error fetching story data:', storyError);
+        throw new Error(`Story not found or inaccessible: ${storyError.message}`);
+      }
+      
+      if (!storyData) {
+        throw new Error('Story data is empty');
+      }
+      
+      console.log('Story found:', storyData.title || 'Untitled', 'Content length:', storyData.content.length);
+      
+      // Check if content is empty
+      if (!storyData.content || storyData.content.trim() === '') {
+        throw new Error('Story content is empty');
+      }
+
       const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
         body: { 
           storyId, 

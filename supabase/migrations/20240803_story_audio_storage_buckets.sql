@@ -26,3 +26,15 @@ VALUES (
   'objects',
   '{anon, authenticated}'
 ) ON CONFLICT DO NOTHING;
+
+-- Ensure we have proper delete permissions (important for cleaning up old audio files)
+INSERT INTO storage.policies (name, definition, check, action, schema, table, roles)
+VALUES (
+  'Public Delete Access',
+  'bucket_id = ''story-audio''',
+  'true',
+  'DELETE',
+  'storage',
+  'objects',
+  '{anon, authenticated}'
+) ON CONFLICT DO NOTHING;

@@ -13,6 +13,7 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Received request to generate audio');
     const { storyId, voiceId = "21m00Tcm4TlvDq8ikWAM" } = await req.json()
 
     if (!storyId) {
@@ -32,16 +33,27 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Get story content
+    console.log('Fetching story content...');
     const { data: story, error: storyError } = await supabase
       .from('stories')
       .select('content, title')
       .eq('id', storyId)
       .single()
 
-    if (storyError || !story) {
+    if (storyError) {
       console.error('Story fetch error:', storyError)
       throw new Error(storyError?.message || 'Story not found')
     }
+
+    if (!story) {
+      throw new Error('Story not found')
+    }
+
+    if (!story.content || story.content.trim() === '') {
+      throw new Error('Story content is empty')
+    }
+
+    console.log(`Story found: ${story.title || 'Untitled'}, Content length: ${story.content.length}`)
 
     // Prepare text for TTS
     const text = `${story.title ? story.title + ". " : ""}${story.content}`
@@ -72,7 +84,7 @@ serve(async (req) => {
     }
 
     // Generate audio using ElevenLabs API
-    console.log('Calling ElevenLabs API...')
+    console.log(`Calling ElevenLabs API with voice ID: ${voiceId}...`)
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
       {
@@ -94,7 +106,12 @@ serve(async (req) => {
     )
 
     if (!response.ok) {
-      const errorText = await response.text()
+      let errorText = '';
+      try {
+        errorText = await response.text();
+      } catch (e) {
+        errorText = 'Failed to read error response';
+      }
       console.error('ElevenLabs API error:', response.status, errorText)
       throw new Error(`Failed to generate audio: ${response.status} ${errorText}`)
     }
@@ -105,11 +122,8 @@ serve(async (req) => {
     const audioBuffer = await response.arrayBuffer()
     console.log(`Received audio buffer of size: ${audioBuffer.byteLength} bytes`)
 
-    // Upload to Supabase Storage
-    const filename = `${storyId}-${Date.now()}.mp3`
-    console.log(`Uploading audio to storage with filename: ${filename}`)
-
     // Check if bucket exists
+    console.log('Checking if story-audio bucket exists...')
     const { data: buckets } = await supabase
       .storage
       .listBuckets()
@@ -129,6 +143,10 @@ serve(async (req) => {
         throw new Error(`Failed to create storage bucket: ${createBucketError.message}`)
       }
     }
+
+    // Upload to Supabase Storage
+    const filename = `${storyId}-${Date.now()}.mp3`
+    console.log(`Uploading audio to storage with filename: ${filename}`)
 
     const { error: uploadError } = await supabase
       .storage
