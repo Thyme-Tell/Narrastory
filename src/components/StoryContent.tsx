@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
@@ -23,8 +24,6 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
 
   const handleListen = async () => {
     console.log('Listen button clicked for story:', storyId);
-    console.log('Content length:', content.length);
-    console.log('Current audio URL:', audioUrl);
     
     if (!content || content.trim() === '') {
       toast({
@@ -36,7 +35,7 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     }
     
     if (!audioUrl) {
-      console.log('No existing audio URL, generating new audio...');
+      console.log('No existing audio URL, requesting audio...');
       try {
         const generatedUrl = await generateAudio();
         if (generatedUrl) {

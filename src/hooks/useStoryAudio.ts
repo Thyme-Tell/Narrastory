@@ -2,9 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-// Standardized voice ID to use across the application
-const STANDARD_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
-
 export const useStoryAudio = (storyId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -16,36 +13,13 @@ export const useStoryAudio = (storyId: string) => {
     setError(null);
 
     try {
-      console.log('Generating audio for story:', storyId, 'with standard voice');
+      console.log('Requesting audio for story:', storyId);
       
-      // First, check if the story exists and get its content
-      const { data: storyData, error: storyError } = await supabase
-        .from('stories')
-        .select('content, title')
-        .eq('id', storyId)
-        .single();
-        
-      if (storyError) {
-        console.error('Error fetching story data:', storyError);
-        throw new Error(`Story not found or inaccessible: ${storyError.message}`);
-      }
-      
-      if (!storyData) {
-        throw new Error('Story data is empty');
-      }
-      
-      console.log('Story found:', storyData.title || 'Untitled', 'Content length:', storyData.content?.length || 0);
-      
-      // Check if content is empty
-      if (!storyData.content || storyData.content.trim() === '') {
-        throw new Error('Story content is empty. Please add content before generating audio.');
-      }
-
+      // Make a single call to the edge function that will either:
+      // 1. Return an existing audio URL if it exists
+      // 2. Generate a new audio file if one doesn't exist
       const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
-        body: { 
-          storyId, 
-          voiceId: STANDARD_VOICE_ID
-        },
+        body: { storyId }
       });
 
       if (invokeError) {
@@ -57,7 +31,7 @@ export const useStoryAudio = (storyId: string) => {
         throw new Error('No data returned from edge function');
       }
 
-      console.log('Audio generation response:', data);
+      console.log('Audio response:', data);
 
       if (data.error) {
         throw new Error(data.error);
@@ -68,7 +42,7 @@ export const useStoryAudio = (storyId: string) => {
         
         toast({
           title: "Success",
-          description: "Audio generated successfully",
+          description: "Audio ready for playback",
         });
         
         return data.audioUrl;
@@ -76,11 +50,11 @@ export const useStoryAudio = (storyId: string) => {
         throw new Error('No audio URL returned from edge function');
       }
     } catch (err: any) {
-      console.error('Error generating audio:', err);
+      console.error('Error with audio:', err);
       setError(err.message);
       toast({
         title: "Error",
-        description: `Failed to generate audio: ${err.message}`,
+        description: `Failed to get audio: ${err.message}`,
         variant: "destructive",
       });
       return null;
@@ -92,28 +66,21 @@ export const useStoryAudio = (storyId: string) => {
   useEffect(() => {
     const fetchExistingAudio = async () => {
       try {
-        console.log('Fetching existing audio for story:', storyId);
+        // Simply call the same function that handles both generating and checking
+        // But don't display toast messages for initial loading
+        setIsLoading(true);
+        const result = await supabase.functions.invoke('story-tts', {
+          body: { storyId }
+        });
         
-        const { data, error } = await supabase
-          .from('story_audio')
-          .select('audio_url')
-          .eq('story_id', storyId)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error fetching audio:', error);
-          // Don't throw here to prevent crashes when loading
-          console.log('Will attempt to generate new audio if needed');
-        }
-        
-        console.log('Existing audio data:', data);
-        
-        if (data?.audio_url) {
-          setAudioUrl(data.audio_url);
+        if (result.data?.audioUrl) {
+          setAudioUrl(result.data.audioUrl);
         }
       } catch (err) {
-        console.error('Error fetching audio:', err);
-        // Don't throw here to prevent crashes when loading
+        console.error('Error checking for existing audio:', err);
+        // Don't display errors during initial check
+      } finally {
+        setIsLoading(false);
       }
     };
 
