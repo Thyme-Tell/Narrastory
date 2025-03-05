@@ -32,17 +32,20 @@ export const useStoryAudio = (storyId: string) => {
         throw new Error('Story data is empty');
       }
       
-      console.log('Story found:', storyData.title || 'Untitled', 'Content length:', storyData.content.length);
+      console.log('Story found:', storyData.title || 'Untitled', 'Content length:', storyData.content?.length || 0);
       
       // Check if content is empty
       if (!storyData.content || storyData.content.trim() === '') {
-        throw new Error('Story content is empty');
+        throw new Error('Story content is empty. Please add content before generating audio.');
       }
+
+      // Default voice ID if not provided
+      const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
 
       const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
         body: { 
           storyId, 
-          voiceId: voiceId || "21m00Tcm4TlvDq8ikWAM" // Default ElevenLabs voice ID
+          voiceId: voiceId || defaultVoiceId
         },
       });
 
@@ -71,7 +74,7 @@ export const useStoryAudio = (storyId: string) => {
         
         return data.audioUrl;
       } else {
-        throw new Error('No audio URL returned');
+        throw new Error('No audio URL returned from edge function');
       }
     } catch (err: any) {
       console.error('Error generating audio:', err);
@@ -100,7 +103,8 @@ export const useStoryAudio = (storyId: string) => {
 
         if (error) {
           console.error('Error fetching audio:', error);
-          throw error;
+          // Don't throw here to prevent crashes when loading
+          console.log('Will attempt to generate new audio if needed');
         }
         
         console.log('Existing audio data:', data);
@@ -110,6 +114,7 @@ export const useStoryAudio = (storyId: string) => {
         }
       } catch (err) {
         console.error('Error fetching audio:', err);
+        // Don't throw here to prevent crashes when loading
       }
     };
 
@@ -129,7 +134,7 @@ export const useStoryAudio = (storyId: string) => {
 
       if (statsError) {
         console.error('Error fetching playback stats:', statsError);
-        throw statsError;
+        return; // Don't throw, just log and continue
       }
 
       // Only update if the record exists

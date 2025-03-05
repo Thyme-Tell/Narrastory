@@ -29,8 +29,8 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     
     if (!content || content.trim() === '') {
       toast({
-        title: "Error",
-        description: "Story content is empty. Cannot generate audio.",
+        title: "Cannot Generate Audio",
+        description: "This story has no content. Please add some text before generating audio.",
         variant: "destructive",
       });
       return;
@@ -44,20 +44,10 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         const generatedUrl = await generateAudio(voiceId);
         if (generatedUrl) {
           setShowPlayer(true);
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to generate audio. Please try again.",
-            variant: "destructive",
-          });
         }
       } catch (err) {
         console.error('Error in handleListen:', err);
-        toast({
-          title: "Error",
-          description: `Failed to generate audio: ${err instanceof Error ? err.message : 'Unknown error'}`,
-          variant: "destructive",
-        });
+        // Error already handled in useStoryAudio hook
       }
     } else {
       setShowPlayer(true);
@@ -74,7 +64,7 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
           variant="outline"
           size="sm"
           onClick={handleListen}
-          disabled={isLoading}
+          disabled={isLoading || !content || content.trim() === ''}
           className="ml-auto"
         >
           {isLoading ? (
@@ -89,6 +79,12 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
       {error && (
         <div className="text-red-500 mb-4 p-2 bg-red-50 rounded-md text-sm">
           Error: {error}
+        </div>
+      )}
+      
+      {content && content.trim() === '' && (
+        <div className="text-amber-700 mb-4 p-2 bg-amber-50 rounded-md text-sm">
+          This story has no content. Add some text to generate audio.
         </div>
       )}
       
