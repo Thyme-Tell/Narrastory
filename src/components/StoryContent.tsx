@@ -21,9 +21,14 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
 
   const handleListen = async () => {
+    console.log('Listen button clicked for story:', storyId);
+    console.log('Current audio URL:', audioUrl);
+    
     if (!audioUrl) {
+      console.log('No existing audio URL, generating new audio...');
       await generateAudio();
     }
+    
     setShowPlayer(true);
   };
 

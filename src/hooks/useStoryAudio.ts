@@ -14,25 +14,42 @@ export const useStoryAudio = (storyId: string) => {
     setError(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('story-tts', {
+      console.log('Generating audio for story:', storyId, 'with voice:', voiceId);
+      
+      const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
         body: { storyId, voiceId },
       });
 
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
-
-      setAudioUrl(data.audioUrl);
+      if (invokeError) {
+        throw new Error(`Function invocation error: ${invokeError.message}`);
+      }
       
-      toast({
-        title: "Success",
-        description: "Audio generated successfully",
-      });
+      if (!data) {
+        throw new Error('No data returned from edge function');
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      console.log('Audio generation response:', data);
+
+      if (data.audioUrl) {
+        setAudioUrl(data.audioUrl);
+        
+        toast({
+          title: "Success",
+          description: "Audio generated successfully",
+        });
+      } else {
+        throw new Error('No audio URL returned');
+      }
     } catch (err) {
       console.error('Error generating audio:', err);
       setError(err.message);
       toast({
         title: "Error",
-        description: "Failed to generate audio",
+        description: `Failed to generate audio: ${err.message}`,
         variant: "destructive",
       });
     } finally {
@@ -43,6 +60,8 @@ export const useStoryAudio = (storyId: string) => {
   useEffect(() => {
     const fetchExistingAudio = async () => {
       try {
+        console.log('Fetching existing audio for story:', storyId);
+        
         const { data, error } = await supabase
           .from('story_audio')
           .select('audio_url')
@@ -50,6 +69,9 @@ export const useStoryAudio = (storyId: string) => {
           .maybeSingle();
 
         if (error) throw error;
+        
+        console.log('Existing audio data:', data);
+        
         if (data?.audio_url) {
           setAudioUrl(data.audio_url);
         }
@@ -63,19 +85,28 @@ export const useStoryAudio = (storyId: string) => {
 
   const updatePlaybackStats = useCallback(async () => {
     try {
+      console.log('Updating playback stats for story:', storyId);
+      
       // Get current playback count
-      const { data: currentStats } = await supabase
+      const { data: currentStats, error: statsError } = await supabase
         .from('story_audio')
         .select('playback_count')
         .eq('story_id', storyId)
         .maybeSingle();
 
+      if (statsError) {
+        throw statsError;
+      }
+
       // Only update if the record exists
       if (currentStats) {
+        const newCount = (currentStats.playback_count || 0) + 1;
+        console.log('Incrementing playback count to:', newCount);
+        
         await supabase
           .from('story_audio')
           .update({
-            playback_count: (currentStats.playback_count || 0) + 1,
+            playback_count: newCount,
             last_played_at: new Date().toISOString(),
           })
           .eq('story_id', storyId);
