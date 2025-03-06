@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,4 +7,36 @@
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
+}
+
+/* Card styles */
+.bg-card {
+  background-color: white !important;
+}
+
+/* Book preview styles */
+.book-page {
+  /* 5x8 inch book format with proper aspect ratio */
+  aspect-ratio: 5/8;
+  max-width: 100%;
+  max-height: 100%;
+  background-color: white;
+}
+
+.book-content {
+  /* Standard book content width with margins */
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+.book-text {
+  /* 14pt font size - equivalent to roughly 18.5px */
+  font-size: 18.5px;
+  line-height: 1.5;
+}
+
+/* Ensure media content stays within page bounds */
+.book-page img, .book-page video {
+  max-width: 100%;
+  height: auto;
 }

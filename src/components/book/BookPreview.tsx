@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Book, ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
@@ -25,6 +24,8 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [showToc, setShowToc] = useState(false);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
+  const [storyPages, setStoryPages] = useState<number[]>([]);
+  const [totalPageCount, setTotalPageCount] = useState(1); // Cover page by default
   const bookContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
@@ -74,12 +75,35 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     enabled: open,
   });
 
-  // Calculate total pages (cover + stories)
-  const totalPages = stories ? stories.length + 1 : 1; // +1 for cover
+  // Calculate page distribution for stories
+  useEffect(() => {
+    if (!stories || stories.length === 0) {
+      setStoryPages([]);
+      setTotalPageCount(1); // Just the cover
+      return;
+    }
+
+    let pageCount = 1; // Start with cover page
+    const pageStartIndices: number[] = [];
+
+    // Each story starts on a new page
+    stories.forEach((story) => {
+      pageStartIndices.push(pageCount);
+      
+      // Estimate number of pages based on content length
+      // This is a simple estimation - about 2000 characters per page
+      const contentLength = story.content.length;
+      const estimatedPages = Math.max(1, Math.ceil(contentLength / 2000));
+      pageCount += estimatedPages;
+    });
+
+    setStoryPages(pageStartIndices);
+    setTotalPageCount(pageCount);
+  }, [stories]);
 
   // Handle page navigation
   const goToNextPage = () => {
-    if (currentPage < totalPages - 1) {
+    if (currentPage < totalPageCount - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -88,6 +112,26 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
+  };
+
+  // Find which story is displayed on the current page
+  const getCurrentStoryIndex = () => {
+    if (currentPage === 0) return -1; // Cover page
+    
+    for (let i = storyPages.length - 1; i >= 0; i--) {
+      if (currentPage >= storyPages[i]) {
+        return i;
+      }
+    }
+    return -1;
+  };
+
+  // Get current page number within a story
+  const getPageWithinStory = () => {
+    const storyIndex = getCurrentStoryIndex();
+    if (storyIndex === -1) return 0;
+    
+    return currentPage - storyPages[storyIndex] + 1;
   };
 
   // Handle zoom controls
@@ -144,9 +188,13 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, currentPage, totalPages, onClose]);
+  }, [open, currentPage, totalPageCount, onClose]);
 
   if (!open) return null;
+
+  // Get the current story to display
+  const currentStoryIndex = getCurrentStoryIndex();
+  const currentStory = currentStoryIndex !== -1 ? stories?.[currentStoryIndex] : null;
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden">
@@ -184,7 +232,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-sm">
-            Page {currentPage + 1} of {totalPages}
+            Page {currentPage + 1} of {totalPageCount}
           </span>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
@@ -201,6 +249,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
               currentPage={currentPage}
               onSelectPage={jumpToPage}
               bookmarks={bookmarks}
+              storyPages={storyPages}
             />
           </div>
         )}
@@ -215,8 +264,8 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             style={{ 
               transform: `scale(${zoomLevel})`,
               transformOrigin: 'center',
-              width: '600px',
-              height: '800px',
+              width: '600px',  // Adjusted for 5x8 aspect ratio (5:8 = 600:960)
+              height: '960px', // 5x8 inch ratio
               maxHeight: '90vh'
             }}
           >
@@ -233,8 +282,12 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
                   />
                 ) : (
                   // Content Pages
-                  stories && stories[currentPage - 1] && (
-                    <PageView story={stories[currentPage - 1]} pageNumber={currentPage} />
+                  currentStory && (
+                    <PageView 
+                      story={currentStory} 
+                      pageNumber={getPageWithinStory()}
+                      isLastPage={currentStoryIndex < stories!.length - 1 && currentPage === storyPages[currentStoryIndex + 1] - 1}
+                    />
                   )
                 )}
               </>
@@ -255,7 +308,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
                 variant="ghost" 
                 size="icon" 
                 onClick={goToNextPage}
-                disabled={currentPage === totalPages - 1}
+                disabled={currentPage === totalPageCount - 1}
                 className="h-12 w-12 rounded-full bg-background/80 pointer-events-auto mr-2"
               >
                 <ChevronRight className="h-6 w-6" />
