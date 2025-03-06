@@ -60,11 +60,12 @@ serve(async (req) => {
       .upsert(
         {
           profile_id: profileId,
-          cover_data: coverData
+          cover_data: coverData,
+          updated_at: new Date().toISOString() // Add explicit timestamp
         },
         {
           onConflict: 'profile_id',
-          ignoreDuplicates: false
+          returning: 'representation' // Return all columns
         }
       )
       .select()

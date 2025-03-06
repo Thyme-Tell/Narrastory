@@ -23,6 +23,7 @@ export function useCoverData(profileId: string) {
     }
 
     try {
+      setIsLoading(true);
       console.log('Fetching cover data for profile:', profileId);
       
       // First, try to fetch existing cover data
@@ -40,10 +41,13 @@ export function useCoverData(profileId: string) {
       console.log('Received cover data:', data);
       
       if (data && data.cover_data) {
-        setCoverData(data.cover_data as CoverData);
+        // Explicitly cast and set the cover data
+        const typedCoverData = data.cover_data as CoverData;
+        console.log('Setting cover data:', typedCoverData);
+        setCoverData(typedCoverData);
       } else {
         // If no cover data exists yet, create a new record with default data
-        console.log('Creating new cover data with defaults');
+        console.log('No cover data found, creating with defaults');
         await saveCoverData(DEFAULT_COVER_DATA);
       }
     } catch (err) {
@@ -59,7 +63,9 @@ export function useCoverData(profileId: string) {
     }
   };
 
+  // Initial data fetch
   useEffect(() => {
+    console.log('Profile ID changed, fetching cover data');
     fetchCoverData();
   }, [profileId]);
 
@@ -91,11 +97,8 @@ export function useCoverData(profileId: string) {
       const result = await response.json();
       console.log('Cover data saved successfully:', result);
       
-      // Update local state with the saved data
+      // Update local state right away
       setCoverData(newCoverData);
-      
-      // Refetch the data to ensure we have the latest from the server
-      await fetchCoverData();
       
       return true;
     } catch (err) {
