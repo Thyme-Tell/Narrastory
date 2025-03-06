@@ -9,38 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      book_covers: {
-        Row: {
-          cover_data: Json
-          created_at: string
-          id: string
-          profile_id: string
-          updated_at: string
-        }
-        Insert: {
-          cover_data?: Json
-          created_at?: string
-          id?: string
-          profile_id: string
-          updated_at?: string
-        }
-        Update: {
-          cover_data?: Json
-          created_at?: string
-          id?: string
-          profile_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "book_covers_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       deleted_stories: {
         Row: {
           content: string
