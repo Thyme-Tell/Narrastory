@@ -19,11 +19,11 @@ const PageContent = ({ pageContent, contentOverflows, isLastPage }: PageContentP
   return (
     <div className="prose max-w-none book-text">
       {pageContent.map((paragraph, index) => (
-        <p key={index} className="mb-4">{paragraph}</p>
+        <p key={index} className="mb-4 leading-relaxed">{paragraph}</p>
       ))}
       
       {contentOverflows && !isLastPage && (
-        <div className="text-right text-sm text-gray-400 mt-4">
+        <div className="text-right text-sm text-gray-400 mt-4 continuation-indicator">
           Continued on next page...
         </div>
       )}

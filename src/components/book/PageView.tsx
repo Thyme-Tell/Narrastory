@@ -23,6 +23,7 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   const [contentHeight, setContentHeight] = useState(0);
   const [pageCapacity, setPageCapacity] = useState(0);
   const [contentOverflows, setContentOverflows] = useState(false);
+  const [lineHeight, setLineHeight] = useState(30); // Estimated line height in pixels
 
   const { mediaItems, isMediaLoading } = useStoryPageMedia(story.id);
   const hasImages = !isMediaLoading && mediaItems && mediaItems.length > 0;
@@ -32,9 +33,11 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   
   // Define constants for content pagination
   const PAGINATION_CONFIG = {
-    charsPerPage: 1800, // Slightly conservative estimate
+    charsPerPage: 1800, // Baseline character estimate
     titleSpace: 150,    // Approximate character equivalent of space taken by title and date
-    imageSpace: 300     // Approximate character equivalent of space taken by an image
+    imageSpace: 300,    // Approximate character equivalent of space taken by an image
+    lineHeight: lineHeight, // Line height in pixels
+    linesPerPage: Math.floor((768 - 64) / lineHeight) // Calculate lines per page based on page height and line height
   };
   
   // Calculate content for this specific page
@@ -46,9 +49,21 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   // Show media only on first page
   const showMedia = pageNumber === 1 && hasImages;
 
-  // After component mounts, measure the actual content height
+  // After component mounts, measure the actual content height and line height
   useEffect(() => {
     if (contentRef.current) {
+      // Get a sample line height if we have content
+      if (contentRef.current.querySelector('p')) {
+        const sampleLine = contentRef.current.querySelector('p');
+        if (sampleLine) {
+          const computedStyle = window.getComputedStyle(sampleLine);
+          const actualLineHeight = parseInt(computedStyle.lineHeight);
+          if (!isNaN(actualLineHeight) && actualLineHeight > 0) {
+            setLineHeight(actualLineHeight);
+          }
+        }
+      }
+      
       // Get the content height
       const height = contentRef.current.scrollHeight;
       setContentHeight(height);

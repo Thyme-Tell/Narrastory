@@ -75,6 +75,12 @@
   max-height: 100%;
 }
 
+.book-text p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  break-inside: avoid; /* Prevent paragraph from breaking across pages */
+}
+
 /* Ensure media content stays within page bounds */
 .book-page img, .book-page video {
   max-width: 100%;
@@ -103,4 +109,12 @@
 .book-dimensions {
   width: 480px; /* 5 inches at 96dpi */
   height: 768px; /* 8 inches at 96dpi */
+}
+
+/* Ensure continuation indicator is properly positioned */
+.continuation-indicator {
+  position: relative;
+  z-index: 5;
+  padding-top: 0.5rem;
+  margin-top: auto;
 }

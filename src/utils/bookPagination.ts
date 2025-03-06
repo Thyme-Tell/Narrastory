@@ -2,8 +2,21 @@
 export interface PaginationConfig {
   charsPerPage: number;
   titleSpace: number;
-  imageSpace: number; // Adding space consideration for images
+  imageSpace: number;
+  lineHeight: number; // Adding line height for better pagination calculations
+  linesPerPage: number; // Adding lines per page calculation
 }
+
+// Helper function to estimate if a paragraph will fit on a page
+const willParagraphFit = (
+  paragraph: string, 
+  remainingLines: number,
+  avgCharsPerLine: number
+): boolean => {
+  // Estimate the number of lines this paragraph will take
+  const estimatedLines = Math.ceil(paragraph.length / avgCharsPerLine);
+  return estimatedLines <= remainingLines;
+};
 
 export const calculatePageContent = (
   paragraphs: string[],
@@ -11,7 +24,7 @@ export const calculatePageContent = (
   config: PaginationConfig,
   hasImage: boolean = false
 ): string[] => {
-  const { charsPerPage, titleSpace, imageSpace } = config;
+  const { charsPerPage, titleSpace, imageSpace, linesPerPage } = config;
   
   if (!paragraphs || paragraphs.length === 0) {
     return [];
@@ -21,55 +34,76 @@ export const calculatePageContent = (
   const firstPageDeduction = titleSpace + (hasImage && pageNumber === 1 ? imageSpace : 0);
   const effectiveCharsForFirstPage = charsPerPage - firstPageDeduction;
   
+  // Calculate lines available for first page vs other pages
+  const firstPageLines = Math.floor(linesPerPage - (titleSpace / 30) - (hasImage && pageNumber === 1 ? (imageSpace / 30) : 0));
+  const regularPageLines = linesPerPage;
+  
+  // Average characters per line (rough estimate)
+  const avgCharsPerLine = 60; // This can be adjusted based on font size and page width
+  
   // Initialize tracking variables
   let currentPageNumber = 1;
-  let currentPageCharCount = 0;
+  let currentPageLines = currentPageNumber === 1 ? firstPageLines : regularPageLines;
+  let currentPageContent: string[] = [];
   let result: string[] = [];
   let paragraphIndex = 0;
   
-  // Track if we've processed any paragraphs for the requested page
-  let processedAnyForRequestedPage = false;
-  
-  // Iterate through paragraphs until we reach the requested page
+  // Process paragraphs until we reach the requested page
   while (paragraphIndex < paragraphs.length) {
     const paragraph = paragraphs[paragraphIndex];
-    const maxCharsForCurrentPage = currentPageNumber === 1 
-      ? effectiveCharsForFirstPage 
-      : charsPerPage;
+    const linesForCurrentPage = currentPageNumber === 1 ? firstPageLines : regularPageLines;
     
     // Check if adding this paragraph would exceed the current page's capacity
-    if (currentPageCharCount + paragraph.length > maxCharsForCurrentPage) {
+    if (!willParagraphFit(paragraph, currentPageLines, avgCharsPerLine)) {
       // This paragraph doesn't fit on the current page, move to next page
-      currentPageNumber++;
-      currentPageCharCount = 0;
-      
-      // If we've moved past the requested page, we're done
-      if (currentPageNumber > pageNumber) {
-        break;
+      if (currentPageNumber === pageNumber) {
+        // We've filled the requested page, return what we have
+        return currentPageContent;
       }
+      
+      // Move to next page
+      currentPageNumber++;
+      currentPageLines = currentPageNumber === 1 ? firstPageLines : regularPageLines;
+      currentPageContent = [];
       
       // Don't increment paragraphIndex, try this paragraph on the next page
       continue;
     }
     
     // This paragraph fits on the current page
-    currentPageCharCount += paragraph.length;
+    const estimatedLines = Math.ceil(paragraph.length / avgCharsPerLine);
+    currentPageLines -= estimatedLines;
     
     // If we're on the requested page, add this paragraph to the result
     if (currentPageNumber === pageNumber) {
-      result.push(paragraph);
-      processedAnyForRequestedPage = true;
+      currentPageContent.push(paragraph);
     }
     
     // Move to the next paragraph
     paragraphIndex++;
+    
+    // If we've run out of lines on this page, move to the next page
+    if (currentPageLines <= 0) {
+      if (currentPageNumber === pageNumber) {
+        // We've filled the requested page, return what we have
+        return currentPageContent;
+      }
+      
+      // Move to next page
+      currentPageNumber++;
+      currentPageLines = currentPageNumber === 1 ? firstPageLines : regularPageLines;
+      currentPageContent = [];
+    }
   }
   
-  return result;
+  // If we're here, we've processed all paragraphs
+  // Only return content if we've reached the requested page
+  return currentPageNumber === pageNumber ? currentPageContent : [];
 };
 
 export const checkContentOverflow = (contentHeight: number, pageCapacity: number): boolean => {
-  return contentHeight > pageCapacity;
+  // Add a small buffer to prevent edge cases
+  return contentHeight > (pageCapacity - 10);
 };
 
 export const getTotalPageCount = (
@@ -81,25 +115,19 @@ export const getTotalPageCount = (
     return 1; // At least cover page
   }
   
-  // Calculate total chars in the content
-  let totalChars = paragraphs.reduce((sum, p) => sum + p.length, 0);
+  // The approach here is to simulate pagination through all content
+  let currentPage = 1;
+  let pageContent: string[] = [];
   
-  // First page has less capacity due to title space and possibly image
-  const firstPageDeduction = config.titleSpace + (hasImage ? config.imageSpace : 0);
-  const firstPageCapacity = config.charsPerPage - firstPageDeduction;
+  do {
+    pageContent = calculatePageContent(paragraphs, currentPage, config, hasImage);
+    if (pageContent.length > 0) {
+      currentPage++;
+    }
+  } while (pageContent.length > 0);
   
-  // Calculate how many full pages we need
-  let totalPages = 1; // Start with one page (first page)
-  
-  // Account for content on first page
-  let remainingChars = totalChars - firstPageCapacity;
-  
-  // Add additional pages as needed
-  if (remainingChars > 0) {
-    totalPages += Math.ceil(remainingChars / config.charsPerPage);
-  }
-  
-  return totalPages;
+  // currentPage will be one more than the last page with content
+  return Math.max(1, currentPage - 1);
 };
 
 export const isLastPageOfStory = (
