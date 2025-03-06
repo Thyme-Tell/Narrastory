@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 
 interface PageContentProps {
   pageContent: string[];
@@ -8,20 +8,16 @@ interface PageContentProps {
 }
 
 const PageContent = ({ pageContent, contentOverflows, isLastPage }: PageContentProps) => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  if (!pageContent || pageContent.length === 0) {
+    return <div className="text-gray-500">No content available for this page.</div>;
+  }
   
   return (
-    <div 
-      ref={contentRef}
-      className="prose max-w-none book-text"
-    >
+    <div className="prose max-w-none book-text">
       {pageContent.map((paragraph, index) => (
-        <p key={index} className="mb-4">
-          {paragraph}
-        </p>
+        <p key={index} className="mb-4">{paragraph}</p>
       ))}
       
-      {/* If content overflows to next page, show indicator */}
       {contentOverflows && !isLastPage && (
         <div className="text-right text-sm text-gray-400 mt-4">
           Continued on next page...

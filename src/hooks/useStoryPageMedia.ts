@@ -18,7 +18,13 @@ export const useStoryPageMedia = (storyId: string) => {
         return [];
       }
 
-      return data as StoryMediaItem[];
+      // Transform the data to include full URLs
+      return (data || []).map((item: StoryMediaItem) => ({
+        ...item,
+        file_path: supabase.storage
+          .from("story-media")
+          .getPublicUrl(item.file_path).data.publicUrl
+      }));
     },
   });
 

@@ -12,73 +12,53 @@ export const calculatePageContent = (
   const { charsPerPage, titleSpace } = config;
   
   let pageContent: string[] = [];
+  let currentCharCount = 0;
+  let paragraphsToSkip = 0;
   
-  if (pageNumber === 1) {
-    // First page - account for title and date
-    let charCount = 0;
-    let paraIndex = 0;
+  // For first page, account for title space
+  const effectiveCharsForFirstPage = charsPerPage - titleSpace;
+  
+  // Calculate how many paragraphs to skip based on previous pages
+  if (pageNumber > 1) {
+    let accumulatedChars = 0;
+    let firstPageDone = false;
     
-    while (paraIndex < paragraphs.length && charCount + paragraphs[paraIndex].length <= charsPerPage - titleSpace) {
-      pageContent.push(paragraphs[paraIndex]);
-      charCount += paragraphs[paraIndex].length;
-      paraIndex++;
-    }
-  } else {
-    // Subsequent pages - calculate how much content should be skipped
-    let totalCharsToSkip = charsPerPage - titleSpace; // First page capacity
-    totalCharsToSkip += (pageNumber - 2) * charsPerPage; // Plus full pages in between
-    
-    // Skip content until we reach what should be shown on this page
-    let charCount = 0;
-    let paraIndex = 0;
-    
-    // Skip content that would be on previous pages
-    while (paraIndex < paragraphs.length && charCount < totalCharsToSkip) {
-      if (charCount + paragraphs[paraIndex].length <= totalCharsToSkip) {
-        // This paragraph fits entirely on previous pages
-        charCount += paragraphs[paraIndex].length;
-        paraIndex++;
-      } else {
-        // This paragraph spans across pages, take the remainder
-        const charsToSkipInPara = totalCharsToSkip - charCount;
-        // Save the remaining part of this paragraph for this page
-        const remainingPart = paragraphs[paraIndex].substring(charsToSkipInPara);
-        
-        if (remainingPart.length > 0) {
-          pageContent.push(remainingPart);
+    for (let i = 0; i < paragraphs.length; i++) {
+      const paraLength = paragraphs[i].length;
+      
+      if (!firstPageDone) {
+        accumulatedChars += paraLength;
+        if (accumulatedChars > effectiveCharsForFirstPage) {
+          firstPageDone = true;
+          accumulatedChars = paraLength - (accumulatedChars - effectiveCharsForFirstPage);
         }
-        
-        // Move to next paragraph
-        charCount = totalCharsToSkip;
-        paraIndex++;
+        paragraphsToSkip++;
+        continue;
+      }
+      
+      accumulatedChars += paraLength;
+      if (accumulatedChars > charsPerPage * (pageNumber - 1)) {
         break;
       }
+      paragraphsToSkip++;
     }
+  }
+  
+  // Now collect paragraphs for the current page
+  for (let i = paragraphsToSkip; i < paragraphs.length; i++) {
+    const paraLength = paragraphs[i].length;
     
-    // Now add paragraphs that fit on this page
-    let pageCharCount = pageContent.length > 0 ? pageContent[0].length : 0;
-    
-    // Add more paragraphs until we fill this page
-    while (paraIndex < paragraphs.length && pageCharCount + paragraphs[paraIndex].length <= charsPerPage) {
-      pageContent.push(paragraphs[paraIndex]);
-      pageCharCount += paragraphs[paraIndex].length;
-      paraIndex++;
-    }
-    
-    // Check if we need to include a partial paragraph
-    if (paraIndex < paragraphs.length && pageCharCount < charsPerPage) {
-      const remainingSpace = charsPerPage - pageCharCount;
-      const partialPara = paragraphs[paraIndex].substring(0, remainingSpace);
-      pageContent.push(partialPara + "...");
+    if (currentCharCount + paraLength <= (pageNumber === 1 ? effectiveCharsForFirstPage : charsPerPage)) {
+      pageContent.push(paragraphs[i]);
+      currentCharCount += paraLength;
+    } else {
+      break;
     }
   }
   
   return pageContent;
 };
 
-export const checkContentOverflow = (
-  contentHeight: number, 
-  pageCapacity: number
-): boolean => {
+export const checkContentOverflow = (contentHeight: number, pageCapacity: number): boolean => {
   return contentHeight > pageCapacity;
 };
