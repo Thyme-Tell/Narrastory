@@ -79,17 +79,19 @@
 .book-cover-container {
   position: relative;
   display: inline-block;
+  perspective: 1500px;
 }
 
 .book-canvas {
   position: relative;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  transform: perspective(1000px) rotateY(3deg);
-  transition: transform 0.3s ease;
+  transform: rotateY(15deg);
+  transform-origin: left center;
+  transition: transform 0.5s ease;
 }
 
 .book-cover-container:hover .book-canvas {
-  transform: perspective(1000px) rotateY(5deg);
+  transform: rotateY(25deg);
 }
 
 .book-spine-overlay {
@@ -99,13 +101,20 @@
   height: 100%;
   width: 20px;
   background: linear-gradient(90deg, 
-    rgba(0,0,0,0.4) 0%, 
-    rgba(0,0,0,0.1) 20%, 
-    rgba(0,0,0,0.05) 40%, 
+    rgba(0,0,0,0.6) 0%, 
+    rgba(0,0,0,0.3) 20%, 
+    rgba(0,0,0,0.1) 40%, 
     rgba(0,0,0,0) 100%);
   z-index: 10;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
+  transform: rotateY(15deg);
+  transform-origin: left;
+  transition: transform 0.5s ease;
+}
+
+.book-cover-container:hover .book-spine-overlay {
+  transform: rotateY(25deg) translateX(-2px);
 }
 
 .book-cover-overlay {
@@ -125,6 +134,34 @@
   pointer-events: none;
   border-radius: 4px;
   z-index: 5;
+}
+
+.book-page-edge {
+  position: absolute;
+  top: 0;
+  left: 1px;
+  width: 8px;
+  height: 100%;
+  background: linear-gradient(to right, 
+    #f8f8f8 0%, 
+    #e8e8e8 20%, 
+    #f8f8f8 40%,
+    #e8e8e8 60%,
+    #f8f8f8 80%,
+    #e8e8e8 100%);
+  z-index: 1;
+  border-left: 1px solid #ddd;
+  transform: rotateY(75deg) translateX(-7px);
+  transform-origin: left;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.book-cover-container:hover .book-page-edge {
+  opacity: 1;
+  transform: rotateY(65deg) translateX(-7px);
 }
 
 /* Cover editor specific styles */
