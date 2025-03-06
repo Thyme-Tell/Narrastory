@@ -5,12 +5,7 @@ import PageHeader from "./PageHeader";
 import PageContent from "./PageContent";
 import PageMedia from "./PageMedia";
 import { useStoryPageMedia } from "@/hooks/useStoryPageMedia";
-import { 
-  calculatePageContent, 
-  checkContentOverflow, 
-  isLastPageOfStory,
-  getTotalPageCount
-} from "@/utils/bookPagination";
+import { calculatePageContent, checkContentOverflow } from "@/utils/bookPagination";
 
 interface PageViewProps {
   story: Story;
@@ -23,53 +18,27 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   const [contentHeight, setContentHeight] = useState(0);
   const [pageCapacity, setPageCapacity] = useState(0);
   const [contentOverflows, setContentOverflows] = useState(false);
-  const [lineHeight, setLineHeight] = useState(30); // Estimated line height in pixels
-  const [hasContent, setHasContent] = useState(true);
 
-  const { mediaItems, isLoading } = useStoryPageMedia(story.id);
-  const hasImages = !isLoading && mediaItems && mediaItems.length > 0;
+  const { mediaItems, isMediaLoading } = useStoryPageMedia(story.id);
 
-  // Parse story content into paragraphs and filter out empty ones
+  // Parse story content into paragraphs
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
   
   // Define constants for content pagination
   const PAGINATION_CONFIG = {
-    charsPerPage: 1800, // Baseline character estimate
-    titleSpace: 150,    // Approximate character equivalent of space taken by title and date
-    imageSpace: 300,    // Approximate character equivalent of space taken by an image
-    lineHeight: lineHeight, // Line height in pixels
-    linesPerPage: Math.floor((768 - 64) / lineHeight) // Calculate lines per page based on page height and line height
+    charsPerPage: 1800, // Slightly conservative estimate
+    titleSpace: 150, // Approximate character equivalent of space taken by title and date
   };
   
   // Calculate content for this specific page
-  const pageContent = calculatePageContent(paragraphs, pageNumber, PAGINATION_CONFIG, hasImages);
-  
-  // Check if this is the last page of this story
-  const isStoryLastPage = isLastPageOfStory(paragraphs, pageNumber, PAGINATION_CONFIG, hasImages);
+  const pageContent = calculatePageContent(paragraphs, pageNumber, PAGINATION_CONFIG);
 
   // Show media only on first page
-  const showMedia = pageNumber === 1 && hasImages;
+  const showMedia = pageNumber === 1;
 
-  // Check if there's any content to display on this page
-  useEffect(() => {
-    setHasContent(pageContent.length > 0 || (pageNumber === 1 && showMedia));
-  }, [pageContent, pageNumber, showMedia]);
-
-  // After component mounts, measure the actual content height and line height
+  // After component mounts, measure the actual content height
   useEffect(() => {
     if (contentRef.current) {
-      // Get a sample line height if we have content
-      if (contentRef.current.querySelector('p')) {
-        const sampleLine = contentRef.current.querySelector('p');
-        if (sampleLine) {
-          const computedStyle = window.getComputedStyle(sampleLine);
-          const actualLineHeight = parseInt(computedStyle.lineHeight);
-          if (!isNaN(actualLineHeight) && actualLineHeight > 0) {
-            setLineHeight(actualLineHeight);
-          }
-        }
-      }
-      
       // Get the content height
       const height = contentRef.current.scrollHeight;
       setContentHeight(height);
@@ -97,13 +66,6 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
     console.log("Start crop:", url, mediaId);
   };
 
-  // If there's no content on this page (except for first page with header), log it for debugging
-  useEffect(() => {
-    if (!hasContent && pageNumber > 1) {
-      console.log(`Empty page detected: Page ${pageNumber} for story ${story.id}`);
-    }
-  }, [hasContent, pageNumber, story.id]);
-
   return (
     <div className="w-full h-full book-page flex flex-col p-8 bg-white">
       <div 
@@ -117,13 +79,13 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
         <PageContent 
           pageContent={pageContent}
           contentOverflows={contentOverflows}
-          isLastPage={isStoryLastPage || isLastPage} 
+          isLastPage={isLastPage} 
         />
         
         {showMedia && (
           <PageMedia 
             mediaItems={mediaItems}
-            isMediaLoading={isLoading}
+            isMediaLoading={isMediaLoading}
             handleImageClick={handleImageClick}
             handleCaptionUpdate={handleCaptionUpdate}
             handleStartCrop={handleStartCrop}

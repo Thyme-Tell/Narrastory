@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Story } from "@/types/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { getTotalPageCount } from "@/utils/bookPagination";
 
 export function useBookPreview(profileId: string, open: boolean) {
   const [currentPage, setCurrentPage] = useState(0);
@@ -71,41 +69,26 @@ export function useBookPreview(profileId: string, open: boolean) {
     stories.forEach((story) => {
       pageStartIndices.push(pageCount);
       
-      // Use our pagination utility to calculate pages needed
-      const PAGINATION_CONFIG = {
-        charsPerPage: 1800, // Baseline character estimate
-        titleSpace: 150,    // Space for title
-        imageSpace: 300,    // Space for image if present
-        lineHeight: 30,     // Default line height
-        linesPerPage: Math.floor((768 - 64) / 30) // Approx lines per page
-      };
+      const CHARS_PER_PAGE = 1800;
       
-      // Parse paragraphs from story content
-      const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
+      const contentLength = story.content.length;
       
-      // Check if the story has images
-      const hasImage = async () => {
-        const { data } = await supabase
-          .from("story_media")
-          .select("id")
-          .eq("story_id", story.id)
-          .limit(1);
-        return data && data.length > 0;
-      };
+      const firstPageCapacity = CHARS_PER_PAGE - 150; // Reserve 150 chars for title/date
       
-      // For simplicity, let's assume images might exist
-      // In a production app, you'd want to properly check this with a query
-      const pagesNeeded = getTotalPageCount(paragraphs, PAGINATION_CONFIG, true);
+      let pagesNeeded = 1; // Start with one page
+      let remainingContent = contentLength - firstPageCapacity;
+      
+      if (remainingContent > 0) {
+        pagesNeeded += Math.ceil(remainingContent / CHARS_PER_PAGE);
+      }
+      
+      pagesNeeded = Math.max(1, Math.ceil(pagesNeeded + 0.5));
       
       pageCount += pagesNeeded;
     });
 
     setStoryPages(pageStartIndices);
     setTotalPageCount(pageCount);
-    
-    // Log important information for debugging
-    console.log("Story page indices:", pageStartIndices);
-    console.log("Total pages calculated:", pageCount);
   }, [stories]);
 
   const goToNextPage = () => {

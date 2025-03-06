@@ -59,11 +59,6 @@ const BookPreviewContent = ({
   const PAGE_WIDTH = 480;  // 5 inches * 96dpi = 480px
   const PAGE_HEIGHT = 768; // 8 inches * 96dpi = 768px
 
-  // Determine if this is the last page for the current story
-  const isLastPageForStory = 
-    currentStoryIndex < (stories?.length || 0) - 1 && 
-    currentPage === storyPages[currentStoryIndex + 1] - 1;
-
   return (
     <div 
       className="flex-1 h-full flex flex-col items-center justify-center p-4 overflow-hidden"
@@ -77,6 +72,7 @@ const BookPreviewContent = ({
           width: `${PAGE_WIDTH}px`,
           height: `${PAGE_HEIGHT}px`,
           maxHeight: '90vh',
+          overflow: 'hidden'
         }}
       >
         {(isLoading || pageTransitioning) && (
@@ -99,7 +95,7 @@ const BookPreviewContent = ({
                 <PageView 
                   story={currentStory} 
                   pageNumber={getPageWithinStory()}
-                  isLastPage={isLastPageForStory}
+                  isLastPage={currentStoryIndex < (stories?.length || 0) - 1 && currentPage === storyPages[currentStoryIndex + 1] - 1}
                 />
               )
             )}

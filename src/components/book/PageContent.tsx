@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 interface PageContentProps {
   pageContent: string[];
@@ -8,20 +8,22 @@ interface PageContentProps {
 }
 
 const PageContent = ({ pageContent, contentOverflows, isLastPage }: PageContentProps) => {
-  if (!pageContent || pageContent.length === 0) {
-    // Instead of showing a blank page message, we'll just return null
-    // This helps PageView handle the empty page case
-    return null;
-  }
+  const contentRef = useRef<HTMLDivElement>(null);
   
   return (
-    <div className="prose max-w-none book-text">
+    <div 
+      ref={contentRef}
+      className="prose max-w-none book-text"
+    >
       {pageContent.map((paragraph, index) => (
-        <p key={index} className="mb-4 leading-relaxed">{paragraph}</p>
+        <p key={index} className="mb-4">
+          {paragraph}
+        </p>
       ))}
       
+      {/* If content overflows to next page, show indicator */}
       {contentOverflows && !isLastPage && (
-        <div className="text-right text-sm text-gray-400 mt-4 continuation-indicator">
+        <div className="text-right text-sm text-gray-400 mt-4">
           Continued on next page...
         </div>
       )}
