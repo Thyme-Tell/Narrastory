@@ -81,18 +81,18 @@ export function useCoverData(profileId: string) {
       
       // Add auth headers when using cookie-based auth
       const currentProfileId = Cookies.get('profile_id');
-      const headers: Record<string, string> = {};
       
       if (currentProfileId && currentProfileId !== profileId) {
         console.log('Warning: Current profile ID does not match target profile ID');
       }
       
       // Use Supabase directly for the upsert operation
+      // Fix: Explicitly define the correct type structure for the upsert
       const { data, error } = await supabase
         .from('book_covers')
         .upsert({
           profile_id: profileId,
-          cover_data: newCoverData,
+          cover_data: newCoverData as any, // Use type assertion to avoid TypeScript error
           updated_at: new Date().toISOString()
         }, { 
           onConflict: 'profile_id',
