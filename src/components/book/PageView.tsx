@@ -9,6 +9,7 @@ import ImageMedia from "@/components/ImageMedia";
 import VideoMedia from "@/components/VideoMedia";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPageContent } from "@/utils/bookPagination";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PageViewProps {
   story: Story;
@@ -46,6 +47,15 @@ const PageView = ({
   // Get content for this page using our pagination utility
   const pageContent = getPageContent(story, pageNumber);
 
+  // Helper function to get public URL for media items
+  const getPublicUrl = (filePath: string) => {
+    const { data } = supabase.storage
+      .from("story-media")
+      .getPublicUrl(filePath);
+    
+    return data.publicUrl;
+  };
+
   // If this is a media page, only show the media item
   if (isMediaPage && mediaItem) {
     return (
@@ -56,9 +66,15 @@ const PageView = ({
               {/* Simplified display of image without edit functionality */}
               <div className="media-display">
                 <img 
-                  src={mediaItem.file_path} 
+                  src={getPublicUrl(mediaItem.file_path)} 
                   alt={mediaItem.caption || "Image"} 
                   className="max-h-[70vh] max-w-full object-contain rounded-lg" 
+                  onError={(e) => {
+                    console.error("Error loading image:", e);
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = "/placeholder.svg";
+                  }}
                 />
               </div>
               {mediaItem.caption && (
@@ -68,9 +84,14 @@ const PageView = ({
           ) : mediaItem.content_type.startsWith("video/") ? (
             <div className="media-display">
               <video 
-                src={mediaItem.file_path} 
+                src={getPublicUrl(mediaItem.file_path)} 
                 controls 
                 className="max-h-[70vh] max-w-full rounded-lg"
+                onError={(e) => {
+                  console.error("Error loading video:", e);
+                  const target = e.target as HTMLVideoElement;
+                  target.onerror = null;
+                }}
               >
                 Your browser does not support the video tag.
               </video>
