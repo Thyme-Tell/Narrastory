@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -17,7 +16,13 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const { coverData, saveCoverData, isLoading: isCoverLoading, refreshCoverData } = useCoverData(profileId);
+  const { 
+    coverData, 
+    saveCoverData, 
+    isLoading: isCoverLoading, 
+    refreshCoverData,
+    error: coverError
+  } = useCoverData(profileId);
   
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -54,13 +59,18 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     },
   });
   
-  // Make sure to refresh cover data whenever the component mounts or profileId changes
   useEffect(() => {
     if (profileId) {
       console.log("BookProgress: Refreshing cover data for profile:", profileId);
       refreshCoverData();
     }
   }, [profileId, refreshCoverData]);
+
+  useEffect(() => {
+    if (coverError) {
+      console.error("Cover data error in BookProgress:", coverError);
+    }
+  }, [coverError]);
 
   const handleOpenCoverEditor = () => {
     console.log("Opening cover editor with data:", coverData);

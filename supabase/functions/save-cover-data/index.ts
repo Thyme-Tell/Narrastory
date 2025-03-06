@@ -18,9 +18,27 @@ serve(async (req) => {
 
   try {
     // Get the request JSON
-    const { profileId, coverData } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      console.error("Error parsing request body:", e);
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
     
-    console.log("Received request to save cover data:", { profileId, coverData });
+    const { profileId, coverData } = body;
+    
+    console.log("Received request to save cover data:", { 
+      profileId, 
+      coverDataType: typeof coverData,
+      coverDataKeys: coverData ? Object.keys(coverData) : 'none' 
+    });
     
     if (!profileId || !coverData) {
       return new Response(
@@ -35,6 +53,18 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing Supabase credentials in environment");
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Check if profile exists
@@ -44,8 +74,19 @@ serve(async (req) => {
       .eq('id', profileId)
       .maybeSingle();
       
-    if (profileError || !profileData) {
-      console.error("Profile not found:", profileError);
+    if (profileError) {
+      console.error("Error checking profile:", profileError);
+      return new Response(
+        JSON.stringify({ error: 'Database error when checking profile' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+    
+    if (!profileData) {
+      console.error("Profile not found for ID:", profileId);
       return new Response(
         JSON.stringify({ error: 'Invalid profile ID' }),
         {
@@ -70,7 +111,13 @@ serve(async (req) => {
       
     if (error) {
       console.error('Error saving cover data:', error);
-      throw error;
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
     }
     
     console.log('Cover data saved successfully:', data);
@@ -85,7 +132,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || 'Unknown server error' }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }

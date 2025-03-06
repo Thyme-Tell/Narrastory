@@ -20,6 +20,7 @@ export function useCoverData(profileId: string) {
 
     try {
       setIsLoading(true);
+      setError(null);
       console.log('Fetching cover data for profile:', profileId);
       
       // First, try to fetch existing cover data
@@ -77,27 +78,33 @@ export function useCoverData(profileId: string) {
     if (!profileId) return false;
 
     try {
-      console.log('Saving cover data:', newCoverData);
+      console.log('Preparing to save cover data for profile:', profileId);
+      console.log('Cover data to save:', newCoverData);
       
-      // Fix: Properly cast the cover data as Json before inserting it
-      // Also ensure we're using the correct structure for the upsert operation
-      // Remove the 'returning' parameter which was causing the TypeScript error
-      const { data, error } = await supabase
-        .from('book_covers')
-        .upsert({
-          profile_id: profileId,
-          cover_data: newCoverData as unknown as Json,
-          updated_at: new Date().toISOString()
-        }, { 
-          onConflict: 'profile_id'
-        });
+      // Use the edge function for reliable saving
+      const response = await fetch(
+        `https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/save-cover-data`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabase.auth.getSession().then(({ data }) => data.session?.access_token)}`,
+          },
+          body: JSON.stringify({
+            profileId,
+            coverData: newCoverData
+          })
+        }
+      );
 
-      if (error) {
-        console.error('Error saving cover data:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error response from save-cover-data:', response.status, errorData);
+        throw new Error(`Server error (${response.status}): ${errorData.error || 'Unknown error'}`);
       }
       
-      console.log('Cover data saved successfully:', data);
+      const result = await response.json();
+      console.log('Cover data saved successfully:', result);
       
       // Update local state right away
       setCoverData(newCoverData);
