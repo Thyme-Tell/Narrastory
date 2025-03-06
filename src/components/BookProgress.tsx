@@ -5,6 +5,9 @@ import { Book, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { X } from "lucide-react";
+import CoverEditor from "./CoverEditor";
+import { useCoverData } from "@/hooks/useCoverData";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BookProgressProps {
   profileId: string;
@@ -12,6 +15,9 @@ interface BookProgressProps {
 
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { coverData } = useCoverData(profileId);
   
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -80,6 +86,14 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     );
   }
 
+  const hasCustomCover = coverData && Object.keys(coverData).length > 0;
+  const coverStyle = hasCustomCover ? {
+    backgroundImage: coverData.backgroundImage ? `url(${coverData.backgroundImage})` : undefined,
+    backgroundColor: coverData.backgroundColor || undefined,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  } : {};
+
   return (
     <div className="mb-8">
       <nav className="flex text-sm text-atlantic/60 mb-4">
@@ -92,7 +106,13 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <div>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
           <div className="space-y-3">
-            <Button variant="outline" size="lg" className="w-[200px] justify-start">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="w-[200px] justify-start"
+              onClick={() => setIsEditorOpen(true)}
+              disabled={!isAuthenticated}
+            >
               <Book className="mr-2" />
               Edit Cover
             </Button>
@@ -108,13 +128,84 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         </div>
         
         <div className="w-[300px]">
-          <img
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
-            alt="Book cover preview"
-            className="w-full rounded-lg shadow-lg"
-          />
+          <div 
+            className="relative w-full rounded-lg shadow-lg overflow-hidden"
+            style={coverStyle}
+          >
+            {/* Show default image if no custom cover */}
+            {!hasCustomCover && (
+              <img
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
+                alt="Book cover preview"
+                className="w-full rounded-lg shadow-lg"
+              />
+            )}
+            
+            {/* Show custom cover content */}
+            {hasCustomCover && (
+              <div 
+                className="w-full aspect-[2/3]" 
+              >
+                {coverData.title && (
+                  <div 
+                    className={`absolute w-full text-center p-4 ${
+                      coverData.titlePosition === 'top' 
+                        ? 'top-8' 
+                        : coverData.titlePosition === 'bottom' 
+                          ? 'bottom-24' 
+                          : 'top-1/3'
+                    }`}
+                  >
+                    <h1 
+                      className="text-2xl font-bold font-rosemartin"
+                      style={{ color: coverData.titleColor || '#000000' }}
+                    >
+                      {coverData.title}
+                    </h1>
+                  </div>
+                )}
+                
+                {coverData.subtitle && (
+                  <div 
+                    className={`absolute w-full text-center p-4 ${
+                      coverData.subtitlePosition === 'top' 
+                        ? 'top-16' 
+                        : coverData.subtitlePosition === 'bottom' 
+                          ? 'bottom-16'
+                          : 'top-1/2'
+                    }`}
+                  >
+                    <h2 
+                      className="text-lg font-rosemartin"
+                      style={{ color: coverData.subtitleColor || '#000000' }}
+                    >
+                      {coverData.subtitle}
+                    </h2>
+                  </div>
+                )}
+                
+                {coverData.authorName && (
+                  <div className="absolute w-full text-center p-4 bottom-8">
+                    <p className="text-sm font-rosemartin">
+                      {coverData.authorName}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Cover Editor Dialog */}
+      {isEditorOpen && (
+        <CoverEditor
+          open={isEditorOpen}
+          onClose={() => setIsEditorOpen(false)}
+          profileId={profileId}
+          initialCoverData={coverData}
+        />
+      )}
     </div>
   );
 };
