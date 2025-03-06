@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -78,7 +79,7 @@ export const AddStoryModal = ({ storyBookId, onSuccess }: AddStoryModalProps) =>
           Add Story
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-white">
         <DialogHeader>
           <DialogTitle>Add Story to Storybook</DialogTitle>
         </DialogHeader>
