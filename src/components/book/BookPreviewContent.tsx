@@ -1,5 +1,5 @@
 
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
@@ -20,7 +20,7 @@ interface BookPreviewContentProps {
   getPageWithinStory: () => number;
 }
 
-const BookPreviewContent = ({
+const BookPreviewContent = forwardRef<HTMLDivElement, BookPreviewContentProps>(({
   currentPage,
   zoomLevel,
   coverData,
@@ -30,8 +30,7 @@ const BookPreviewContent = ({
   storyPages,
   getCurrentStoryIndex,
   getPageWithinStory,
-}: BookPreviewContentProps) => {
-  const bookContainerRef = useRef<HTMLDivElement>(null);
+}, ref) => {
   const [pageTransitioning, setPageTransitioning] = useState(false);
   const [prevPage, setPrevPage] = useState(currentPage);
   const isMobile = useIsMobile();
@@ -86,9 +85,9 @@ const BookPreviewContent = ({
   return (
     <div 
       className="flex-1 h-full flex flex-col items-center justify-center p-2 md:p-4 overflow-hidden"
-      ref={bookContainerRef}
     >
       <div 
+        ref={ref}
         className="relative bg-white shadow-xl rounded-md transition-transform"
         style={{ 
           transform: `scale(${zoomLevel})`,
@@ -126,6 +125,8 @@ const BookPreviewContent = ({
       </div>
     </div>
   );
-};
+});
+
+BookPreviewContent.displayName = "BookPreviewContent";
 
 export default BookPreviewContent;

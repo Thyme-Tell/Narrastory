@@ -6,6 +6,8 @@ import BookPreviewHeader from "./BookPreviewHeader";
 import BookPreviewContent from "./BookPreviewContent";
 import BookPreviewNavigation from "./BookPreviewNavigation";
 import TableOfContents from "./TableOfContents";
+import { generateBookPDF } from "@/utils/pdfGenerator";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookPreviewProps {
   profileId: string;
@@ -16,6 +18,7 @@ interface BookPreviewProps {
 const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const bookContainerRef = useRef<HTMLDivElement>(null);
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
+  const { toast } = useToast();
   
   const {
     currentPage,
@@ -43,6 +46,25 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const isLoading = isStoriesLoading || isCoverLoading;
   const authorName = profile ? `${profile.first_name} ${profile.last_name}` : "";
 
+  const handleDownloadPDF = async () => {
+    if (isLoading || !stories || stories.length === 0) {
+      toast({
+        title: "Cannot generate PDF",
+        description: "Please wait for content to load completely",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await generateBookPDF(
+      stories,
+      coverData,
+      authorName,
+      storyPages,
+      bookContainerRef
+    );
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden">
       <BookPreviewHeader 
@@ -55,6 +77,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
         onZoomOut={zoomOut}
         onToggleBookmark={toggleBookmark}
         onToggleToc={toggleToc}
+        onDownloadPDF={handleDownloadPDF}
       />
 
       <div className="flex-1 w-full flex overflow-hidden">
@@ -72,6 +95,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
 
         <div className="relative flex-1 h-full overflow-hidden">
           <BookPreviewContent 
+            ref={bookContainerRef}
             currentPage={currentPage}
             zoomLevel={zoomLevel}
             coverData={coverData}
