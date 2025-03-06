@@ -17,8 +17,6 @@ interface PageViewProps {
   totalPagesInStory?: number;
   isMediaPage?: boolean;
   mediaItem?: StoryMediaItem;
-  pagePosition?: "left" | "right" | "full"; // Added "full" as a valid option
-  pageIndex?: number; // Overall page number in the book
 }
 
 const PageView = ({ 
@@ -26,9 +24,7 @@ const PageView = ({
   pageNumber, 
   totalPagesInStory = 1,
   isMediaPage = false,
-  mediaItem,
-  pagePosition = "full", // Default to full page view
-  pageIndex
+  mediaItem
 }: PageViewProps) => {
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
@@ -63,7 +59,7 @@ const PageView = ({
   // If this is a media page, only show the media item
   if (isMediaPage && mediaItem) {
     return (
-      <div className={`w-full h-full overflow-auto p-8 bg-white book-page flex flex-col items-center justify-center ${pagePosition === "full" ? "" : `page-${pagePosition}`}`}>
+      <div className="w-full h-full overflow-auto p-8 bg-white book-page flex flex-col items-center justify-center">
         <div className="max-w-full max-h-[80%] flex justify-center items-center">
           {mediaItem.content_type.startsWith("image/") ? (
             <div className="max-h-full">
@@ -114,7 +110,7 @@ const PageView = ({
   }
 
   return (
-    <div className={`w-full h-full overflow-auto p-8 bg-white book-page ${pagePosition === "full" ? "" : `page-${pagePosition}`}`}>
+    <div className="w-full h-full overflow-auto p-8 bg-white book-page">
       <div className="w-full mx-auto book-content">
         {/* Story Header - only on first page */}
         {pageNumber === 1 && (

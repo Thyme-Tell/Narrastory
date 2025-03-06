@@ -14,7 +14,6 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   const [storyPages, setStoryPages] = useState<number[]>([]);
   const [totalPageCount, setTotalPageCount] = useState(1); // Cover page by default
   const [storyMediaMap, setStoryMediaMap] = useState<Map<string, StoryMediaItem[]>>(new Map());
-  const [viewMode, setViewMode] = useState<"single" | "double">("single");
 
   // Fetch media items for all stories
   const { data: allMediaItems = [] } = useQuery({
@@ -138,52 +137,6 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
     return null;
   };
 
-  // Get next story/page for double-page view
-  const getNextStory = () => {
-    if (currentPage >= totalPageCount - 1 || !stories || stories.length === 0) {
-      return null;
-    }
-    
-    let currentPageCount = 1; // Start after cover
-    
-    for (let i = 0; i < stories.length; i++) {
-      const story = stories[i];
-      const storyTextPages = calculateStoryPages(story);
-      const mediaItems = storyMediaMap.get(story.id) || [];
-      const totalStoryPages = storyTextPages + mediaItems.length;
-      
-      // If next page falls within this story's range
-      if (currentPage + 1 < currentPageCount + totalStoryPages) {
-        const pageOffset = currentPage + 1 - currentPageCount;
-        
-        // Check if it's a media page
-        if (pageOffset >= storyTextPages && mediaItems.length > 0) {
-          const mediaIndex = pageOffset - storyTextPages;
-          if (mediaIndex < mediaItems.length) {
-            return {
-              story,
-              pageWithinStory: 1, // Not relevant for media pages
-              totalPagesInStory: totalStoryPages,
-              isMediaPage: true,
-              mediaItem: mediaItems[mediaIndex]
-            };
-          }
-        }
-        
-        // Regular text page
-        return {
-          story,
-          pageWithinStory: pageOffset + 1, // Convert to 1-based
-          totalPagesInStory: totalStoryPages
-        };
-      }
-      
-      currentPageCount += totalStoryPages;
-    }
-    
-    return null;
-  };
-
   // Handle zoom controls
   const zoomIn = () => {
     setZoomLevel(Math.min(2, zoomLevel + 0.1));
@@ -191,11 +144,6 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
 
   const zoomOut = () => {
     setZoomLevel(Math.max(0.5, zoomLevel - 0.1));
-  };
-
-  // Toggle view mode between single and double page
-  const toggleViewMode = () => {
-    setViewMode(viewMode === "single" ? "double" : "single");
   };
 
   // Toggle bookmark for current page
@@ -233,13 +181,10 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
     goToNextPage,
     goToPrevPage,
     getCurrentStory,
-    getNextStory, // Added for two-page layout
     zoomIn,
     zoomOut,
     toggleBookmark,
     jumpToPage,
-    storyMediaMap,
-    viewMode,
-    toggleViewMode
+    storyMediaMap
   };
 };
