@@ -21,12 +21,14 @@
   max-width: 100%;
   max-height: 100%;
   background-color: white;
+  overflow: hidden; /* Prevent scrolling */
 }
 
 .book-content {
   /* Standard book content width with margins */
   max-width: 90%;
   margin: 0 auto;
+  overflow: hidden; /* Ensure no scrolling */
 }
 
 .book-text {

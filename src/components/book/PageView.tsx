@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Story } from "@/types/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -34,22 +33,15 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
     },
   });
 
-  // Split story content into paragraphs
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
   
-  // For multi-page stories, we need to determine which content goes on this page
-  // A simple approach: approximately 2000 characters per page
   const CHARS_PER_PAGE = 2000;
   const startIndex = (pageNumber - 1) * CHARS_PER_PAGE;
-  const endIndex = startIndex + CHARS_PER_PAGE;
   
-  // Get content for this page
-  let pageContent = '';
   let currentCharCount = 0;
   let pageParas: string[] = [];
   
   if (pageNumber === 1) {
-    // First page: show all content up to the character limit
     for (const para of paragraphs) {
       if (currentCharCount + para.length <= CHARS_PER_PAGE) {
         pageParas.push(para);
@@ -59,7 +51,6 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
       }
     }
   } else {
-    // Subsequent pages: skip content from previous pages
     let skippedChars = 0;
     for (const para of paragraphs) {
       skippedChars += para.length;
@@ -74,31 +65,23 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
     }
   }
 
-  // Show media only on the first page of a story
   const showMedia = pageNumber === 1;
 
-  // Function to handle media item click (empty implementation for now)
   const handleImageClick = (url: string) => {
-    // This will be enhanced later with a lightbox or modal
     console.log("Image clicked:", url);
   };
 
-  // Function to handle media caption update (empty implementation for now)
   const handleCaptionUpdate = (mediaId: string, caption: string) => {
-    // This will be implemented when editing is required
     console.log("Caption update:", mediaId, caption);
   };
 
-  // Function to handle crop start (empty implementation for now)
   const handleStartCrop = (url: string, mediaId: string) => {
-    // This will be implemented when crop functionality is needed
     console.log("Start crop:", url, mediaId);
   };
 
   return (
-    <div className="w-full h-full overflow-auto p-8 bg-white book-page">
-      <div className="w-full mx-auto book-content">
-        {/* Story Header - only on first page */}
+    <div className="w-full h-full book-page flex flex-col overflow-hidden p-8 bg-white">
+      <div className="w-full mx-auto book-content flex-1">
         {pageNumber === 1 && (
           <div className="mb-6">
             <div className="flex justify-between items-baseline">
@@ -113,7 +96,6 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
           </div>
         )}
 
-        {/* Story Content */}
         <div className="prose max-w-none book-text">
           {pageParas.map((paragraph, index) => (
             <p key={index} className="mb-4">
@@ -122,7 +104,6 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
           ))}
         </div>
 
-        {/* Media Items - only on the first page */}
         {showMedia && (
           isMediaLoading ? (
             <Skeleton className="w-full h-40 mt-6" />

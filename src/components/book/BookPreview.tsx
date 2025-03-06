@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +29,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const { toast } = useToast();
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
   
-  // Fetch stories for the book content
   const { data: stories, isLoading: isStoriesLoading } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
@@ -55,7 +53,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     enabled: open,
   });
 
-  // Get profile info
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
     queryFn: async () => {
@@ -75,7 +72,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     enabled: open,
   });
 
-  // Calculate page distribution for stories
   useEffect(() => {
     if (!stories || stories.length === 0) {
       setStoryPages([]);
@@ -86,12 +82,9 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     let pageCount = 1; // Start with cover page
     const pageStartIndices: number[] = [];
 
-    // Each story starts on a new page
     stories.forEach((story) => {
       pageStartIndices.push(pageCount);
       
-      // Estimate number of pages based on content length
-      // This is a simple estimation - about 2000 characters per page
       const contentLength = story.content.length;
       const estimatedPages = Math.max(1, Math.ceil(contentLength / 2000));
       pageCount += estimatedPages;
@@ -101,7 +94,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     setTotalPageCount(pageCount);
   }, [stories]);
 
-  // Handle page navigation
   const goToNextPage = () => {
     if (currentPage < totalPageCount - 1) {
       setCurrentPage(currentPage + 1);
@@ -114,7 +106,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     }
   };
 
-  // Find which story is displayed on the current page
   const getCurrentStoryIndex = () => {
     if (currentPage === 0) return -1; // Cover page
     
@@ -126,7 +117,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     return -1;
   };
 
-  // Get current page number within a story
   const getPageWithinStory = () => {
     const storyIndex = getCurrentStoryIndex();
     if (storyIndex === -1) return 0;
@@ -134,7 +124,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     return currentPage - storyPages[storyIndex] + 1;
   };
 
-  // Handle zoom controls
   const zoomIn = () => {
     setZoomLevel(Math.min(2, zoomLevel + 0.1));
   };
@@ -143,7 +132,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     setZoomLevel(Math.max(0.5, zoomLevel - 0.1));
   };
 
-  // Toggle bookmark for current page
   const toggleBookmark = () => {
     if (bookmarks.includes(currentPage)) {
       setBookmarks(bookmarks.filter(b => b !== currentPage));
@@ -152,13 +140,11 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     }
   };
 
-  // Jump to specific page from TOC
   const jumpToPage = (pageIndex: number) => {
     setCurrentPage(pageIndex);
     setShowToc(false);
   };
 
-  // Reset state when dialog is opened
   useEffect(() => {
     if (open) {
       setCurrentPage(0);
@@ -166,7 +152,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     }
   }, [open]);
 
-  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!open) return;
@@ -192,14 +177,12 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
 
   if (!open) return null;
 
-  // Get the current story to display
   const currentStoryIndex = getCurrentStoryIndex();
   const currentStory = currentStoryIndex !== -1 ? stories?.[currentStoryIndex] : null;
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden">
-      {/* Header */}
-      <div className="w-full bg-background p-4 flex items-center justify-between">
+      <div className="w-full bg-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline" 
@@ -241,7 +224,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
       </div>
 
       <div className="flex-1 w-full flex overflow-hidden">
-        {/* TOC Sidebar */}
         {showToc && (
           <div className="w-64 h-full bg-muted p-4 overflow-y-auto animate-slide-in-right">
             <TableOfContents 
@@ -254,9 +236,8 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
           </div>
         )}
 
-        {/* Book Content */}
         <div 
-          className="flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto"
+          className="flex-1 h-full flex flex-col items-center justify-center p-4 overflow-hidden"
           ref={bookContainerRef}
         >
           <div 
@@ -266,22 +247,20 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
               transformOrigin: 'center',
               width: '600px',  // Adjusted for 5x8 aspect ratio (5:8 = 600:960)
               height: '960px', // 5x8 inch ratio
-              maxHeight: '90vh'
+              maxHeight: '90vh',
+              overflow: 'hidden'
             }}
           >
-            {/* Book Pages */}
             {isStoriesLoading || isCoverLoading ? (
               <Skeleton className="w-full h-full" />
             ) : (
               <>
                 {currentPage === 0 ? (
-                  // Cover Page
                   <BookCover 
                     coverData={coverData} 
                     authorName={profile ? `${profile.first_name} ${profile.last_name}` : ""}
                   />
                 ) : (
-                  // Content Pages
                   currentStory && (
                     <PageView 
                       story={currentStory} 
@@ -293,7 +272,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
               </>
             )}
 
-            {/* Page Turn Buttons */}
             <div className="absolute inset-0 flex justify-between items-center pointer-events-none">
               <Button 
                 variant="ghost" 
