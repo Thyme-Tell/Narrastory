@@ -29,11 +29,28 @@ export function useCoverData(profileId: string) {
         if (data) {
           setCoverData(data.cover_data as CoverData);
         } else {
-          setCoverData(null);
+          // If no cover data exists yet, create a new record with default data
+          const { data: newData, error: insertError } = await supabase
+            .from('book_covers')
+            .insert({ 
+              profile_id: profileId,
+              cover_data: DEFAULT_COVER_DATA 
+            })
+            .select('cover_data')
+            .single();
+
+          if (insertError) throw insertError;
+          
+          setCoverData(newData.cover_data as CoverData);
         }
       } catch (err) {
         console.error("Error fetching cover data:", err);
         setError(err as Error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load cover data",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -46,48 +63,14 @@ export function useCoverData(profileId: string) {
     if (!profileId) return;
 
     try {
-      // Check if a record already exists
-      const { data: existingRecord, error: checkError } = await supabase
+      const { error } = await supabase
         .from('book_covers')
-        .select('id')
-        .eq('profile_id', profileId)
-        .maybeSingle();
+        .upsert({ 
+          profile_id: profileId,
+          cover_data: newCoverData 
+        });
 
-      if (checkError) throw checkError;
-
-      // Convert CoverData to a JSON-compatible object
-      const coverDataJson = {
-        ...newCoverData,
-        backgroundColor: newCoverData.backgroundColor || null,
-        backgroundImage: newCoverData.backgroundImage || null,
-        titleText: newCoverData.titleText || null,
-        authorText: newCoverData.authorText || null,
-        titleColor: newCoverData.titleColor || null,
-        authorColor: newCoverData.authorColor || null,
-        titleSize: newCoverData.titleSize || null,
-        authorSize: newCoverData.authorSize || null,
-        layout: newCoverData.layout || null
-      };
-
-      let result;
-      
-      if (existingRecord) {
-        // Update existing record
-        result = await supabase
-          .from('book_covers')
-          .update({ cover_data: coverDataJson })
-          .eq('profile_id', profileId);
-      } else {
-        // Insert new record
-        result = await supabase
-          .from('book_covers')
-          .insert({ 
-            profile_id: profileId, 
-            cover_data: coverDataJson 
-          });
-      }
-
-      if (result.error) throw result.error;
+      if (error) throw error;
 
       setCoverData(newCoverData);
       return true;
