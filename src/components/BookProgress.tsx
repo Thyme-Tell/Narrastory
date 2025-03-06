@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -111,7 +110,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
               size="lg" 
               className="w-[200px] justify-start"
               onClick={() => setIsEditorOpen(true)}
-              disabled={!isAuthenticated}
             >
               <Book className="mr-2" />
               Edit Cover
@@ -132,7 +130,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
             className="relative w-full rounded-lg shadow-lg overflow-hidden"
             style={coverStyle}
           >
-            {/* Show default image if no custom cover */}
             {!hasCustomCover && (
               <img
                 src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
@@ -141,7 +138,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
               />
             )}
             
-            {/* Show custom cover content */}
             {hasCustomCover && (
               <div 
                 className="w-full aspect-[2/3]" 
@@ -197,7 +193,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         </div>
       </div>
 
-      {/* Cover Editor Dialog */}
       {isEditorOpen && (
         <CoverEditor
           open={isEditorOpen}
