@@ -17,6 +17,7 @@ interface PageViewProps {
   totalPagesInStory?: number;
   isMediaPage?: boolean;
   mediaItem?: StoryMediaItem;
+  isMobile?: boolean;
 }
 
 const PageView = ({ 
@@ -24,7 +25,8 @@ const PageView = ({
   pageNumber, 
   totalPagesInStory = 1,
   isMediaPage = false,
-  mediaItem
+  mediaItem,
+  isMobile = false
 }: PageViewProps) => {
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
@@ -59,7 +61,7 @@ const PageView = ({
   // If this is a media page, only show the media item
   if (isMediaPage && mediaItem) {
     return (
-      <div className="w-full h-full overflow-auto p-8 bg-white book-page flex flex-col items-center justify-center">
+      <div className="w-full h-full overflow-auto p-4 sm:p-8 bg-white book-page flex flex-col items-center justify-center">
         <div className="max-w-full max-h-[80%] flex justify-center items-center">
           {mediaItem.content_type.startsWith("image/") ? (
             <div className="max-h-full">
@@ -109,29 +111,32 @@ const PageView = ({
     );
   }
 
+  const titleFontSize = isMobile ? "text-xl" : "text-2xl";
+  const contentFontSize = isMobile ? "text-sm" : "text-base";
+
   return (
-    <div className="w-full h-full overflow-auto p-8 bg-white book-page">
+    <div className="w-full h-full overflow-auto p-4 sm:p-8 bg-white book-page">
       <div className="w-full mx-auto book-content">
         {/* Story Header - only on first page */}
         {pageNumber === 1 && (
-          <div className="mb-6">
-            <div className="flex justify-between items-baseline">
-              <h2 className="text-2xl font-semibold">
+          <div className="mb-4 sm:mb-6">
+            <div className="flex justify-between items-baseline flex-wrap">
+              <h2 className={`${titleFontSize} font-semibold mb-1`}>
                 {story.title || "Untitled Story"}
               </h2>
-              <span className="text-sm text-gray-500">
+              <span className="text-xs sm:text-sm text-gray-500">
                 {format(new Date(story.created_at), "MMMM d, yyyy")}
               </span>
             </div>
-            <div className="text-right text-sm text-gray-400">Page {pageNumber} of {totalPagesInStory}</div>
+            <div className="text-right text-xs text-gray-400">Page {pageNumber} of {totalPagesInStory}</div>
           </div>
         )}
 
         {/* Story Content */}
-        <div className="prose max-w-none book-text">
+        <div className={`prose max-w-none ${contentFontSize}`}>
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => (
-              <p key={index} className="mb-4">
+              <p key={index} className="mb-2 sm:mb-4">
                 {paragraph}
               </p>
             ))

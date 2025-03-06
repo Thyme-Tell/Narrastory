@@ -43,18 +43,18 @@ const BookPreviewContent = ({
   currentStoryInfo,
   isMobile = false,
 }: BookPreviewContentProps) => {
-  // Calculate dimensions based on device
-  const maxWidth = isMobile ? "100%" : "600px";
-  const maxHeight = isMobile ? "75vh" : "90vh";
+  // Calculate dimensions based on device while maintaining aspect ratio
+  const maxWidth = isMobile ? "280px" : "600px";
+  const maxHeight = isMobile ? "450px" : "90vh";
 
   return (
     <div 
-      className="relative bg-white shadow-xl rounded-md transition-transform w-full mx-auto"
+      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden"
       style={{ 
         transform: `scale(${zoomLevel})`,
         transformOrigin: 'center',
         maxWidth,
-        maxHeight,
+        height: "auto",
         aspectRatio: "5/8"
       }}
     >
@@ -78,6 +78,7 @@ const BookPreviewContent = ({
                 totalPagesInStory={currentStoryInfo.totalPagesInStory}
                 isMediaPage={currentStoryInfo.isMediaPage}
                 mediaItem={currentStoryInfo.mediaItem}
+                isMobile={isMobile}
               />
             )
           )}

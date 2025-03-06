@@ -163,6 +163,20 @@
   .ios-footer-padding {
     padding-bottom: 80px;
   }
+  
+  /* Mobile book preview text size adjustments */
+  .book-preview-mobile-text {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+  
+  .book-preview-mobile-title {
+    font-size: 18px !important;
+  }
+  
+  .book-preview-mobile-content {
+    padding: 12px !important;
+  }
 }
 
 /* Animations for mobile transitions */
