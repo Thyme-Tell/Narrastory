@@ -10,6 +10,13 @@ export const useStoryPageMedia = (storyId: string) => {
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", storyId],
     queryFn: async () => {
+      if (!storyId) {
+        console.warn("No storyId provided to useStoryPageMedia");
+        return [];
+      }
+      
+      console.log(`Fetching media for story: ${storyId}`);
+      
       const { data, error } = await supabase
         .from("story_media")
         .select("*")
@@ -21,15 +28,42 @@ export const useStoryPageMedia = (storyId: string) => {
         return [];
       }
 
+      if (!data || data.length === 0) {
+        console.log(`No media found for story: ${storyId}`);
+        return [];
+      }
+      
+      console.log(`Found ${data.length} media items for story: ${storyId}`);
+      
+      // Process and validate media items
+      const processedMedia = data.map(item => {
+        // Get public URL for the media item
+        const { data: storageData } = supabase.storage
+          .from("story-media")
+          .getPublicUrl(item.file_path);
+          
+        // Add the public URL to the media item
+        return {
+          ...item,
+          publicUrl: storageData.publicUrl
+        };
+      });
+
       // Optimize media items for mobile if needed
       if (isMobile) {
-        // We could modify media items for mobile here if needed
-        // For now, we're just returning them as is
+        // Adjust media item properties for mobile
+        return processedMedia.map(item => ({
+          ...item,
+          // No resize needed for now, just returning as is
+        }));
       }
 
-      return data as StoryMediaItem[];
+      return processedMedia as (StoryMediaItem & { publicUrl: string })[];
     },
   });
 
-  return { mediaItems, isMediaLoading };
+  return { 
+    mediaItems: mediaItems as (StoryMediaItem & { publicUrl: string })[], 
+    isMediaLoading 
+  };
 };
