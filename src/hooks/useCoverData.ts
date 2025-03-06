@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 import Cookies from 'js-cookie';
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   // Function to fetch cover data
   const fetchCoverData = useCallback(async () => {
@@ -74,19 +76,44 @@ export function useCoverData(profileId: string) {
   }, [profileId, fetchCoverData]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
-    if (!profileId) return false;
+    if (!profileId || !isAuthenticated) {
+      console.error("Cannot save: No profile ID or not authenticated");
+      toast({
+        variant: "destructive",
+        title: "Authentication error",
+        description: "You must be logged in to save cover data",
+      });
+      return false;
+    }
 
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Add auth headers when using cookie-based auth
+      // Make sure we're using the exact profile ID that's associated with the authenticated user
+      const authCookie = Cookies.get('profile_authorized');
       const currentProfileId = Cookies.get('profile_id');
       
-      if (currentProfileId && currentProfileId !== profileId) {
-        console.log('Warning: Current profile ID does not match target profile ID');
+      if (!authCookie || !currentProfileId) {
+        console.error('Missing authentication cookies');
+        toast({
+          variant: "destructive",
+          title: "Authentication error",
+          description: "Please log in again to continue",
+        });
+        return false;
       }
       
-      // Fix: Update the upsert call to match the Supabase JS client API
+      if (currentProfileId !== profileId) {
+        console.error(`Authentication mismatch: User ${currentProfileId} trying to update profile ${profileId}`);
+        toast({
+          variant: "destructive",
+          title: "Permission denied",
+          description: "You can only edit your own book cover",
+        });
+        return false;
+      }
+      
+      // Use supabase function to save data
       const { data, error } = await supabase
         .from('book_covers')
         .upsert({
