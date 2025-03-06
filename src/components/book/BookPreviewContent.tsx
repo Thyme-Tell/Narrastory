@@ -50,6 +50,10 @@ const BookPreviewContent = ({
     }
   }, [currentPage, prevPage, isLoading]);
 
+  // Page dimensions for a 5x8 inch book (at 96 DPI)
+  const PAGE_WIDTH = 480;  // 5 inches * 96dpi = 480px
+  const PAGE_HEIGHT = 768; // 8 inches * 96dpi = 768px
+
   return (
     <div 
       className="flex-1 h-full flex flex-col items-center justify-center p-4 overflow-hidden"
@@ -60,8 +64,8 @@ const BookPreviewContent = ({
         style={{ 
           transform: `scale(${zoomLevel})`,
           transformOrigin: 'center',
-          width: '600px',  // Adjusted for 5x8 aspect ratio (5:8 = 600:960)
-          height: '960px', // 5x8 inch ratio
+          width: `${PAGE_WIDTH}px`,
+          height: `${PAGE_HEIGHT}px`,
           maxHeight: '90vh',
           overflow: 'hidden'
         }}
