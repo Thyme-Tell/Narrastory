@@ -15,50 +15,51 @@ export function useCoverData(profileId: string) {
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchCoverData() {
-      if (!profileId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        console.log('Fetching cover data for profile:', profileId);
-        
-        // First, try to fetch existing cover data
-        const { data, error } = await supabase
-          .from('book_covers')
-          .select('cover_data')
-          .eq('profile_id', profileId)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error fetching cover data:', error);
-          throw error;
-        }
-
-        console.log('Received cover data:', data);
-        
-        if (data) {
-          setCoverData(data.cover_data as CoverData);
-        } else {
-          // If no cover data exists yet, create a new record with default data
-          console.log('Creating new cover data with defaults');
-          await saveCoverData(DEFAULT_COVER_DATA);
-        }
-      } catch (err) {
-        console.error("Error in fetchCoverData:", err);
-        setError(err as Error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load cover data",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  // Function to fetch cover data
+  const fetchCoverData = async () => {
+    if (!profileId) {
+      setIsLoading(false);
+      return;
     }
 
+    try {
+      console.log('Fetching cover data for profile:', profileId);
+      
+      // First, try to fetch existing cover data
+      const { data, error } = await supabase
+        .from('book_covers')
+        .select('cover_data')
+        .eq('profile_id', profileId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching cover data:', error);
+        throw error;
+      }
+
+      console.log('Received cover data:', data);
+      
+      if (data && data.cover_data) {
+        setCoverData(data.cover_data as CoverData);
+      } else {
+        // If no cover data exists yet, create a new record with default data
+        console.log('Creating new cover data with defaults');
+        await saveCoverData(DEFAULT_COVER_DATA);
+      }
+    } catch (err) {
+      console.error("Error in fetchCoverData:", err);
+      setError(err as Error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load cover data",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCoverData();
   }, [profileId]);
 
@@ -89,7 +90,13 @@ export function useCoverData(profileId: string) {
       
       const result = await response.json();
       console.log('Cover data saved successfully:', result);
+      
+      // Update local state with the saved data
       setCoverData(newCoverData);
+      
+      // Refetch the data to ensure we have the latest from the server
+      await fetchCoverData();
+      
       return true;
     } catch (err) {
       console.error("Error in saveCoverData:", err);
@@ -107,5 +114,6 @@ export function useCoverData(profileId: string) {
     isLoading,
     error,
     saveCoverData,
+    refreshCoverData: fetchCoverData
   };
 }
