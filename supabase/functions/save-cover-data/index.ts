@@ -20,6 +20,8 @@ serve(async (req) => {
     // Get the request JSON
     const { profileId, coverData } = await req.json();
     
+    console.log("Received request to save cover data:", { profileId, coverData });
+    
     if (!profileId || !coverData) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
@@ -43,6 +45,7 @@ serve(async (req) => {
       .maybeSingle();
       
     if (profileError || !profileData) {
+      console.error("Profile not found:", profileError);
       return new Response(
         JSON.stringify({ error: 'Invalid profile ID' }),
         {
@@ -62,8 +65,7 @@ serve(async (req) => {
         cover_data: coverData,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: 'profile_id',
-        returning: 'representation'
+        onConflict: 'profile_id'
       });
       
     if (error) {
@@ -74,7 +76,7 @@ serve(async (req) => {
     console.log('Cover data saved successfully:', data);
     
     return new Response(
-      JSON.stringify({ data }),
+      JSON.stringify({ success: true, data }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }

@@ -81,6 +81,7 @@ export function useCoverData(profileId: string) {
       
       // Fix: Properly cast the cover data as Json before inserting it
       // Also ensure we're using the correct structure for the upsert operation
+      // Remove the 'returning' parameter which was causing the TypeScript error
       const { data, error } = await supabase
         .from('book_covers')
         .upsert({
@@ -88,8 +89,7 @@ export function useCoverData(profileId: string) {
           cover_data: newCoverData as unknown as Json,
           updated_at: new Date().toISOString()
         }, { 
-          onConflict: 'profile_id',
-          returning: 'representation'
+          onConflict: 'profile_id'
         });
 
       if (error) {
