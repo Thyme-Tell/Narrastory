@@ -3,21 +3,13 @@ import { Check, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { CoverData } from "../CoverTypes";
+import { BackgroundTabProps } from "../CoverTypes";
 
 const BACKGROUND_COLORS = [
   "#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd", 
   "#F6F4EB", "#FFF8E3", "#F5EEE6", "#F3E1E1", "#EAD7D1",
   "#E8D0D0", "#E5D2C4", "#DED0B6", "#BBADA0", "#F0E4D8"
 ];
-
-interface BackgroundTabProps {
-  coverData: CoverData;
-  onBackgroundColorChange: (color: string) => void;
-  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveImage: () => void;
-  isUploading: boolean;
-}
 
 const BackgroundTab = ({
   coverData,

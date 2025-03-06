@@ -1,12 +1,14 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { X } from "lucide-react";
-import CoverEditor, { CoverData } from "./cover/CoverEditor";
+import CoverEditor from "./cover/CoverEditor";
 import CoverCanvas from "./cover/CoverCanvas";
 import { useCoverData } from "@/hooks/useCoverData";
+import { CoverData } from "./cover/CoverTypes";
 
 interface BookProgressProps {
   profileId: string;

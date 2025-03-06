@@ -1,118 +1,108 @@
 
-import { Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { CoverData } from "../CoverTypes";
+import { TextTabProps } from "../CoverTypes";
+import { Check } from "lucide-react";
 
 const TEXT_COLORS = [
-  "#000000", "#333333", "#555555", "#777777", "#999999",
-  "#A33D29", "#732626", "#9B87F5", "#7E69AB", "#0C2340"
+  "#000000", "#333333", "#555555", "#777777", "#999999", 
+  "#0F172A", "#1E293B", "#334155", "#475569", "#64748B",
+  "#7F1D1D", "#991B1B", "#9A3412", "#A16207", "#15803D"
 ];
 
-interface TextTabProps {
-  coverData: CoverData;
-  onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
-  onTextColorChange: (color: string, type: 'title' | 'author') => void;
-  onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
-}
-
-const TextTab = ({
-  coverData,
-  onTextChange,
-  onTextColorChange,
-  onFontSizeChange
+const TextTab = ({ 
+  coverData, 
+  onTextChange, 
+  onTextColorChange, 
+  onFontSizeChange 
 }: TextTabProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
-        <Label htmlFor="title-text" className="block mb-2">Title</Label>
+        <Label className="block mb-2">Title</Label>
         <Input
-          id="title-text"
-          value={coverData.titleText || ''}
+          value={coverData.titleText || ""}
           onChange={(e) => onTextChange(e, 'title')}
-          placeholder="Enter book title"
+          placeholder="Book title"
+          className="mb-4"
         />
+        
+        <div className="mb-4">
+          <Label className="block mb-2">Title Color</Label>
+          <div className="grid grid-cols-5 gap-2">
+            {TEXT_COLORS.map((color) => (
+              <button
+                key={`title-${color}`}
+                className={`w-full aspect-square rounded-md flex items-center justify-center border ${
+                  coverData.titleColor === color 
+                    ? 'border-primary' 
+                    : 'border-transparent'
+                }`}
+                style={{ backgroundColor: color }}
+                onClick={() => onTextColorChange(color, 'title')}
+              >
+                {coverData.titleColor === color && (
+                  <Check className="h-4 w-4 text-white" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <Label className="block mb-2">Title Size: {coverData.titleSize}px</Label>
+          <Slider
+            value={[coverData.titleSize || 36]}
+            min={20}
+            max={60}
+            step={1}
+            onValueChange={(value) => onFontSizeChange(value, 'title')}
+          />
+        </div>
       </div>
       
       <div>
-        <Label htmlFor="author-text" className="block mb-2">Author</Label>
+        <Label className="block mb-2">Author</Label>
         <Input
-          id="author-text"
-          value={coverData.authorText || ''}
+          value={coverData.authorText || ""}
           onChange={(e) => onTextChange(e, 'author')}
-          placeholder="Enter author name"
+          placeholder="Author name"
+          className="mb-4"
         />
-      </div>
-      
-      <div>
-        <Label className="block mb-2">Title Color</Label>
-        <div className="grid grid-cols-5 gap-2">
-          {TEXT_COLORS.map((color) => (
-            <button
-              key={color}
-              className={`w-full aspect-square rounded-md flex items-center justify-center border ${
-                coverData.titleColor === color 
-                  ? 'border-primary' 
-                  : 'border-transparent'
-              }`}
-              style={{ backgroundColor: color }}
-              onClick={() => onTextColorChange(color, 'title')}
-            >
-              {coverData.titleColor === color && (
-                <Check className="h-4 w-4 text-white" />
-              )}
-            </button>
-          ))}
+        
+        <div className="mb-4">
+          <Label className="block mb-2">Author Color</Label>
+          <div className="grid grid-cols-5 gap-2">
+            {TEXT_COLORS.map((color) => (
+              <button
+                key={`author-${color}`}
+                className={`w-full aspect-square rounded-md flex items-center justify-center border ${
+                  coverData.authorColor === color 
+                    ? 'border-primary' 
+                    : 'border-transparent'
+                }`}
+                style={{ backgroundColor: color }}
+                onClick={() => onTextColorChange(color, 'author')}
+              >
+                {coverData.authorColor === color && (
+                  <Check className="h-4 w-4 text-white" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      
-      <div>
-        <Label className="block mb-2">Author Color</Label>
-        <div className="grid grid-cols-5 gap-2">
-          {TEXT_COLORS.map((color) => (
-            <button
-              key={color}
-              className={`w-full aspect-square rounded-md flex items-center justify-center border ${
-                coverData.authorColor === color 
-                  ? 'border-primary' 
-                  : 'border-transparent'
-              }`}
-              style={{ backgroundColor: color }}
-              onClick={() => onTextColorChange(color, 'author')}
-            >
-              {coverData.authorColor === color && (
-                <Check className="h-4 w-4 text-white" />
-              )}
-            </button>
-          ))}
+        
+        <div>
+          <Label className="block mb-2">Author Size: {coverData.authorSize}px</Label>
+          <Slider
+            value={[coverData.authorSize || 24]}
+            min={12}
+            max={40}
+            step={1}
+            onValueChange={(value) => onFontSizeChange(value, 'author')}
+          />
         </div>
-      </div>
-      
-      <div>
-        <Label className="block mb-2">
-          Title Size: {coverData.titleSize}px
-        </Label>
-        <Slider
-          defaultValue={[coverData.titleSize || 36]}
-          min={16}
-          max={72}
-          step={1}
-          onValueChange={(value) => onFontSizeChange(value, 'title')}
-        />
-      </div>
-      
-      <div>
-        <Label className="block mb-2">
-          Author Size: {coverData.authorSize}px
-        </Label>
-        <Slider
-          defaultValue={[coverData.authorSize || 24]}
-          min={12}
-          max={48}
-          step={1}
-          onValueChange={(value) => onFontSizeChange(value, 'author')}
-        />
       </div>
     </div>
   );

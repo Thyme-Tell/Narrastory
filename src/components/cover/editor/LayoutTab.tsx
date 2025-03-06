@@ -1,11 +1,6 @@
 
-import { CoverData } from "../CoverTypes";
+import { LayoutTabProps } from "../CoverTypes";
 import { Label } from "@/components/ui/label";
-
-interface LayoutTabProps {
-  coverData: CoverData;
-  onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
-}
 
 const LayoutTab = ({ coverData, onLayoutChange }: LayoutTabProps) => {
   return (

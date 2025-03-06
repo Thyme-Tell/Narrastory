@@ -10,18 +10,7 @@ import ImageCropper from "@/components/ImageCropper";
 import BackgroundTab from "./editor/BackgroundTab";
 import TextTab from "./editor/TextTab";
 import LayoutTab from "./editor/LayoutTab";
-import { CoverData, CoverEditorProps } from "./CoverTypes";
-
-const DEFAULT_COVER_DATA: CoverData = {
-  backgroundColor: "#f8f9fa",
-  titleText: "My Stories",
-  authorText: "",
-  titleColor: "#333333",
-  authorColor: "#666666",
-  titleSize: 36,
-  authorSize: 24,
-  layout: 'centered',
-};
+import { CoverData, CoverEditorProps, DEFAULT_COVER_DATA } from "./CoverTypes";
 
 const CoverEditor = ({ 
   profileId, 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CoverData } from "@/components/cover/CoverEditor";
+import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
