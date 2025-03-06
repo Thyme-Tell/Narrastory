@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -120,7 +121,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <div>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
           <div className="space-y-3">
-            <Button variant="outline" size="lg" className="w-[200px] justify-start" onClick={handleOpenCoverEditor}>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="w-[200px] justify-start" 
+              onClick={handleOpenCoverEditor}
+            >
               <Book className="mr-2" />
               Edit Cover
             </Button>

@@ -7,6 +7,7 @@ import { CoverData, CoverEditorProps, DEFAULT_COVER_DATA } from "./CoverTypes";
 import EditorControlPanel from "./editor/EditorControlPanel";
 import CoverPreview from "./editor/CoverPreview";
 import ImageCropperDialog from "./editor/ImageCropperDialog";
+import Cookies from 'js-cookie';
 
 const CoverEditor = ({ 
   profileId, 

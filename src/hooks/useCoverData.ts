@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
+import Cookies from 'js-cookie';
 
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
@@ -77,6 +78,14 @@ export function useCoverData(profileId: string) {
 
     try {
       console.log('Saving cover data:', newCoverData);
+      
+      // Add auth headers when using cookie-based auth
+      const currentProfileId = Cookies.get('profile_id');
+      const headers: Record<string, string> = {};
+      
+      if (currentProfileId && currentProfileId !== profileId) {
+        console.log('Warning: Current profile ID does not match target profile ID');
+      }
       
       // Use Supabase directly for the upsert operation
       const { data, error } = await supabase
