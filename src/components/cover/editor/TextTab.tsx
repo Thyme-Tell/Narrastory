@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -6,9 +5,7 @@ import { TextTabProps } from "../CoverTypes";
 import { Check } from "lucide-react";
 
 const TEXT_COLORS = [
-  "#000000", "#333333", "#555555", "#777777", "#999999", 
-  "#0F172A", "#1E293B", "#334155", "#475569", "#64748B",
-  "#7F1D1D", "#991B1B", "#9A3412", "#A16207", "#15803D"
+  "#000000", "#0F172A", "#7F1D1D", "#15803D", "#9A3412"
 ];
 
 const TextTab = ({ 
