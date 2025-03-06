@@ -55,8 +55,8 @@ const PageView = ({ story, pageNumber }: PageViewProps) => {
   };
 
   return (
-    <div className="w-full h-full overflow-auto p-8 bg-white">
-      <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full h-full overflow-auto p-8 bg-white book-page">
+      <div className="w-full mx-auto book-content">
         {/* Story Header */}
         <div className="mb-6">
           <div className="flex justify-between items-baseline">
@@ -71,7 +71,7 @@ const PageView = ({ story, pageNumber }: PageViewProps) => {
         </div>
 
         {/* Story Content */}
-        <div className="prose max-w-none">
+        <div className="prose max-w-none book-text">
           {paragraphs.map((paragraph, index) => (
             <p key={index} className="mb-4">
               {paragraph}

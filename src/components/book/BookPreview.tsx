@@ -215,8 +215,8 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             style={{ 
               transform: `scale(${zoomLevel})`,
               transformOrigin: 'center',
-              width: '600px',
-              height: '800px',
+              width: '600px',  // Adjusted for 5x8 aspect ratio (5:8 = 600:960)
+              height: '960px', // 5x8 inch ratio
               maxHeight: '90vh'
             }}
           >
