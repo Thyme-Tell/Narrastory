@@ -17,7 +17,12 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const { coverData, saveCoverData, isLoading: isCoverLoading, refreshCoverData } = useCoverData(profileId);
+  const { 
+    coverData, 
+    saveCoverData, 
+    isLoading: isCoverLoading, 
+    refreshCoverData 
+  } = useCoverData(profileId);
   
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -54,8 +59,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     },
   });
   
+  // Ensure cover data is refreshed when component mounts and when profileId changes
   useEffect(() => {
     if (profileId) {
+      console.log('BookProgress: Refreshing cover data for profile:', profileId);
       refreshCoverData();
     }
   }, [profileId, refreshCoverData]);

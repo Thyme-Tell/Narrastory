@@ -70,10 +70,10 @@ serve(async (req) => {
       throw error;
     }
     
-    console.log('Cover data saved successfully:', data);
+    console.log('Cover data saved successfully');
     
     return new Response(
-      JSON.stringify({ success: true, data }),
+      JSON.stringify({ success: true, message: 'Cover data saved successfully' }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }

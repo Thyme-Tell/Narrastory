@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
-import Cookies from 'js-cookie';
 import { useAuth } from "@/contexts/AuthContext";
 
 export function useCoverData(profileId: string) {
@@ -27,7 +26,7 @@ export function useCoverData(profileId: string) {
       // First, try to fetch existing cover data
       const { data, error } = await supabase
         .from('book_covers')
-        .select('cover_data')
+        .select('cover_data, updated_at')
         .eq('profile_id', profileId)
         .maybeSingle();
 
@@ -43,6 +42,10 @@ export function useCoverData(profileId: string) {
         const typedCoverData = data.cover_data as CoverData;
         console.log('Setting cover data from database:', typedCoverData);
         setCoverData(typedCoverData);
+        
+        // Store the last fetch timestamp in localStorage for debugging
+        localStorage.setItem(`cover_data_last_fetched_${profileId}`, new Date().toISOString());
+        localStorage.setItem(`cover_data_updated_at_${profileId}`, data.updated_at);
       } else {
         // If no cover data exists yet, use defaults but don't save until user makes changes
         console.log('No cover data found, using defaults');
@@ -108,6 +111,10 @@ export function useCoverData(profileId: string) {
       
       // Update local state right away
       setCoverData(newCoverData);
+      
+      // Also update localStorage as a backup/cache mechanism
+      localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(newCoverData));
+      localStorage.setItem(`cover_data_saved_at_${profileId}`, new Date().toISOString());
       
       toast({
         title: "Cover saved",
