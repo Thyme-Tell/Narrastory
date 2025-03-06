@@ -116,6 +116,9 @@ const PageView = ({ story, pageNumber }: PageViewProps) => {
                       Unsupported media type: {media.content_type}
                     </div>
                   )}
+                  {media.caption && (
+                    <p className="text-sm text-center italic mt-2">{media.caption}</p>
+                  )}
                 </div>
               ))}
             </div>
