@@ -170,13 +170,13 @@ const CoverEditor = ({
           {isMobile ? (
             // Mobile layout (vertical)
             <div className="flex flex-col h-[100vh] bg-white">
-              {/* Preview section - top 25% */}
-              <div className="w-full" style={{ height: "25%" }}>
+              {/* Preview section - top 40% */}
+              <div className="w-full" style={{ height: "40%" }}>
                 <CoverPreview coverData={coverData} isLoading={isUploading} />
               </div>
               
-              {/* Controls section - bottom 75% */}
-              <div className="w-full" style={{ height: "75%" }}>
+              {/* Controls section - bottom 60% */}
+              <div className="w-full" style={{ height: "60%" }}>
                 <EditorControlPanel
                   coverData={coverData}
                   onSave={handleSave}

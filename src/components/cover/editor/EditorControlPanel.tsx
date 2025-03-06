@@ -56,7 +56,7 @@ const EditorControlPanel = ({
           </TabsList>
         
           {/* Content area - scrollable, adjusted for more space */}
-          <div className={`overflow-y-auto px-4 py-4 ${isMobile ? 'max-h-[calc(75vh-120px)]' : 'h-[calc(90vh-180px)]'}`}>
+          <div className={`overflow-y-auto px-4 py-4 ${isMobile ? 'max-h-[calc(60vh-120px)]' : 'h-[calc(90vh-180px)]'}`}>
             <TabsContent value="background" className="m-0 h-auto">
               <BackgroundTab
                 coverData={coverData}

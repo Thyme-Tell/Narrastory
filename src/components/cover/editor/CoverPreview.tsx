@@ -26,14 +26,18 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
         <div 
           className="max-h-full" 
           style={{ 
-            width: isMobile ? "75%" : "auto", 
-            maxWidth: isMobile ? "180px" : "240px" 
+            width: "auto", 
+            height: isMobile ? "90%" : "auto", 
+            maxWidth: isMobile ? "200px" : "240px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center" 
           }}
         >
           <CoverCanvas 
             coverData={coverData} 
-            width={isMobile ? 180 : 240}
-            height={isMobile ? 288 : 384}
+            width={isMobile ? 200 : 240}
+            height={isMobile ? 320 : 384}
             className="mx-auto shadow-lg"
           />
         </div>
