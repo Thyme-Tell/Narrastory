@@ -8,14 +8,15 @@ import { StoryMediaItem } from "@/types/media";
 import ImageMedia from "@/components/ImageMedia";
 import VideoMedia from "@/components/VideoMedia";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getPageContent } from "@/utils/bookPagination";
 
 interface PageViewProps {
   story: Story;
-  pageNumber: number;
-  isLastPage?: boolean;
+  pageNumber: number; // 1-based page number within the story
+  totalPagesInStory?: number;
 }
 
-const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
+const PageView = ({ story, pageNumber, totalPagesInStory = 1 }: PageViewProps) => {
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
     queryFn: async () => {
@@ -34,64 +35,24 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
     },
   });
 
-  // Split story content into paragraphs
-  const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
+  // Get content for this page using our pagination utility
+  const pageContent = getPageContent(story, pageNumber);
   
-  // For multi-page stories, we need to determine which content goes on this page
-  // A simple approach: approximately 2000 characters per page
-  const CHARS_PER_PAGE = 2000;
-  const startIndex = (pageNumber - 1) * CHARS_PER_PAGE;
-  const endIndex = startIndex + CHARS_PER_PAGE;
-  
-  // Get content for this page
-  let pageContent = '';
-  let currentCharCount = 0;
-  let pageParas: string[] = [];
-  
-  if (pageNumber === 1) {
-    // First page: show all content up to the character limit
-    for (const para of paragraphs) {
-      if (currentCharCount + para.length <= CHARS_PER_PAGE) {
-        pageParas.push(para);
-        currentCharCount += para.length;
-      } else {
-        break;
-      }
-    }
-  } else {
-    // Subsequent pages: skip content from previous pages
-    let skippedChars = 0;
-    for (const para of paragraphs) {
-      skippedChars += para.length;
-      if (skippedChars > startIndex) {
-        if (currentCharCount + para.length <= CHARS_PER_PAGE) {
-          pageParas.push(para);
-          currentCharCount += para.length;
-        } else {
-          break;
-        }
-      }
-    }
-  }
-
   // Show media only on the first page of a story
   const showMedia = pageNumber === 1;
 
-  // Function to handle media item click (empty implementation for now)
+  // Function to handle media item click
   const handleImageClick = (url: string) => {
-    // This will be enhanced later with a lightbox or modal
     console.log("Image clicked:", url);
   };
 
-  // Function to handle media caption update (empty implementation for now)
+  // Function to handle media caption update
   const handleCaptionUpdate = (mediaId: string, caption: string) => {
-    // This will be implemented when editing is required
     console.log("Caption update:", mediaId, caption);
   };
 
-  // Function to handle crop start (empty implementation for now)
+  // Function to handle crop start
   const handleStartCrop = (url: string, mediaId: string) => {
-    // This will be implemented when crop functionality is needed
     console.log("Start crop:", url, mediaId);
   };
 
@@ -109,17 +70,21 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
                 {format(new Date(story.created_at), "MMMM d, yyyy")}
               </span>
             </div>
-            <div className="text-right text-sm text-gray-400">Page {pageNumber}</div>
+            <div className="text-right text-sm text-gray-400">Page {pageNumber} of {totalPagesInStory}</div>
           </div>
         )}
 
         {/* Story Content */}
         <div className="prose max-w-none book-text">
-          {pageParas.map((paragraph, index) => (
-            <p key={index} className="mb-4">
-              {paragraph}
-            </p>
-          ))}
+          {pageContent.length > 0 ? (
+            pageContent.map((paragraph, index) => (
+              <p key={index} className="mb-4">
+                {paragraph}
+              </p>
+            ))
+          ) : (
+            <p className="text-gray-400 italic">No content on this page</p>
+          )}
         </div>
 
         {/* Media Items - only on the first page */}

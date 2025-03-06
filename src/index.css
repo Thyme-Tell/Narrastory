@@ -21,22 +21,39 @@
   max-width: 100%;
   max-height: 100%;
   background-color: white;
+  overflow: hidden; /* Prevent content overflow */
+  position: relative; /* For absolute positioning of elements if needed */
 }
 
 .book-content {
   /* Standard book content width with margins */
   max-width: 90%;
   margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .book-text {
   /* 14pt font size - equivalent to roughly 18.5px */
   font-size: 18.5px;
   line-height: 1.5;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 /* Ensure media content stays within page bounds */
 .book-page img, .book-page video {
   max-width: 100%;
   height: auto;
+}
+
+/* Add animation for page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
 }

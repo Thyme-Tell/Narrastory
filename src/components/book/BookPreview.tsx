@@ -12,6 +12,11 @@ import TableOfContents from "./TableOfContents";
 import { useCoverData } from "@/hooks/useCoverData";
 import { Story } from "@/types/supabase";
 import { cn } from "@/lib/utils";
+import { 
+  calculateTotalPages, 
+  calculateStoryPages, 
+  mapPageToStory 
+} from "@/utils/bookPagination";
 
 interface BookPreviewProps {
   profileId: string;
@@ -75,7 +80,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     enabled: open,
   });
 
-  // Calculate page distribution for stories
+  // Calculate page distribution for stories using our new pagination logic
   useEffect(() => {
     if (!stories || stories.length === 0) {
       setStoryPages([]);
@@ -86,19 +91,14 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     let pageCount = 1; // Start with cover page
     const pageStartIndices: number[] = [];
 
-    // Each story starts on a new page
+    // Calculate starting page for each story
     stories.forEach((story) => {
       pageStartIndices.push(pageCount);
-      
-      // Estimate number of pages based on content length
-      // This is a simple estimation - about 2000 characters per page
-      const contentLength = story.content.length;
-      const estimatedPages = Math.max(1, Math.ceil(contentLength / 2000));
-      pageCount += estimatedPages;
+      pageCount += calculateStoryPages(story);
     });
 
     setStoryPages(pageStartIndices);
-    setTotalPageCount(pageCount);
+    setTotalPageCount(calculateTotalPages(stories));
   }, [stories]);
 
   // Handle page navigation
@@ -115,23 +115,17 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   };
 
   // Find which story is displayed on the current page
-  const getCurrentStoryIndex = () => {
-    if (currentPage === 0) return -1; // Cover page
-    
-    for (let i = storyPages.length - 1; i >= 0; i--) {
-      if (currentPage >= storyPages[i]) {
-        return i;
-      }
+  const getCurrentStory = () => {
+    if (currentPage === 0 || !stories || stories.length === 0) {
+      return null;
     }
-    return -1;
-  };
-
-  // Get current page number within a story
-  const getPageWithinStory = () => {
-    const storyIndex = getCurrentStoryIndex();
-    if (storyIndex === -1) return 0;
     
-    return currentPage - storyPages[storyIndex] + 1;
+    const mapping = mapPageToStory(currentPage, stories);
+    return mapping.storyIndex >= 0 ? {
+      story: stories[mapping.storyIndex],
+      pageWithinStory: mapping.pageWithinStory,
+      totalPagesInStory: calculateStoryPages(stories[mapping.storyIndex])
+    } : null;
   };
 
   // Handle zoom controls
@@ -193,8 +187,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   if (!open) return null;
 
   // Get the current story to display
-  const currentStoryIndex = getCurrentStoryIndex();
-  const currentStory = currentStoryIndex !== -1 ? stories?.[currentStoryIndex] : null;
+  const currentStoryInfo = getCurrentStory();
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden">
@@ -282,11 +275,11 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
                   />
                 ) : (
                   // Content Pages
-                  currentStory && (
+                  currentStoryInfo && currentStoryInfo.story && (
                     <PageView 
-                      story={currentStory} 
-                      pageNumber={getPageWithinStory()}
-                      isLastPage={currentStoryIndex < stories!.length - 1 && currentPage === storyPages[currentStoryIndex + 1] - 1}
+                      story={currentStoryInfo.story} 
+                      pageNumber={currentStoryInfo.pageWithinStory}
+                      totalPagesInStory={currentStoryInfo.totalPagesInStory}
                     />
                   )
                 )}
