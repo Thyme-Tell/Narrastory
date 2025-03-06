@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -155,16 +154,20 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
               <Eye className="mr-2" />
               Preview Book
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="w-[200px] justify-start"
-              disabled
-            >
-              <ShoppingCart className="mr-2" />
-              Order Book
-              <span className="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">Coming Soon</span>
-            </Button>
+            <div className="relative">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="w-[200px] justify-start"
+                disabled
+              >
+                <ShoppingCart className="mr-2" />
+                Order Book
+              </Button>
+              <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2">
+                <span className="text-xs bg-[#FEF7CD] text-gray-700 px-2 py-0.5 rounded-full">Coming Soon</span>
+              </div>
+            </div>
           </div>
         </div>
         
