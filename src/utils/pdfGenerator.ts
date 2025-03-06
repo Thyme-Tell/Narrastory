@@ -4,6 +4,7 @@ import html2canvas from "html2canvas";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const generateBookPDF = async (
   stories: Story[],
@@ -54,6 +55,23 @@ export const generateBookPDF = async (
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
       const storyStartPage = storyPages[i];
+      
+      // Check if the story has media
+      let hasMedia = false;
+      
+      try {
+        // Query for media related to this story
+        const { data: mediaItems } = await supabase
+          .from('story_media')
+          .select('id')
+          .eq('story_id', story.id)
+          .limit(1);
+          
+        hasMedia = !!mediaItems && mediaItems.length > 0;
+      } catch (error) {
+        console.error("Error checking for story media:", error);
+        hasMedia = false;
+      }
       
       // For each story page
       let pageIndex = 0;
@@ -181,7 +199,7 @@ export const generateBookPDF = async (
           contentContainer.appendChild(contentElement);
           
           // Add media on first page only
-          if (pageIndex === 0 && story.has_media) {
+          if (pageIndex === 0 && hasMedia) {
             const mediaPlaceholder = document.createElement("div");
             mediaPlaceholder.className = "mt-6 border rounded-md p-2 text-center";
             mediaPlaceholder.textContent = "Media content will appear here in the PDF";
