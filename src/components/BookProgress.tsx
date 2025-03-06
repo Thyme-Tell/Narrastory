@@ -10,6 +10,7 @@ import CoverCanvas from "./cover/CoverCanvas";
 import { useCoverData } from "@/hooks/useCoverData";
 import { CoverData } from "./cover/CoverTypes";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BookProgressProps {
   profileId: string;
@@ -19,8 +20,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   
   console.log("BookProgress rendering with profileId:", profileId);
+  console.log("User authentication status:", isAuthenticated ? "Authenticated" : "Not authenticated");
   
   const { 
     coverData, 
@@ -89,7 +92,18 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     console.log("Current cover data in BookProgress:", coverData);
   }, [coverData]);
 
-  const handleOpenCoverEditor = () => {
+  const handleOpenCoverEditor = async () => {
+    // Check if user is authenticated before opening editor
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "You need to be logged in to edit the book cover.",
+      });
+      return;
+    }
+    
     console.log("Opening cover editor with data:", coverData);
     refreshCoverData();
     setIsEditorOpen(true);
@@ -102,6 +116,17 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const handleSaveCover = async (newCoverData: CoverData) => {
     console.log("Saving new cover data:", newCoverData);
     try {
+      // Double check authentication
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication required",
+          description: "You need to be logged in to save the book cover.",
+        });
+        return;
+      }
+      
       const success = await saveCoverData(newCoverData);
       if (success) {
         console.log("Cover data saved successfully, refreshing...");

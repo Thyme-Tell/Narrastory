@@ -97,16 +97,21 @@ export function useCoverData(profileId: string) {
       console.log('Preparing to save cover data for profile:', profileId);
       console.log('Cover data to save:', newCoverData);
       
-      // Skip direct database upsert (which requires auth) and use the edge function directly
-      console.log('Calling edge function directly');
+      // Get the current auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
       
-      // We'll skip the auth check by using fetch directly
+      console.log('Authentication token available:', !!authToken);
+      
+      // Add proper authorization header
       const response = await fetch(
-        `https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/save-cover-data`,
+        `${supabase.supabaseUrl}/functions/v1/save-cover-data`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken || ''}`,
+            'apikey': supabase.supabaseKey
           },
           body: JSON.stringify({
             profileId,
