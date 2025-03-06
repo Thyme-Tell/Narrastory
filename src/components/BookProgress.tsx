@@ -1,17 +1,15 @@
 
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Book, Eye, ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { useState, useEffect } from "react";
-import { X } from "lucide-react";
-import CoverEditor from "./cover/CoverEditor";
-import CoverCanvas from "./cover/CoverCanvas";
 import { useCoverData } from "@/hooks/useCoverData";
-import { CoverData } from "./cover/CoverTypes";
-import BookPreview from "./book/BookPreview";
 import { calculateTotalPages } from "@/utils/bookPagination";
+import { CoverData } from "./cover/CoverTypes";
+import BookProgressHeader from "./book-progress/BookProgressHeader";
+import BookProgressOptions from "./book-progress/BookProgressOptions";
+import BookProgressBar from "./book-progress/BookProgressBar";
+import BookCoverPreview from "./book-progress/BookCoverPreview";
+import BookEditorModals from "./book-progress/BookEditorModals";
 
 interface BookProgressProps {
   profileId: string;
@@ -105,31 +103,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   }
 
   if (!stories?.length) {
-    return (
-      <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative overflow-hidden">
-        <button 
-          onClick={() => setIsHidden(true)}
-          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full bg-white/50 text-atlantic/70 hover:text-atlantic z-10"
-        >
-          <X className="h-5 w-5" />
-          <span className="sr-only">Close</span>
-        </button>
-        <div className="flex flex-col">
-          <img
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
-            alt="Book illustration"
-            className="w-full h-32 object-cover"
-          />
-          <div className="p-6">
-            <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Share your first story</h2>
-            <p className="text-atlantic mb-4 text-left">
-              Call <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a><br />
-              One phone call, one memory at a time.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <BookProgressHeader setIsHidden={setIsHidden} />;
   }
 
   return (
@@ -143,88 +117,35 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
+          
           <div className="flex flex-col space-y-6">
-            <div className="space-y-3">
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="w-[200px] justify-start" 
-                onClick={handleOpenCoverEditor}
-              >
-                <Book className="mr-2" />
-                Edit Cover
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="w-[200px] justify-start"
-                onClick={handleOpenPreview}
-              >
-                <Eye className="mr-2" />
-                Preview Book
-              </Button>
-              <div className="relative">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="w-[200px] justify-start"
-                  disabled
-                >
-                  <ShoppingCart className="mr-2" />
-                  Order Book
-                </Button>
-                <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2">
-                  <span className="text-xs bg-[#AF4623] text-white px-2 py-0.5 rounded-full">Coming Soon</span>
-                </div>
-              </div>
-            </div>
+            <BookProgressOptions 
+              onEditCover={handleOpenCoverEditor}
+              onPreviewBook={handleOpenPreview}
+            />
 
-            <div className="space-y-2 mt-4 w-[300px]">
-              <p className="text-sm text-atlantic">
-                Current Book Length: {currentPageCount} {currentPageCount === 1 ? 'page' : 'pages'}
-              </p>
-              <Progress value={progressPercentage} className="h-2" />
-              {currentPageCount < MIN_PAGES_REQUIRED && (
-                <p className="text-sm text-muted-foreground">
-                  Add {MIN_PAGES_REQUIRED - currentPageCount} more {(MIN_PAGES_REQUIRED - currentPageCount) === 1 ? 'page' : 'pages'} to reach the minimum for printing
-                </p>
-              )}
-              {currentPageCount >= MIN_PAGES_REQUIRED && (
-                <p className="text-sm text-[#155B4A]">
-                  ✓ Your book meets the minimum length requirement
-                </p>
-              )}
-            </div>
+            <BookProgressBar 
+              currentPageCount={currentPageCount}
+              progressPercentage={progressPercentage}
+              minPagesRequired={MIN_PAGES_REQUIRED}
+            />
           </div>
         </div>
         
-        <div className="w-[300px]">
-          {isCoverLoading ? (
-            <div className="w-full aspect-[5/8] bg-gray-200 rounded-lg animate-pulse"></div>
-          ) : (
-            <div className="book-preview-container rounded-lg shadow-lg overflow-hidden">
-              <CoverCanvas 
-                coverData={coverData} 
-                width={300}
-                height={480}
-              />
-            </div>
-          )}
-        </div>
+        <BookCoverPreview 
+          coverData={coverData}
+          isLoading={isCoverLoading}
+        />
       </div>
 
-      <CoverEditor
+      <BookEditorModals
         profileId={profileId}
-        open={isEditorOpen}
-        onClose={handleCloseCoverEditor}
-        onSave={handleSaveCover}
-        initialCoverData={coverData}
-      />
-
-      <BookPreview 
-        profileId={profileId}
-        open={isPreviewOpen}
-        onClose={handleClosePreview}
+        isEditorOpen={isEditorOpen}
+        isPreviewOpen={isPreviewOpen}
+        coverData={coverData}
+        onCloseCoverEditor={handleCloseCoverEditor}
+        onClosePreview={handleClosePreview}
+        onSaveCover={handleSaveCover}
       />
     </div>
   );
