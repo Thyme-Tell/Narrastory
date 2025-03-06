@@ -149,8 +149,6 @@ const CoverCanvas = ({
 
   return (
     <div className="book-cover-container">
-      <div className="book-pages-stack"></div>
-      <div className="book-page-edge"></div>
       <canvas
         ref={canvasRef}
         className={`shadow-lg rounded-md book-canvas ${className}`}

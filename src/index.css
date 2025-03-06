@@ -79,42 +79,33 @@
 .book-cover-container {
   position: relative;
   display: inline-block;
-  perspective: 1500px;
 }
 
 .book-canvas {
   position: relative;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  transform: rotateY(-15deg);
-  transform-origin: right center;
-  transition: transform 0.5s ease;
+  transform: perspective(1000px) rotateY(3deg);
+  transition: transform 0.3s ease;
 }
 
 .book-cover-container:hover .book-canvas {
-  transform: rotateY(-25deg);
+  transform: perspective(1000px) rotateY(5deg);
 }
 
 .book-spine-overlay {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   height: 100%;
   width: 20px;
-  background: linear-gradient(-90deg, 
-    rgba(0,0,0,0.6) 0%, 
-    rgba(0,0,0,0.3) 20%, 
-    rgba(0,0,0,0.1) 40%, 
+  background: linear-gradient(90deg, 
+    rgba(0,0,0,0.4) 0%, 
+    rgba(0,0,0,0.1) 20%, 
+    rgba(0,0,0,0.05) 40%, 
     rgba(0,0,0,0) 100%);
   z-index: 10;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  transform: rotateY(-15deg);
-  transform-origin: right;
-  transition: transform 0.5s ease;
-}
-
-.book-cover-container:hover .book-spine-overlay {
-  transform: rotateY(-25deg) translateX(2px);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
 .book-cover-overlay {
@@ -123,7 +114,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(-90deg, 
+  background: linear-gradient(90deg, 
     rgba(2,0,36,0.3) 0%, 
     rgba(0,0,0,0.3) 2%, 
     rgba(255,255,255,0.3) 3%, 
@@ -134,74 +125,6 @@
   pointer-events: none;
   border-radius: 4px;
   z-index: 5;
-}
-
-.book-page-edge {
-  position: absolute;
-  top: 0;
-  right: 1px;
-  width: 8px;
-  height: 100%;
-  background: linear-gradient(to right, 
-    #f8f8f8 0%, 
-    #e8e8e8 20%, 
-    #f8f8f8 40%,
-    #e8e8e8 60%,
-    #f8f8f8 80%,
-    #e8e8e8 100%);
-  z-index: 1;
-  border-right: 1px solid #ddd;
-  transform: rotateY(-75deg) translateX(7px);
-  transform-origin: right;
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
-  opacity: 0;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.book-cover-container:hover .book-page-edge {
-  opacity: 1;
-  transform: rotateY(-65deg) translateX(7px);
-}
-
-.book-pages-stack {
-  position: absolute;
-  top: 3px;
-  right: 0;
-  width: calc(100% - 10px);
-  height: calc(100% - 6px);
-  background-color: #ffffff;
-  border-radius: 3px;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-  z-index: -1;
-  transform: rotateY(-8deg) translateZ(-5px) translateX(5px);
-  transform-origin: right;
-}
-
-.book-pages-stack::before {
-  content: '';
-  position: absolute;
-  top: 3px;
-  right: 0;
-  width: calc(100% - 5px);
-  height: calc(100% - 6px);
-  background-color: #f5f5f5;
-  border-radius: 3px;
-  z-index: -2;
-  transform: translateZ(-10px) translateX(5px);
-}
-
-.book-pages-stack::after {
-  content: '';
-  position: absolute;
-  top: 6px;
-  right: 0;
-  width: calc(100% - 10px);
-  height: calc(100% - 12px);
-  background-color: #eeeeee;
-  border-radius: 3px;
-  z-index: -3;
-  transform: translateZ(-15px) translateX(10px);
 }
 
 /* Cover editor specific styles */
