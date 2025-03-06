@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -8,6 +9,7 @@ import CoverEditor from "./cover/CoverEditor";
 import CoverCanvas from "./cover/CoverCanvas";
 import { useCoverData } from "@/hooks/useCoverData";
 import { CoverData } from "./cover/CoverTypes";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookProgressProps {
   profileId: string;
@@ -16,6 +18,7 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const { toast } = useToast();
   
   console.log("BookProgress rendering with profileId:", profileId);
   
@@ -74,8 +77,13 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   useEffect(() => {
     if (coverError) {
       console.error("Cover data error in BookProgress:", coverError);
+      toast({
+        variant: "destructive",
+        title: "Error loading cover",
+        description: "There was an issue loading your book cover. Default settings will be used.",
+      });
     }
-  }, [coverError]);
+  }, [coverError, toast]);
 
   useEffect(() => {
     console.log("Current cover data in BookProgress:", coverData);
@@ -93,10 +101,21 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
 
   const handleSaveCover = async (newCoverData: CoverData) => {
     console.log("Saving new cover data:", newCoverData);
-    const success = await saveCoverData(newCoverData);
-    if (success) {
-      console.log("Cover data saved successfully, refreshing...");
-      refreshCoverData();
+    try {
+      const success = await saveCoverData(newCoverData);
+      if (success) {
+        console.log("Cover data saved successfully, refreshing...");
+        refreshCoverData();
+      } else {
+        console.error("Failed to save cover data");
+      }
+    } catch (err) {
+      console.error("Error saving cover:", err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save cover data. Please try again later.",
+      });
     }
   };
 
