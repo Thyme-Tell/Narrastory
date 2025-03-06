@@ -165,31 +165,59 @@ const CoverEditor = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white">
+        <DialogContent className="max-w-5xl p-0 overflow-hidden bg-white">
           <DialogTitle className="sr-only">Edit Book Cover</DialogTitle>
-          <div className={`flex flex-col ${isMobile ? "h-[100vh]" : "h-[90vh]"} bg-white`}>
-            {/* Preview section - top 60% */}
-            <div className="w-full" style={{ height: "60%" }}>
-              <CoverPreview coverData={coverData} isLoading={isUploading} />
+          {isMobile ? (
+            // Mobile layout (vertical)
+            <div className="flex flex-col h-[100vh] bg-white">
+              {/* Preview section - top 60% */}
+              <div className="w-full" style={{ height: "60%" }}>
+                <CoverPreview coverData={coverData} isLoading={isUploading} />
+              </div>
+              
+              {/* Controls section - bottom 40% */}
+              <div className="w-full" style={{ height: "40%" }}>
+                <EditorControlPanel
+                  coverData={coverData}
+                  onSave={handleSave}
+                  onCancel={onClose}
+                  onBackgroundColorChange={handleBackgroundColorChange}
+                  onFileUpload={handleFileUpload}
+                  onRemoveImage={handleRemoveImage}
+                  isUploading={isUploading}
+                  onTextChange={handleTextChange}
+                  onTextColorChange={handleTextColorChange}
+                  onFontSizeChange={handleFontSizeChange}
+                  onLayoutChange={handleLayoutChange}
+                />
+              </div>
             </div>
-            
-            {/* Controls section - bottom 40% */}
-            <div className="w-full" style={{ height: "40%" }}>
-              <EditorControlPanel
-                coverData={coverData}
-                onSave={handleSave}
-                onCancel={onClose}
-                onBackgroundColorChange={handleBackgroundColorChange}
-                onFileUpload={handleFileUpload}
-                onRemoveImage={handleRemoveImage}
-                isUploading={isUploading}
-                onTextChange={handleTextChange}
-                onTextColorChange={handleTextColorChange}
-                onFontSizeChange={handleFontSizeChange}
-                onLayoutChange={handleLayoutChange}
-              />
+          ) : (
+            // Desktop layout (horizontal)
+            <div className="flex flex-row h-[90vh] bg-white">
+              {/* Controls section - left 40% */}
+              <div className="w-2/5 h-full border-r">
+                <EditorControlPanel
+                  coverData={coverData}
+                  onSave={handleSave}
+                  onCancel={onClose}
+                  onBackgroundColorChange={handleBackgroundColorChange}
+                  onFileUpload={handleFileUpload}
+                  onRemoveImage={handleRemoveImage}
+                  isUploading={isUploading}
+                  onTextChange={handleTextChange}
+                  onTextColorChange={handleTextColorChange}
+                  onFontSizeChange={handleFontSizeChange}
+                  onLayoutChange={handleLayoutChange}
+                />
+              </div>
+              
+              {/* Preview section - right 60% */}
+              <div className="w-3/5 h-full">
+                <CoverPreview coverData={coverData} isLoading={isUploading} />
+              </div>
             </div>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
       
