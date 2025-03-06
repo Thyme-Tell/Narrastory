@@ -10,13 +10,15 @@ interface TableOfContentsProps {
   currentPage: number;
   onSelectPage: (pageIndex: number) => void;
   bookmarks: number[];
+  storyPages: number[]; // Added this prop
 }
 
 const TableOfContents = ({ 
   stories, 
   currentPage, 
   onSelectPage, 
-  bookmarks 
+  bookmarks,
+  storyPages 
 }: TableOfContentsProps) => {
   return (
     <div className="space-y-4">
