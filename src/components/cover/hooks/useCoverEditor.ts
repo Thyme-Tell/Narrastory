@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,13 +11,13 @@ export function useCoverEditor(
 ) {
   const [coverData, setCoverData] = useState<CoverData>(
     initialCoverData || {
-      backgroundColor: "#f8f9fa",
+      backgroundColor: "#CADCDA",
       titleText: "My Stories",
       authorText: "",
-      titleColor: "#333333",
-      authorColor: "#666666",
-      titleSize: 21, // Updated to be in the middle of the new range (18-24)
-      authorSize: 14, // Updated to be in the middle of the new range (12-16)
+      titleColor: "#303441",
+      authorColor: "#303441",
+      titleSize: 21,
+      authorSize: 14,
       layout: 'centered',
     }
   );
