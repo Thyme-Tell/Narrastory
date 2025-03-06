@@ -1,3 +1,4 @@
+
 import { MoreVertical, Pencil, Trash2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,11 +29,11 @@ const StoryActions = ({ onEdit, onDelete, onShare }: StoryActionsProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="bg-white hover:bg-gray-100">
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[180px]">
+      <DropdownMenuContent align="end" className="min-w-[180px] bg-white shadow-lg">
         <DropdownMenuItem onClick={onShare} className="py-3 text-base">
           <Share2 className="h-5 w-5 mr-3" />
           Share
@@ -51,7 +52,7 @@ const StoryActions = ({ onEdit, onDelete, onShare }: StoryActionsProps) => {
               Delete
             </DropdownMenuItem>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="bg-white">
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
