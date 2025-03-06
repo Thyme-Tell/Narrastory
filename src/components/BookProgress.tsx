@@ -9,6 +9,7 @@ import CoverEditor from "./cover/CoverEditor";
 import CoverCanvas from "./cover/CoverCanvas";
 import { useCoverData } from "@/hooks/useCoverData";
 import { CoverData } from "./cover/CoverTypes";
+import BookPreview from "./book/BookPreview";
 
 interface BookProgressProps {
   profileId: string;
@@ -17,6 +18,7 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { 
     coverData, 
     saveCoverData, 
@@ -74,6 +76,14 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
 
   const handleCloseCoverEditor = () => {
     setIsEditorOpen(false);
+  };
+
+  const handleOpenPreview = () => {
+    setIsPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
   };
 
   const handleSaveCover = async (newCoverData: CoverData) => {
@@ -137,7 +147,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
               <Book className="mr-2" />
               Edit Cover
             </Button>
-            <Button variant="outline" size="lg" className="w-[200px] justify-start">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="w-[200px] justify-start"
+              onClick={handleOpenPreview}
+            >
               <Eye className="mr-2" />
               Preview Book
             </Button>
@@ -169,6 +184,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         onClose={handleCloseCoverEditor}
         onSave={handleSaveCover}
         initialCoverData={coverData}
+      />
+
+      <BookPreview 
+        profileId={profileId}
+        open={isPreviewOpen}
+        onClose={handleClosePreview}
       />
     </div>
   );
