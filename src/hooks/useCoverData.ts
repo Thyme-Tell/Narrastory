@@ -49,6 +49,7 @@ export function useCoverData(profileId: string) {
         // If no cover data exists yet, create a new record with default data
         console.log('No cover data found, creating with defaults');
         await saveCoverData(DEFAULT_COVER_DATA);
+        setCoverData(DEFAULT_COVER_DATA);
       }
     } catch (err) {
       console.error("Error in fetchCoverData:", err);
