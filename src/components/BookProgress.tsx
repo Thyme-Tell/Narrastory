@@ -52,7 +52,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     queryFn: async () => {
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
-        .select("content")
+        .select("id, title, content, created_at, share_token")
         .eq("profile_id", profileId);
 
       if (storiesError) {
