@@ -19,6 +19,7 @@ interface EditorControlPanelProps {
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
   onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
+  isSaving?: boolean;
 }
 
 const EditorControlPanel = ({
@@ -33,6 +34,7 @@ const EditorControlPanel = ({
   onTextColorChange,
   onFontSizeChange,
   onLayoutChange,
+  isSaving = false,
 }: EditorControlPanelProps) => {
   const [activeTab, setActiveTab] = useState("background");
 
@@ -75,11 +77,14 @@ const EditorControlPanel = ({
       </Tabs>
       
       <div className="absolute bottom-4 left-4 right-4 flex justify-end gap-2">
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel} disabled={isSaving || isUploading}>
           Cancel
         </Button>
-        <Button onClick={onSave}>
-          Save Cover
+        <Button 
+          onClick={onSave} 
+          disabled={isSaving || isUploading}
+        >
+          {isSaving ? 'Saving...' : 'Save Cover'}
         </Button>
       </div>
     </div>

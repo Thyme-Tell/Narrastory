@@ -18,6 +18,7 @@ const CoverEditor = ({
     isUploading,
     uploadedImageUrl,
     isCropperOpen,
+    isSaving,
     handleSave,
     handleBackgroundColorChange,
     handleTextColorChange,
@@ -51,6 +52,7 @@ const CoverEditor = ({
               onFileUpload={handleFileUpload}
               onRemoveImage={handleRemoveImage}
               isUploading={isUploading}
+              isSaving={isSaving}
               onTextChange={handleTextChange}
               onTextColorChange={handleTextColorChange}
               onFontSizeChange={handleFontSizeChange}

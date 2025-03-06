@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
@@ -13,6 +14,7 @@ import {
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
@@ -98,6 +100,7 @@ export function useCoverData(profileId: string) {
 
     try {
       console.log('Saving cover data:', newCoverData);
+      setIsSaving(true);
       
       // Update local cache immediately for responsiveness
       cacheCoverData(profileId, newCoverData);
@@ -125,12 +128,15 @@ export function useCoverData(profileId: string) {
         description: "Failed to save cover data",
       });
       return false;
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return {
     coverData: coverData || DEFAULT_COVER_DATA,
     isLoading,
+    isSaving,
     error,
     saveCoverData,
     refreshCoverData

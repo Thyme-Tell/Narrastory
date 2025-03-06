@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CoverData } from "../CoverTypes";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +27,7 @@ export function useCoverEditorState({
     }
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const { toast } = useToast();
@@ -39,12 +39,24 @@ export function useCoverEditorState({
     }
   }, [initialCoverData]);
 
-  const handleSave = () => {
-    onSave(coverData);
-    toast({
-      title: "Cover saved",
-      description: "Your book cover has been updated successfully",
-    });
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      onSave(coverData);
+      toast({
+        title: "Cover saved",
+        description: "Your book cover has been updated successfully",
+      });
+    } catch (error) {
+      console.error("Error saving cover:", error);
+      toast({
+        variant: "destructive",
+        title: "Save failed",
+        description: "There was an error saving your book cover",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleBackgroundColorChange = (color: string) => {
@@ -206,6 +218,7 @@ export function useCoverEditorState({
   return {
     coverData,
     isUploading,
+    isSaving,
     uploadedImageUrl,
     isCropperOpen,
     handleSave,
