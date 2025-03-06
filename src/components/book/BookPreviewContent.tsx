@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
 import BookPreviewControls from "./BookPreviewControls";
+import TwoPageBookLayout from "./TwoPageBookLayout";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
 import { StoryMediaItem } from "@/types/media";
@@ -19,7 +20,16 @@ interface BookPreviewContentProps {
   authorName: string;
   goToNextPage: () => void;
   goToPrevPage: () => void;
+  jumpToPage: (page: number) => void;
+  viewMode: "single" | "double";
   currentStoryInfo: {
+    story: Story;
+    pageWithinStory: number;
+    totalPagesInStory: number;
+    isMediaPage?: boolean;
+    mediaItem?: StoryMediaItem;
+  } | null;
+  nextStoryInfo: {
     story: Story;
     pageWithinStory: number;
     totalPagesInStory: number;
@@ -39,8 +49,49 @@ const BookPreviewContent = ({
   authorName,
   goToNextPage,
   goToPrevPage,
+  jumpToPage,
+  viewMode,
   currentStoryInfo,
+  nextStoryInfo,
 }: BookPreviewContentProps) => {
+  if (isStoriesLoading || isCoverLoading) {
+    return (
+      <div 
+        className="relative bg-white shadow-xl rounded-md transition-transform book-container"
+        style={{ 
+          transform: `scale(${zoomLevel})`,
+          transformOrigin: 'center',
+        }}
+      >
+        <Skeleton className="w-full h-full" />
+      </div>
+    );
+  }
+
+  // Two-page book layout
+  if (viewMode === "double") {
+    return (
+      <div 
+        className="relative transition-transform book-container"
+        style={{ 
+          transform: `scale(${zoomLevel})`,
+          transformOrigin: 'center',
+        }}
+      >
+        <TwoPageBookLayout
+          currentPage={currentPage}
+          totalPageCount={totalPageCount}
+          coverData={coverData}
+          authorName={authorName}
+          currentStoryInfo={currentStoryInfo}
+          nextStoryInfo={nextStoryInfo}
+          onPageClick={jumpToPage}
+        />
+      </div>
+    );
+  }
+
+  // Single page layout (original)
   return (
     <div 
       className="relative bg-white shadow-xl rounded-md transition-transform"
@@ -53,29 +104,23 @@ const BookPreviewContent = ({
       }}
     >
       {/* Book Pages */}
-      {isStoriesLoading || isCoverLoading ? (
-        <Skeleton className="w-full h-full" />
+      {currentPage === 0 ? (
+        // Cover Page
+        <BookCover 
+          coverData={coverData} 
+          authorName={authorName}
+        />
       ) : (
-        <>
-          {currentPage === 0 ? (
-            // Cover Page
-            <BookCover 
-              coverData={coverData} 
-              authorName={authorName}
-            />
-          ) : (
-            // Content Pages
-            currentStoryInfo && currentStoryInfo.story && (
-              <PageView 
-                story={currentStoryInfo.story} 
-                pageNumber={currentStoryInfo.pageWithinStory}
-                totalPagesInStory={currentStoryInfo.totalPagesInStory}
-                isMediaPage={currentStoryInfo.isMediaPage}
-                mediaItem={currentStoryInfo.mediaItem}
-              />
-            )
-          )}
-        </>
+        // Content Pages
+        currentStoryInfo && currentStoryInfo.story && (
+          <PageView 
+            story={currentStoryInfo.story} 
+            pageNumber={currentStoryInfo.pageWithinStory}
+            totalPagesInStory={currentStoryInfo.totalPagesInStory}
+            isMediaPage={currentStoryInfo.isMediaPage}
+            mediaItem={currentStoryInfo.mediaItem}
+          />
+        )
       )}
 
       {/* Page Turn Buttons */}

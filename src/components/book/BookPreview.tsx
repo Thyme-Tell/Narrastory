@@ -9,6 +9,8 @@ import { useBookNavigation } from "@/hooks/useBookNavigation";
 import BookPreviewHeader from "./BookPreviewHeader";
 import BookPreviewContent from "./BookPreviewContent";
 import TableOfContents from "./TableOfContents";
+import { Button } from "@/components/ui/button";
+import { Book, BookOpen } from "lucide-react";
 
 interface BookPreviewProps {
   profileId: string;
@@ -78,10 +80,13 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     goToNextPage,
     goToPrevPage,
     getCurrentStory,
+    getNextStory,
     zoomIn,
     zoomOut,
     toggleBookmark,
-    jumpToPage
+    jumpToPage,
+    viewMode,
+    toggleViewMode
   } = useBookNavigation(stories, open);
 
   // Handle keyboard navigation
@@ -112,23 +117,50 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
 
   // Get the current story to display
   const currentStoryInfo = getCurrentStory();
+  const nextStoryInfo = getNextStory();
   const authorName = profile ? `${profile.first_name} ${profile.last_name}` : "";
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden">
       {/* Header */}
-      <BookPreviewHeader
-        totalPageCount={totalPageCount}
-        currentPage={currentPage}
-        zoomLevel={zoomLevel}
-        showToc={showToc}
-        bookmarks={bookmarks}
-        onToggleToc={() => setShowToc(!showToc)}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onToggleBookmark={toggleBookmark}
-        onClose={onClose}
-      />
+      <div className="w-full bg-background border-b border-border p-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleViewMode}
+            className="flex items-center gap-2"
+          >
+            {viewMode === "single" ? (
+              <>
+                <BookOpen className="h-4 w-4" />
+                <span>Two-Page View</span>
+              </>
+            ) : (
+              <>
+                <Book className="h-4 w-4" />
+                <span>Single-Page View</span>
+              </>
+            )}
+          </Button>
+          <div className="text-sm text-muted-foreground">
+            Page {currentPage + 1} of {totalPageCount}
+          </div>
+        </div>
+        
+        <BookPreviewHeader
+          totalPageCount={totalPageCount}
+          currentPage={currentPage}
+          zoomLevel={zoomLevel}
+          showToc={showToc}
+          bookmarks={bookmarks}
+          onToggleToc={() => setShowToc(!showToc)}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onToggleBookmark={toggleBookmark}
+          onClose={onClose}
+        />
+      </div>
 
       <div className="flex-1 w-full flex overflow-hidden">
         {/* TOC Sidebar */}
@@ -160,7 +192,10 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             authorName={authorName}
             goToNextPage={goToNextPage}
             goToPrevPage={goToPrevPage}
+            jumpToPage={jumpToPage}
+            viewMode={viewMode}
             currentStoryInfo={currentStoryInfo}
+            nextStoryInfo={nextStoryInfo}
           />
         </div>
       </div>
