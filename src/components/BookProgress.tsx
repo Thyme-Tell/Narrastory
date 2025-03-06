@@ -16,6 +16,9 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  
+  console.log("BookProgress rendering with profileId:", profileId);
+  
   const { 
     coverData, 
     saveCoverData, 

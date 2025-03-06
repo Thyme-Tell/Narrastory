@@ -14,6 +14,7 @@ export function useCoverData(profileId: string) {
   // Function to fetch cover data
   const fetchCoverData = useCallback(async () => {
     if (!profileId) {
+      console.log('No profileId provided, skipping fetch');
       setIsLoading(false);
       return;
     }
@@ -32,14 +33,14 @@ export function useCoverData(profileId: string) {
 
       if (error) {
         console.error('Error fetching cover data:', error);
-        throw error;
+        throw new Error(`Failed to fetch cover data: ${error.message}`);
       }
 
-      console.log('Received cover data from database:', data);
+      console.log('Received data from database:', data);
       
       if (data && data.cover_data) {
         // Explicitly cast and set the cover data
-        const typedCoverData = data.cover_data as CoverData;
+        const typedCoverData = data.cover_data as unknown as CoverData;
         console.log('Setting cover data from database:', typedCoverData);
         setCoverData(typedCoverData);
       } else {
@@ -64,18 +65,27 @@ export function useCoverData(profileId: string) {
 
   // Initial data fetch
   useEffect(() => {
-    console.log('Profile ID in useCoverData:', profileId);
+    console.log('Profile ID changed in useCoverData:', profileId);
     if (profileId) {
       fetchCoverData();
     } else {
       // If no profileId, set defaults and not loading
+      console.log('No profileId, setting defaults');
       setCoverData(DEFAULT_COVER_DATA);
       setIsLoading(false);
     }
   }, [profileId, fetchCoverData]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
-    if (!profileId) return false;
+    if (!profileId) {
+      console.error('Cannot save cover data: No profile ID provided');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Cannot save cover data: missing profile ID",
+      });
+      return false;
+    }
 
     try {
       console.log('Preparing to save cover data for profile:', profileId);
@@ -88,7 +98,6 @@ export function useCoverData(profileId: string) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabase.auth.getSession().then(({ data }) => data.session?.access_token)}`,
           },
           body: JSON.stringify({
             profileId,
@@ -97,14 +106,14 @@ export function useCoverData(profileId: string) {
         }
       );
 
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error response from save-cover-data:', response.status, errorData);
-        throw new Error(`Server error (${response.status}): ${errorData.error || 'Unknown error'}`);
+        console.error('Error response from save-cover-data:', response.status, responseData);
+        throw new Error(`Server error (${response.status}): ${responseData.error || 'Unknown error'}`);
       }
       
-      const result = await response.json();
-      console.log('Cover data saved successfully:', result);
+      console.log('Cover data saved successfully:', responseData);
       
       // Update local state right away
       setCoverData(newCoverData);
@@ -120,7 +129,7 @@ export function useCoverData(profileId: string) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save cover data",
+        description: `Failed to save cover data: ${err instanceof Error ? err.message : 'Unknown error'}`,
       });
       return false;
     }
