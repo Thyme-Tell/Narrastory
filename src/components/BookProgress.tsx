@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -199,13 +200,13 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         
         <div className="w-[300px]">
           {isCoverLoading ? (
-            <div className="w-full h-[450px] bg-gray-200 rounded-lg animate-pulse"></div>
+            <div className="w-full aspect-[5/8] bg-gray-200 rounded-lg animate-pulse"></div>
           ) : (
-            <div className="rounded-lg shadow-lg overflow-hidden">
+            <div className="book-preview-container rounded-lg shadow-lg overflow-hidden">
               <CoverCanvas 
                 coverData={coverData} 
                 width={300}
-                height={450}
+                height={480}
               />
             </div>
           )}

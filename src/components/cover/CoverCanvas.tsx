@@ -156,7 +156,8 @@ const CoverCanvas = ({
         height: `${height}px`,
         maxWidth: '100%',
         maxHeight: '100%',
-        objectFit: 'contain'
+        objectFit: 'contain',
+        aspectRatio: '5/8'
       }}
     />
   );

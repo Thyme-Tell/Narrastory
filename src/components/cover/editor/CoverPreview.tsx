@@ -12,15 +12,19 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
   if (isLoading) {
     return (
       <div className="w-2/3 bg-gray-100 flex items-center justify-center p-6">
-        <Skeleton className="w-full h-[400px]" />
+        <Skeleton className="w-full aspect-[5/8]" />
       </div>
     );
   }
 
   return (
     <div className="w-2/3 bg-gray-100 flex items-center justify-center p-6">
-      <div className="w-full h-full flex items-center justify-center">
-        <CoverCanvas coverData={coverData} />
+      <div className="book-preview-container w-full">
+        <CoverCanvas 
+          coverData={coverData} 
+          width={400}
+          height={640}
+        />
       </div>
     </div>
   );
