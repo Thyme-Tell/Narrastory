@@ -3,14 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
 import CoverEditor from "./cover/CoverEditor";
 import CoverCanvas from "./cover/CoverCanvas";
 import { useCoverData } from "@/hooks/useCoverData";
 import { CoverData } from "./cover/CoverTypes";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface BookProgressProps {
   profileId: string;
@@ -19,19 +17,7 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
-  
-  console.log("BookProgress rendering with profileId:", profileId);
-  console.log("User authentication status:", isAuthenticated ? "Authenticated" : "Not authenticated");
-  
-  const { 
-    coverData, 
-    saveCoverData, 
-    isLoading: isCoverLoading, 
-    refreshCoverData,
-    error: coverError
-  } = useCoverData(profileId);
+  const { coverData, saveCoverData, isLoading: isCoverLoading } = useCoverData(profileId);
   
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -54,10 +40,9 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const { data: stories } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
-      console.log("Fetching stories for profileId:", profileId);
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
-        .select("id, content")
+        .select("content")
         .eq("profile_id", profileId);
 
       if (storiesError) {
@@ -65,47 +50,11 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         return [];
       }
 
-      console.log(`Found ${storiesData?.length || 0} stories for profile:`, profileId);
       return storiesData;
     },
   });
-  
-  useEffect(() => {
-    if (profileId) {
-      console.log("BookProgress: Refreshing cover data for profile:", profileId);
-      refreshCoverData();
-    }
-  }, [profileId, refreshCoverData]);
 
-  useEffect(() => {
-    if (coverError) {
-      console.error("Cover data error in BookProgress:", coverError);
-      toast({
-        variant: "destructive",
-        title: "Error loading cover",
-        description: "There was an issue loading your book cover. Default settings will be used.",
-      });
-    }
-  }, [coverError, toast]);
-
-  useEffect(() => {
-    console.log("Current cover data in BookProgress:", coverData);
-  }, [coverData]);
-
-  const handleOpenCoverEditor = async () => {
-    // Check if user is authenticated before opening editor
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      toast({
-        variant: "destructive",
-        title: "Authentication required",
-        description: "You need to be logged in to edit the book cover.",
-      });
-      return;
-    }
-    
-    console.log("Opening cover editor with data:", coverData);
-    refreshCoverData();
+  const handleOpenCoverEditor = () => {
     setIsEditorOpen(true);
   };
 
@@ -114,34 +63,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   };
 
   const handleSaveCover = async (newCoverData: CoverData) => {
-    console.log("Saving new cover data:", newCoverData);
-    try {
-      // Double check authentication
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        toast({
-          variant: "destructive",
-          title: "Authentication required",
-          description: "You need to be logged in to save the book cover.",
-        });
-        return;
-      }
-      
-      const success = await saveCoverData(newCoverData);
-      if (success) {
-        console.log("Cover data saved successfully, refreshing...");
-        refreshCoverData();
-      } else {
-        console.error("Failed to save cover data");
-      }
-    } catch (err) {
-      console.error("Error saving cover:", err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to save cover data. Please try again later.",
-      });
-    }
+    await saveCoverData(newCoverData);
   };
 
   if (isHidden) {
@@ -206,7 +128,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <div className="w-[300px]">
           {isCoverLoading ? (
             <div className="w-full h-[450px] bg-gray-200 rounded-lg animate-pulse"></div>
-          ) : (
+          ) : coverData ? (
             <div className="rounded-lg shadow-lg overflow-hidden">
               <CoverCanvas 
                 coverData={coverData} 
@@ -214,6 +136,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
                 height={450}
               />
             </div>
+          ) : (
+            <img
+              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
+              alt="Book cover preview"
+              className="w-full rounded-lg shadow-lg"
+            />
           )}
         </div>
       </div>
@@ -223,7 +151,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         open={isEditorOpen}
         onClose={handleCloseCoverEditor}
         onSave={handleSaveCover}
-        initialCoverData={coverData}
+        initialCoverData={coverData || undefined}
       />
     </div>
   );

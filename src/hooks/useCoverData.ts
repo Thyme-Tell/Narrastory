@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
@@ -11,155 +11,101 @@ export function useCoverData(profileId: string) {
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
-  // Function to fetch cover data
-  const fetchCoverData = useCallback(async () => {
-    if (!profileId) {
-      console.log('No profileId provided, skipping fetch');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      console.log('Fetching cover data for profile:', profileId);
-      
-      // First, try to fetch existing cover data
-      const { data, error, status } = await supabase
-        .from('book_covers')
-        .select('cover_data, id')
-        .eq('profile_id', profileId)
-        .maybeSingle();
-
-      console.log('Database query status:', status);
-      console.log('Raw response from database:', data);
-      
-      if (error) {
-        console.error('Error fetching cover data:', error);
-        throw new Error(`Failed to fetch cover data: ${error.message}`);
-      }
-
-      if (data && data.cover_data) {
-        // Log the actual data received
-        console.log('Cover data found in database with ID:', data.id);
-        console.log('Cover data from database:', data.cover_data);
-        
-        // Explicitly cast and set the cover data
-        const typedCoverData = data.cover_data as unknown as CoverData;
-        console.log('Setting cover data from database:', typedCoverData);
-        setCoverData(typedCoverData);
-      } else {
-        // If no cover data exists yet, use defaults but don't save until user makes changes
-        console.log('No cover data found for profile ID:', profileId);
-        console.log('Using defaults');
-        setCoverData(DEFAULT_COVER_DATA);
-      }
-    } catch (err) {
-      console.error("Error in fetchCoverData:", err);
-      setError(err as Error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load cover data",
-      });
-      // Even on error, use the default data
-      setCoverData(DEFAULT_COVER_DATA);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [profileId, toast]);
-
-  // Initial data fetch
   useEffect(() => {
-    console.log('Profile ID changed in useCoverData:', profileId);
-    if (profileId) {
-      fetchCoverData();
-    } else {
-      // If no profileId, set defaults and not loading
-      console.log('No profileId, setting defaults');
-      setCoverData(DEFAULT_COVER_DATA);
-      setIsLoading(false);
+    async function fetchCoverData() {
+      if (!profileId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        console.log('Fetching cover data for profile:', profileId);
+        const { data, error } = await supabase
+          .from('book_covers')
+          .select('cover_data')
+          .eq('profile_id', profileId)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching cover data:', error);
+          throw error;
+        }
+
+        console.log('Received cover data:', data);
+        
+        if (data) {
+          setCoverData(data.cover_data as CoverData);
+        } else {
+          // If no cover data exists yet, create a new record with default data
+          console.log('Creating new cover data with defaults');
+          const { data: newData, error: insertError } = await supabase
+            .from('book_covers')
+            .insert({ 
+              profile_id: profileId,
+              cover_data: DEFAULT_COVER_DATA as unknown as Json
+            })
+            .select('cover_data')
+            .single();
+
+          if (insertError) {
+            console.error('Error creating cover data:', insertError);
+            throw insertError;
+          }
+          
+          console.log('Created new cover data:', newData);
+          setCoverData(newData.cover_data as CoverData);
+        }
+      } catch (err) {
+        console.error("Error in fetchCoverData:", err);
+        setError(err as Error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load cover data",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [profileId, fetchCoverData]);
+
+    fetchCoverData();
+  }, [profileId]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
-    if (!profileId) {
-      console.error('Cannot save cover data: No profile ID provided');
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Cannot save cover data: missing profile ID",
-      });
-      return false;
-    }
+    if (!profileId) return false;
 
     try {
-      console.log('Preparing to save cover data for profile:', profileId);
-      console.log('Cover data to save:', newCoverData);
-      
-      // Get the current auth token
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      console.log('Authentication token available:', !!authToken);
-      
-      // Add proper authorization header
-      const response = await fetch(
-        `${supabase.supabaseUrl}/functions/v1/save-cover-data`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken || ''}`,
-            'apikey': supabase.supabaseKey
-          },
-          body: JSON.stringify({
-            profileId,
-            coverData: newCoverData
-          })
-        }
-      );
+      console.log('Saving cover data:', newCoverData);
+      const { error } = await supabase
+        .from('book_covers')
+        .upsert({ 
+          profile_id: profileId,
+          cover_data: newCoverData as unknown as Json
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response from save-cover-data:', response.status, errorText);
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          errorData = { error: 'Could not parse error response' };
-        }
-        throw new Error(`Server error (${response.status}): ${errorData.error || errorText || 'Unknown error'}`);
+      if (error) {
+        console.error('Error saving cover data:', error);
+        throw error;
       }
-      
-      const responseData = await response.json();
-      console.log('Cover data saved successfully through edge function:', responseData);
-      
-      // Update local state right away
+
+      console.log('Cover data saved successfully');
       setCoverData(newCoverData);
-      
-      toast({
-        title: "Cover saved",
-        description: "Your book cover preferences have been saved successfully",
-      });
-      
       return true;
     } catch (err) {
       console.error("Error in saveCoverData:", err);
       toast({
         variant: "destructive",
         title: "Error",
-        description: `Failed to save cover data: ${err instanceof Error ? err.message : 'Unknown error'}`,
+        description: "Failed to save cover data",
       });
       return false;
     }
   };
 
   return {
-    coverData: coverData || DEFAULT_COVER_DATA,
+    coverData,
     isLoading,
     error,
     saveCoverData,
-    refreshCoverData: fetchCoverData
   };
 }
