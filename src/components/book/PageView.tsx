@@ -1,95 +1,92 @@
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Story } from "@/types/supabase";
-import PageHeader from "./PageHeader";
-import PageContent from "./PageContent";
-import PageMedia from "./PageMedia";
-import { useStoryPageMedia } from "@/hooks/useStoryPageMedia";
-import { calculatePageContent, checkContentOverflow } from "@/utils/bookPagination";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { StoryMediaItem } from "@/types/media";
+import ImageMedia from "@/components/ImageMedia";
+import VideoMedia from "@/components/VideoMedia";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PageViewProps {
   story: Story;
   pageNumber: number;
-  isLastPage?: boolean;
 }
 
-const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState(0);
-  const [pageCapacity, setPageCapacity] = useState(0);
-  const [contentOverflows, setContentOverflows] = useState(false);
+const PageView = ({ story, pageNumber }: PageViewProps) => {
+  const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
+    queryKey: ["story-media", story.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("story_media")
+        .select("*")
+        .eq("story_id", story.id)
+        .order("created_at", { ascending: true });
 
-  const { mediaItems, isMediaLoading } = useStoryPageMedia(story.id);
+      if (error) {
+        console.error("Error fetching media:", error);
+        return [];
+      }
 
-  // Parse story content into paragraphs
+      return data as StoryMediaItem[];
+    },
+  });
+
+  // Split story content into paragraphs
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
-  
-  // Define constants for content pagination
-  const PAGINATION_CONFIG = {
-    charsPerPage: 1800, // Slightly conservative estimate
-    titleSpace: 150, // Approximate character equivalent of space taken by title and date
-  };
-  
-  // Calculate content for this specific page
-  const pageContent = calculatePageContent(paragraphs, pageNumber, PAGINATION_CONFIG);
-
-  // Show media only on first page
-  const showMedia = pageNumber === 1;
-
-  // After component mounts, measure the actual content height
-  useEffect(() => {
-    if (contentRef.current) {
-      // Get the content height
-      const height = contentRef.current.scrollHeight;
-      setContentHeight(height);
-      
-      // Get the available page height (accounting for padding)
-      // For a 5x8 inch book at standard DPI, height is about 768px (8 inches * 96dpi)
-      const pageHeight = 768 - 64; // 64px for padding (32px top + 32px bottom)
-      setPageCapacity(pageHeight);
-      
-      // Determine if content overflows
-      setContentOverflows(checkContentOverflow(height, pageHeight));
-    }
-  }, [pageContent, mediaItems, pageNumber]);
-
-  // Handlers for media operations
-  const handleImageClick = (url: string) => {
-    console.log("Image clicked:", url);
-  };
-
-  const handleCaptionUpdate = (mediaId: string, caption: string) => {
-    console.log("Caption update:", mediaId, caption);
-  };
-
-  const handleStartCrop = (url: string, mediaId: string) => {
-    console.log("Start crop:", url, mediaId);
-  };
 
   return (
-    <div className="w-full h-full book-page flex flex-col p-8 bg-white">
-      <div 
-        ref={contentRef}
-        className="w-full mx-auto book-content flex-1"
-      >
-        {pageNumber === 1 && (
-          <PageHeader story={story} pageNumber={pageNumber} />
-        )}
+    <div className="w-full h-full overflow-auto p-8 bg-white">
+      <div className="w-full max-w-4xl mx-auto">
+        {/* Story Header */}
+        <div className="mb-6">
+          <div className="flex justify-between items-baseline">
+            <h2 className="text-2xl font-semibold">
+              {story.title || "Untitled Story"}
+            </h2>
+            <span className="text-sm text-gray-500">
+              {format(new Date(story.created_at), "MMMM d, yyyy")}
+            </span>
+          </div>
+          <div className="text-right text-sm text-gray-400">Page {pageNumber}</div>
+        </div>
 
-        <PageContent 
-          pageContent={pageContent}
-          contentOverflows={contentOverflows}
-          isLastPage={isLastPage} 
-        />
-        
-        {showMedia && (
-          <PageMedia 
-            mediaItems={mediaItems}
-            isMediaLoading={isMediaLoading}
-            handleImageClick={handleImageClick}
-            handleCaptionUpdate={handleCaptionUpdate}
-            handleStartCrop={handleStartCrop}
-          />
+        {/* Story Content */}
+        <div className="prose max-w-none">
+          {paragraphs.map((paragraph, index) => (
+            <p key={index} className="mb-4">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+
+        {/* Media Items */}
+        {isMediaLoading ? (
+          <Skeleton className="w-full h-40 mt-6" />
+        ) : (
+          mediaItems.length > 0 && (
+            <div className="mt-8 space-y-4">
+              {mediaItems.map((media) => (
+                <div key={media.id} className="border rounded-md p-2">
+                  {media.content_type.startsWith("image/") ? (
+                    <div className="flex justify-center">
+                      <ImageMedia url={media.file_path} alt={media.caption || "Story image"} />
+                    </div>
+                  ) : media.content_type.startsWith("video/") ? (
+                    <VideoMedia url={media.file_path} />
+                  ) : (
+                    <div className="text-center p-4 bg-gray-100 rounded">
+                      Unsupported media type: {media.content_type}
+                    </div>
+                  )}
+                  {media.caption && (
+                    <p className="text-sm text-center italic mt-2">{media.caption}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>
