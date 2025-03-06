@@ -26,7 +26,10 @@ export const calculatePageContent = (
 ): string[] => {
   const { charsPerPage, titleSpace, imageSpace, linesPerPage } = config;
   
-  if (!paragraphs || paragraphs.length === 0) {
+  // Filter out empty paragraphs first
+  const nonEmptyParagraphs = paragraphs.filter(p => p.trim() !== '');
+  
+  if (!nonEmptyParagraphs || nonEmptyParagraphs.length === 0) {
     return [];
   }
   
@@ -45,27 +48,47 @@ export const calculatePageContent = (
   let currentPageNumber = 1;
   let currentPageLines = currentPageNumber === 1 ? firstPageLines : regularPageLines;
   let currentPageContent: string[] = [];
-  let result: string[] = [];
   let paragraphIndex = 0;
   
   // Process paragraphs until we reach the requested page
-  while (paragraphIndex < paragraphs.length) {
-    const paragraph = paragraphs[paragraphIndex];
+  while (paragraphIndex < nonEmptyParagraphs.length) {
+    const paragraph = nonEmptyParagraphs[paragraphIndex];
     const linesForCurrentPage = currentPageNumber === 1 ? firstPageLines : regularPageLines;
     
     // Check if adding this paragraph would exceed the current page's capacity
     if (!willParagraphFit(paragraph, currentPageLines, avgCharsPerLine)) {
-      // This paragraph doesn't fit on the current page, move to next page
-      if (currentPageNumber === pageNumber) {
-        // We've filled the requested page, return what we have
-        return currentPageContent;
+      // This paragraph doesn't fit on the current page
+      
+      // If the current page is empty but we're trying to add a very long paragraph,
+      // we should force at least some content onto the page
+      if (currentPageContent.length === 0) {
+        // Split the paragraph to fit what we can on this page
+        const charsForCurrentPage = currentPageLines * avgCharsPerLine;
+        const partialParagraph = paragraph.substring(0, charsForCurrentPage);
+        
+        if (currentPageNumber === pageNumber) {
+          currentPageContent.push(partialParagraph);
+          return currentPageContent;
+        }
+        
+        // Move to next page
+        currentPageNumber++;
+        currentPageLines = currentPageNumber === 1 ? firstPageLines : regularPageLines;
+        currentPageContent = [];
+        
+        // Continue with the rest of the paragraph
+        const remainingParagraph = paragraph.substring(charsForCurrentPage);
+        if (remainingParagraph.trim()) {
+          nonEmptyParagraphs[paragraphIndex] = remainingParagraph;
+          continue;
+        } else {
+          paragraphIndex++;
+          continue;
+        }
       }
       
-      // If the current page is empty, make sure we add at least one paragraph
-      // This prevents creating blank pages
-      if (currentPageContent.length === 0 && currentPageNumber === pageNumber) {
-        currentPageContent.push(paragraph);
-        paragraphIndex++;
+      // If we've reached the requested page, return what we have
+      if (currentPageNumber === pageNumber) {
         return currentPageContent;
       }
       
@@ -104,9 +127,13 @@ export const calculatePageContent = (
     }
   }
   
-  // If we're here, we've processed all paragraphs
-  // Only return content if we've reached the requested page
-  return currentPageNumber === pageNumber ? currentPageContent : [];
+  // If we've processed all paragraphs and reached our target page with content
+  if (currentPageNumber === pageNumber && currentPageContent.length > 0) {
+    return currentPageContent;
+  }
+  
+  // If we've reached here, there is no content for this page
+  return [];
 };
 
 export const checkContentOverflow = (contentHeight: number, pageCapacity: number): boolean => {
@@ -123,13 +150,20 @@ export const getTotalPageCount = (
     return 1; // At least cover page
   }
   
+  // Filter out empty paragraphs
+  const nonEmptyParagraphs = paragraphs.filter(p => p.trim() !== '');
+  
+  if (nonEmptyParagraphs.length === 0) {
+    return 1; // Just cover if all paragraphs are empty
+  }
+  
   // Simulate pagination through all content to count non-empty pages
   let currentPage = 1;
   let pageContent: string[] = [];
   let nonEmptyPageCount = 0;
   
   do {
-    pageContent = calculatePageContent(paragraphs, currentPage, config, hasImage);
+    pageContent = calculatePageContent(nonEmptyParagraphs, currentPage, config, hasImage);
     if (pageContent.length > 0) {
       nonEmptyPageCount++;
       currentPage++;

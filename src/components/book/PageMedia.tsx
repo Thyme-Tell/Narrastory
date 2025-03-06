@@ -27,9 +27,16 @@ const PageMedia = ({
   }
 
   // Only show the first image in book preview to avoid excessive page consumption
-  const firstImage = mediaItems.find(media => media.content_type.startsWith("image/"));
+  const firstImage = mediaItems.find(media => media.content_type && media.content_type.startsWith("image/"));
   
   if (!firstImage) {
+    return null;
+  }
+
+  // Check if the image URL is valid
+  const imageUrl = firstImage.file_path;
+  if (!imageUrl || (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://'))) {
+    console.error("Invalid image URL:", imageUrl);
     return null;
   }
 
@@ -37,12 +44,12 @@ const PageMedia = ({
     <div className="mt-8 mb-4 flex justify-center">
       <div className="max-w-[90%] border rounded-md p-2">
         <img 
-          src={firstImage.file_path} 
+          src={imageUrl} 
           alt={firstImage.file_name || "Story image"} 
           className="max-h-[300px] w-auto object-contain mx-auto"
-          onClick={() => handleImageClick(firstImage.file_path)}
+          onClick={() => handleImageClick(imageUrl)}
           onError={(e) => {
-            console.error("Image failed to load:", firstImage.file_path);
+            console.error("Image failed to load:", imageUrl);
             e.currentTarget.style.display = 'none';
           }}
         />

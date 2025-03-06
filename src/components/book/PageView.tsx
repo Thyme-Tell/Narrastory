@@ -24,11 +24,12 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   const [pageCapacity, setPageCapacity] = useState(0);
   const [contentOverflows, setContentOverflows] = useState(false);
   const [lineHeight, setLineHeight] = useState(30); // Estimated line height in pixels
+  const [hasContent, setHasContent] = useState(true);
 
   const { mediaItems, isLoading } = useStoryPageMedia(story.id);
   const hasImages = !isLoading && mediaItems && mediaItems.length > 0;
 
-  // Parse story content into paragraphs
+  // Parse story content into paragraphs and filter out empty ones
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
   
   // Define constants for content pagination
@@ -48,6 +49,11 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
 
   // Show media only on first page
   const showMedia = pageNumber === 1 && hasImages;
+
+  // Check if there's any content to display on this page
+  useEffect(() => {
+    setHasContent(pageContent.length > 0 || (pageNumber === 1 && showMedia));
+  }, [pageContent, pageNumber, showMedia]);
 
   // After component mounts, measure the actual content height and line height
   useEffect(() => {
@@ -90,6 +96,13 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   const handleStartCrop = (url: string, mediaId: string) => {
     console.log("Start crop:", url, mediaId);
   };
+
+  // If there's no content on this page (except for first page with header), log it for debugging
+  useEffect(() => {
+    if (!hasContent && pageNumber > 1) {
+      console.log(`Empty page detected: Page ${pageNumber} for story ${story.id}`);
+    }
+  }, [hasContent, pageNumber, story.id]);
 
   return (
     <div className="w-full h-full book-page flex flex-col p-8 bg-white">
