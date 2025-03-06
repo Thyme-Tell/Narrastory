@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Story } from "@/types/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,24 @@ const PageView = ({ story, pageNumber }: PageViewProps) => {
   // Split story content into paragraphs
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
 
+  // Function to handle media item click (empty implementation for now)
+  const handleImageClick = (url: string) => {
+    // This will be enhanced later with a lightbox or modal
+    console.log("Image clicked:", url);
+  };
+
+  // Function to handle media caption update (empty implementation for now)
+  const handleCaptionUpdate = (mediaId: string, caption: string) => {
+    // This will be implemented when editing is required
+    console.log("Caption update:", mediaId, caption);
+  };
+
+  // Function to handle crop start (empty implementation for now)
+  const handleStartCrop = (url: string, mediaId: string) => {
+    // This will be implemented when crop functionality is needed
+    console.log("Start crop:", url, mediaId);
+  };
+
   return (
     <div className="w-full h-full overflow-auto p-8 bg-white">
       <div className="w-full max-w-4xl mx-auto">
@@ -71,17 +89,32 @@ const PageView = ({ story, pageNumber }: PageViewProps) => {
                 <div key={media.id} className="border rounded-md p-2">
                   {media.content_type.startsWith("image/") ? (
                     <div className="flex justify-center">
-                      <ImageMedia url={media.file_path} alt={media.caption || "Story image"} />
+                      <ImageMedia
+                        media={{
+                          id: media.id,
+                          file_path: media.file_path,
+                          file_name: media.file_name || "image",
+                          caption: media.caption
+                        }}
+                        onImageClick={handleImageClick}
+                        onStartCrop={handleStartCrop}
+                        onCaptionUpdate={handleCaptionUpdate}
+                      />
                     </div>
                   ) : media.content_type.startsWith("video/") ? (
-                    <VideoMedia url={media.file_path} />
+                    <VideoMedia
+                      media={{
+                        id: media.id,
+                        file_path: media.file_path,
+                        content_type: media.content_type,
+                        caption: media.caption
+                      }}
+                      onCaptionUpdate={handleCaptionUpdate}
+                    />
                   ) : (
                     <div className="text-center p-4 bg-gray-100 rounded">
                       Unsupported media type: {media.content_type}
                     </div>
-                  )}
-                  {media.caption && (
-                    <p className="text-sm text-center italic mt-2">{media.caption}</p>
                   )}
                 </div>
               ))}
