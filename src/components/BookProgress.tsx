@@ -5,6 +5,9 @@ import { Book, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { X } from "lucide-react";
+import CoverEditor, { CoverData } from "./cover/CoverEditor";
+import CoverCanvas from "./cover/CoverCanvas";
+import { useCoverData } from "@/hooks/useCoverData";
 
 interface BookProgressProps {
   profileId: string;
@@ -12,6 +15,8 @@ interface BookProgressProps {
 
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const { coverData, saveCoverData, isLoading: isCoverLoading } = useCoverData(profileId);
   
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -47,6 +52,18 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       return storiesData;
     },
   });
+
+  const handleOpenCoverEditor = () => {
+    setIsEditorOpen(true);
+  };
+
+  const handleCloseCoverEditor = () => {
+    setIsEditorOpen(false);
+  };
+
+  const handleSaveCover = async (newCoverData: CoverData) => {
+    await saveCoverData(newCoverData);
+  };
 
   if (isHidden) {
     return null;
@@ -92,7 +109,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <div>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
           <div className="space-y-3">
-            <Button variant="outline" size="lg" className="w-[200px] justify-start">
+            <Button variant="outline" size="lg" className="w-[200px] justify-start" onClick={handleOpenCoverEditor}>
               <Book className="mr-2" />
               Edit Cover
             </Button>
@@ -108,13 +125,33 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         </div>
         
         <div className="w-[300px]">
-          <img
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
-            alt="Book cover preview"
-            className="w-full rounded-lg shadow-lg"
-          />
+          {isCoverLoading ? (
+            <div className="w-full h-[450px] bg-gray-200 rounded-lg animate-pulse"></div>
+          ) : coverData ? (
+            <div className="rounded-lg shadow-lg overflow-hidden">
+              <CoverCanvas 
+                coverData={coverData} 
+                width={300}
+                height={450}
+              />
+            </div>
+          ) : (
+            <img
+              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
+              alt="Book cover preview"
+              className="w-full rounded-lg shadow-lg"
+            />
+          )}
         </div>
       </div>
+
+      <CoverEditor
+        profileId={profileId}
+        open={isEditorOpen}
+        onClose={handleCloseCoverEditor}
+        onSave={handleSaveCover}
+        initialCoverData={coverData || undefined}
+      />
     </div>
   );
 };
