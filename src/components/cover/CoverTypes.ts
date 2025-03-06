@@ -32,7 +32,6 @@ export interface BackgroundTabProps {
 export interface TextTabProps {
   coverData: CoverData;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
-  onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
 }
 
