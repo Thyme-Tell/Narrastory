@@ -42,52 +42,74 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   // Parse story content into paragraphs
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
   
-  // Calculate content for this specific page
-  // Standard 5x8 book page can fit around 250-300 words (roughly 1500-2000 characters)
+  // Define constants for content pagination
   const CHARS_PER_PAGE = 1800; // Slightly conservative estimate
-  const startIndex = (pageNumber - 1) * CHARS_PER_PAGE;
+  const TITLE_SPACE = 150; // Approximate character equivalent of space taken by title and date
   
-  let currentCharCount = 0;
-  let pageParas: string[] = [];
+  // Calculate content for this specific page
+  let pageContent: string[] = [];
   
-  // First page includes title and date
   if (pageNumber === 1) {
-    // We need to account for the title and date space
-    const titleSpace = 150; // Approximate character equivalent of space taken by title and date
+    // First page - account for title and date
+    let charCount = 0;
+    let paraIndex = 0;
     
-    for (const para of paragraphs) {
-      if (currentCharCount + para.length <= CHARS_PER_PAGE - titleSpace) {
-        pageParas.push(para);
-        currentCharCount += para.length;
+    while (paraIndex < paragraphs.length && charCount + paragraphs[paraIndex].length <= CHARS_PER_PAGE - TITLE_SPACE) {
+      pageContent.push(paragraphs[paraIndex]);
+      charCount += paragraphs[paraIndex].length;
+      paraIndex++;
+    }
+  } else {
+    // Subsequent pages - calculate how much content should be skipped
+    let totalCharsToSkip = CHARS_PER_PAGE - TITLE_SPACE; // First page capacity
+    totalCharsToSkip += (pageNumber - 2) * CHARS_PER_PAGE; // Plus full pages in between
+    
+    // Skip content until we reach what should be shown on this page
+    let charCount = 0;
+    let paraIndex = 0;
+    
+    // Skip content that would be on previous pages
+    while (paraIndex < paragraphs.length && charCount < totalCharsToSkip) {
+      if (charCount + paragraphs[paraIndex].length <= totalCharsToSkip) {
+        // This paragraph fits entirely on previous pages
+        charCount += paragraphs[paraIndex].length;
+        paraIndex++;
       } else {
+        // This paragraph spans across pages, take the remainder
+        const charsToSkipInPara = totalCharsToSkip - charCount;
+        // Save the remaining part of this paragraph for this page
+        const remainingPart = paragraphs[paraIndex].substring(charsToSkipInPara);
+        
+        if (remainingPart.length > 0) {
+          pageContent.push(remainingPart);
+        }
+        
+        // Move to next paragraph
+        charCount = totalCharsToSkip;
+        paraIndex++;
         break;
       }
     }
-  } else {
-    // For subsequent pages, continue from where we left off
-    let skippedChars = 0;
-    for (const para of paragraphs) {
-      if (skippedChars < startIndex) {
-        skippedChars += para.length;
-        continue;
-      }
-      
-      if (currentCharCount + para.length <= CHARS_PER_PAGE) {
-        pageParas.push(para);
-        currentCharCount += para.length;
-      } else {
-        // Check if we can include part of this paragraph
-        if (currentCharCount < CHARS_PER_PAGE) {
-          const remainingSpace = CHARS_PER_PAGE - currentCharCount;
-          const partialPara = para.substring(0, remainingSpace);
-          pageParas.push(partialPara + "...");
-        }
-        break;
-      }
+    
+    // Now add paragraphs that fit on this page
+    let pageCharCount = pageContent.length > 0 ? pageContent[0].length : 0;
+    
+    // Add more paragraphs until we fill this page
+    while (paraIndex < paragraphs.length && pageCharCount + paragraphs[paraIndex].length <= CHARS_PER_PAGE) {
+      pageContent.push(paragraphs[paraIndex]);
+      pageCharCount += paragraphs[paraIndex].length;
+      paraIndex++;
+    }
+    
+    // Check if we need to include a partial paragraph
+    if (paraIndex < paragraphs.length && pageCharCount < CHARS_PER_PAGE) {
+      const remainingSpace = CHARS_PER_PAGE - pageCharCount;
+      const partialPara = paragraphs[paraIndex].substring(0, remainingSpace);
+      pageContent.push(partialPara + "...");
     }
   }
 
-  // Check if we need to show media (only on first page)
+  // Show media only on first page
   const showMedia = pageNumber === 1;
 
   // After component mounts, measure the actual content height
@@ -105,7 +127,7 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
       // Determine if content overflows
       setContentOverflows(height > pageHeight);
     }
-  }, [pageParas, mediaItems, pageNumber]);
+  }, [pageContent, mediaItems, pageNumber]);
 
   // Handlers for media operations
   const handleImageClick = (url: string) => {
@@ -141,14 +163,14 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
         )}
 
         <div className="prose max-w-none book-text">
-          {pageParas.map((paragraph, index) => (
+          {pageContent.map((paragraph, index) => (
             <p key={index} className="mb-4">
               {paragraph}
             </p>
           ))}
           
           {/* If content overflows to next page, show indicator */}
-          {contentOverflows && !isLastPage && (
+          {contentOverflows && !isLastPage && pageNumber * CHARS_PER_PAGE < story.content.length && (
             <div className="text-right text-sm text-gray-400 mt-4">
               Continued on next page...
             </div>
