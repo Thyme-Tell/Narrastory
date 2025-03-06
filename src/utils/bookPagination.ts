@@ -70,23 +70,25 @@ export const isLastPageOfStory = (
   pageNumber: number, 
   config: PaginationConfig
 ): boolean => {
-  // Count how many pages this story would take
-  const { charsPerPage, titleSpace } = config;
-  let totalPages = 1; // Start with 1 page
-  let currentPageChars = 0;
-  const firstPageCapacity = charsPerPage - titleSpace;
+  if (!paragraphs || paragraphs.length === 0) {
+    return true;
+  }
   
-  for (let i = 0; i < paragraphs.length; i++) {
-    const paragraph = paragraphs[i];
-    const currentPageCapacity = totalPages === 1 ? firstPageCapacity : charsPerPage;
-    
-    // If paragraph doesn't fit on current page
-    if (currentPageChars + paragraph.length > currentPageCapacity) {
-      totalPages++;
-      currentPageChars = paragraph.length;
-    } else {
-      currentPageChars += paragraph.length;
-    }
+  // Calculate total chars in the content
+  let totalChars = paragraphs.reduce((sum, p) => sum + p.length, 0);
+  
+  // First page has less capacity due to title space
+  const firstPageCapacity = config.charsPerPage - config.titleSpace;
+  
+  // Calculate how many full pages we need
+  let totalPages = 1; // Start with one page
+  
+  // Remove first page capacity
+  totalChars -= firstPageCapacity;
+  
+  // If we still have content, calculate remaining pages
+  if (totalChars > 0) {
+    totalPages += Math.ceil(totalChars / config.charsPerPage);
   }
   
   return pageNumber >= totalPages;
