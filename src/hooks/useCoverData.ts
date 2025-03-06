@@ -1,188 +1,127 @@
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 
-export type CoverData = {
-  backgroundColor?: string;
-  backgroundImage?: string;
-  title?: string;
-  titlePosition?: 'center' | 'top' | 'bottom';
-  titleColor?: string;
-  subtitle?: string;
-  subtitlePosition?: 'center' | 'top' | 'bottom';
-  subtitleColor?: string;
-  authorName?: string;
-  customImages?: Array<{
-    id: string;
-    url: string;
-    position: { x: number; y: number };
-    size: { width: number; height: number };
-    zIndex: number;
-  }>;
-};
-
-export const useCoverData = (profileId: string) => {
+export function useCoverData(profileId: string) {
+  const [coverData, setCoverData] = useState<CoverData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: coverData, isLoading: isFetching } = useQuery({
-    queryKey: ["coverData", profileId],
-    queryFn: async () => {
-      try {
-        // First try to get data directly from the database
-        const { data, error } = await supabase
-          .from("book_covers")
-          .select("cover_data")
-          .eq("profile_id", profileId)
-          .maybeSingle();
-
-        if (!error && data) {
-          return (data?.cover_data as CoverData) || {} as CoverData;
-        }
-
-        // If that fails (e.g., due to RLS), use the edge function
-        const sessionResponse = await supabase.auth.getSession();
-        const accessToken = sessionResponse.data?.session?.access_token || '';
-        
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://pohnhzxqorelllbfnqyj.supabase.co'}/functions/v1/cover-operations`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            operation: 'get',
-            profileId
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Error fetching cover data: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        return (result.coverData as CoverData) || {} as CoverData;
-      } catch (error) {
-        console.error("Error fetching cover data:", error);
-        return {} as CoverData;
-      }
-    },
-    enabled: !!profileId,
-  });
-
-  const updateCoverData = useMutation({
-    mutationFn: async (newCoverData: CoverData) => {
-      setIsLoading(true);
-      
-      try {
-        // First try direct database update
-        const { data, error } = await supabase
-          .from("book_covers")
-          .upsert(
-            { 
-              profile_id: profileId, 
-              cover_data: newCoverData 
-            },
-            { 
-              onConflict: "profile_id",
-              ignoreDuplicates: false 
-            }
-          )
-          .select();
-
-        if (!error) {
-          return data;
-        }
-
-        // If direct update fails, use the edge function
-        const sessionResponse = await supabase.auth.getSession();
-        const accessToken = sessionResponse.data?.session?.access_token || '';
-        
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://pohnhzxqorelllbfnqyj.supabase.co'}/functions/v1/cover-operations`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            operation: 'update',
-            profileId,
-            coverData: newCoverData
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Error updating cover data: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        return result.data;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    onSuccess: () => {
-      toast({
-        title: "Cover updated",
-        description: "Your book cover has been updated successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["coverData", profileId] });
-    },
-    onError: (error) => {
-      console.error("Error updating cover data:", error);
-      toast({
-        title: "Error updating cover",
-        description: "Could not update your book cover. Please try again.",
-        variant: "destructive",
-      });
+  // Function to fetch cover data
+  const fetchCoverData = useCallback(async () => {
+    if (!profileId) {
+      setIsLoading(false);
+      return;
     }
-  });
 
-  const uploadCoverImage = async (file: File): Promise<string | null> => {
-    setIsLoading(true);
     try {
-      // Create the storage bucket if it doesn't exist
-      await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://pohnhzxqorelllbfnqyj.supabase.co'}/functions/v1/create-storage-bucket`, {
-        method: 'POST'
-      });
+      setIsLoading(true);
+      console.log('Fetching cover data for profile:', profileId);
       
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `${profileId}/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
+      // First, try to fetch existing cover data
+      const { data, error } = await supabase
         .from('book_covers')
-        .upload(filePath, file);
-      
-      if (uploadError) {
-        throw uploadError;
+        .select('cover_data')
+        .eq('profile_id', profileId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching cover data:', error);
+        throw error;
       }
+
+      console.log('Received cover data from database:', data);
       
-      const { data: urlData } = supabase.storage
-        .from('book_covers')
-        .getPublicUrl(filePath);
-      
-      return urlData.publicUrl;
-    } catch (error) {
-      console.error("Error uploading image:", error);
+      if (data && data.cover_data) {
+        // Explicitly cast and set the cover data
+        const typedCoverData = data.cover_data as CoverData;
+        console.log('Setting cover data from database:', typedCoverData);
+        setCoverData(typedCoverData);
+      } else {
+        // If no cover data exists yet, use defaults but don't save until user makes changes
+        console.log('No cover data found, using defaults');
+        setCoverData(DEFAULT_COVER_DATA);
+      }
+    } catch (err) {
+      console.error("Error in fetchCoverData:", err);
+      setError(err as Error);
       toast({
-        title: "Upload failed",
-        description: "Could not upload your image. Please try again.",
         variant: "destructive",
+        title: "Error",
+        description: "Failed to load cover data",
       });
-      return null;
+      // Even on error, use the default data
+      setCoverData(DEFAULT_COVER_DATA);
     } finally {
       setIsLoading(false);
+    }
+  }, [profileId, toast]);
+
+  // Initial data fetch
+  useEffect(() => {
+    console.log('Profile ID in useCoverData:', profileId);
+    if (profileId) {
+      fetchCoverData();
+    } else {
+      // If no profileId, set defaults and not loading
+      setCoverData(DEFAULT_COVER_DATA);
+      setIsLoading(false);
+    }
+  }, [profileId, fetchCoverData]);
+
+  const saveCoverData = async (newCoverData: CoverData) => {
+    if (!profileId) return false;
+
+    try {
+      console.log('Saving cover data:', newCoverData);
+      
+      // Use Supabase directly for the upsert operation
+      const { data, error } = await supabase
+        .from('book_covers')
+        .upsert({
+          profile_id: profileId,
+          cover_data: newCoverData,
+          updated_at: new Date().toISOString()
+        }, { 
+          onConflict: 'profile_id',
+          returning: 'representation'
+        });
+
+      if (error) {
+        console.error('Error saving cover data:', error);
+        throw error;
+      }
+      
+      console.log('Cover data saved successfully:', data);
+      
+      // Update local state right away
+      setCoverData(newCoverData);
+      
+      toast({
+        title: "Cover saved",
+        description: "Your book cover preferences have been saved successfully",
+      });
+      
+      return true;
+    } catch (err) {
+      console.error("Error in saveCoverData:", err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save cover data",
+      });
+      return false;
     }
   };
 
   return {
-    coverData: coverData || {},
-    isLoading: isLoading || isFetching,
-    updateCoverData: updateCoverData.mutate,
-    uploadCoverImage,
+    coverData: coverData || DEFAULT_COVER_DATA,
+    isLoading,
+    error,
+    saveCoverData,
+    refreshCoverData: fetchCoverData
   };
-};
+}
