@@ -48,9 +48,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const { data: stories } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
+      console.log("Fetching stories for profileId:", profileId);
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
-        .select("content")
+        .select("id, content")
         .eq("profile_id", profileId);
 
       if (storiesError) {
@@ -58,6 +59,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         return [];
       }
 
+      console.log(`Found ${storiesData?.length || 0} stories for profile:`, profileId);
       return storiesData;
     },
   });
@@ -74,6 +76,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       console.error("Cover data error in BookProgress:", coverError);
     }
   }, [coverError]);
+
+  useEffect(() => {
+    console.log("Current cover data in BookProgress:", coverData);
+  }, [coverData]);
 
   const handleOpenCoverEditor = () => {
     console.log("Opening cover editor with data:", coverData);

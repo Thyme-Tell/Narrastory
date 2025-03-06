@@ -25,27 +25,33 @@ export function useCoverData(profileId: string) {
       console.log('Fetching cover data for profile:', profileId);
       
       // First, try to fetch existing cover data
-      const { data, error } = await supabase
+      const { data, error, status } = await supabase
         .from('book_covers')
-        .select('cover_data')
+        .select('cover_data, id')
         .eq('profile_id', profileId)
         .maybeSingle();
 
+      console.log('Database query status:', status);
+      console.log('Raw response from database:', data);
+      
       if (error) {
         console.error('Error fetching cover data:', error);
         throw new Error(`Failed to fetch cover data: ${error.message}`);
       }
 
-      console.log('Received data from database:', data);
-      
       if (data && data.cover_data) {
+        // Log the actual data received
+        console.log('Cover data found in database with ID:', data.id);
+        console.log('Cover data from database:', data.cover_data);
+        
         // Explicitly cast and set the cover data
         const typedCoverData = data.cover_data as unknown as CoverData;
         console.log('Setting cover data from database:', typedCoverData);
         setCoverData(typedCoverData);
       } else {
         // If no cover data exists yet, use defaults but don't save until user makes changes
-        console.log('No cover data found, using defaults');
+        console.log('No cover data found for profile ID:', profileId);
+        console.log('Using defaults');
         setCoverData(DEFAULT_COVER_DATA);
       }
     } catch (err) {
@@ -91,29 +97,54 @@ export function useCoverData(profileId: string) {
       console.log('Preparing to save cover data for profile:', profileId);
       console.log('Cover data to save:', newCoverData);
       
-      // Use the edge function for reliable saving
-      const response = await fetch(
-        `https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/save-cover-data`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            profileId,
-            coverData: newCoverData
-          })
-        }
-      );
+      // Try direct database upsert first
+      console.log('Attempting direct database upsert');
+      const { data: upsertData, error: upsertError } = await supabase
+        .from('book_covers')
+        .upsert({
+          profile_id: profileId,
+          cover_data: newCoverData as unknown as Json,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'profile_id'
+        });
+      
+      if (upsertError) {
+        console.error('Direct upsert failed:', upsertError);
+        console.log('Falling back to edge function');
+        
+        // Use the edge function as fallback
+        const response = await fetch(
+          `https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/save-cover-data`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              profileId,
+              coverData: newCoverData
+            })
+          }
+        );
 
-      const responseData = await response.json();
-      
-      if (!response.ok) {
-        console.error('Error response from save-cover-data:', response.status, responseData);
-        throw new Error(`Server error (${response.status}): ${responseData.error || 'Unknown error'}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response from save-cover-data:', response.status, errorText);
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (e) {
+            errorData = { error: 'Could not parse error response' };
+          }
+          throw new Error(`Server error (${response.status}): ${errorData.error || errorText || 'Unknown error'}`);
+        }
+        
+        const responseData = await response.json();
+        console.log('Cover data saved successfully through edge function:', responseData);
+      } else {
+        console.log('Direct upsert successful:', upsertData);
       }
-      
-      console.log('Cover data saved successfully:', responseData);
       
       // Update local state right away
       setCoverData(newCoverData);
