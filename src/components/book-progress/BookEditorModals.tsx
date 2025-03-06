@@ -39,7 +39,6 @@ const BookEditorModals = ({
         profileId={profileId}
         open={isPreviewOpen}
         onClose={onClosePreview}
-        isMobile={isMobile}
       />
     </>
   );
