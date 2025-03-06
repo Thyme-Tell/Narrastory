@@ -46,21 +46,6 @@ const PageView = ({
   // Get content for this page using our pagination utility
   const pageContent = getPageContent(story, pageNumber);
 
-  // Function to handle media item click
-  const handleImageClick = (url: string) => {
-    console.log("Image clicked:", url);
-  };
-
-  // Function to handle media caption update
-  const handleCaptionUpdate = (mediaId: string, caption: string) => {
-    console.log("Caption update:", mediaId, caption);
-  };
-
-  // Function to handle crop start
-  const handleStartCrop = (url: string, mediaId: string) => {
-    console.log("Start crop:", url, mediaId);
-  };
-
   // If this is a media page, only show the media item
   if (isMediaPage && mediaItem) {
     return (
@@ -68,31 +53,31 @@ const PageView = ({
         <div className="max-w-full max-h-[80%] flex justify-center items-center">
           {mediaItem.content_type.startsWith("image/") ? (
             <div className="max-h-full">
-              <ImageMedia
-                media={{
-                  id: mediaItem.id,
-                  file_path: mediaItem.file_path,
-                  file_name: mediaItem.file_name || "image",
-                  caption: mediaItem.caption
-                }}
-                onImageClick={handleImageClick}
-                onStartCrop={handleStartCrop}
-                onCaptionUpdate={handleCaptionUpdate}
-              />
+              {/* Simplified display of image without edit functionality */}
+              <div className="media-display">
+                <img 
+                  src={mediaItem.file_path} 
+                  alt={mediaItem.caption || "Image"} 
+                  className="max-h-[70vh] max-w-full object-contain rounded-lg" 
+                />
+              </div>
               {mediaItem.caption && (
                 <p className="text-sm text-center italic mt-4">{mediaItem.caption}</p>
               )}
             </div>
           ) : mediaItem.content_type.startsWith("video/") ? (
-            <VideoMedia
-              media={{
-                id: mediaItem.id,
-                file_path: mediaItem.file_path,
-                content_type: mediaItem.content_type,
-                caption: mediaItem.caption
-              }}
-              onCaptionUpdate={handleCaptionUpdate}
-            />
+            <div className="media-display">
+              <video 
+                src={mediaItem.file_path} 
+                controls 
+                className="max-h-[70vh] max-w-full rounded-lg"
+              >
+                Your browser does not support the video tag.
+              </video>
+              {mediaItem.caption && (
+                <p className="text-sm text-center italic mt-4">{mediaItem.caption}</p>
+              )}
+            </div>
           ) : (
             <div className="text-center p-4 bg-gray-100 rounded">
               Unsupported media type: {mediaItem.content_type}
