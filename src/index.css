@@ -96,6 +96,17 @@
   .cover-editor-mobile {
     padding-bottom: 80px; /* Space for fixed bottom buttons */
   }
+  
+  /* Fixed controls styling */
+  .cover-editor-fixed-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+  }
 }
 
 /* Animations for mobile transitions */

@@ -39,17 +39,11 @@ const EditorControlPanel = ({
   const isMobile = useIsMobile();
 
   return (
-    <div className={`${isMobile ? "w-full" : "w-1/3 border-r"} p-4 overflow-y-auto relative`}>
+    <div className={`${isMobile ? "w-full" : "w-1/3 border-r"} p-4 ${isMobile ? "pb-32" : "overflow-y-auto"} relative`}>
       <h2 className="text-xl font-semibold mb-4">Edit Book Cover</h2>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full mb-4">
-          <TabsTrigger value="background" className="flex-1">Background</TabsTrigger>
-          <TabsTrigger value="text" className="flex-1">Text</TabsTrigger>
-          <TabsTrigger value="layout" className="flex-1">Layout</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="background">
+      <div className={`${isMobile ? "overflow-y-auto h-full" : ""}`}>
+        <TabsContent value="background" className={activeTab === "background" ? "block" : "hidden"}>
           <BackgroundTab
             coverData={coverData}
             onBackgroundColorChange={onBackgroundColorChange}
@@ -59,7 +53,7 @@ const EditorControlPanel = ({
           />
         </TabsContent>
         
-        <TabsContent value="text">
+        <TabsContent value="text" className={activeTab === "text" ? "block" : "hidden"}>
           <TextTab
             coverData={coverData}
             onTextChange={onTextChange}
@@ -68,22 +62,55 @@ const EditorControlPanel = ({
           />
         </TabsContent>
         
-        <TabsContent value="layout">
+        <TabsContent value="layout" className={activeTab === "layout" ? "block" : "hidden"}>
           <LayoutTab
             coverData={coverData}
             onLayoutChange={onLayoutChange}
           />
         </TabsContent>
-      </Tabs>
-      
-      <div className={`${isMobile ? "fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg" : "absolute bottom-4 left-4 right-4"} flex justify-end gap-2`}>
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={onSave}>
-          Save Cover
-        </Button>
       </div>
+
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-10">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full flex">
+              <TabsTrigger value="background" className="flex-1">Background</TabsTrigger>
+              <TabsTrigger value="text" className="flex-1">Text</TabsTrigger>
+              <TabsTrigger value="layout" className="flex-1">Layout</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <div className="p-3 flex justify-end gap-2 border-t">
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSave}>
+              Save Cover
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {!isMobile && (
+        <>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="background" className="flex-1">Background</TabsTrigger>
+              <TabsTrigger value="text" className="flex-1">Text</TabsTrigger>
+              <TabsTrigger value="layout" className="flex-1">Layout</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <div className="absolute bottom-4 left-4 right-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSave}>
+              Save Cover
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
