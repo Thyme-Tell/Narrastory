@@ -165,7 +165,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
                 Order Book
               </Button>
               <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2">
-                <span className="text-xs bg-[#FEF7CD] text-gray-700 px-2 py-0.5 rounded-full">Coming Soon</span>
+                <span className="text-xs bg-[#AF4623] text-white px-2 py-0.5 rounded-full">Coming Soon</span>
               </div>
             </div>
           </div>
