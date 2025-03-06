@@ -2,27 +2,33 @@
 export interface PaginationConfig {
   charsPerPage: number;
   titleSpace: number;
+  imageSpace: number; // Adding space consideration for images
 }
 
 export const calculatePageContent = (
   paragraphs: string[],
   pageNumber: number,
-  config: PaginationConfig
+  config: PaginationConfig,
+  hasImage: boolean = false
 ): string[] => {
-  const { charsPerPage, titleSpace } = config;
+  const { charsPerPage, titleSpace, imageSpace } = config;
   
   if (!paragraphs || paragraphs.length === 0) {
     return [];
   }
   
-  // For first page, account for title space
-  const effectiveCharsForFirstPage = charsPerPage - titleSpace;
+  // For first page, account for title space and possibly image space
+  const firstPageDeduction = titleSpace + (hasImage && pageNumber === 1 ? imageSpace : 0);
+  const effectiveCharsForFirstPage = charsPerPage - firstPageDeduction;
   
   // Initialize tracking variables
   let currentPageNumber = 1;
   let currentPageCharCount = 0;
   let result: string[] = [];
   let paragraphIndex = 0;
+  
+  // Track if we've processed any paragraphs for the requested page
+  let processedAnyForRequestedPage = false;
   
   // Iterate through paragraphs until we reach the requested page
   while (paragraphIndex < paragraphs.length) {
@@ -52,6 +58,7 @@ export const calculatePageContent = (
     // If we're on the requested page, add this paragraph to the result
     if (currentPageNumber === pageNumber) {
       result.push(paragraph);
+      processedAnyForRequestedPage = true;
     }
     
     // Move to the next paragraph
@@ -65,31 +72,42 @@ export const checkContentOverflow = (contentHeight: number, pageCapacity: number
   return contentHeight > pageCapacity;
 };
 
-export const isLastPageOfStory = (
+export const getTotalPageCount = (
   paragraphs: string[],
-  pageNumber: number, 
-  config: PaginationConfig
-): boolean => {
+  config: PaginationConfig,
+  hasImage: boolean = false
+): number => {
   if (!paragraphs || paragraphs.length === 0) {
-    return true;
+    return 1; // At least cover page
   }
   
   // Calculate total chars in the content
   let totalChars = paragraphs.reduce((sum, p) => sum + p.length, 0);
   
-  // First page has less capacity due to title space
-  const firstPageCapacity = config.charsPerPage - config.titleSpace;
+  // First page has less capacity due to title space and possibly image
+  const firstPageDeduction = config.titleSpace + (hasImage ? config.imageSpace : 0);
+  const firstPageCapacity = config.charsPerPage - firstPageDeduction;
   
   // Calculate how many full pages we need
-  let totalPages = 1; // Start with one page
+  let totalPages = 1; // Start with one page (first page)
   
-  // Remove first page capacity
-  totalChars -= firstPageCapacity;
+  // Account for content on first page
+  let remainingChars = totalChars - firstPageCapacity;
   
-  // If we still have content, calculate remaining pages
-  if (totalChars > 0) {
-    totalPages += Math.ceil(totalChars / config.charsPerPage);
+  // Add additional pages as needed
+  if (remainingChars > 0) {
+    totalPages += Math.ceil(remainingChars / config.charsPerPage);
   }
   
+  return totalPages;
+};
+
+export const isLastPageOfStory = (
+  paragraphs: string[],
+  pageNumber: number, 
+  config: PaginationConfig,
+  hasImage: boolean = false
+): boolean => {
+  const totalPages = getTotalPageCount(paragraphs, config, hasImage);
   return pageNumber >= totalPages;
 };

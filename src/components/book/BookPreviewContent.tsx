@@ -72,7 +72,6 @@ const BookPreviewContent = ({
           width: `${PAGE_WIDTH}px`,
           height: `${PAGE_HEIGHT}px`,
           maxHeight: '90vh',
-          overflow: 'hidden'
         }}
       >
         {(isLoading || pageTransitioning) && (
