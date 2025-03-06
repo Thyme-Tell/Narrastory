@@ -52,17 +52,24 @@ serve(async (req) => {
       );
     }
     
-    // Save cover data using service role (bypasses RLS)
+    // Use upsert operation to either insert or update cover data
     const { data, error } = await supabase
       .from('book_covers')
-      .upsert({
-        profile_id: profileId,
-        cover_data: coverData
-      })
+      .upsert(
+        {
+          profile_id: profileId,
+          cover_data: coverData
+        },
+        {
+          onConflict: 'profile_id',
+          ignoreDuplicates: false
+        }
+      )
       .select()
       .single();
       
     if (error) {
+      console.error('Error in upsert operation:', error);
       return new Response(
         JSON.stringify({ error: error.message }),
         {
@@ -80,6 +87,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    console.error('Unexpected error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

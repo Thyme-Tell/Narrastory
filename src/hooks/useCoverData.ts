@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 import { Json } from "@/integrations/supabase/types";
-import Cookies from "js-cookie";
 
 // Get Supabase URL from the client configuration file
 const SUPABASE_URL = "https://pohnhzxqorelllbfnqyj.supabase.co";
@@ -45,37 +43,7 @@ export function useCoverData(profileId: string) {
         } else {
           // If no cover data exists yet, create a new record with default data
           console.log('Creating new cover data with defaults');
-          
-          try {
-            // Use Edge Function to create initial cover data
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/save-cover-data`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-              },
-              body: JSON.stringify({
-                profileId: profileId,
-                coverData: DEFAULT_COVER_DATA
-              })
-            });
-            
-            if (!response.ok) {
-              const errorData = await response.json();
-              console.error('Error response from edge function:', errorData);
-              throw new Error(errorData.error || 'Failed to create cover data');
-            }
-            
-            const newData = await response.json();
-            console.log('Created new cover data via edge function:', newData);
-            
-            if (newData.data) {
-              setCoverData(newData.data.cover_data as CoverData);
-            }
-          } catch (edgeFnError) {
-            console.error('Edge function error:', edgeFnError);
-            throw edgeFnError;
-          }
+          await saveCoverData(DEFAULT_COVER_DATA);
         }
       } catch (err) {
         console.error("Error in fetchCoverData:", err);
