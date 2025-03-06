@@ -75,6 +75,20 @@
   object-fit: contain;
 }
 
+/* Cover editor specific styles */
+.cover-editor-preview {
+  height: 60vh;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-editor-controls {
+  height: 40vh;
+  overflow-y: auto;
+}
+
 /* Mobile-specific styles */
 @media (max-width: 768px) {
   .book-preview-container {
@@ -106,6 +120,15 @@
     background-color: white;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     z-index: 50;
+  }
+  
+  /* Cover editor mobile adjustments */
+  .cover-editor-preview {
+    height: 50vh;
+  }
+  
+  .cover-editor-controls {
+    height: 50vh;
   }
 }
 

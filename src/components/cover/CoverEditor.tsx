@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,22 +167,28 @@ const CoverEditor = ({
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
           <DialogTitle className="sr-only">Edit Book Cover</DialogTitle>
-          <div className={`flex ${isMobile ? "flex-col h-screen bg-white" : "h-[80vh] bg-white"}`}>
-            <EditorControlPanel
-              coverData={coverData}
-              onSave={handleSave}
-              onCancel={onClose}
-              onBackgroundColorChange={handleBackgroundColorChange}
-              onFileUpload={handleFileUpload}
-              onRemoveImage={handleRemoveImage}
-              isUploading={isUploading}
-              onTextChange={handleTextChange}
-              onTextColorChange={handleTextColorChange}
-              onFontSizeChange={handleFontSizeChange}
-              onLayoutChange={handleLayoutChange}
-            />
+          <div className={`flex flex-col ${isMobile ? "h-[100vh]" : "h-[90vh]"} bg-white`}>
+            {/* Preview section - top 60% */}
+            <div className="w-full" style={{ height: "60%" }}>
+              <CoverPreview coverData={coverData} isLoading={isUploading} />
+            </div>
             
-            <CoverPreview coverData={coverData} isLoading={isUploading} />
+            {/* Controls section - bottom 40% */}
+            <div className="w-full" style={{ height: "40%" }}>
+              <EditorControlPanel
+                coverData={coverData}
+                onSave={handleSave}
+                onCancel={onClose}
+                onBackgroundColorChange={handleBackgroundColorChange}
+                onFileUpload={handleFileUpload}
+                onRemoveImage={handleRemoveImage}
+                isUploading={isUploading}
+                onTextChange={handleTextChange}
+                onTextColorChange={handleTextColorChange}
+                onFontSizeChange={handleFontSizeChange}
+                onLayoutChange={handleLayoutChange}
+              />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
