@@ -15,6 +15,7 @@ interface BookPreviewHeaderProps {
   onZoomOut: () => void;
   onToggleBookmark: () => void;
   onClose: () => void;
+  isMobile?: boolean;
 }
 
 const BookPreviewHeader = ({
@@ -28,6 +29,7 @@ const BookPreviewHeader = ({
   onZoomOut,
   onToggleBookmark,
   onClose,
+  isMobile = false,
 }: BookPreviewHeaderProps) => {
   return (
     <div className="w-full bg-white p-4 flex items-center justify-between">
