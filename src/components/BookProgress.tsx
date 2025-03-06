@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -61,7 +60,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     },
   });
   
-  // Ensure cover data is refreshed when component mounts and when profileId changes
   useEffect(() => {
     if (profileId) {
       console.log('BookProgress: Refreshing cover data for profile:', profileId);
@@ -137,7 +135,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
-          <div className="space-y-3">
+          <div className="flex flex-col space-y-3">
             <Button 
               variant="outline" 
               size="lg" 
