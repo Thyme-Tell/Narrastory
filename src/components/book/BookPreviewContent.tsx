@@ -39,16 +39,21 @@ const BookPreviewContent = ({
 
   // Handle page transition animation
   useEffect(() => {
-    if (prevPage !== currentPage && !isLoading) {
-      setPageTransitioning(true);
-      const timer = setTimeout(() => {
-        setPageTransitioning(false);
-      }, 400); // Slightly longer than animation duration
-      
-      setPrevPage(currentPage);
-      return () => clearTimeout(timer);
+    if (prevPage !== currentPage) {
+      // Only show transition if not the initial load
+      if (prevPage !== 0 || currentPage !== 0) {
+        setPageTransitioning(true);
+        
+        const timer = setTimeout(() => {
+          setPageTransitioning(false);
+        }, 400); // Slightly longer than animation duration
+        
+        return () => clearTimeout(timer);
+      }
     }
-  }, [currentPage, prevPage, isLoading]);
+    
+    setPrevPage(currentPage);
+  }, [currentPage, prevPage]);
 
   // Page dimensions for a 5x8 inch book (at 96 DPI)
   const PAGE_WIDTH = 480;  // 5 inches * 96dpi = 480px
@@ -70,11 +75,11 @@ const BookPreviewContent = ({
           overflow: 'hidden'
         }}
       >
-        {isLoading || pageTransitioning ? (
+        {(isLoading || pageTransitioning) && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 transition-opacity duration-300">
             <LoadingSpinner className="h-10 w-10 text-primary" />
           </div>
-        ) : null}
+        )}
         
         {isLoading ? (
           <Skeleton className="w-full h-full" />

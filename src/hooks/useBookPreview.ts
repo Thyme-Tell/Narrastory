@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,7 +56,6 @@ export function useBookPreview(profileId: string, open: boolean) {
     enabled: open,
   });
 
-  // Calculate total pages and starting page for each story
   useEffect(() => {
     if (!stories || stories.length === 0) {
       setStoryPages([]);
@@ -71,27 +69,19 @@ export function useBookPreview(profileId: string, open: boolean) {
     stories.forEach((story) => {
       pageStartIndices.push(pageCount);
       
-      // Improved page calculation logic
-      // Characters per page (considering 14pt font, 5x8 inch format)
       const CHARS_PER_PAGE = 1800;
       
-      // Calculate pages needed for this story
       const contentLength = story.content.length;
       
-      // First page has title and date, so less space for content
       const firstPageCapacity = CHARS_PER_PAGE - 150; // Reserve 150 chars for title/date
       
       let pagesNeeded = 1; // Start with one page
       let remainingContent = contentLength - firstPageCapacity;
       
       if (remainingContent > 0) {
-        // Add extra pages as needed
         pagesNeeded += Math.ceil(remainingContent / CHARS_PER_PAGE);
       }
       
-      // Add media consideration - if story has media, it may need an extra page
-      // This would require fetching media for each story, but for now we'll estimate
-      // For a basic approximation, we'll add 0.5 pages on average for media
       pagesNeeded = Math.max(1, Math.ceil(pagesNeeded + 0.5));
       
       pageCount += pagesNeeded;
