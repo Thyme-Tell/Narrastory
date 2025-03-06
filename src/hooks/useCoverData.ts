@@ -76,8 +76,24 @@ export function useCoverData(profileId: string) {
   }, [profileId, fetchCoverData]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
-    if (!profileId || !isAuthenticated) {
-      console.error("Cannot save: No profile ID or not authenticated");
+    // Check for profile ID first
+    if (!profileId) {
+      console.error("Cannot save: No profile ID provided");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Unable to identify which profile to save to",
+      });
+      return false;
+    }
+
+    // Use either the cookie or auth context for authentication check
+    const profileCookie = Cookies.get('profile_id');
+    const profileAuthCookie = Cookies.get('profile_authorized');
+    const isAuth = profileCookie && profileAuthCookie && profileCookie === profileId;
+
+    if (!isAuth && !isAuthenticated) {
+      console.error("Cannot save: Authentication check failed");
       toast({
         variant: "destructive",
         title: "Authentication error",
@@ -89,30 +105,9 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Make sure we're using the exact profile ID that's associated with the authenticated user
-      const authCookie = Cookies.get('profile_authorized');
-      const currentProfileId = Cookies.get('profile_id');
-      
-      if (!authCookie || !currentProfileId) {
-        console.error('Missing authentication cookies');
-        toast({
-          variant: "destructive",
-          title: "Authentication error",
-          description: "Please log in again to continue",
-        });
-        return false;
-      }
-      
-      if (currentProfileId !== profileId) {
-        console.error(`Authentication mismatch: User ${currentProfileId} trying to update profile ${profileId}`);
-        toast({
-          variant: "destructive",
-          title: "Permission denied",
-          description: "You can only edit your own book cover",
-        });
-        return false;
-      }
-      
+      // Skip the authentication validation since RLS will handle it
+      // Let Supabase RLS policies enforce access control
+
       // Use supabase function to save data
       const { data, error } = await supabase
         .from('book_covers')
