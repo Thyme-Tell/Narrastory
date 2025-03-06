@@ -62,7 +62,7 @@ const PageView = ({
                 />
               </div>
               {mediaItem.caption && (
-                <p className="text-sm text-center italic mt-4">{mediaItem.caption}</p>
+                <p className="text-sm text-center italic mt-4 text-gray-500 text-[12pt]">{mediaItem.caption}</p>
               )}
             </div>
           ) : mediaItem.content_type.startsWith("video/") ? (
@@ -75,7 +75,7 @@ const PageView = ({
                 Your browser does not support the video tag.
               </video>
               {mediaItem.caption && (
-                <p className="text-sm text-center italic mt-4">{mediaItem.caption}</p>
+                <p className="text-sm text-center italic mt-4 text-gray-500 text-[12pt]">{mediaItem.caption}</p>
               )}
             </div>
           ) : (
