@@ -86,7 +86,7 @@ export function useCoverData(profileId: string) {
     }
   }, [profileId, refreshCoverData]);
 
-  const saveCoverData = async (newCoverData: CoverData) => {
+  const saveCoverData = async (newCoverData: CoverData): Promise<boolean> => {
     // Check for profile ID first
     if (!profileId) {
       console.error("Cannot save: No profile ID provided");

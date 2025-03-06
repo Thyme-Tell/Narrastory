@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,12 +89,9 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     setIsPreviewOpen(false);
   };
 
-  const handleSaveCover = async (newCoverData: CoverData) => {
+  const handleSaveCover = async (newCoverData: CoverData): Promise<boolean> => {
     console.log("Saving new cover data:", newCoverData);
-    const success = await saveCoverData(newCoverData);
-    if (success) {
-      refreshCoverData();
-    }
+    return await saveCoverData(newCoverData);
   };
 
   if (isHidden) {

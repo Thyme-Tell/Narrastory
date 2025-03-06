@@ -25,8 +25,9 @@ export async function fetchCoverData(profileId: string) {
 
 /**
  * Saves cover data for a specific profile using Supabase Edge Function
+ * @returns Promise resolving to true if save was successful
  */
-export async function saveCoverData(profileId: string, coverData: CoverData) {
+export async function saveCoverData(profileId: string, coverData: CoverData): Promise<boolean> {
   console.log('API: Saving cover data:', coverData);
   
   const { data, error } = await supabase.functions.invoke('save-cover-data', {
@@ -43,5 +44,5 @@ export async function saveCoverData(profileId: string, coverData: CoverData) {
   }
   
   console.log('API: Response from save-cover-data function:', data);
-  return data;
+  return true;
 }
