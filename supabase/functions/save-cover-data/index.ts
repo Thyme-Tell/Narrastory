@@ -70,10 +70,27 @@ serve(async (req) => {
       throw error;
     }
     
-    console.log('Cover data saved successfully');
+    // After saving, retrieve the saved data to confirm it saved correctly
+    const { data: savedData, error: fetchError } = await supabase
+      .from('book_covers')
+      .select('cover_data, updated_at')
+      .eq('profile_id', profileId)
+      .maybeSingle();
+      
+    if (fetchError) {
+      console.error('Error verifying saved data:', fetchError);
+      // Continue anyway since we did save successfully
+    } else {
+      console.log('Cover data saved and verified:', !!savedData);
+    }
     
     return new Response(
-      JSON.stringify({ success: true, message: 'Cover data saved successfully' }),
+      JSON.stringify({ 
+        success: true, 
+        message: 'Cover data saved successfully',
+        timestamp: new Date().toISOString(),
+        data: savedData
+      }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
