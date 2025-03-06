@@ -25,8 +25,8 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   const [contentOverflows, setContentOverflows] = useState(false);
   const [lineHeight, setLineHeight] = useState(30); // Estimated line height in pixels
 
-  const { mediaItems, isMediaLoading } = useStoryPageMedia(story.id);
-  const hasImages = !isMediaLoading && mediaItems && mediaItems.length > 0;
+  const { mediaItems, isLoading } = useStoryPageMedia(story.id);
+  const hasImages = !isLoading && mediaItems && mediaItems.length > 0;
 
   // Parse story content into paragraphs
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
@@ -110,7 +110,7 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
         {showMedia && (
           <PageMedia 
             mediaItems={mediaItems}
-            isMediaLoading={isMediaLoading}
+            isMediaLoading={isLoading}
             handleImageClick={handleImageClick}
             handleCaptionUpdate={handleCaptionUpdate}
             handleStartCrop={handleStartCrop}
