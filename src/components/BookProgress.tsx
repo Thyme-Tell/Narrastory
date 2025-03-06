@@ -1,7 +1,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Progress } from "@/components/ui/progress";
+import { Book, Eye, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { X } from "lucide-react";
 
@@ -12,6 +13,24 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   
+  const { data: profile } = useQuery({
+    queryKey: ["profile", profileId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", profileId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+  });
+
   const { data: stories } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
@@ -28,23 +47,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       return storiesData;
     },
   });
-
-  const calculatePages = (stories: { content: string }[] | undefined) => {
-    if (!stories) return 0;
-    
-    const totalCharacters = stories.reduce((acc, story) => {
-      return acc + (story.content?.length || 0);
-    }, 0);
-
-    // Using 1500 characters per page as a conservative estimate
-    return Math.ceil(totalCharacters / 1500);
-  };
-
-  const currentPages = calculatePages(stories);
-  const requiredPages = 64;
-  const remainingPages = Math.max(0, requiredPages - currentPages);
-
-  const progressPercentage = Math.min((currentPages / requiredPages) * 100, 100);
 
   if (isHidden) {
     return null;
@@ -79,26 +81,38 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   }
 
   return (
-    <div className="mb-6 rounded-lg bg-white/50 shadow-sm relative overflow-hidden">
-      <button 
-        onClick={() => setIsHidden(true)}
-        className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full bg-white/50 text-atlantic/70 hover:text-atlantic z-10"
-      >
-        <X className="h-5 w-5" />
-        <span className="sr-only">Close</span>
-      </button>
-      <div className="flex flex-col">
-        <img
-          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
-          alt="Book illustration"
-          className="w-full h-32 object-cover"
-        />
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-atlantic mb-2 text-left">Great progress!</h2>
-          <p className="text-atlantic mb-4 text-left">
-            You've completed {currentPages} {currentPages === 1 ? 'page' : 'pages'} of your story.
-          </p>
-          <Progress value={progressPercentage} className="h-2" />
+    <div className="mb-8">
+      <nav className="flex text-sm text-atlantic/60 mb-4">
+        <a href="/" className="hover:text-atlantic">HOME</a>
+        <span className="mx-2">›</span>
+        <span className="font-medium text-atlantic">{profile?.first_name?.toUpperCase()} {profile?.last_name?.toUpperCase()}</span>
+      </nav>
+      
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
+          <div className="space-y-3">
+            <Button variant="outline" size="lg" className="w-[200px] justify-start">
+              <Book className="mr-2" />
+              Edit Cover
+            </Button>
+            <Button variant="outline" size="lg" className="w-[200px] justify-start">
+              <Eye className="mr-2" />
+              Preview Book
+            </Button>
+            <Button variant="outline" size="lg" className="w-[200px] justify-start">
+              <ShoppingCart className="mr-2" />
+              Order Book
+            </Button>
+          </div>
+        </div>
+        
+        <div className="w-[300px]">
+          <img
+            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
+            alt="Book cover preview"
+            className="w-full rounded-lg shadow-lg"
+          />
         </div>
       </div>
     </div>
