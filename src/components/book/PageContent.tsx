@@ -1,5 +1,6 @@
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PageContentProps {
   pageContent: string[];
@@ -9,11 +10,13 @@ interface PageContentProps {
 
 const PageContent = ({ pageContent, contentOverflows, isLastPage }: PageContentProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   return (
     <div 
       ref={contentRef}
       className="prose max-w-none book-text"
+      style={{ fontSize: isMobile ? '16px' : '18.5px' }}
     >
       {pageContent.map((paragraph, index) => (
         <p key={index} className="mb-4">

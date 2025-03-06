@@ -75,6 +75,18 @@
   max-height: 100%;
 }
 
+/* Mobile-friendly adjustments */
+@media (max-width: 768px) {
+  .book-text {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  
+  .book-content {
+    max-width: 95%;
+  }
+}
+
 /* Ensure media content stays within page bounds */
 .book-page img, .book-page video {
   max-width: 100%;
@@ -103,4 +115,36 @@
 .book-dimensions {
   width: 480px; /* 5 inches at 96dpi */
   height: 768px; /* 8 inches at 96dpi */
+}
+
+/* Mobile-friendly book dimensions */
+@media (max-width: 768px) {
+  .book-dimensions {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+  }
+}
+
+/* Responsive padding and spacing */
+.responsive-container {
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .responsive-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .responsive-container {
+    padding: 2rem;
+  }
+}
+
+/* Improve touch targets for mobile */
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
 }

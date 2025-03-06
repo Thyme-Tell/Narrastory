@@ -6,6 +6,7 @@ import PageView from "./PageView";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BookPreviewContentProps {
   currentPage: number;
@@ -33,6 +34,7 @@ const BookPreviewContent = ({
   const bookContainerRef = useRef<HTMLDivElement>(null);
   const [pageTransitioning, setPageTransitioning] = useState(false);
   const [prevPage, setPrevPage] = useState(currentPage);
+  const isMobile = useIsMobile();
   
   const currentStoryIndex = getCurrentStoryIndex();
   const currentStory = currentStoryIndex !== -1 ? stories?.[currentStoryIndex] : null;
@@ -59,9 +61,31 @@ const BookPreviewContent = ({
   const PAGE_WIDTH = 480;  // 5 inches * 96dpi = 480px
   const PAGE_HEIGHT = 768; // 8 inches * 96dpi = 768px
 
+  // For mobile, we'll use responsive dimensions
+  const getPageDimensions = () => {
+    if (isMobile) {
+      // On mobile, use a responsive approach
+      return {
+        width: '100%',
+        height: 'auto',
+        maxHeight: '80vh',
+        aspectRatio: '5/8'
+      };
+    }
+    
+    // On desktop, use fixed dimensions
+    return {
+      width: `${PAGE_WIDTH}px`,
+      height: `${PAGE_HEIGHT}px`,
+      maxHeight: '90vh'
+    };
+  };
+
+  const pageDimensions = getPageDimensions();
+
   return (
     <div 
-      className="flex-1 h-full flex flex-col items-center justify-center p-4 overflow-hidden"
+      className="flex-1 h-full flex flex-col items-center justify-center p-2 md:p-4 overflow-hidden"
       ref={bookContainerRef}
     >
       <div 
@@ -69,15 +93,13 @@ const BookPreviewContent = ({
         style={{ 
           transform: `scale(${zoomLevel})`,
           transformOrigin: 'center',
-          width: `${PAGE_WIDTH}px`,
-          height: `${PAGE_HEIGHT}px`,
-          maxHeight: '90vh',
+          ...pageDimensions,
           overflow: 'hidden'
         }}
       >
         {(isLoading || pageTransitioning) && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 transition-opacity duration-300">
-            <LoadingSpinner className="h-10 w-10 text-primary" />
+            <LoadingSpinner className="h-8 w-8 md:h-10 md:w-10 text-primary" />
           </div>
         )}
         
