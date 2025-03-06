@@ -98,25 +98,31 @@ const TableOfContents = ({
           <div className="space-y-2">
             {bookmarks.map((pageIndex) => {
               // Find which story this bookmark belongs to
-              const storyInfo = pageIndex === 0 
-                ? { title: "Cover", index: -1 } 
-                : stories.length && storyPages.length
-                  ? stories.findIndex((_, idx) => {
-                      const nextIdx = idx + 1;
-                      const nextPage = nextIdx < storyPages.length ? storyPages[nextIdx] : Number.MAX_SAFE_INTEGER;
-                      return pageIndex >= storyPages[idx] && pageIndex < nextPage;
-                    })
-                  : -1;
+              let storyInfo = -1;
               
-              const storyTitle = storyInfo === -1 
-                ? "Unknown" 
-                : pageIndex === 0 
-                ? "Cover" 
-                : stories[storyInfo]?.title || "Untitled Story";
+              if (pageIndex === 0) {
+                // Cover page
+                storyInfo = -1;
+              } else if (stories.length && storyPages.length) {
+                // Find which story this page belongs to
+                storyInfo = stories.findIndex((_, idx) => {
+                  const nextIdx = idx + 1;
+                  const nextPage = nextIdx < storyPages.length ? storyPages[nextIdx] : Number.MAX_SAFE_INTEGER;
+                  return pageIndex >= storyPages[idx] && pageIndex < nextPage;
+                });
+              }
+              
+              // Determine the title based on storyInfo
+              let storyTitle = "Unknown";
+              if (pageIndex === 0) {
+                storyTitle = "Cover";
+              } else if (storyInfo !== -1 && storyInfo >= 0 && storyInfo < stories.length) {
+                storyTitle = stories[storyInfo]?.title || "Untitled Story";
+              }
               
               // If it's a story page, calculate which page within the story
               let pageText = "";
-              if (pageIndex > 0 && storyInfo !== -1) {
+              if (pageIndex > 0 && storyInfo !== -1 && storyInfo >= 0) {
                 const pageWithinStory = pageIndex - storyPages[storyInfo] + 1;
                 pageText = ` (Page ${pageWithinStory})`;
               }
