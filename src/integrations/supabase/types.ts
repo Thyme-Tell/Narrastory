@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      book_covers: {
+        Row: {
+          cover_data: Json
+          created_at: string
+          id: string
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          cover_data?: Json
+          created_at?: string
+          id?: string
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          cover_data?: Json
+          created_at?: string
+          id?: string
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_covers_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deleted_stories: {
         Row: {
           content: string
@@ -414,7 +446,88 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_storybook_member: {
+        Args: {
+          _storybook_id: string
+          _email: string
+          _role: string
+        }
+        Returns: boolean
+      }
+      can_add_storybook_member: {
+        Args: {
+          _storybook_id: string
+          _profile_id: string
+          _added_by: string
+        }
+        Returns: boolean
+      }
+      can_modify_storybook_members: {
+        Args: {
+          _storybook_id: string
+        }
+        Returns: boolean
+      }
+      can_view_storybook_members: {
+        Args: {
+          _storybook_id: string
+        }
+        Returns: boolean
+      }
+      create_storybook_with_owner: {
+        Args: {
+          _title: string
+          _description: string
+          _profile_id: string
+        }
+        Returns: Json
+      }
+      get_storybook_member_role: {
+        Args: {
+          _storybook_id: string
+          _profile_id: string
+        }
+        Returns: string
+      }
+      get_storybook_members: {
+        Args: {
+          _storybook_id: string
+        }
+        Returns: {
+          profile_id: string
+          role: string
+          first_name: string
+          last_name: string
+          email: string
+        }[]
+      }
+      get_user_storybooks: {
+        Args: {
+          _profile_id: string
+        }
+        Returns: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      remove_storybook_member: {
+        Args: {
+          _storybook_id: string
+          _profile_id: string
+        }
+        Returns: boolean
+      }
+      update_storybook_member_role: {
+        Args: {
+          _storybook_id: string
+          _profile_id: string
+          _new_role: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       storybook_role: "owner" | "contributor" | "viewer"

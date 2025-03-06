@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,7 +61,7 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold font-sans text-left">
-        {firstName} {lastName}'s Stories
+        Your Stories
       </h1>
       <Button 
         className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"

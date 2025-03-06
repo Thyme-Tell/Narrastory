@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 
@@ -16,7 +17,7 @@ export function StoryBookCard({ storybook }: StoryBookCardProps) {
   return (
     <Link
       to={`/storybooks/${storybook.id}`}
-      className="block border rounded-lg p-6 hover:shadow-lg transition-shadow"
+      className="block border rounded-lg p-6 hover:shadow-lg transition-shadow bg-white"
     >
       <h2 className="text-xl font-semibold mb-2">{storybook.title}</h2>
       {storybook.description && (
