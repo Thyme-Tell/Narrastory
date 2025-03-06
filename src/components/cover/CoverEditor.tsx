@@ -7,7 +7,7 @@ import { CoverData, CoverEditorProps, DEFAULT_COVER_DATA } from "./CoverTypes";
 import EditorControlPanel from "./editor/EditorControlPanel";
 import CoverPreview from "./editor/CoverPreview";
 import ImageCropperDialog from "./editor/ImageCropperDialog";
-import Cookies from 'js-cookie';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const CoverEditor = ({ 
   profileId, 
@@ -23,6 +23,7 @@ const CoverEditor = ({
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Update local state when props change
   useEffect(() => {
@@ -167,7 +168,7 @@ const CoverEditor = ({
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
           <DialogTitle className="sr-only">Edit Book Cover</DialogTitle>
-          <div className="flex h-[80vh]">
+          <div className={`flex ${isMobile ? "flex-col h-screen" : "h-[80vh]"}`}>
             <EditorControlPanel
               coverData={coverData}
               onSave={handleSave}
@@ -182,7 +183,7 @@ const CoverEditor = ({
               onLayoutChange={handleLayoutChange}
             />
             
-            <CoverPreview coverData={coverData} />
+            <CoverPreview coverData={coverData} isLoading={isUploading} />
           </div>
         </DialogContent>
       </Dialog>

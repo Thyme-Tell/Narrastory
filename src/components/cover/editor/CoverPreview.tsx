@@ -14,19 +14,19 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
 
   if (isLoading) {
     return (
-      <div className={`${isMobile ? "w-full" : "w-2/3"} bg-gray-100 flex items-center justify-center p-6`}>
-        <Skeleton className="w-full aspect-[5/8]" />
+      <div className={`${isMobile ? "w-full flex-grow" : "w-2/3"} bg-gray-100 flex items-center justify-center p-6`}>
+        <Skeleton className="w-full aspect-[5/8] max-w-xs mx-auto" />
       </div>
     );
   }
 
   return (
-    <div className={`${isMobile ? "w-full" : "w-2/3"} bg-gray-100 flex items-center justify-center p-6`}>
-      <div className={`book-preview-container ${isMobile ? "w-2/3" : "w-full"}`}>
+    <div className={`${isMobile ? "w-full flex-grow" : "w-2/3"} bg-gray-100 flex items-center justify-center p-6`}>
+      <div className={`book-preview-container ${isMobile ? "max-w-[240px]" : "w-full"} mx-auto`}>
         <CoverCanvas 
           coverData={coverData} 
-          width={isMobile ? 300 : 400}
-          height={isMobile ? 480 : 640}
+          width={isMobile ? 240 : 400}
+          height={isMobile ? 384 : 640}
         />
       </div>
     </div>
