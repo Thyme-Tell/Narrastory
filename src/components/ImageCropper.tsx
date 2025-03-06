@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -38,7 +37,6 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
-      // Draw image to canvas with the cropping applied
       ctx.drawImage(
         image,
         crop.x * scaleX,
@@ -51,7 +49,6 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
         crop.height * scaleY
       );
 
-      // Convert canvas to blob
       return new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
           (blob) => {
@@ -86,15 +83,9 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
     <Dialog open={open} onOpenChange={() => onCancel()}>
       <DialogContent className="max-w-[90vw] w-fit p-6 [&>button]:hidden">
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Crop Image</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Drag to adjust the crop area, then click "Apply Crop" when you're done.
-          </p>
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
-            keepSelection
-            aspect={5/8} // Maintain a 5:8 aspect ratio for book cover
           >
             <img
               ref={imageRef}
