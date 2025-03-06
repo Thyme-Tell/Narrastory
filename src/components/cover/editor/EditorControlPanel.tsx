@@ -54,39 +54,39 @@ const EditorControlPanel = ({
             <TabsTrigger value="text">Text</TabsTrigger>
             <TabsTrigger value="layout">Layout</TabsTrigger>
           </TabsList>
-        
-          {/* Content area - scrollable, adjusted for more space */}
-          <div className={`overflow-y-auto px-4 py-4 ${isMobile ? 'max-h-[calc(60vh-120px)]' : 'h-[calc(90vh-180px)]'}`}>
-            <TabsContent value="background" className="m-0 h-auto">
-              <BackgroundTab
-                coverData={coverData}
-                onBackgroundColorChange={onBackgroundColorChange}
-                onFileUpload={onFileUpload}
-                onRemoveImage={onRemoveImage}
-                isUploading={isUploading}
-              />
-            </TabsContent>
-            
-            <TabsContent value="text" className="m-0 h-auto">
-              <TextTab
-                coverData={coverData}
-                onTextChange={onTextChange}
-                onTextColorChange={onTextColorChange}
-                onFontSizeChange={onFontSizeChange}
-              />
-            </TabsContent>
-            
-            <TabsContent value="layout" className="m-0 h-auto">
-              <LayoutTab
-                coverData={coverData}
-                onLayoutChange={onLayoutChange}
-              />
-            </TabsContent>
-          </div>
         </Tabs>
       </div>
       
-      {/* Fixed footer with actions */}
+      {/* Content area - scrollable */}
+      <div className={`flex-1 overflow-y-auto px-4 py-4 ${isMobile ? 'max-h-[calc(60vh-180px)]' : 'h-[calc(90vh-240px)]'}`}>
+        {activeTab === "background" && (
+          <BackgroundTab
+            coverData={coverData}
+            onBackgroundColorChange={onBackgroundColorChange}
+            onFileUpload={onFileUpload}
+            onRemoveImage={onRemoveImage}
+            isUploading={isUploading}
+          />
+        )}
+        
+        {activeTab === "text" && (
+          <TextTab
+            coverData={coverData}
+            onTextChange={onTextChange}
+            onTextColorChange={onTextColorChange}
+            onFontSizeChange={onFontSizeChange}
+          />
+        )}
+        
+        {activeTab === "layout" && (
+          <LayoutTab
+            coverData={coverData}
+            onLayoutChange={onLayoutChange}
+          />
+        )}
+      </div>
+      
+      {/* Fixed footer with actions - always visible */}
       <div className="px-4 py-3 flex justify-end gap-2 border-t mt-auto">
         <Button variant="outline" onClick={onCancel}>
           Cancel
