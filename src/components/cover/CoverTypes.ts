@@ -47,7 +47,7 @@ export const DEFAULT_COVER_DATA: CoverData = {
   authorText: "",
   titleColor: "#333333",
   authorColor: "#666666",
-  titleSize: 36,
-  authorSize: 24,
+  titleSize: 21, // Updated to be in the middle of the new range (18-24)
+  authorSize: 14, // Updated to be in the middle of the new range (12-16)
   layout: 'centered',
 };

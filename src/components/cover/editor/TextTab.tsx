@@ -49,11 +49,11 @@ const TextTab = ({
         </div>
         
         <div>
-          <Label className="block mb-2">Title Size: {coverData.titleSize}px</Label>
+          <Label className="block mb-2">Title Size: {coverData.titleSize}pt</Label>
           <Slider
-            value={[coverData.titleSize || 36]}
-            min={20}
-            max={60}
+            value={[coverData.titleSize || 20]}
+            min={18}
+            max={24}
             step={1}
             onValueChange={(value) => onFontSizeChange(value, 'title')}
           />
@@ -92,11 +92,11 @@ const TextTab = ({
         </div>
         
         <div>
-          <Label className="block mb-2">Author Size: {coverData.authorSize}px</Label>
+          <Label className="block mb-2">Author Size: {coverData.authorSize}pt</Label>
           <Slider
-            value={[coverData.authorSize || 24]}
+            value={[coverData.authorSize || 14]}
             min={12}
-            max={40}
+            max={16}
             step={1}
             onValueChange={(value) => onFontSizeChange(value, 'author')}
           />
