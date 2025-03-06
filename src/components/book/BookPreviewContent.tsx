@@ -1,10 +1,11 @@
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface BookPreviewContentProps {
   currentPage: number;
@@ -30,9 +31,24 @@ const BookPreviewContent = ({
   getPageWithinStory,
 }: BookPreviewContentProps) => {
   const bookContainerRef = useRef<HTMLDivElement>(null);
+  const [pageTransitioning, setPageTransitioning] = useState(false);
+  const [prevPage, setPrevPage] = useState(currentPage);
   
   const currentStoryIndex = getCurrentStoryIndex();
   const currentStory = currentStoryIndex !== -1 ? stories?.[currentStoryIndex] : null;
+
+  // Handle page transition animation
+  useEffect(() => {
+    if (prevPage !== currentPage && !isLoading) {
+      setPageTransitioning(true);
+      const timer = setTimeout(() => {
+        setPageTransitioning(false);
+      }, 400); // Slightly longer than animation duration
+      
+      setPrevPage(currentPage);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, prevPage, isLoading]);
 
   return (
     <div 
@@ -50,6 +66,12 @@ const BookPreviewContent = ({
           overflow: 'hidden'
         }}
       >
+        {isLoading || pageTransitioning ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 transition-opacity duration-300">
+            <LoadingSpinner className="h-10 w-10 text-primary" />
+          </div>
+        ) : null}
+        
         {isLoading ? (
           <Skeleton className="w-full h-full" />
         ) : (
