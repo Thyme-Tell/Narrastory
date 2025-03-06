@@ -14,9 +14,17 @@ interface PageViewProps {
   story: Story;
   pageNumber: number; // 1-based page number within the story
   totalPagesInStory?: number;
+  isMediaPage?: boolean;
+  mediaItem?: StoryMediaItem;
 }
 
-const PageView = ({ story, pageNumber, totalPagesInStory = 1 }: PageViewProps) => {
+const PageView = ({ 
+  story, 
+  pageNumber, 
+  totalPagesInStory = 1,
+  isMediaPage = false,
+  mediaItem
+}: PageViewProps) => {
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
     queryFn: async () => {
@@ -37,9 +45,6 @@ const PageView = ({ story, pageNumber, totalPagesInStory = 1 }: PageViewProps) =
 
   // Get content for this page using our pagination utility
   const pageContent = getPageContent(story, pageNumber);
-  
-  // Show media only on the first page of a story
-  const showMedia = pageNumber === 1;
 
   // Function to handle media item click
   const handleImageClick = (url: string) => {
@@ -55,6 +60,48 @@ const PageView = ({ story, pageNumber, totalPagesInStory = 1 }: PageViewProps) =
   const handleStartCrop = (url: string, mediaId: string) => {
     console.log("Start crop:", url, mediaId);
   };
+
+  // If this is a media page, only show the media item
+  if (isMediaPage && mediaItem) {
+    return (
+      <div className="w-full h-full overflow-auto p-8 bg-white book-page flex flex-col items-center justify-center">
+        <div className="max-w-full max-h-[80%] flex justify-center items-center">
+          {mediaItem.content_type.startsWith("image/") ? (
+            <div className="max-h-full">
+              <ImageMedia
+                media={{
+                  id: mediaItem.id,
+                  file_path: mediaItem.file_path,
+                  file_name: mediaItem.file_name || "image",
+                  caption: mediaItem.caption
+                }}
+                onImageClick={handleImageClick}
+                onStartCrop={handleStartCrop}
+                onCaptionUpdate={handleCaptionUpdate}
+              />
+              {mediaItem.caption && (
+                <p className="text-sm text-center italic mt-4">{mediaItem.caption}</p>
+              )}
+            </div>
+          ) : mediaItem.content_type.startsWith("video/") ? (
+            <VideoMedia
+              media={{
+                id: mediaItem.id,
+                file_path: mediaItem.file_path,
+                content_type: mediaItem.content_type,
+                caption: mediaItem.caption
+              }}
+              onCaptionUpdate={handleCaptionUpdate}
+            />
+          ) : (
+            <div className="text-center p-4 bg-gray-100 rounded">
+              Unsupported media type: {mediaItem.content_type}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full overflow-auto p-8 bg-white book-page">
@@ -86,54 +133,6 @@ const PageView = ({ story, pageNumber, totalPagesInStory = 1 }: PageViewProps) =
             <p className="text-gray-400 italic">No content on this page</p>
           )}
         </div>
-
-        {/* Media Items - only on the first page */}
-        {showMedia && (
-          isMediaLoading ? (
-            <Skeleton className="w-full h-40 mt-6" />
-          ) : (
-            mediaItems.length > 0 && (
-              <div className="mt-8 space-y-4">
-                {mediaItems.map((media) => (
-                  <div key={media.id} className="border rounded-md p-2">
-                    {media.content_type.startsWith("image/") ? (
-                      <div className="flex justify-center">
-                        <ImageMedia
-                          media={{
-                            id: media.id,
-                            file_path: media.file_path,
-                            file_name: media.file_name || "image",
-                            caption: media.caption
-                          }}
-                          onImageClick={handleImageClick}
-                          onStartCrop={handleStartCrop}
-                          onCaptionUpdate={handleCaptionUpdate}
-                        />
-                      </div>
-                    ) : media.content_type.startsWith("video/") ? (
-                      <VideoMedia
-                        media={{
-                          id: media.id,
-                          file_path: media.file_path,
-                          content_type: media.content_type,
-                          caption: media.caption
-                        }}
-                        onCaptionUpdate={handleCaptionUpdate}
-                      />
-                    ) : (
-                      <div className="text-center p-4 bg-gray-100 rounded">
-                        Unsupported media type: {media.content_type}
-                      </div>
-                    )}
-                    {media.caption && (
-                      <p className="text-sm text-center italic mt-2">{media.caption}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )
-          )
-        )}
       </div>
     </div>
   );

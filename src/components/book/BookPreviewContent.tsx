@@ -6,7 +6,7 @@ import PageView from "./PageView";
 import BookPreviewControls from "./BookPreviewControls";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
-import { calculateStoryPages } from "@/utils/bookPagination";
+import { StoryMediaItem } from "@/types/media";
 
 interface BookPreviewContentProps {
   currentPage: number;
@@ -23,6 +23,8 @@ interface BookPreviewContentProps {
     story: Story;
     pageWithinStory: number;
     totalPagesInStory: number;
+    isMediaPage?: boolean;
+    mediaItem?: StoryMediaItem;
   } | null;
 }
 
@@ -68,6 +70,8 @@ const BookPreviewContent = ({
                 story={currentStoryInfo.story} 
                 pageNumber={currentStoryInfo.pageWithinStory}
                 totalPagesInStory={currentStoryInfo.totalPagesInStory}
+                isMediaPage={currentStoryInfo.isMediaPage}
+                mediaItem={currentStoryInfo.mediaItem}
               />
             )
           )}
