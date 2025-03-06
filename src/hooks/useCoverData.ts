@@ -86,17 +86,15 @@ export function useCoverData(profileId: string) {
         console.log('Warning: Current profile ID does not match target profile ID');
       }
       
-      // Use Supabase directly for the upsert operation
-      // Fix: Explicitly define the correct type structure for the upsert
+      // Fix: Update the upsert call to match the Supabase JS client API
       const { data, error } = await supabase
         .from('book_covers')
         .upsert({
           profile_id: profileId,
-          cover_data: newCoverData as any, // Use type assertion to avoid TypeScript error
+          cover_data: newCoverData as any, // Use type assertion for the JSON data
           updated_at: new Date().toISOString()
         }, { 
-          onConflict: 'profile_id',
-          returning: 'representation'
+          onConflict: 'profile_id'
         });
 
       if (error) {
