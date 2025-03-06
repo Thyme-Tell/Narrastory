@@ -34,7 +34,7 @@ export function useCoverData(profileId: string) {
             .from('book_covers')
             .insert({ 
               profile_id: profileId,
-              cover_data: DEFAULT_COVER_DATA 
+              cover_data: DEFAULT_COVER_DATA as unknown as Json
             })
             .select('cover_data')
             .single();
@@ -67,7 +67,7 @@ export function useCoverData(profileId: string) {
         .from('book_covers')
         .upsert({ 
           profile_id: profileId,
-          cover_data: newCoverData 
+          cover_data: newCoverData as unknown as Json
         });
 
       if (error) throw error;
