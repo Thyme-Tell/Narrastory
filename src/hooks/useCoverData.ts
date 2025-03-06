@@ -6,6 +6,10 @@ import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 import { Json } from "@/integrations/supabase/types";
 import Cookies from "js-cookie";
 
+// Get Supabase URL from the client configuration file
+const SUPABASE_URL = "https://pohnhzxqorelllbfnqyj.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvaG5oenhxb3JlbGxsYmZucXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc1Njk1MzAsImV4cCI6MjA1MzE0NTUzMH0.nG7V_e8Izqi-pXHw1HoaYAC4hediI0D9l_Qf9De93C0";
+
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,11 +48,11 @@ export function useCoverData(profileId: string) {
           
           try {
             // Use Edge Function to create initial cover data
-            const response = await fetch(`${supabase.supabaseUrl}/functions/v1/save-cover-data`, {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/save-cover-data`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabase.supabaseKey}`
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
               },
               body: JSON.stringify({
                 profileId: profileId,
@@ -96,11 +100,11 @@ export function useCoverData(profileId: string) {
       console.log('Saving cover data:', newCoverData);
       
       // Use Edge Function to save cover data (bypasses RLS)
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/save-cover-data`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/save-cover-data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           profileId: profileId,
