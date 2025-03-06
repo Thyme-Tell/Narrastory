@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -86,7 +87,8 @@ export function useCoverData(profileId: string) {
         throw new Error(errorData.error || 'Failed to save cover data');
       }
       
-      console.log('Cover data saved successfully');
+      const result = await response.json();
+      console.log('Cover data saved successfully:', result);
       setCoverData(newCoverData);
       return true;
     } catch (err) {

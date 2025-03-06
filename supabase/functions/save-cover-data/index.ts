@@ -52,6 +52,8 @@ serve(async (req) => {
       );
     }
     
+    console.log('About to upsert cover data for profile:', profileId);
+    
     // Use upsert operation to either insert or update cover data
     const { data, error } = await supabase
       .from('book_covers')
@@ -78,6 +80,8 @@ serve(async (req) => {
         }
       );
     }
+    
+    console.log('Cover data saved successfully:', data);
     
     return new Response(
       JSON.stringify({ data }),
