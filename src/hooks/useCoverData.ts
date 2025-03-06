@@ -90,24 +90,21 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Try to use the Edge Function instead of direct Supabase call
-      // This bypasses RLS issues since the function runs with service role
-      const response = await fetch('/api/save-cover-data', {
+      // Direct call to the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('save-cover-data', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        body: {
           profileId: profileId,
           coverData: newCoverData
-        }),
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error from save-cover-data API:', errorData);
-        throw new Error(errorData.error || 'Failed to save cover data');
+      if (error) {
+        console.error('Error from save-cover-data function:', error);
+        throw new Error(error.message || 'Failed to save cover data');
       }
+      
+      console.log('Response from save-cover-data function:', data);
       
       // Update local state right away
       setCoverData(newCoverData);
