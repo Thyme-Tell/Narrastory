@@ -17,7 +17,8 @@ const BookCover = ({ coverData, authorName }: BookCoverProps) => {
 
   return (
     <div className="w-full h-full relative flex items-center justify-center">
-      <div className="absolute top-0 left-0 w-10 h-full bg-gradient-to-r from-black/40 to-transparent z-10"></div>
+      {/* Left side subtle shadow */}
+      <div className="absolute top-0 left-0 w-6 h-full bg-gradient-to-r from-black/25 to-transparent z-10"></div>
       <CoverCanvas 
         coverData={coverWithAuthor} 
         width={600}

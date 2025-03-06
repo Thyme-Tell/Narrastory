@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { CoverData } from "./CoverTypes";
 
@@ -33,11 +32,9 @@ const CoverCanvas = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw background color
-    if (coverData.backgroundColor) {
-      ctx.fillStyle = coverData.backgroundColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+    // Draw background color - use a lighter default if none provided
+    ctx.fillStyle = coverData.backgroundColor || '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Draw background image if available
     if (coverData.backgroundImage) {
@@ -184,7 +181,9 @@ const CoverCanvas = ({
             maxWidth: '100%',
             maxHeight: '100%',
             objectFit: 'contain',
-            aspectRatio: '5/8'
+            aspectRatio: '5/8',
+            backgroundColor: 'white',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
           }}
         />
         <div className="book-spine"></div>
