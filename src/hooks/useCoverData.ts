@@ -44,12 +44,14 @@ export const useCoverData = (profileId: string) => {
         }
 
         // If that fails (e.g., due to RLS), use the edge function
-        const { session } = await supabase.auth.getSession();
-        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/cover-operations`, {
+        const sessionResponse = await supabase.auth.getSession();
+        const accessToken = sessionResponse.data?.session?.access_token || '';
+        
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://pohnhzxqorelllbfnqyj.supabase.co'}/functions/v1/cover-operations`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token || ''}`
+            'Authorization': `Bearer ${accessToken}`
           },
           body: JSON.stringify({
             operation: 'get',
@@ -96,12 +98,14 @@ export const useCoverData = (profileId: string) => {
         }
 
         // If direct update fails, use the edge function
-        const { session } = await supabase.auth.getSession();
-        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/cover-operations`, {
+        const sessionResponse = await supabase.auth.getSession();
+        const accessToken = sessionResponse.data?.session?.access_token || '';
+        
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://pohnhzxqorelllbfnqyj.supabase.co'}/functions/v1/cover-operations`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token || ''}`
+            'Authorization': `Bearer ${accessToken}`
           },
           body: JSON.stringify({
             operation: 'update',
@@ -141,7 +145,7 @@ export const useCoverData = (profileId: string) => {
     setIsLoading(true);
     try {
       // Create the storage bucket if it doesn't exist
-      await fetch(`${supabase.supabaseUrl}/functions/v1/create-storage-bucket`, {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://pohnhzxqorelllbfnqyj.supabase.co'}/functions/v1/create-storage-bucket`, {
         method: 'POST'
       });
       
