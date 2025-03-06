@@ -26,6 +26,7 @@ export const useStoryPageMedia = (storyId: string) => {
           .getPublicUrl(item.file_path).data.publicUrl
       }));
     },
+    enabled: !!storyId,
   });
 
   return { mediaItems, isMediaLoading };

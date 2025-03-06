@@ -9,7 +9,7 @@ interface PageContentProps {
 
 const PageContent = ({ pageContent, contentOverflows, isLastPage }: PageContentProps) => {
   if (!pageContent || pageContent.length === 0) {
-    return <div className="text-gray-500">No content available for this page.</div>;
+    return <div className="text-gray-500 italic">No content available for this page.</div>;
   }
   
   return (

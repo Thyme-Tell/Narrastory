@@ -5,7 +5,11 @@ import PageHeader from "./PageHeader";
 import PageContent from "./PageContent";
 import PageMedia from "./PageMedia";
 import { useStoryPageMedia } from "@/hooks/useStoryPageMedia";
-import { calculatePageContent, checkContentOverflow } from "@/utils/bookPagination";
+import { 
+  calculatePageContent, 
+  checkContentOverflow, 
+  isLastPageOfStory 
+} from "@/utils/bookPagination";
 
 interface PageViewProps {
   story: Story;
@@ -32,6 +36,9 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
   
   // Calculate content for this specific page
   const pageContent = calculatePageContent(paragraphs, pageNumber, PAGINATION_CONFIG);
+  
+  // Check if this is the last page of this story
+  const isStoryLastPage = isLastPageOfStory(paragraphs, pageNumber, PAGINATION_CONFIG);
 
   // Show media only on first page
   const showMedia = pageNumber === 1;
@@ -79,10 +86,10 @@ const PageView = ({ story, pageNumber, isLastPage = false }: PageViewProps) => {
         <PageContent 
           pageContent={pageContent}
           contentOverflows={contentOverflows}
-          isLastPage={isLastPage} 
+          isLastPage={isStoryLastPage || isLastPage} 
         />
         
-        {showMedia && (
+        {showMedia && mediaItems && mediaItems.length > 0 && (
           <PageMedia 
             mediaItems={mediaItems}
             isMediaLoading={isMediaLoading}
