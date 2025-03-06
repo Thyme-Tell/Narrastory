@@ -41,60 +41,60 @@ const EditorControlPanel = ({
   return (
     <div className="h-full flex flex-col bg-white border-t">
       {/* Header with tabs */}
-      <div className="px-4 pt-2 flex items-center justify-between border-b">
-        <h2 className="text-lg font-semibold">Edit Cover</h2>
-        <TabsList className="mb-1">
-          <TabsTrigger value="background">Background</TabsTrigger>
-          <TabsTrigger value="text">Text</TabsTrigger>
-          <TabsTrigger value="layout">Layout</TabsTrigger>
-        </TabsList>
+      <div className="px-4 pt-2 pb-1 border-b">
+        <h2 className="text-lg font-semibold mb-2">Edit Cover</h2>
+        <Tabs 
+          defaultValue="background" 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger value="background">Background</TabsTrigger>
+            <TabsTrigger value="text">Text</TabsTrigger>
+            <TabsTrigger value="layout">Layout</TabsTrigger>
+          </TabsList>
+      
+          {/* Content area - scrollable */}
+          <div className="flex-1 overflow-y-auto px-4 py-2">
+            <TabsContent value="background" className="m-0 h-auto pb-16">
+              <BackgroundTab
+                coverData={coverData}
+                onBackgroundColorChange={onBackgroundColorChange}
+                onFileUpload={onFileUpload}
+                onRemoveImage={onRemoveImage}
+                isUploading={isUploading}
+              />
+            </TabsContent>
+            
+            <TabsContent value="text" className="m-0 h-auto pb-16">
+              <TextTab
+                coverData={coverData}
+                onTextChange={onTextChange}
+                onTextColorChange={onTextColorChange}
+                onFontSizeChange={onFontSizeChange}
+              />
+            </TabsContent>
+            
+            <TabsContent value="layout" className="m-0 h-auto pb-16">
+              <LayoutTab
+                coverData={coverData}
+                onLayoutChange={onLayoutChange}
+              />
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
       
-      {/* Content area - scrollable */}
-      <Tabs 
-        defaultValue="background" 
-        value={activeTab} 
-        onValueChange={setActiveTab} 
-        className="flex flex-col h-full"
-      >
-        <div className="flex-1 overflow-y-auto px-4 py-2">
-          <TabsContent value="background" className="m-0 h-auto pb-16">
-            <BackgroundTab
-              coverData={coverData}
-              onBackgroundColorChange={onBackgroundColorChange}
-              onFileUpload={onFileUpload}
-              onRemoveImage={onRemoveImage}
-              isUploading={isUploading}
-            />
-          </TabsContent>
-          
-          <TabsContent value="text" className="m-0 h-auto pb-16">
-            <TextTab
-              coverData={coverData}
-              onTextChange={onTextChange}
-              onTextColorChange={onTextColorChange}
-              onFontSizeChange={onFontSizeChange}
-            />
-          </TabsContent>
-          
-          <TabsContent value="layout" className="m-0 h-auto pb-16">
-            <LayoutTab
-              coverData={coverData}
-              onLayoutChange={onLayoutChange}
-            />
-          </TabsContent>
-        </div>
-        
-        {/* Fixed footer with actions */}
-        <div className="px-4 py-3 flex justify-end gap-2 border-t mt-auto">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={onSave}>
-            Save Cover
-          </Button>
-        </div>
-      </Tabs>
+      {/* Fixed footer with actions */}
+      <div className="px-4 py-3 flex justify-end gap-2 border-t mt-auto">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button onClick={onSave}>
+          Save Cover
+        </Button>
+      </div>
     </div>
   );
 };
