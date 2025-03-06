@@ -1,6 +1,6 @@
 
 import { useRef, useEffect } from "react";
-import { CoverData } from "./CoverEditor";
+import { CoverData } from "./CoverTypes";
 
 interface CoverCanvasProps {
   coverData: CoverData;
