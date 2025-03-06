@@ -4,10 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 
-// Get Supabase URL from the client configuration file
-const SUPABASE_URL = "https://pohnhzxqorelllbfnqyj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvaG5oenhxb3JlbGxsYmZucXlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc1Njk1MzAsImV4cCI6MjA1MzE0NTUzMH0.nG7V_e8Izqi-pXHw1HoaYAC4hediI0D9l_Qf9De93C0";
-
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +65,10 @@ export function useCoverData(profileId: string) {
     console.log('Profile ID in useCoverData:', profileId);
     if (profileId) {
       fetchCoverData();
+    } else {
+      // If no profileId, set defaults and not loading
+      setCoverData(DEFAULT_COVER_DATA);
+      setIsLoading(false);
     }
   }, [profileId, fetchCoverData]);
 
@@ -78,27 +78,24 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Use Edge Function to save cover data (bypasses RLS)
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/save-cover-data`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          profileId: profileId,
-          coverData: newCoverData
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error response from edge function:', errorData);
-        throw new Error(errorData.error || 'Failed to save cover data');
+      // Use Supabase directly for the upsert operation
+      const { data, error } = await supabase
+        .from('book_covers')
+        .upsert({
+          profile_id: profileId,
+          cover_data: newCoverData,
+          updated_at: new Date().toISOString()
+        }, { 
+          onConflict: 'profile_id',
+          returning: 'representation'
+        });
+
+      if (error) {
+        console.error('Error saving cover data:', error);
+        throw error;
       }
       
-      const result = await response.json();
-      console.log('Cover data saved successfully:', result);
+      console.log('Cover data saved successfully:', data);
       
       // Update local state right away
       setCoverData(newCoverData);

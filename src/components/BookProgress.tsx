@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import CoverEditor from "./cover/CoverEditor";
 import CoverCanvas from "./cover/CoverCanvas";
@@ -52,6 +52,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       return storiesData;
     },
   });
+  
+  useEffect(() => {
+    if (profileId) {
+      refreshCoverData();
+    }
+  }, [profileId, refreshCoverData]);
 
   const handleOpenCoverEditor = () => {
     refreshCoverData();
@@ -132,7 +138,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <div className="w-[300px]">
           {isCoverLoading ? (
             <div className="w-full h-[450px] bg-gray-200 rounded-lg animate-pulse"></div>
-          ) : coverData ? (
+          ) : (
             <div className="rounded-lg shadow-lg overflow-hidden">
               <CoverCanvas 
                 coverData={coverData} 
@@ -140,12 +146,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
                 height={450}
               />
             </div>
-          ) : (
-            <img
-              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/book-image.png?t=2025-01-27T11%3A42%3A27.791Z"
-              alt="Book cover preview"
-              className="w-full rounded-lg shadow-lg"
-            />
           )}
         </div>
       </div>

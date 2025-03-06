@@ -53,50 +53,28 @@ serve(async (req) => {
     }
     
     console.log('About to upsert cover data for profile:', profileId);
-    console.log('Cover data to save:', JSON.stringify(coverData));
     
-    // First check if record exists
-    const { data: existingData, error: existingError } = await supabase
+    // Use upsert to handle both insert and update cases
+    const { data, error } = await supabase
       .from('book_covers')
-      .select('*')
-      .eq('profile_id', profileId)
-      .maybeSingle();
+      .upsert({
+        profile_id: profileId,
+        cover_data: coverData,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'profile_id',
+        returning: 'representation'
+      });
       
-    let result;
-    
-    if (existingData) {
-      // Update existing record
-      const { data, error } = await supabase
-        .from('book_covers')
-        .update({
-          cover_data: coverData,
-          updated_at: new Date().toISOString()
-        })
-        .eq('profile_id', profileId)
-        .select();
-        
-      if (error) throw error;
-      result = data;
-    } else {
-      // Insert new record
-      const { data, error } = await supabase
-        .from('book_covers')
-        .insert({
-          profile_id: profileId,
-          cover_data: coverData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select();
-        
-      if (error) throw error;
-      result = data;
+    if (error) {
+      console.error('Error saving cover data:', error);
+      throw error;
     }
     
-    console.log('Cover data saved successfully:', result);
+    console.log('Cover data saved successfully:', data);
     
     return new Response(
-      JSON.stringify({ data: result }),
+      JSON.stringify({ data }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
