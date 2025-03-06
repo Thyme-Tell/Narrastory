@@ -81,7 +81,7 @@ const TwoPageBookLayout = ({
           isMediaPage={currentStoryInfo.isMediaPage}
           mediaItem={currentStoryInfo.mediaItem}
           pagePosition="left"
-          pageNumber={currentPage}
+          pageIndex={currentPage}
         />
       );
     }
@@ -99,7 +99,7 @@ const TwoPageBookLayout = ({
           isMediaPage={nextStoryInfo.isMediaPage}
           mediaItem={nextStoryInfo.mediaItem}
           pagePosition="right"
-          pageNumber={currentPage + 1}
+          pageIndex={currentPage + 1}
         />
       );
     } else if (nextStoryInfo && currentPage < totalPageCount - 1) {
@@ -112,7 +112,7 @@ const TwoPageBookLayout = ({
           isMediaPage={nextStoryInfo.isMediaPage}
           mediaItem={nextStoryInfo.mediaItem}
           pagePosition="right"
-          pageNumber={currentPage + 1}
+          pageIndex={currentPage + 1}
         />
       );
     }

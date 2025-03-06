@@ -17,7 +17,7 @@ interface PageViewProps {
   totalPagesInStory?: number;
   isMediaPage?: boolean;
   mediaItem?: StoryMediaItem;
-  pagePosition?: "left" | "right"; // Added for the two-page layout
+  pagePosition?: "left" | "right" | "full"; // Added "full" as a valid option
   pageIndex?: number; // Overall page number in the book
 }
 
