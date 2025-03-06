@@ -19,18 +19,25 @@ export function useCoverData(profileId: string) {
       }
 
       try {
+        console.log('Fetching cover data for profile:', profileId);
         const { data, error } = await supabase
           .from('book_covers')
           .select('cover_data')
           .eq('profile_id', profileId)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching cover data:', error);
+          throw error;
+        }
 
+        console.log('Received cover data:', data);
+        
         if (data) {
           setCoverData(data.cover_data as CoverData);
         } else {
           // If no cover data exists yet, create a new record with default data
+          console.log('Creating new cover data with defaults');
           const { data: newData, error: insertError } = await supabase
             .from('book_covers')
             .insert({ 
@@ -40,12 +47,16 @@ export function useCoverData(profileId: string) {
             .select('cover_data')
             .single();
 
-          if (insertError) throw insertError;
+          if (insertError) {
+            console.error('Error creating cover data:', insertError);
+            throw insertError;
+          }
           
+          console.log('Created new cover data:', newData);
           setCoverData(newData.cover_data as CoverData);
         }
       } catch (err) {
-        console.error("Error fetching cover data:", err);
+        console.error("Error in fetchCoverData:", err);
         setError(err as Error);
         toast({
           variant: "destructive",
@@ -61,9 +72,10 @@ export function useCoverData(profileId: string) {
   }, [profileId]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
-    if (!profileId) return;
+    if (!profileId) return false;
 
     try {
+      console.log('Saving cover data:', newCoverData);
       const { error } = await supabase
         .from('book_covers')
         .upsert({ 
@@ -71,12 +83,16 @@ export function useCoverData(profileId: string) {
           cover_data: newCoverData as unknown as Json
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving cover data:', error);
+        throw error;
+      }
 
+      console.log('Cover data saved successfully');
       setCoverData(newCoverData);
       return true;
     } catch (err) {
-      console.error("Error saving cover data:", err);
+      console.error("Error in saveCoverData:", err);
       toast({
         variant: "destructive",
         title: "Error",
