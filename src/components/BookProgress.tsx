@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import CoverEditor from "./cover/CoverEditor";
@@ -9,10 +10,13 @@ import CoverCanvas from "./cover/CoverCanvas";
 import { useCoverData } from "@/hooks/useCoverData";
 import { CoverData } from "./cover/CoverTypes";
 import BookPreview from "./book/BookPreview";
+import { calculateTotalPages } from "@/utils/bookPagination";
 
 interface BookProgressProps {
   profileId: string;
 }
+
+const MIN_PAGES_REQUIRED = 32;
 
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
@@ -59,7 +63,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       return storiesData;
     },
   });
-  
+
+  const currentPageCount = stories ? calculateTotalPages(stories) : 1;
+  const progressPercentage = Math.min((currentPageCount / MIN_PAGES_REQUIRED) * 100, 100);
+
   useEffect(() => {
     if (profileId) {
       console.log('BookProgress: Refreshing cover data for profile:', profileId);
@@ -135,38 +142,57 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
-          <div className="flex flex-col space-y-3">
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="w-[200px] justify-start" 
-              onClick={handleOpenCoverEditor}
-            >
-              <Book className="mr-2" />
-              Edit Cover
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="w-[200px] justify-start"
-              onClick={handleOpenPreview}
-            >
-              <Eye className="mr-2" />
-              Preview Book
-            </Button>
-            <div className="relative">
+          <div className="flex flex-col space-y-6">
+            <div className="space-y-3">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="w-[200px] justify-start" 
+                onClick={handleOpenCoverEditor}
+              >
+                <Book className="mr-2" />
+                Edit Cover
+              </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
                 className="w-[200px] justify-start"
-                disabled
+                onClick={handleOpenPreview}
               >
-                <ShoppingCart className="mr-2" />
-                Order Book
+                <Eye className="mr-2" />
+                Preview Book
               </Button>
-              <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2">
-                <span className="text-xs bg-[#AF4623] text-white px-2 py-0.5 rounded-full">Coming Soon</span>
+              <div className="relative">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-[200px] justify-start"
+                  disabled
+                >
+                  <ShoppingCart className="mr-2" />
+                  Order Book
+                </Button>
+                <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2">
+                  <span className="text-xs bg-[#AF4623] text-white px-2 py-0.5 rounded-full">Coming Soon</span>
+                </div>
               </div>
+            </div>
+
+            <div className="space-y-2 mt-4 w-[300px]">
+              <p className="text-sm text-atlantic">
+                Current Book Length: {currentPageCount} {currentPageCount === 1 ? 'page' : 'pages'}
+              </p>
+              <Progress value={progressPercentage} className="h-2" />
+              {currentPageCount < MIN_PAGES_REQUIRED && (
+                <p className="text-sm text-muted-foreground">
+                  Add {MIN_PAGES_REQUIRED - currentPageCount} more {(MIN_PAGES_REQUIRED - currentPageCount) === 1 ? 'page' : 'pages'} to reach the minimum for printing
+                </p>
+              )}
+              {currentPageCount >= MIN_PAGES_REQUIRED && (
+                <p className="text-sm text-[#155B4A]">
+                  ✓ Your book meets the minimum length requirement
+                </p>
+              )}
             </div>
           </div>
         </div>
