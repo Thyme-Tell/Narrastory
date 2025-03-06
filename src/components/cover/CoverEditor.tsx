@@ -169,7 +169,7 @@ const CoverEditor = ({
           <DialogTitle className="sr-only">Edit Book Cover</DialogTitle>
           {isMobile ? (
             // Mobile layout (vertical)
-            <div className="flex flex-col h-[100vh] bg-white">
+            <div className="flex flex-col h-[100vh] bg-white overflow-hidden">
               {/* Preview section - top 40% */}
               <div className="w-full" style={{ height: "40%" }}>
                 <CoverPreview coverData={coverData} isLoading={isUploading} />

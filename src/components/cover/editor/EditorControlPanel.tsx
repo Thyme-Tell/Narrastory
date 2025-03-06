@@ -58,7 +58,7 @@ const EditorControlPanel = ({
       </div>
       
       {/* Content area - scrollable */}
-      <div className={`flex-1 overflow-y-auto px-4 py-4 ${isMobile ? 'max-h-[calc(60vh-180px)]' : 'h-[calc(90vh-240px)]'}`}>
+      <div className={`flex-1 overflow-y-auto px-4 py-4 ${isMobile ? 'pb-24' : ''}`}>
         {activeTab === "background" && (
           <BackgroundTab
             coverData={coverData}
@@ -87,7 +87,7 @@ const EditorControlPanel = ({
       </div>
       
       {/* Fixed footer with actions - always visible */}
-      <div className="px-4 py-3 flex justify-end gap-2 border-t mt-auto">
+      <div className="px-4 py-3 flex justify-end gap-2 border-t mt-auto bg-white fixed bottom-0 left-0 right-0 z-50 shadow-md">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>

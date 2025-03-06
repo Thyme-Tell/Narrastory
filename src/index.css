@@ -120,6 +120,7 @@
     background-color: white;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     z-index: 50;
+    padding: 10px 16px;
   }
   
   /* Cover editor mobile adjustments */
@@ -129,6 +130,7 @@
   
   .cover-editor-controls {
     height: 60%;
+    padding-bottom: 72px; /* Add padding to ensure content isn't hidden behind fixed footer */
   }
   
   /* Book preview modal mobile optimizations */
@@ -144,6 +146,22 @@
   .toc-mobile {
     max-width: 80vw;
     overflow-x: hidden;
+  }
+  
+  /* Fix for iPhone 16 and similar devices - ensure fixed footers are always visible */
+  .fixed-footer-ios {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  
+  /* Add padding to content to prevent it from being hidden behind fixed footer */
+  .ios-footer-padding {
+    padding-bottom: 80px;
   }
 }
 
