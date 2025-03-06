@@ -166,7 +166,7 @@ const CoverEditor = ({
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
           <DialogTitle className="sr-only">Edit Book Cover</DialogTitle>
-          <div className={`flex ${isMobile ? "flex-col h-screen" : "h-[80vh]"}`}>
+          <div className={`flex ${isMobile ? "flex-col h-screen bg-white" : "h-[80vh] bg-white"}`}>
             <EditorControlPanel
               coverData={coverData}
               onSave={handleSave}
