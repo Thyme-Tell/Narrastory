@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Eye, ShoppingCart } from "lucide-react";
@@ -17,7 +16,7 @@ interface BookProgressProps {
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const { coverData, saveCoverData, isLoading: isCoverLoading } = useCoverData(profileId);
+  const { coverData, saveCoverData, isLoading: isCoverLoading, refreshCoverData } = useCoverData(profileId);
   
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -55,6 +54,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   });
 
   const handleOpenCoverEditor = () => {
+    refreshCoverData();
     setIsEditorOpen(true);
   };
 
@@ -63,7 +63,11 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   };
 
   const handleSaveCover = async (newCoverData: CoverData) => {
-    await saveCoverData(newCoverData);
+    console.log("Saving new cover data:", newCoverData);
+    const success = await saveCoverData(newCoverData);
+    if (success) {
+      refreshCoverData();
+    }
   };
 
   if (isHidden) {
@@ -151,7 +155,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         open={isEditorOpen}
         onClose={handleCloseCoverEditor}
         onSave={handleSaveCover}
-        initialCoverData={coverData || undefined}
+        initialCoverData={coverData}
       />
     </div>
   );

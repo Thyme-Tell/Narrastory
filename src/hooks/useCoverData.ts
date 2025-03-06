@@ -45,9 +45,8 @@ export function useCoverData(profileId: string) {
         console.log('Setting cover data from database:', typedCoverData);
         setCoverData(typedCoverData);
       } else {
-        // If no cover data exists yet, create a new record with default data
-        console.log('No cover data found, creating with defaults');
-        await saveCoverData(DEFAULT_COVER_DATA);
+        // If no cover data exists yet, use defaults but don't save until user makes changes
+        console.log('No cover data found, using defaults');
         setCoverData(DEFAULT_COVER_DATA);
       }
     } catch (err) {
@@ -58,6 +57,8 @@ export function useCoverData(profileId: string) {
         title: "Error",
         description: "Failed to load cover data",
       });
+      // Even on error, use the default data
+      setCoverData(DEFAULT_COVER_DATA);
     } finally {
       setIsLoading(false);
     }

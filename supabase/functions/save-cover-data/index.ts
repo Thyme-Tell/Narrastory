@@ -55,37 +55,48 @@ serve(async (req) => {
     console.log('About to upsert cover data for profile:', profileId);
     console.log('Cover data to save:', JSON.stringify(coverData));
     
-    // Use upsert operation to either insert or update cover data
-    const { data, error } = await supabase
+    // First check if record exists
+    const { data: existingData, error: existingError } = await supabase
       .from('book_covers')
-      .upsert(
-        {
+      .select('*')
+      .eq('profile_id', profileId)
+      .maybeSingle();
+      
+    let result;
+    
+    if (existingData) {
+      // Update existing record
+      const { data, error } = await supabase
+        .from('book_covers')
+        .update({
+          cover_data: coverData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('profile_id', profileId)
+        .select();
+        
+      if (error) throw error;
+      result = data;
+    } else {
+      // Insert new record
+      const { data, error } = await supabase
+        .from('book_covers')
+        .insert({
           profile_id: profileId,
           cover_data: coverData,
-          updated_at: new Date().toISOString() // Add explicit timestamp
-        },
-        {
-          onConflict: 'profile_id',
-          returning: 'representation' // Return all columns
-        }
-      )
-      .select();
-      
-    if (error) {
-      console.error('Error in upsert operation:', error);
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
-      );
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select();
+        
+      if (error) throw error;
+      result = data;
     }
     
-    console.log('Cover data saved successfully:', data);
+    console.log('Cover data saved successfully:', result);
     
     return new Response(
-      JSON.stringify({ data }),
+      JSON.stringify({ data: result }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }

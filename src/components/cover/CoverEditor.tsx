@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, CoverEditorProps, DEFAULT_COVER_DATA } from "./CoverTypes";
@@ -22,6 +22,13 @@ const CoverEditor = ({
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const { toast } = useToast();
+  
+  // Update local state when props change
+  useEffect(() => {
+    if (initialCoverData) {
+      setCoverData(initialCoverData);
+    }
+  }, [initialCoverData]);
 
   const handleSave = () => {
     onSave(coverData);
@@ -158,6 +165,7 @@ const CoverEditor = ({
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          <DialogTitle className="sr-only">Edit Book Cover</DialogTitle>
           <div className="flex h-[80vh]">
             <EditorControlPanel
               coverData={coverData}
