@@ -44,20 +44,18 @@ const BookPreviewContent = ({
   isMobile = false,
 }: BookPreviewContentProps) => {
   // Calculate dimensions based on device
-  const width = isMobile ? "100%" : "600px";
-  const height = isMobile ? "auto" : "960px";
-  const maxHeight = isMobile ? "80vh" : "90vh";
+  const maxWidth = isMobile ? "100%" : "600px";
+  const maxHeight = isMobile ? "75vh" : "90vh";
 
   return (
     <div 
-      className="relative bg-white shadow-xl rounded-md transition-transform"
+      className="relative bg-white shadow-xl rounded-md transition-transform w-full mx-auto"
       style={{ 
         transform: `scale(${zoomLevel})`,
         transformOrigin: 'center',
-        width,
-        height,
+        maxWidth,
         maxHeight,
-        aspectRatio: isMobile ? "5/8" : "auto" // Maintain aspect ratio on mobile
+        aspectRatio: "5/8"
       }}
     >
       {/* Book Pages */}

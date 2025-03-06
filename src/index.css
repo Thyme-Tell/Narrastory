@@ -124,11 +124,26 @@
   
   /* Cover editor mobile adjustments */
   .cover-editor-preview {
-    height: 50vh;
+    height: 40%;
   }
   
   .cover-editor-controls {
-    height: 50vh;
+    height: 60%;
+  }
+  
+  /* Book preview modal mobile optimizations */
+  .book-preview-modal-mobile {
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ensure tables of contents doesn't overflow */
+  .toc-mobile {
+    max-width: 80vw;
+    overflow-x: hidden;
   }
 }
 
@@ -140,4 +155,23 @@
 
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
+}
+
+/* Touch-friendly style improvements */
+@media (max-width: 768px) {
+  /* Make touch targets larger */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text from getting too small */
+  .min-text-size {
+    font-size: 16px !important;
+  }
+  
+  /* Ensure buttons have enough spacing */
+  .mobile-button-spacing > * {
+    margin: 0.25rem !important;
+  }
 }

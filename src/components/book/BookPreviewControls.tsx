@@ -18,8 +18,8 @@ const BookPreviewControls = ({
   goToPrevPage,
   isMobile = false,
 }: BookPreviewControlsProps) => {
-  const buttonSize = isMobile ? "h-10 w-10" : "h-12 w-12";
-  const iconSize = isMobile ? "h-5 w-5" : "h-6 w-6";
+  const buttonSize = isMobile ? "h-8 w-8" : "h-12 w-12";
+  const iconSize = isMobile ? "h-4 w-4" : "h-6 w-6";
   const marginClass = isMobile ? "mx-1" : "mx-2";
 
   return (

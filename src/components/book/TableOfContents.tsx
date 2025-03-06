@@ -25,15 +25,15 @@ const TableOfContents = ({
   if (stories.length === 0) return null;
 
   return (
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Table of Contents</h3>
+    <div className="w-full overflow-x-hidden">
+      <h3 className="text-lg font-semibold mb-4 truncate">Contents</h3>
       
       {/* Cover */}
       <div 
-        className={`p-2 mb-2 rounded cursor-pointer ${currentPage === 0 ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
+        className={`p-2 mb-2 rounded cursor-pointer truncate ${currentPage === 0 ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
         onClick={() => onSelectPage(0)}
       >
-        <span>Cover</span>
+        <span className="block truncate">Cover</span>
       </div>
 
       {/* Stories */}
@@ -48,11 +48,11 @@ const TableOfContents = ({
               className={`p-2 mb-1 rounded cursor-pointer ${currentPage === startPage ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
               onClick={() => onSelectPage(startPage)}
             >
-              <span className="font-medium">{story.title || "Untitled Story"}</span>
+              <span className="font-medium block truncate">{story.title || "Untitled Story"}</span>
             </div>
             
             {/* Text pages */}
-            <div className="ml-4 space-y-1 mb-2">
+            <div className="ml-4 space-y-1 mb-2 overflow-hidden">
               {Array.from({ length: storyTextPages }).map((_, i) => {
                 const pageIndex = startPage + i;
                 const isBookmarked = bookmarks.includes(pageIndex);
@@ -60,12 +60,12 @@ const TableOfContents = ({
                 return (
                   <div 
                     key={`text-${i}`}
-                    className={`flex items-center p-1 rounded cursor-pointer ${currentPage === pageIndex ? 'bg-muted' : 'hover:bg-accent/50'}`}
+                    className={`flex items-center p-1 rounded cursor-pointer truncate ${currentPage === pageIndex ? 'bg-muted' : 'hover:bg-accent/50'}`}
                     onClick={() => onSelectPage(pageIndex)}
                   >
-                    <FileText className="h-3 w-3 mr-2" />
-                    <span className="text-sm">Page {i + 1}</span>
-                    {isBookmarked && <Bookmark className="h-3 w-3 ml-auto text-amber-500" />}
+                    <FileText className="h-3 w-3 min-w-[12px] mr-2" />
+                    <span className="text-sm truncate">Page {i + 1}</span>
+                    {isBookmarked && <Bookmark className="h-3 w-3 ml-auto min-w-[12px] text-amber-500" />}
                   </div>
                 );
               })}
@@ -73,7 +73,7 @@ const TableOfContents = ({
             
             {/* Media pages */}
             {mediaItems.length > 0 && (
-              <div className="ml-4 space-y-1">
+              <div className="ml-4 space-y-1 overflow-hidden">
                 {mediaItems.map((mediaItem, i) => {
                   const pageIndex = startPage + storyTextPages + i;
                   const isBookmarked = bookmarks.includes(pageIndex);
@@ -81,14 +81,14 @@ const TableOfContents = ({
                   return (
                     <div 
                       key={`media-${mediaItem.id}`}
-                      className={`flex items-center p-1 rounded cursor-pointer ${currentPage === pageIndex ? 'bg-muted' : 'hover:bg-accent/50'}`}
+                      className={`flex items-center p-1 rounded cursor-pointer truncate ${currentPage === pageIndex ? 'bg-muted' : 'hover:bg-accent/50'}`}
                       onClick={() => onSelectPage(pageIndex)}
                     >
-                      <FileImage className="h-3 w-3 mr-2" />
-                      <span className="text-sm">
+                      <FileImage className="h-3 w-3 min-w-[12px] mr-2" />
+                      <span className="text-sm truncate">
                         {mediaItem.caption ? mediaItem.caption : `Image ${i + 1}`}
                       </span>
-                      {isBookmarked && <Bookmark className="h-3 w-3 ml-auto text-amber-500" />}
+                      {isBookmarked && <Bookmark className="h-3 w-3 ml-auto min-w-[12px] text-amber-500" />}
                     </div>
                   );
                 })}
@@ -100,17 +100,17 @@ const TableOfContents = ({
       
       {/* Bookmarks section */}
       {bookmarks.length > 0 && (
-        <div className="mt-6">
-          <h4 className="text-md font-medium mb-2">Bookmarks</h4>
+        <div className="mt-6 overflow-hidden">
+          <h4 className="text-md font-medium mb-2 truncate">Bookmarks</h4>
           <div className="space-y-1">
             {bookmarks.map((pageIndex) => (
               <div 
                 key={`bookmark-${pageIndex}`}
-                className={`flex items-center p-1 rounded cursor-pointer ${currentPage === pageIndex ? 'bg-muted' : 'hover:bg-accent/50'}`}
+                className={`flex items-center p-1 rounded cursor-pointer truncate ${currentPage === pageIndex ? 'bg-muted' : 'hover:bg-accent/50'}`}
                 onClick={() => onSelectPage(pageIndex)}
               >
-                <Bookmark className="h-3 w-3 mr-2 text-amber-500" />
-                <span className="text-sm">
+                <Bookmark className="h-3 w-3 min-w-[12px] mr-2 text-amber-500" />
+                <span className="text-sm truncate">
                   {pageIndex === 0 
                     ? "Cover" 
                     : `Page ${pageIndex}`}

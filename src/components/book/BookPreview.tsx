@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,18 +9,19 @@ import { useBookNavigation } from "@/hooks/useBookNavigation";
 import BookPreviewHeader from "./BookPreviewHeader";
 import BookPreviewContent from "./BookPreviewContent";
 import TableOfContents from "./TableOfContents";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BookPreviewProps {
   profileId: string;
   open: boolean;
   onClose: () => void;
-  isMobile?: boolean;
 }
 
-const BookPreview = ({ profileId, open, onClose, isMobile = false }: BookPreviewProps) => {
+const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const bookContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
+  const isMobile = useIsMobile();
   
   // Fetch stories for the book content
   const { data: stories, isLoading: isStoriesLoading } = useQuery({
@@ -115,7 +117,7 @@ const BookPreview = ({ profileId, open, onClose, isMobile = false }: BookPreview
   const authorName = profile ? `${profile.first_name} ${profile.last_name}` : "";
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden">
+    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden w-full">
       {/* Header */}
       <BookPreviewHeader
         totalPageCount={totalPageCount}
