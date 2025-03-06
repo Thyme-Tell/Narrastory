@@ -3,8 +3,8 @@ export interface PaginationConfig {
   charsPerPage: number;
   titleSpace: number;
   imageSpace: number;
-  lineHeight: number; // Adding line height for better pagination calculations
-  linesPerPage: number; // Adding lines per page calculation
+  lineHeight: number;
+  linesPerPage: number;
 }
 
 // Helper function to estimate if a paragraph will fit on a page
@@ -58,6 +58,14 @@ export const calculatePageContent = (
       // This paragraph doesn't fit on the current page, move to next page
       if (currentPageNumber === pageNumber) {
         // We've filled the requested page, return what we have
+        return currentPageContent;
+      }
+      
+      // If the current page is empty, make sure we add at least one paragraph
+      // This prevents creating blank pages
+      if (currentPageContent.length === 0 && currentPageNumber === pageNumber) {
+        currentPageContent.push(paragraph);
+        paragraphIndex++;
         return currentPageContent;
       }
       
@@ -115,19 +123,24 @@ export const getTotalPageCount = (
     return 1; // At least cover page
   }
   
-  // The approach here is to simulate pagination through all content
+  // Simulate pagination through all content to count non-empty pages
   let currentPage = 1;
   let pageContent: string[] = [];
+  let nonEmptyPageCount = 0;
   
   do {
     pageContent = calculatePageContent(paragraphs, currentPage, config, hasImage);
     if (pageContent.length > 0) {
+      nonEmptyPageCount++;
       currentPage++;
+    } else {
+      // If we hit an empty page, we've reached the end
+      break;
     }
-  } while (pageContent.length > 0);
+  } while (pageContent.length > 0 && currentPage < 100); // Safety limit of 100 pages
   
-  // currentPage will be one more than the last page with content
-  return Math.max(1, currentPage - 1);
+  // Ensure at least 1 page if we have paragraphs (even if they're empty)
+  return Math.max(1, nonEmptyPageCount);
 };
 
 export const isLastPageOfStory = (

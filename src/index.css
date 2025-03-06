@@ -86,6 +86,7 @@
   max-width: 100%;
   max-height: 25%; /* Limit height of media to avoid overflow */
   object-fit: contain;
+  display: block; /* Prevent default inline display */
 }
 
 /* Page navigation indicators */
@@ -117,4 +118,10 @@
   z-index: 5;
   padding-top: 0.5rem;
   margin-top: auto;
+}
+
+/* Fix for image display in book preview */
+.book-page .max-w-\[90\%\] {
+  border-color: #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

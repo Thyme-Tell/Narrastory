@@ -41,6 +41,10 @@ const PageMedia = ({
           alt={firstImage.file_name || "Story image"} 
           className="max-h-[300px] w-auto object-contain mx-auto"
           onClick={() => handleImageClick(firstImage.file_path)}
+          onError={(e) => {
+            console.error("Image failed to load:", firstImage.file_path);
+            e.currentTarget.style.display = 'none';
+          }}
         />
         {firstImage.caption && (
           <p className="text-sm text-center italic mt-2">{firstImage.caption}</p>
