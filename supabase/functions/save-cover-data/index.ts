@@ -53,6 +53,7 @@ serve(async (req) => {
     }
     
     console.log('About to upsert cover data for profile:', profileId);
+    console.log('Cover data to save:', JSON.stringify(coverData));
     
     // Use upsert operation to either insert or update cover data
     const { data, error } = await supabase
@@ -68,8 +69,7 @@ serve(async (req) => {
           returning: 'representation' // Return all columns
         }
       )
-      .select()
-      .single();
+      .select();
       
     if (error) {
       console.error('Error in upsert operation:', error);

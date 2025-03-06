@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
-import { Json } from "@/integrations/supabase/types";
 
 // Get Supabase URL from the client configuration file
 const SUPABASE_URL = "https://pohnhzxqorelllbfnqyj.supabase.co";
@@ -16,7 +15,7 @@ export function useCoverData(profileId: string) {
   const { toast } = useToast();
 
   // Function to fetch cover data
-  const fetchCoverData = async () => {
+  const fetchCoverData = useCallback(async () => {
     if (!profileId) {
       setIsLoading(false);
       return;
@@ -38,12 +37,12 @@ export function useCoverData(profileId: string) {
         throw error;
       }
 
-      console.log('Received cover data:', data);
+      console.log('Received cover data from database:', data);
       
       if (data && data.cover_data) {
         // Explicitly cast and set the cover data
         const typedCoverData = data.cover_data as CoverData;
-        console.log('Setting cover data:', typedCoverData);
+        console.log('Setting cover data from database:', typedCoverData);
         setCoverData(typedCoverData);
       } else {
         // If no cover data exists yet, create a new record with default data
@@ -62,13 +61,15 @@ export function useCoverData(profileId: string) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [profileId, toast]);
 
   // Initial data fetch
   useEffect(() => {
-    console.log('Profile ID changed, fetching cover data');
-    fetchCoverData();
-  }, [profileId]);
+    console.log('Profile ID in useCoverData:', profileId);
+    if (profileId) {
+      fetchCoverData();
+    }
+  }, [profileId, fetchCoverData]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
     if (!profileId) return false;
@@ -101,6 +102,11 @@ export function useCoverData(profileId: string) {
       // Update local state right away
       setCoverData(newCoverData);
       
+      toast({
+        title: "Cover saved",
+        description: "Your book cover preferences have been saved successfully",
+      });
+      
       return true;
     } catch (err) {
       console.error("Error in saveCoverData:", err);
@@ -114,7 +120,7 @@ export function useCoverData(profileId: string) {
   };
 
   return {
-    coverData,
+    coverData: coverData || DEFAULT_COVER_DATA,
     isLoading,
     error,
     saveCoverData,
