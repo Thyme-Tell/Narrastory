@@ -42,7 +42,7 @@ export interface LayoutTabProps {
 }
 
 export const DEFAULT_COVER_DATA: CoverData = {
-  backgroundColor: "#f8f9fa",
+  backgroundColor: "#CADCDA",
   titleText: "My Stories",
   authorText: "",
   titleColor: "#333333",
