@@ -16,7 +16,7 @@ interface BookProgressProps {
   profileId: string;
 }
 
-const MIN_PAGES_REQUIRED = 32;
+const MIN_PAGES_REQUIRED = 64;
 
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
