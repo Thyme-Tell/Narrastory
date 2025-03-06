@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
+import { Json } from "@/integrations/supabase/types";
 
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
@@ -78,12 +79,13 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Use Supabase directly for the upsert operation
+      // Fix: Properly cast the cover data as Json before inserting it
+      // Also ensure we're using the correct structure for the upsert operation
       const { data, error } = await supabase
         .from('book_covers')
         .upsert({
           profile_id: profileId,
-          cover_data: newCoverData,
+          cover_data: newCoverData as unknown as Json,
           updated_at: new Date().toISOString()
         }, { 
           onConflict: 'profile_id',
