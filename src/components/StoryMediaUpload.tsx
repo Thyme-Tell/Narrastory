@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -35,19 +36,38 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       setUploading(true);
       setProgress(0);
 
+      // Check if user is authenticated
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication required",
+          description: "You must be logged in to upload files",
+        });
+        setUploading(false);
+        return;
+      }
+
       // Upload file to storage
       const fileExt = file.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      console.log('Uploading to story-media bucket:', filePath);
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('story-media')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true, // Changed to true to allow overwriting
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error details:', uploadError);
+        throw uploadError;
+      }
 
+      console.log('Upload successful, file path:', filePath);
+      
       // Set progress to 50% after storage upload
       setProgress(50);
 
@@ -63,7 +83,10 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
         .select()
         .single();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database error details:', dbError);
+        throw dbError;
+      }
 
       // Set progress to 100% after database update
       setProgress(100);
@@ -82,12 +105,23 @@ const StoryMediaUpload = ({ storyId, onUploadComplete }: StoryMediaUploadProps) 
       if (onUploadComplete) {
         onUploadComplete();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading media:', error);
+      
+      let errorMessage = "Failed to upload media";
+      
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      
+      if (error.statusCode) {
+        errorMessage += ` (Status: ${error.statusCode})`;
+      }
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to upload media",
+        description: errorMessage,
       });
     } finally {
       setUploading(false);

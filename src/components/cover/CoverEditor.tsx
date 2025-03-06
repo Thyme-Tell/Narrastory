@@ -7,7 +7,6 @@ import { CoverData, CoverEditorProps, DEFAULT_COVER_DATA } from "./CoverTypes";
 import EditorControlPanel from "./editor/EditorControlPanel";
 import CoverPreview from "./editor/CoverPreview";
 import ImageCropperDialog from "./editor/ImageCropperDialog";
-import Cookies from 'js-cookie';
 
 const CoverEditor = ({ 
   profileId, 
@@ -75,37 +74,71 @@ const CoverEditor = ({
     setIsUploading(true);
 
     try {
+      // Check if user is authenticated
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication required",
+          description: "You must be logged in to upload images",
+        });
+        setIsUploading(false);
+        return;
+      }
+
       const fileExt = 'jpg';
       const fileName = `book-cover-${profileId}-${Date.now()}.${fileExt}`;
       
-      const { error: uploadError } = await supabase.storage
+      console.log('Uploading to bucket: book-covers');
+      console.log('File name:', fileName);
+      
+      const { data, error: uploadError } = await supabase.storage
         .from('book-covers')
         .upload(fileName, croppedBlob, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true, // Changed to true to allow overwriting
+          contentType: 'image/jpeg',
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Error details:', uploadError);
+        throw uploadError;
+      }
 
-      const { data } = supabase.storage
+      console.log('Upload successful, getting public URL');
+      
+      const { data: urlData } = supabase.storage
         .from('book-covers')
         .getPublicUrl(fileName);
 
+      console.log('Public URL generated:', urlData.publicUrl);
+      
       setCoverData({
         ...coverData,
-        backgroundImage: data.publicUrl,
+        backgroundImage: urlData.publicUrl,
       });
 
       toast({
         title: "Image uploaded",
         description: "Your background image has been uploaded successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
+      
+      let errorMessage = "There was an error uploading your image";
+      
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      
+      if (error.statusCode) {
+        errorMessage += ` (Status: ${error.statusCode})`;
+      }
+      
       toast({
         variant: "destructive",
         title: "Upload failed",
-        description: "There was an error uploading your image",
+        description: errorMessage,
       });
     } finally {
       setIsUploading(false);
