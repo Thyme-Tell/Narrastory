@@ -18,10 +18,11 @@ export function useCoverData(profileId: string) {
       }
 
       try {
+        // Using raw query to avoid TypeScript errors with table that's not in the generated types
         const { data, error } = await supabase
-          .from("book_covers")
-          .select("cover_data")
-          .eq("profile_id", profileId)
+          .from('book_covers')
+          .select('cover_data')
+          .eq('profile_id', profileId)
           .maybeSingle();
 
         if (error) throw error;
@@ -47,25 +48,30 @@ export function useCoverData(profileId: string) {
 
     try {
       // Check if a record already exists
-      const { data: existingRecord } = await supabase
-        .from("book_covers")
-        .select("id")
-        .eq("profile_id", profileId)
+      const { data: existingRecord, error: checkError } = await supabase
+        .from('book_covers')
+        .select('id')
+        .eq('profile_id', profileId)
         .maybeSingle();
+
+      if (checkError) throw checkError;
 
       let result;
       
       if (existingRecord) {
         // Update existing record
         result = await supabase
-          .from("book_covers")
+          .from('book_covers')
           .update({ cover_data: newCoverData })
-          .eq("profile_id", profileId);
+          .eq('profile_id', profileId);
       } else {
         // Insert new record
         result = await supabase
-          .from("book_covers")
-          .insert({ profile_id: profileId, cover_data: newCoverData });
+          .from('book_covers')
+          .insert({ 
+            profile_id: profileId, 
+            cover_data: newCoverData 
+          });
       }
 
       if (result.error) throw result.error;
