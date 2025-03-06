@@ -91,6 +91,11 @@
   .mobile-book-controls {
     transform: scale(0.85);
   }
+  
+  /* Add bottom padding for mobile cover editor to avoid button overlap */
+  .cover-editor-mobile {
+    padding-bottom: 80px; /* Space for fixed bottom buttons */
+  }
 }
 
 /* Animations for mobile transitions */

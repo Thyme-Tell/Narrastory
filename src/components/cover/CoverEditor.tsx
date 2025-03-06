@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +24,6 @@ const CoverEditor = ({
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Update local state when props change
   useEffect(() => {
     if (initialCoverData) {
       setCoverData(initialCoverData);
