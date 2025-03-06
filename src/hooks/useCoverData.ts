@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 import { Json } from "@/integrations/supabase/types";
+import Cookies from "js-cookie";
 
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
@@ -20,6 +21,8 @@ export function useCoverData(profileId: string) {
 
       try {
         console.log('Fetching cover data for profile:', profileId);
+        
+        // First, try to fetch existing cover data
         const { data, error } = await supabase
           .from('book_covers')
           .select('cover_data')
@@ -38,22 +41,37 @@ export function useCoverData(profileId: string) {
         } else {
           // If no cover data exists yet, create a new record with default data
           console.log('Creating new cover data with defaults');
-          const { data: newData, error: insertError } = await supabase
-            .from('book_covers')
-            .insert({ 
-              profile_id: profileId,
-              cover_data: DEFAULT_COVER_DATA as unknown as Json
-            })
-            .select('cover_data')
-            .single();
-
-          if (insertError) {
-            console.error('Error creating cover data:', insertError);
-            throw insertError;
-          }
           
-          console.log('Created new cover data:', newData);
-          setCoverData(newData.cover_data as CoverData);
+          try {
+            // Use Edge Function to create initial cover data
+            const response = await fetch(`${supabase.supabaseUrl}/functions/v1/save-cover-data`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabase.supabaseKey}`
+              },
+              body: JSON.stringify({
+                profileId: profileId,
+                coverData: DEFAULT_COVER_DATA
+              })
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              console.error('Error response from edge function:', errorData);
+              throw new Error(errorData.error || 'Failed to create cover data');
+            }
+            
+            const newData = await response.json();
+            console.log('Created new cover data via edge function:', newData);
+            
+            if (newData.data) {
+              setCoverData(newData.data.cover_data as CoverData);
+            }
+          } catch (edgeFnError) {
+            console.error('Edge function error:', edgeFnError);
+            throw edgeFnError;
+          }
         }
       } catch (err) {
         console.error("Error in fetchCoverData:", err);
@@ -76,18 +94,26 @@ export function useCoverData(profileId: string) {
 
     try {
       console.log('Saving cover data:', newCoverData);
-      const { error } = await supabase
-        .from('book_covers')
-        .upsert({ 
-          profile_id: profileId,
-          cover_data: newCoverData as unknown as Json
-        });
-
-      if (error) {
-        console.error('Error saving cover data:', error);
-        throw error;
+      
+      // Use Edge Function to save cover data (bypasses RLS)
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/save-cover-data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        },
+        body: JSON.stringify({
+          profileId: profileId,
+          coverData: newCoverData
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response from edge function:', errorData);
+        throw new Error(errorData.error || 'Failed to save cover data');
       }
-
+      
       console.log('Cover data saved successfully');
       setCoverData(newCoverData);
       return true;
