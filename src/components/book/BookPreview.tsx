@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,9 +13,10 @@ interface BookPreviewProps {
   profileId: string;
   open: boolean;
   onClose: () => void;
+  isMobile?: boolean;
 }
 
-const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
+const BookPreview = ({ profileId, open, onClose, isMobile = false }: BookPreviewProps) => {
   const bookContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
@@ -128,12 +128,13 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
         onZoomOut={zoomOut}
         onToggleBookmark={toggleBookmark}
         onClose={onClose}
+        isMobile={isMobile}
       />
 
       <div className="flex-1 w-full flex overflow-hidden">
         {/* TOC Sidebar */}
         {showToc && (
-          <div className="w-64 h-full bg-muted p-4 overflow-y-auto animate-slide-in-right">
+          <div className={`${isMobile ? "w-48" : "w-64"} h-full bg-muted p-4 overflow-y-auto animate-slide-in-right`}>
             <TableOfContents 
               stories={stories || []} 
               currentPage={currentPage}
@@ -161,6 +162,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             goToNextPage={goToNextPage}
             goToPrevPage={goToPrevPage}
             currentStoryInfo={currentStoryInfo}
+            isMobile={isMobile}
           />
         </div>
       </div>

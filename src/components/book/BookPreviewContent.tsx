@@ -26,6 +26,7 @@ interface BookPreviewContentProps {
     isMediaPage?: boolean;
     mediaItem?: StoryMediaItem;
   } | null;
+  isMobile?: boolean;
 }
 
 const BookPreviewContent = ({
@@ -40,16 +41,23 @@ const BookPreviewContent = ({
   goToNextPage,
   goToPrevPage,
   currentStoryInfo,
+  isMobile = false,
 }: BookPreviewContentProps) => {
+  // Calculate dimensions based on device
+  const width = isMobile ? "100%" : "600px";
+  const height = isMobile ? "auto" : "960px";
+  const maxHeight = isMobile ? "80vh" : "90vh";
+
   return (
     <div 
       className="relative bg-white shadow-xl rounded-md transition-transform"
       style={{ 
         transform: `scale(${zoomLevel})`,
         transformOrigin: 'center',
-        width: '600px',  // Adjusted for 5x8 aspect ratio (5:8 = 600:960)
-        height: '960px', // 5x8 inch ratio
-        maxHeight: '90vh'
+        width,
+        height,
+        maxHeight,
+        aspectRatio: isMobile ? "5/8" : "auto" // Maintain aspect ratio on mobile
       }}
     >
       {/* Book Pages */}
@@ -84,6 +92,7 @@ const BookPreviewContent = ({
         totalPageCount={totalPageCount}
         goToNextPage={goToNextPage}
         goToPrevPage={goToPrevPage}
+        isMobile={isMobile}
       />
     </div>
   );

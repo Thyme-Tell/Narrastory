@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCoverData } from "@/hooks/useCoverData";
 import { calculateTotalPages } from "@/utils/bookPagination";
 import { CoverData } from "./cover/CoverTypes";
+import { useIsMobile } from "@/hooks/use-mobile";
 import BookProgressHeader from "./book-progress/BookProgressHeader";
 import BookProgressOptions from "./book-progress/BookProgressOptions";
 import BookProgressBar from "./book-progress/BookProgressBar";
@@ -21,6 +22,8 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const isMobile = useIsMobile();
+  
   const { 
     coverData, 
     saveCoverData, 
@@ -92,10 +95,8 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
 
   const handleSaveCover = async (newCoverData: CoverData) => {
     console.log("Saving new cover data:", newCoverData);
-    const success = await saveCoverData(newCoverData);
-    if (success) {
-      refreshCoverData();
-    }
+    await saveCoverData(newCoverData);
+    refreshCoverData();
   };
 
   if (isHidden) {
@@ -114,9 +115,18 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         <span className="font-medium text-atlantic">{profile?.first_name?.toUpperCase()} {profile?.last_name?.toUpperCase()}</span>
       </nav>
       
-      <div className="flex justify-between items-start">
-        <div>
+      <div className={`flex ${isMobile ? "flex-col" : "justify-between"} items-center`}>
+        <div className={isMobile ? "w-full mb-6" : ""}>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
+          
+          {isMobile && (
+            <div className="mb-6">
+              <BookCoverPreview 
+                coverData={coverData}
+                isLoading={isCoverLoading}
+              />
+            </div>
+          )}
           
           <div className="flex flex-col space-y-6">
             <BookProgressOptions 
@@ -132,10 +142,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           </div>
         </div>
         
-        <BookCoverPreview 
-          coverData={coverData}
-          isLoading={isCoverLoading}
-        />
+        {!isMobile && (
+          <BookCoverPreview 
+            coverData={coverData}
+            isLoading={isCoverLoading}
+          />
+        )}
       </div>
 
       <BookEditorModals

@@ -6,6 +6,7 @@ import BackgroundTab from "./BackgroundTab";
 import TextTab from "./TextTab";
 import LayoutTab from "./LayoutTab";
 import { CoverData } from "../CoverTypes";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EditorControlPanelProps {
   coverData: CoverData;
@@ -35,9 +36,10 @@ const EditorControlPanel = ({
   onLayoutChange,
 }: EditorControlPanelProps) => {
   const [activeTab, setActiveTab] = useState("background");
+  const isMobile = useIsMobile();
 
   return (
-    <div className="w-1/3 border-r p-4 overflow-y-auto">
+    <div className={`${isMobile ? "w-full border-b" : "w-1/3 border-r"} p-4 overflow-y-auto`}>
       <h2 className="text-xl font-semibold mb-4">Edit Book Cover</h2>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -74,7 +76,7 @@ const EditorControlPanel = ({
         </TabsContent>
       </Tabs>
       
-      <div className="absolute bottom-4 left-4 right-4 flex justify-end gap-2">
+      <div className={`${isMobile ? "mt-4" : "absolute bottom-4 left-4 right-4"} flex justify-end gap-2`}>
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>

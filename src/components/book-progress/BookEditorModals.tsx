@@ -1,4 +1,5 @@
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import CoverEditor from "../cover/CoverEditor";
 import BookPreview from "../book/BookPreview";
 import { CoverData } from "../cover/CoverTypes";
@@ -22,6 +23,8 @@ const BookEditorModals = ({
   onClosePreview,
   onSaveCover
 }: BookEditorModalsProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <>
       <CoverEditor
@@ -36,6 +39,7 @@ const BookEditorModals = ({
         profileId={profileId}
         open={isPreviewOpen}
         onClose={onClosePreview}
+        isMobile={isMobile}
       />
     </>
   );
