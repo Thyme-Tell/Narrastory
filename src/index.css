@@ -175,6 +175,25 @@
     rgba(0,0,0,0) 100%);
 }
 
+/* Enhanced Book Styles with Gradients */
+.book-cover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.4) 35%, 
+    rgba(255,255,255,0.1) 65%, 
+    rgba(0,0,0,0.15) 100%);
+  z-index: 5;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  border-radius: 2px 5px 5px 2px;
+}
+
 /* Cover editor specific styles */
 .cover-editor-preview {
   height: 60vh;

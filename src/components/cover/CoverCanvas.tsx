@@ -189,6 +189,7 @@ const CoverCanvas = ({
         />
         <div className="book-spine"></div>
         <div className="book-cover-lighting"></div>
+        <div className="book-cover-overlay"></div>
       </div>
     </div>
   );
