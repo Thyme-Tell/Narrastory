@@ -18,7 +18,6 @@ export function useCoverData(profileId: string) {
       }
 
       try {
-        // Using raw query to avoid TypeScript errors with table that's not in the generated types
         const { data, error } = await supabase
           .from('book_covers')
           .select('cover_data')
@@ -56,13 +55,27 @@ export function useCoverData(profileId: string) {
 
       if (checkError) throw checkError;
 
+      // Convert CoverData to a JSON-compatible object
+      const coverDataJson = {
+        ...newCoverData,
+        backgroundColor: newCoverData.backgroundColor || null,
+        backgroundImage: newCoverData.backgroundImage || null,
+        titleText: newCoverData.titleText || null,
+        authorText: newCoverData.authorText || null,
+        titleColor: newCoverData.titleColor || null,
+        authorColor: newCoverData.authorColor || null,
+        titleSize: newCoverData.titleSize || null,
+        authorSize: newCoverData.authorSize || null,
+        layout: newCoverData.layout || null
+      };
+
       let result;
       
       if (existingRecord) {
         // Update existing record
         result = await supabase
           .from('book_covers')
-          .update({ cover_data: newCoverData })
+          .update({ cover_data: coverDataJson })
           .eq('profile_id', profileId);
       } else {
         // Insert new record
@@ -70,7 +83,7 @@ export function useCoverData(profileId: string) {
           .from('book_covers')
           .insert({ 
             profile_id: profileId, 
-            cover_data: newCoverData 
+            cover_data: coverDataJson 
           });
       }
 
