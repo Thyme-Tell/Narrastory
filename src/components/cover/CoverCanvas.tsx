@@ -95,7 +95,13 @@ const CoverCanvas = ({
         // Handle multiline text
         const titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, titleSize);
         titleLines.forEach((line, index) => {
+          // Add text shadow for 3D effect
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = 2;
+          ctx.shadowOffsetX = 1;
+          ctx.shadowOffsetY = 1;
           ctx.fillText(line, canvas.width / 2, titleY + index * (titleSize * 1.2));
+          ctx.shadowColor = 'transparent';
         });
       }
       
@@ -114,7 +120,13 @@ const CoverCanvas = ({
           authorY = canvas.height * 0.55 + (coverData.titleText ? ((coverData.titleSize || 36) * scale * 1.5) : 0);
         }
         
+        // Add text shadow for 3D effect
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 1;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
         ctx.fillText(coverData.authorText, canvas.width / 2, authorY);
+        ctx.shadowColor = 'transparent';
       }
     }
     
@@ -148,21 +160,36 @@ const CoverCanvas = ({
   };
 
   return (
-    <div className="book-cover-container">
-      <canvas
-        ref={canvasRef}
-        className={`shadow-lg rounded-md book-canvas ${className}`}
-        style={{ 
-          width: `${width}px`, 
-          height: `${height}px`,
-          maxWidth: '100%',
-          maxHeight: '100%',
-          objectFit: 'contain',
-          aspectRatio: '5/8'
-        }}
-      />
-      <div className="book-spine-overlay"></div>
-      <div className="book-cover-overlay"></div>
+    <div className="book-container">
+      {/* Book pages (behind the cover) */}
+      <div className="book-pages">
+        <div className="book-page"></div>
+        <div className="book-page"></div>
+        <div className="book-page"></div>
+        <div className="book-page"></div>
+        <div className="book-page"></div>
+        <div className="book-page"></div>
+        <div className="book-page"></div>
+        <div className="book-page"></div>
+      </div>
+      
+      {/* Book cover */}
+      <div className="book-cover-wrapper">
+        <canvas
+          ref={canvasRef}
+          className={`book-cover ${className}`}
+          style={{ 
+            width: `${width}px`, 
+            height: `${height}px`,
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+            aspectRatio: '5/8'
+          }}
+        />
+        <div className="book-spine"></div>
+        <div className="book-cover-lighting"></div>
+      </div>
     </div>
   );
 };

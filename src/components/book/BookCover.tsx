@@ -9,16 +9,19 @@ interface BookCoverProps {
 }
 
 const BookCover = ({ coverData, authorName }: BookCoverProps) => {
+  // Make sure authorName is included in the coverData
+  const coverWithAuthor = {
+    ...coverData,
+    authorText: coverData.authorText || `By ${authorName}`
+  };
+
   return (
     <div className="w-full h-full relative flex items-center justify-center">
       <CoverCanvas 
-        coverData={coverData} 
+        coverData={coverWithAuthor} 
         width={600}
         height={800}
       />
-      <div className="absolute bottom-8 w-full text-center">
-        <p className="text-white text-shadow font-medium">By {authorName}</p>
-      </div>
     </div>
   );
 };
