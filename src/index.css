@@ -10,6 +10,18 @@
   .no-indent {
     text-indent: 0 !important;
   }
+  
+  .drop-cap:first-letter {
+    float: left;
+    font-size: 4em;
+    line-height: 0.8;
+    padding-right: 0.1em;
+    padding-top: 0.1em;
+    margin-bottom: -0.1em;
+    font-family: 'Playfair Display', serif;
+    font-weight: bold;
+    color: #2b4c38;
+  }
 }
 
 /* Import Playfair Display font for book typography */

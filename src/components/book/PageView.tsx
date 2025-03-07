@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Story } from "@/types/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -140,7 +141,12 @@ const PageView = ({
           
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => (
-              <p key={index} className="indent-8 text-[11pt] text-justify">
+              <p 
+                key={index} 
+                className={`text-[11pt] text-justify ${
+                  isFirstPage && index === 0 ? "drop-cap" : "indent-8"
+                }`}
+              >
                 {paragraph}
               </p>
             ))
