@@ -1,9 +1,306 @@
 
-/* Import base styles and Tailwind */
-@import './styles/base.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Import component-specific styles */
-@import './styles/book.css';
-@import './styles/book-cover.css';
-@import './styles/animations.css';
-@import './styles/mobile.css';
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .no-indent {
+    text-indent: 0 !important;
+  }
+  
+  .drop-cap:first-letter {
+    initial-letter: 2;
+    -webkit-initial-letter: 2;
+    margin-right: 0.5em;
+    font-weight: bold;
+    font-size: 3.5em;
+    float: left;
+    line-height: 0.8;
+    margin-top: 0.1em;
+  }
+}
+
+/* Import Playfair Display font for book typography */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* Card styles */
+.bg-card {
+  background-color: white !important;
+}
+
+/* Dropdown menu styles */
+.radix-dropdown-content {
+  background-color: white !important;
+  opacity: 1 !important;
+}
+
+/* Book preview styles */
+.book-page {
+  /* 5x8 inch book format with proper aspect ratio */
+  aspect-ratio: 5/8;
+  max-width: 100%;
+  max-height: 100%;
+  background-color: #f5f5f0; /* Cream paper color */
+  overflow: hidden; /* Prevent content overflow */
+  position: relative; /* For absolute positioning of elements if needed */
+  font-family: 'Playfair Display', serif;
+}
+
+.book-content {
+  /* Standard book content width with margins */
+  max-width: 90%;
+  margin: 0 auto;
+  font-family: 'Playfair Display', serif;
+}
+
+.book-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  word-break: normal;
+  color: #333333;
+}
+
+/* Text indentation for paragraphs to match book format */
+.book-page p {
+  text-indent: 2em;
+  margin-bottom: 0; /* Remove space between paragraphs */
+  font-size: 11pt;
+  text-align: justify; /* Justify text on both sides */
+}
+
+/* First paragraph of chapters should not be indented */
+.book-page .chapter-start p:first-of-type {
+  text-indent: 0;
+}
+
+/* Story title on first page */
+.book-page h1 {
+  font-size: 16pt;
+  text-align: center;
+  margin-bottom: 1.5em;
+  font-weight: bold;
+}
+
+/* Ensure media content stays within page bounds */
+.book-page img, .book-page video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Add animation for page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Book preview container with 5:8 aspect ratio */
+.book-preview-container {
+  width: 100%;
+  position: relative;
+  aspect-ratio: 5/8;
+  overflow: hidden;
+}
+
+.book-preview-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Book Cover Styles */
+.book-cover-container {
+  position: relative;
+  display: inline-block;
+}
+
+.book-canvas {
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateY(2deg);
+  transition: transform 0.3s ease;
+}
+
+.book-cover-container:hover .book-canvas {
+  transform: perspective(1000px) rotateY(4deg);
+}
+
+.book-spine-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 20px;
+  background: linear-gradient(90deg, 
+    rgba(0,0,0,0.4) 0%, 
+    rgba(0,0,0,0.1) 20%, 
+    rgba(0,0,0,0.05) 40%, 
+    rgba(0,0,0,0) 100%);
+  z-index: 10;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.book-cover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(2,0,36,0.3) 0%, 
+    rgba(0,0,0,0.3) 2%, 
+    rgba(255,255,255,0.3) 3%, 
+    rgba(247,254,255,0.3) 5%, 
+    rgba(0,0,0,0.2) 7%, 
+    rgba(255,255,255,0.2) 13%, 
+    rgba(255,255,255,0.1) 100%);
+  pointer-events: none;
+  border-radius: 4px;
+  z-index: 5;
+}
+
+/* Cover editor specific styles */
+.cover-editor-preview {
+  height: 60vh;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-editor-controls {
+  height: 40vh;
+  overflow-y: auto;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .book-preview-container {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .book-text {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  
+  /* Adjust controls for book preview on mobile */
+  .mobile-book-controls {
+    transform: scale(0.85);
+  }
+  
+  /* Add bottom padding for mobile cover editor to avoid button overlap */
+  .cover-editor-mobile {
+    padding-bottom: 80px; /* Space for fixed bottom buttons */
+  }
+  
+  /* Fixed controls styling */
+  .cover-editor-fixed-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding: 10px 16px;
+  }
+  
+  /* Cover editor mobile adjustments */
+  .cover-editor-preview {
+    height: 40%;
+  }
+  
+  .cover-editor-controls {
+    height: 60%;
+    padding-bottom: 72px; /* Add padding to ensure content isn't hidden behind fixed footer */
+  }
+  
+  /* Book preview modal mobile optimizations */
+  .book-preview-modal-mobile {
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ensure tables of contents doesn't overflow */
+  .toc-mobile {
+    max-width: 80vw;
+    overflow-x: hidden;
+  }
+  
+  /* Fix for iPhone 16 and similar devices - ensure fixed footers are always visible */
+  .fixed-footer-ios {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  
+  /* Add padding to content to prevent it from being hidden behind fixed footer */
+  .ios-footer-padding {
+    padding-bottom: 80px;
+  }
+  
+  /* Mobile book preview text size adjustments */
+  .book-preview-mobile-text {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+  
+  .book-preview-mobile-title {
+    font-size: 18px !important;
+  }
+  
+  .book-preview-mobile-content {
+    padding: 12px !important;
+  }
+}
+
+/* Animations for mobile transitions */
+@keyframes slide-in-right {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Touch-friendly style improvements */
+@media (max-width: 768px) {
+  /* Make touch targets larger */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text from getting too small */
+  .min-text-size {
+    font-size: 16px !important;
+  }
+  
+  /* Ensure buttons have enough spacing */
+  .mobile-button-spacing > * {
+    margin: 0.25rem !important;
+  }
+}

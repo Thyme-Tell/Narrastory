@@ -1,13 +1,12 @@
-
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ImageCropperProps {
   imageUrl: string;
-  onCropComplete: (croppedBlob: Blob) => Promise<void>;
+  onCropComplete: (croppedBlob: Blob) => void;
   onCancel: () => void;
   open: boolean;
 }
@@ -20,15 +19,7 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
     x: 5,
     y: 5,
   });
-  const [imgLoaded, setImgLoaded] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
-
-  // Reset state when a new image is loaded
-  useEffect(() => {
-    if (open) {
-      setImgLoaded(false);
-    }
-  }, [open, imageUrl]);
 
   const getCroppedImg = async () => {
     try {
@@ -81,48 +72,39 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
     try {
       const croppedBlob = await getCroppedImg();
       if (croppedBlob) {
-        await onCropComplete(croppedBlob);
+        onCropComplete(croppedBlob);
       }
     } catch (error) {
       console.error('Error in crop completion:', error);
     }
   };
 
-  const handleImageLoad = () => {
-    if (imageRef.current) {
-      imageRef.current.crossOrigin = "anonymous";
-      setImgLoaded(true);
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={() => onCancel()}>
       <DialogContent className="max-w-[90vw] w-fit p-6 [&>button]:hidden">
-        <DialogTitle className="sr-only">Crop Image</DialogTitle>
         <div className="space-y-4">
-          {imageUrl && (
-            <ReactCrop
-              crop={crop}
-              onChange={(c) => setCrop(c)}
-            >
-              <img
-                ref={imageRef}
-                src={imageUrl}
-                alt="Crop preview"
-                className="max-h-[70vh] object-contain"
-                crossOrigin="anonymous"
-                onLoad={handleImageLoad}
-              />
-            </ReactCrop>
-          )}
+          <ReactCrop
+            crop={crop}
+            onChange={(c) => setCrop(c)}
+          >
+            <img
+              ref={imageRef}
+              src={imageUrl}
+              alt="Crop preview"
+              className="max-h-[70vh] object-contain"
+              onLoad={() => {
+                // Ensure image is loaded before allowing crop
+                if (imageRef.current) {
+                  imageRef.current.crossOrigin = "anonymous";
+                }
+              }}
+            />
+          </ReactCrop>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleCropComplete}
-              disabled={!imgLoaded}
-            >
+            <Button onClick={handleCropComplete}>
               Apply Crop
             </Button>
           </div>
