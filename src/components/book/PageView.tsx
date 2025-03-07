@@ -127,15 +127,15 @@ const PageView = ({
       
       <div className="flex-1 mx-auto book-content px-12 py-10 overflow-y-auto">
         {/* Story Content */}
-        <div className="prose max-w-none font-serif">
+        <div className="prose max-w-none font-serif text-[12pt]">
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => (
-              <p key={index} className="mb-4 text-lg leading-relaxed indent-8">
+              <p key={index} className="mb-4 leading-relaxed indent-8 text-[12pt]">
                 {paragraph}
               </p>
             ))
           ) : (
-            <p className="text-gray-400 italic">No content on this page</p>
+            <p className="text-gray-400 italic text-[12pt]">No content on this page</p>
           )}
         </div>
       </div>

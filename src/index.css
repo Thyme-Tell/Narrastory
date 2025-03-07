@@ -38,7 +38,7 @@
 
 .book-text {
   font-family: 'Playfair Display', serif;
-  font-size: 16px;
+  font-size: 12pt;
   line-height: 1.6;
   overflow-wrap: break-word;
   word-break: normal;
@@ -49,6 +49,7 @@
 .book-page p {
   text-indent: 2em;
   margin-bottom: 1em;
+  font-size: 12pt;
 }
 
 /* First paragraph of chapters should not be indented */
