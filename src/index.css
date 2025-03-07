@@ -32,6 +32,12 @@
   background-color: white !important;
 }
 
+/* Dropdown menu styles */
+.radix-dropdown-content {
+  background-color: white !important;
+  opacity: 1 !important;
+}
+
 /* Book preview styles */
 .book-page {
   /* 5x8 inch book format with proper aspect ratio */
