@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData } from "../CoverTypes";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useCoverEditor(
   profileId: string, 
@@ -26,6 +27,7 @@ export function useCoverEditor(
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   const handleSave = () => {
     onSave(coverData);
@@ -92,16 +94,24 @@ export function useCoverEditor(
     setIsUploading(true);
 
     try {
+      // Check authentication status first
+      if (!isAuthenticated) {
+        throw new Error("You must be logged in to upload images");
+      }
+
       const fileExt = 'jpg';
-      const fileName = `book-cover-${profileId}-${Date.now()}.${fileExt}`;
+      const fileName = `cover-${profileId}-${Date.now()}.${fileExt}`;
       
       console.log('Uploading cropped image to storage bucket:', fileName);
       
+      // Create a file path that includes the user ID to help with RLS
+      const filePath = `${profileId}/${fileName}`;
+      
       const { error: uploadError, data: uploadData } = await supabase.storage
         .from('book-covers')
-        .upload(fileName, croppedBlob, {
+        .upload(filePath, croppedBlob, {
           cacheControl: '3600',
-          upsert: true, // Changed to true to replace if exists
+          upsert: true,
         });
 
       if (uploadError) {
@@ -113,7 +123,7 @@ export function useCoverEditor(
       
       const { data } = supabase.storage
         .from('book-covers')
-        .getPublicUrl(fileName);
+        .getPublicUrl(filePath);
 
       console.log('Got public URL:', data.publicUrl);
       
@@ -131,7 +141,9 @@ export function useCoverEditor(
       toast({
         variant: "destructive",
         title: "Upload failed",
-        description: "There was an error uploading your image. Please try again.",
+        description: typeof error === 'object' && error !== null && 'message' in error 
+          ? String(error.message)
+          : "There was an error uploading your image. Please try again.",
       });
     } finally {
       setIsUploading(false);

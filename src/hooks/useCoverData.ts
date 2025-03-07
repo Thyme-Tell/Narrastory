@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -88,6 +89,16 @@ export function useCoverData(profileId: string) {
         variant: "destructive",
         title: "Error",
         description: "Unable to identify which profile to save to",
+      });
+      return false;
+    }
+
+    if (!isAuthenticated) {
+      console.error("Cannot save: User not authenticated");
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "You must be logged in to save your cover",
       });
       return false;
     }
