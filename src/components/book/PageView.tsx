@@ -66,14 +66,14 @@ const PageView = ({
   if (isMediaPage && mediaItem) {
     return (
       <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
-        {/* Book title at top */}
-        <div className="text-center italic text-green-800 font-serif pt-6">
+        {/* Book title at top with consistent styling across all pages */}
+        <div className="text-center italic text-green-800 font-serif pt-6 w-full">
           {bookTitle}
         </div>
         
-        <div className="max-w-full max-h-[75%] flex justify-center items-center">
+        <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1">
           {mediaItem.content_type.startsWith("image/") ? (
-            <div className="max-h-full">
+            <div className="max-h-full flex flex-col items-center">
               {/* Simplified display of image without edit functionality */}
               <div className="media-display">
                 <img 
@@ -89,11 +89,11 @@ const PageView = ({
                 />
               </div>
               {mediaItem.caption && (
-                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt]">{mediaItem.caption}</p>
+                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%]">{mediaItem.caption}</p>
               )}
             </div>
           ) : mediaItem.content_type.startsWith("video/") ? (
-            <div className="media-display">
+            <div className="media-display flex flex-col items-center">
               <video 
                 src={getPublicUrl(mediaItem.file_path)} 
                 controls 
@@ -107,7 +107,7 @@ const PageView = ({
                 Your browser does not support the video tag.
               </video>
               {mediaItem.caption && (
-                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt]">{mediaItem.caption}</p>
+                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%]">{mediaItem.caption}</p>
               )}
             </div>
           ) : (
@@ -130,7 +130,7 @@ const PageView = ({
 
   return (
     <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col">
-      {/* Book title at top - for all pages */}
+      {/* Book title at top - consistent with media pages */}
       <div className="text-center italic text-green-800 font-serif pt-6">
         {bookTitle}
       </div>
