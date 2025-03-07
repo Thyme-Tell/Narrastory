@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Story } from "@/types/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -50,10 +49,8 @@ const PageView = ({
     },
   });
 
-  // Get content for this page using our pagination utility
   const pageContent = getPageContent(story, pageNumber);
 
-  // Helper function to get public URL for media items
   const getPublicUrl = (filePath: string) => {
     const { data } = supabase.storage
       .from("story-media")
@@ -62,11 +59,9 @@ const PageView = ({
     return data.publicUrl;
   };
 
-  // If this is a media page, only show the media item
   if (isMediaPage && mediaItem) {
     return (
       <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
-        {/* Book title at top with consistent styling across all pages */}
         <div className="text-center italic text-green-800 font-serif pt-6 w-full">
           {bookTitle}
         </div>
@@ -74,7 +69,6 @@ const PageView = ({
         <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1">
           {mediaItem.content_type.startsWith("image/") ? (
             <div className="max-h-full flex flex-col items-center">
-              {/* Simplified display of image without edit functionality */}
               <div className="media-display">
                 <img 
                   src={getPublicUrl(mediaItem.file_path)} 
@@ -89,7 +83,9 @@ const PageView = ({
                 />
               </div>
               {mediaItem.caption && (
-                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%]">{mediaItem.caption}</p>
+                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%] no-indent">
+                  {mediaItem.caption}
+                </p>
               )}
             </div>
           ) : mediaItem.content_type.startsWith("video/") ? (
@@ -107,7 +103,9 @@ const PageView = ({
                 Your browser does not support the video tag.
               </video>
               {mediaItem.caption && (
-                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%]">{mediaItem.caption}</p>
+                <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%] no-indent">
+                  {mediaItem.caption}
+                </p>
               )}
             </div>
           ) : (
@@ -117,7 +115,6 @@ const PageView = ({
           )}
         </div>
         
-        {/* Centered page number at bottom */}
         <div className="absolute bottom-8 w-full text-center">
           <span className="text-gray-700">{globalPageNumber}</span>
         </div>
@@ -125,18 +122,15 @@ const PageView = ({
     );
   }
 
-  // Check if this is the first page of the story to display the title with larger font
   const isFirstPage = pageNumber === 1;
 
   return (
     <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col">
-      {/* Book title at top - consistent with media pages */}
       <div className="text-center italic text-green-800 font-serif pt-6">
         {bookTitle}
       </div>
       
       <div className="flex-1 mx-auto book-content px-12 py-10 overflow-y-auto">
-        {/* Story Content */}
         <div className="prose max-w-none font-serif text-[11pt]">
           {isFirstPage && (
             <h1 className="text-center font-serif text-[16pt] mb-6 font-bold">
@@ -156,7 +150,6 @@ const PageView = ({
         </div>
       </div>
       
-      {/* Centered page number at bottom */}
       <div className="w-full text-center pb-8">
         <span className="text-gray-700">{globalPageNumber}</span>
       </div>
