@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -38,22 +39,4 @@
 
 .read-the-docs {
   color: #888;
-}
-
-/* Book format styling */
-.book-format {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  background-color: #f5f5f0; /* Cream paper color */
-}
-
-/* Improved book cover styling */
-.book-cover {
-  position: relative;
-  transform: perspective(1000px) rotateY(2deg);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
-}
-
-.book-cover:hover {
-  transform: perspective(1000px) rotateY(4deg);
 }
