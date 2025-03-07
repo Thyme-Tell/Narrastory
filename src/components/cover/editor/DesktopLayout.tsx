@@ -10,7 +10,6 @@ interface DesktopLayoutProps {
   onSave: () => void;
   onClose: () => void;
   onBackgroundColorChange: (color: string) => void;
-  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: () => void;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
@@ -24,7 +23,6 @@ const DesktopLayout = ({
   onSave,
   onClose,
   onBackgroundColorChange,
-  onFileUpload,
   onRemoveImage,
   onTextChange,
   onTextColorChange,
@@ -40,7 +38,6 @@ const DesktopLayout = ({
           onSave={onSave}
           onCancel={onClose}
           onBackgroundColorChange={onBackgroundColorChange}
-          onFileUpload={onFileUpload}
           onRemoveImage={onRemoveImage}
           isUploading={isUploading}
           onTextChange={onTextChange}

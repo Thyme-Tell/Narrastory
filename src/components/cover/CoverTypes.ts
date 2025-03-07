@@ -1,4 +1,3 @@
-
 export interface CoverData {
   backgroundImage?: string;
   backgroundColor?: string;
@@ -24,9 +23,7 @@ export interface CoverEditorProps {
 export interface BackgroundTabProps {
   coverData: CoverData;
   onBackgroundColorChange: (color: string) => void;
-  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: () => void;
-  isUploading: boolean;
 }
 
 export interface TextTabProps {
@@ -46,7 +43,7 @@ export const DEFAULT_COVER_DATA: CoverData = {
   authorText: "",
   titleColor: "#303441",
   authorColor: "#303441",
-  titleSize: 21, // Updated to be in the middle of the new range (18-24)
-  authorSize: 14, // Updated to be in the middle of the new range (12-16)
+  titleSize: 21,
+  authorSize: 14,
   layout: 'centered',
 };

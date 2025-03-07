@@ -13,7 +13,6 @@ interface EditorControlPanelProps {
   onSave: () => void;
   onCancel: () => void;
   onBackgroundColorChange: (color: string) => void;
-  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: () => void;
   isUploading: boolean;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
@@ -27,7 +26,6 @@ const EditorControlPanel = ({
   onSave,
   onCancel,
   onBackgroundColorChange,
-  onFileUpload,
   onRemoveImage,
   isUploading,
   onTextChange,
@@ -63,9 +61,7 @@ const EditorControlPanel = ({
           <BackgroundTab
             coverData={coverData}
             onBackgroundColorChange={onBackgroundColorChange}
-            onFileUpload={onFileUpload}
             onRemoveImage={onRemoveImage}
-            isUploading={isUploading}
           />
         )}
         

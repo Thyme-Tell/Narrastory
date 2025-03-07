@@ -1,8 +1,6 @@
 
-import { Check, Upload } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { BackgroundTabProps } from "../CoverTypes";
 
 const BACKGROUND_COLORS = [
@@ -12,42 +10,23 @@ const BACKGROUND_COLORS = [
 const BackgroundTab = ({
   coverData,
   onBackgroundColorChange,
-  onFileUpload,
-  onRemoveImage,
-  isUploading
+  onRemoveImage
 }: BackgroundTabProps) => {
   return (
     <div className="space-y-4">
-      <div>
-        <Label className="block mb-2">Upload Image</Label>
-        <div className="flex items-center gap-2 mb-4">
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={onFileUpload}
-            className="hidden"
-            id="cover-image-upload"
-            disabled={isUploading}
-          />
-          <Label 
-            htmlFor="cover-image-upload" 
-            className="cursor-pointer flex items-center justify-center gap-2 h-10 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
-          >
-            <Upload className="h-4 w-4" />
-            {isUploading ? "Uploading..." : "Upload Image"}
-          </Label>
-          
-          {coverData.backgroundImage && (
-            <Button 
-              variant="outline" 
-              size="sm"
+      {coverData.backgroundImage && (
+        <div>
+          <Label className="block mb-2">Background Image</Label>
+          <div className="flex items-center gap-2 mb-4">
+            <button 
+              className="h-10 px-4 py-2 bg-destructive text-destructive-foreground rounded-md text-sm font-medium"
               onClick={onRemoveImage}
             >
-              Remove
-            </Button>
-          )}
+              Remove Image
+            </button>
+          </div>
         </div>
-      </div>
+      )}
       
       <div>
         <Label className="block mb-2">Background Color</Label>
