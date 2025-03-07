@@ -48,7 +48,7 @@ const BookPreviewContent = ({
   const maxHeight = isMobile ? "75vh" : "90vh";
   
   // Get book title from cover data
-  const bookTitle = coverData?.title || "My Book";
+  const bookTitle = coverData?.titleText || "My Book";
 
   return (
     <div 
