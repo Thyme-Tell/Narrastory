@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -60,6 +61,27 @@ export function useCoverEditor(
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please upload a JPEG, PNG or WebP image",
+      });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "Image must be less than 5MB",
+      });
+      return;
+    }
+
     const fileUrl = URL.createObjectURL(file);
     setUploadedImageUrl(fileUrl);
     setIsCropperOpen(true);
@@ -73,19 +95,28 @@ export function useCoverEditor(
       const fileExt = 'jpg';
       const fileName = `book-cover-${profileId}-${Date.now()}.${fileExt}`;
       
-      const { error: uploadError } = await supabase.storage
+      console.log('Uploading cropped image to storage bucket:', fileName);
+      
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('book-covers')
         .upload(fileName, croppedBlob, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true, // Changed to true to replace if exists
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error details:', uploadError);
+        throw uploadError;
+      }
 
+      console.log('Upload successful, getting public URL');
+      
       const { data } = supabase.storage
         .from('book-covers')
         .getPublicUrl(fileName);
 
+      console.log('Got public URL:', data.publicUrl);
+      
       setCoverData({
         ...coverData,
         backgroundImage: data.publicUrl,
@@ -100,7 +131,7 @@ export function useCoverEditor(
       toast({
         variant: "destructive",
         title: "Upload failed",
-        description: "There was an error uploading your image",
+        description: "There was an error uploading your image. Please try again.",
       });
     } finally {
       setIsUploading(false);
@@ -111,6 +142,10 @@ export function useCoverEditor(
     setCoverData({
       ...coverData,
       backgroundImage: undefined,
+    });
+    toast({
+      title: "Image removed",
+      description: "Background image has been removed",
     });
   };
 
