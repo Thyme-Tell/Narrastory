@@ -25,7 +25,7 @@ const BookProgressBar = ({
       )}
       {currentPageCount >= minPagesRequired && (
         <p className="text-sm text-[#155B4A]">
-          ✓ Your book meets the minimum length requirement
+          ✓ Your book meets the minimum length requirement ({minPagesRequired} pages) for printing
         </p>
       )}
     </div>
