@@ -18,6 +18,7 @@ interface PageViewProps {
   isMediaPage?: boolean;
   mediaItem?: StoryMediaItem;
   isMobile?: boolean;
+  globalPageNumber?: number; // Added to display the page number at the bottom
 }
 
 const PageView = ({ 
@@ -26,7 +27,8 @@ const PageView = ({
   totalPagesInStory = 1,
   isMediaPage = false,
   mediaItem,
-  isMobile = false
+  isMobile = false,
+  globalPageNumber = 1
 }: PageViewProps) => {
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
@@ -107,37 +109,28 @@ const PageView = ({
             </div>
           )}
         </div>
+        
+        {/* Centered page number at bottom */}
+        <div className="absolute bottom-8 w-full text-center">
+          <span className="text-gray-700">{globalPageNumber}</span>
+        </div>
       </div>
     );
   }
 
-  const titleFontSize = isMobile ? "text-lg" : "text-2xl";
-  const contentFontSize = isMobile ? "text-sm" : "text-base";
-  const paragraphSpacing = isMobile ? "mb-2" : "mb-4";
-
   return (
-    <div className="w-full h-full bg-white book-page">
-      <div className="w-full mx-auto book-content p-3 sm:p-6 overflow-y-auto" style={{ maxHeight: "100%" }}>
-        {/* Story Header - only on first page */}
-        {pageNumber === 1 && (
-          <div className="mb-3 sm:mb-5">
-            <div className="flex justify-between items-baseline flex-wrap">
-              <h2 className={`${titleFontSize} font-semibold mb-1`}>
-                {story.title || "Untitled Story"}
-              </h2>
-              <span className="text-xs text-gray-500">
-                {format(new Date(story.created_at), "MMMM d, yyyy")}
-              </span>
-            </div>
-            <div className="text-right text-xs text-gray-400">Page {pageNumber} of {totalPagesInStory}</div>
-          </div>
-        )}
-
+    <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col">
+      {/* Story title at top - for all pages of the story */}
+      <div className="text-center italic text-green-800 font-serif pt-6">
+        {story.title || "Untitled Story"}
+      </div>
+      
+      <div className="flex-1 mx-auto book-content px-12 py-10 overflow-y-auto">
         {/* Story Content */}
-        <div className={`prose max-w-none ${contentFontSize}`}>
+        <div className="prose max-w-none font-serif">
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => (
-              <p key={index} className={paragraphSpacing}>
+              <p key={index} className="mb-4 text-lg leading-relaxed indent-8">
                 {paragraph}
               </p>
             ))
@@ -145,6 +138,11 @@ const PageView = ({
             <p className="text-gray-400 italic">No content on this page</p>
           )}
         </div>
+      </div>
+      
+      {/* Centered page number at bottom */}
+      <div className="w-full text-center pb-8">
+        <span className="text-gray-700">{globalPageNumber}</span>
       </div>
     </div>
   );

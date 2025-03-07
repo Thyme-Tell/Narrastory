@@ -49,7 +49,7 @@ const BookPreviewContent = ({
 
   return (
     <div 
-      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden"
+      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format"
       style={{ 
         transform: `scale(${zoomLevel})`,
         transformOrigin: 'center',
@@ -80,6 +80,7 @@ const BookPreviewContent = ({
                 isMediaPage={currentStoryInfo.isMediaPage}
                 mediaItem={currentStoryInfo.mediaItem}
                 isMobile={isMobile}
+                globalPageNumber={currentPage}
               />
             )
           )}
