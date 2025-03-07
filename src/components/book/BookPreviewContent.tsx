@@ -46,10 +46,13 @@ const BookPreviewContent = ({
   // Calculate dimensions based on device while maintaining aspect ratio
   const maxWidth = isMobile ? "90%" : "600px";
   const maxHeight = isMobile ? "75vh" : "90vh";
+  
+  // Get book title from cover data
+  const bookTitle = coverData?.titleText || "My Book";
 
   return (
     <div 
-      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden"
+      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format"
       style={{ 
         transform: `scale(${zoomLevel})`,
         transformOrigin: 'center',
@@ -80,6 +83,8 @@ const BookPreviewContent = ({
                 isMediaPage={currentStoryInfo.isMediaPage}
                 mediaItem={currentStoryInfo.mediaItem}
                 isMobile={isMobile}
+                globalPageNumber={currentPage}
+                bookTitle={bookTitle}
               />
             )
           )}

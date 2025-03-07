@@ -38,7 +38,7 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
             coverData={coverData} 
             width={isMobile ? 200 : 240}
             height={isMobile ? 320 : 384}
-            className="mx-auto shadow-lg"
+            className="mx-auto"
           />
         </div>
       </div>

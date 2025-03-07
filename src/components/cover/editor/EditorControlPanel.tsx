@@ -73,7 +73,6 @@ const EditorControlPanel = ({
           <TextTab
             coverData={coverData}
             onTextChange={onTextChange}
-            onTextColorChange={onTextColorChange}
             onFontSizeChange={onFontSizeChange}
           />
         )}

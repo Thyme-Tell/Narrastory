@@ -32,7 +32,6 @@ export interface BackgroundTabProps {
 export interface TextTabProps {
   coverData: CoverData;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
-  onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
 }
 
@@ -42,11 +41,11 @@ export interface LayoutTabProps {
 }
 
 export const DEFAULT_COVER_DATA: CoverData = {
-  backgroundColor: "#f8f9fa",
+  backgroundColor: "#CADCDA",
   titleText: "My Stories",
   authorText: "",
-  titleColor: "#333333",
-  authorColor: "#666666",
+  titleColor: "#303441",
+  authorColor: "#303441",
   titleSize: 21, // Updated to be in the middle of the new range (18-24)
   authorSize: 14, // Updated to be in the middle of the new range (12-16)
   layout: 'centered',

@@ -80,7 +80,7 @@ const CoverCanvas = ({
       if (coverData.titleText) {
         const titleSize = (coverData.titleSize || 36) * scale;
         ctx.font = `bold ${titleSize}px 'Rosemartin', serif`;
-        ctx.fillStyle = coverData.titleColor || '#333333';
+        ctx.fillStyle = coverData.titleColor || '#303441';
         ctx.textAlign = 'center';
         
         let titleY;
@@ -102,7 +102,7 @@ const CoverCanvas = ({
       if (coverData.authorText) {
         const authorSize = (coverData.authorSize || 24) * scale;
         ctx.font = `${authorSize}px 'Rosemartin', serif`;
-        ctx.fillStyle = coverData.authorColor || '#666666';
+        ctx.fillStyle = coverData.authorColor || '#303441';
         ctx.textAlign = 'center';
         
         let authorY;
@@ -148,18 +148,22 @@ const CoverCanvas = ({
   };
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`shadow-lg rounded-md ${className}`}
-      style={{ 
-        width: `${width}px`, 
-        height: `${height}px`,
-        maxWidth: '100%',
-        maxHeight: '100%',
-        objectFit: 'contain',
-        aspectRatio: '5/8'
-      }}
-    />
+    <div className="book-cover-container">
+      <canvas
+        ref={canvasRef}
+        className={`shadow-lg rounded-md book-canvas ${className}`}
+        style={{ 
+          width: `${width}px`, 
+          height: `${height}px`,
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: 'contain',
+          aspectRatio: '5/8'
+        }}
+      />
+      <div className="book-spine-overlay"></div>
+      <div className="book-cover-overlay"></div>
+    </div>
   );
 };
 

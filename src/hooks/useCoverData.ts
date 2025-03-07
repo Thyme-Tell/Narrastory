@@ -11,7 +11,6 @@ export function useCoverData(profileId: string) {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
 
-  // Function to fetch cover data
   const fetchCoverData = useCallback(async () => {
     if (!profileId) {
       setIsLoading(false);
@@ -22,7 +21,6 @@ export function useCoverData(profileId: string) {
       setIsLoading(true);
       console.log('Fetching cover data for profile:', profileId);
       
-      // First, try to get data from localStorage cache for immediate display
       const cachedData = localStorage.getItem(`cover_data_${profileId}`);
       if (cachedData) {
         const parsedData = JSON.parse(cachedData) as CoverData;
@@ -30,7 +28,6 @@ export function useCoverData(profileId: string) {
         setCoverData(parsedData);
       }
       
-      // Then fetch from server to ensure we have the latest
       const { data, error } = await supabase
         .from('book_covers')
         .select('cover_data, updated_at')
@@ -45,22 +42,18 @@ export function useCoverData(profileId: string) {
       console.log('Received cover data from database:', data);
       
       if (data && data.cover_data) {
-        // Explicitly cast and set the cover data
         const typedCoverData = data.cover_data as CoverData;
         console.log('Setting cover data from database:', typedCoverData);
         setCoverData(typedCoverData);
         
-        // Update local cache
         localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(typedCoverData));
         localStorage.setItem(`cover_data_last_fetched_${profileId}`, new Date().toISOString());
         localStorage.setItem(`cover_data_updated_at_${profileId}`, data.updated_at);
       } else {
-        // If no cover data exists yet, use defaults but don't save until user makes changes
         console.log('No cover data found, using defaults');
         if (!cachedData) {
           setCoverData(DEFAULT_COVER_DATA);
         }
-        // If we had cached data but no server data, keep using the cached data
       }
     } catch (err) {
       console.error("Error in fetchCoverData:", err);
@@ -70,7 +63,6 @@ export function useCoverData(profileId: string) {
         title: "Error",
         description: "Failed to load cover data",
       });
-      // Even on error, use the default data if we don't have cached data
       if (!localStorage.getItem(`cover_data_${profileId}`)) {
         setCoverData(DEFAULT_COVER_DATA);
       }
@@ -79,20 +71,17 @@ export function useCoverData(profileId: string) {
     }
   }, [profileId, toast]);
 
-  // Initial data fetch
   useEffect(() => {
     console.log('Profile ID in useCoverData:', profileId);
     if (profileId) {
       fetchCoverData();
     } else {
-      // If no profileId, set defaults and not loading
       setCoverData(DEFAULT_COVER_DATA);
       setIsLoading(false);
     }
   }, [profileId, fetchCoverData]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
-    // Check for profile ID first
     if (!profileId) {
       console.error("Cannot save: No profile ID provided");
       toast({
@@ -106,14 +95,11 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Update local cache immediately for responsiveness
       localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(newCoverData));
       localStorage.setItem(`cover_data_saving_${profileId}`, new Date().toISOString());
       
-      // Update local state right away
       setCoverData(newCoverData);
       
-      // Direct call to the Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('save-cover-data', {
         method: 'POST',
         body: {

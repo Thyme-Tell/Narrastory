@@ -1,3 +1,4 @@
+
 import { Check, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BackgroundTabProps } from "../CoverTypes";
 
 const BACKGROUND_COLORS = [
-  "#f8f9fa", "#F6F4EB", "#F3E1E1", "#E8D0D0", "#DED0B6"
+  "#CADCDA", "#EEDED2", "#ECDDC3"
 ];
 
 const BackgroundTab = ({
@@ -50,7 +51,7 @@ const BackgroundTab = ({
       
       <div>
         <Label className="block mb-2">Background Color</Label>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 gap-3">
           {BACKGROUND_COLORS.map((color) => (
             <button
               key={color}
