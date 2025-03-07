@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import ReactCrop, { type Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -82,7 +81,7 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, open }: ImageCropper
 
   return (
     <Dialog open={open} onOpenChange={() => onCancel()}>
-      <DialogContent className="max-w-[90vw] w-fit p-6 [&>button]:hidden bg-white">
+      <DialogContent className="max-w-[90vw] w-fit p-6 [&>button]:hidden">
         <div className="space-y-4">
           <ReactCrop
             crop={crop}

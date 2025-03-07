@@ -23,7 +23,7 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
 
   return (
     <div style={{ width: previewWidth, maxWidth }} className="mx-auto">
-      <div className="overflow-visible">
+      <div className="overflow-hidden">
         <CoverCanvas 
           coverData={coverData} 
           width={isMobile ? 200 : 300}

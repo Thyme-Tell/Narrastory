@@ -32,7 +32,7 @@ const EnlargedImageView = ({
 
   return (
     <Dialog open={!!selectedMedia} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-white" hideCloseButton>
+      <DialogContent className="max-w-[90vw] max-h-[90vh] p-0" hideCloseButton>
         <div className="relative">
           <img
             src={selectedMedia}
@@ -49,7 +49,7 @@ const EnlargedImageView = ({
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-white">
+              <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>

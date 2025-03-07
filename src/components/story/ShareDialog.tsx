@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -52,7 +51,7 @@ const ShareDialog = ({ open, onOpenChange, shareUrl }: ShareDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Share Story</DialogTitle>
         </DialogHeader>

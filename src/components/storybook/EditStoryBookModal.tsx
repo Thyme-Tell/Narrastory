@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -62,7 +61,7 @@ export function EditStoryBookModal({ storybook, onSuccess }: EditStoryBookModalP
           <span className="sr-only">Edit</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Storybook</DialogTitle>
         </DialogHeader>

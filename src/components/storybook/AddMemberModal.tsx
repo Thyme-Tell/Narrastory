@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -80,7 +79,7 @@ export function AddMemberModal({ storyBookId, onSuccess }: AddMemberModalProps) 
           Add Member
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Member</DialogTitle>
         </DialogHeader>

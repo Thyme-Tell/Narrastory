@@ -22,7 +22,7 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-gray-100 p-4">
-      <div className="flex items-center justify-center h-full">
+      <div className="book-preview-container flex items-center justify-center h-full">
         <div 
           className="max-h-full" 
           style={{ 

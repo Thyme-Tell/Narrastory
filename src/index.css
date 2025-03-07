@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -74,88 +75,56 @@
   object-fit: contain;
 }
 
-/* New 3D Book Styles */
-.book-container {
+/* Book Cover Styles */
+.book-cover-container {
   position: relative;
   display: inline-block;
-  perspective: 1500px;
-  transform-style: preserve-3d;
 }
 
-.book-cover-wrapper {
+.book-canvas {
   position: relative;
-  transform-style: preserve-3d;
-  transform-origin: 0 50%;
-  transition: transform 0.5s ease;
-  box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateY(3deg);
+  transition: transform 0.3s ease;
 }
 
-.book-container:hover .book-cover-wrapper {
-  transform: rotateY(-15deg);
+.book-cover-container:hover .book-canvas {
+  transform: perspective(1000px) rotateY(5deg);
 }
 
-.book-cover {
-  display: block;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  transform: translateZ(5px);
-  transform-style: preserve-3d;
-  background-color: #fff;
-  z-index: 1;
-  border-radius: 2px 5px 5px 2px;
+.book-spine-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 20px;
+  background: linear-gradient(90deg, 
+    rgba(0,0,0,0.4) 0%, 
+    rgba(0,0,0,0.1) 20%, 
+    rgba(0,0,0,0.05) 40%, 
+    rgba(0,0,0,0) 100%);
+  z-index: 10;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
-.book-cover::before {
-  content: '';
+.book-cover-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, 
-    rgba(255,255,255,0.1) 0%, 
-    rgba(255,255,255,0.05) 35%, 
-    rgba(0,0,0,0.02) 100%);
-  z-index: 5;
+    rgba(2,0,36,0.3) 0%, 
+    rgba(0,0,0,0.3) 2%, 
+    rgba(255,255,255,0.3) 3%, 
+    rgba(247,254,255,0.3) 5%, 
+    rgba(0,0,0,0.2) 7%, 
+    rgba(255,255,255,0.2) 13%, 
+    rgba(255,255,255,0.1) 100%);
   pointer-events: none;
-  mix-blend-mode: overlay;
-  border-radius: 2px 5px 5px 2px;
-}
-
-.book-pages {
-  position: absolute;
-  width: 98%;
-  height: 98%;
-  top: 1%;
-  left: 1%;
-  z-index: 0;
-}
-
-.book-page {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  border-radius: 0 2px 2px 0;
-}
-
-.book-page:nth-child(1) { transform: translateZ(1px); }
-.book-page:nth-child(2) { transform: translateZ(2px); }
-.book-page:nth-child(3) { transform: translateZ(3px); }
-.book-page:nth-child(4) { transform: translateZ(4px); }
-.book-page:nth-child(5) { transform: translateZ(5px); }
-
-.book-page::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(to left, 
-    rgba(0,0,0,0.05) 0%, 
-    rgba(0,0,0,0.02) 40%, 
-    rgba(0,0,0,0) 100%);
+  border-radius: 4px;
+  z-index: 5;
 }
 
 /* Cover editor specific styles */

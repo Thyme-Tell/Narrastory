@@ -71,7 +71,7 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
       </Button>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-white">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Write a New Story</DialogTitle>
           </DialogHeader>

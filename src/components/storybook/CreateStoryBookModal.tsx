@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import FormField from "@/components/FormField";
@@ -121,7 +120,7 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="bg-white">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Storybook</DialogTitle>
         </DialogHeader>
