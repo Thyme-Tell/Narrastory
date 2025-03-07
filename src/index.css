@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +10,17 @@
   
   .no-indent {
     text-indent: 0 !important;
+  }
+  
+  .drop-cap:first-letter {
+    initial-letter: 2;
+    -webkit-initial-letter: 2;
+    margin-right: 0.5em;
+    font-weight: bold;
+    font-size: 3.5em;
+    float: left;
+    line-height: 0.8;
+    margin-top: 0.1em;
   }
 }
 
