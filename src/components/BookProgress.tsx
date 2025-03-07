@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +15,7 @@ interface BookProgressProps {
   profileId: string;
 }
 
-const MIN_PAGES_REQUIRED = 64;
+const MIN_PAGES_REQUIRED = 32;
 
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
