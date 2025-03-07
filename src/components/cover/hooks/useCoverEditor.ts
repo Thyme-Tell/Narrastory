@@ -1,6 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { CoverData } from "../CoverTypes";
 
 export function useCoverEditor(
@@ -23,6 +25,38 @@ export function useCoverEditor(
   );
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+
+  // Fetch profile data to get the author name
+  const { data: profile } = useQuery({
+    queryKey: ["profile", profileId],
+    queryFn: async () => {
+      if (!profileId) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", profileId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+  });
+
+  // Set author name from profile when available
+  useEffect(() => {
+    if (profile && (!coverData.authorText || coverData.authorText === "")) {
+      const authorName = `${profile.first_name} ${profile.last_name}`.trim();
+      setCoverData(prev => ({
+        ...prev,
+        authorText: authorName
+      }));
+    }
+  }, [profile, coverData.authorText]);
 
   const handleSave = () => {
     onSave(coverData);

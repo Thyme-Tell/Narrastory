@@ -1,3 +1,4 @@
+
 export interface CoverData {
   backgroundImage?: string;
   backgroundColor?: string;
@@ -40,7 +41,7 @@ export interface LayoutTabProps {
 export const DEFAULT_COVER_DATA: CoverData = {
   backgroundColor: "#CADCDA",
   titleText: "My Stories",
-  authorText: "",
+  authorText: "",  // This will be populated with the profile name
   titleColor: "#303441",
   authorColor: "#303441",
   titleSize: 21,

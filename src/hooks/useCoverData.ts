@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoverData, DEFAULT_COVER_DATA } from "@/components/cover/CoverTypes";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 
 export function useCoverData(profileId: string) {
   const [coverData, setCoverData] = useState<CoverData | null>(null);
@@ -10,6 +11,26 @@ export function useCoverData(profileId: string) {
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", profileId],
+    queryFn: async () => {
+      if (!profileId) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", profileId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+  });
 
   const fetchCoverData = useCallback(async () => {
     if (!profileId) {
@@ -50,9 +71,14 @@ export function useCoverData(profileId: string) {
         localStorage.setItem(`cover_data_last_fetched_${profileId}`, new Date().toISOString());
         localStorage.setItem(`cover_data_updated_at_${profileId}`, data.updated_at);
       } else {
-        console.log('No cover data found, using defaults');
+        console.log('No cover data found, using defaults with profile name');
         if (!cachedData) {
-          setCoverData(DEFAULT_COVER_DATA);
+          const defaultData = { ...DEFAULT_COVER_DATA };
+          if (profile) {
+            const authorName = `${profile.first_name} ${profile.last_name}`.trim();
+            defaultData.authorText = authorName;
+          }
+          setCoverData(defaultData);
         }
       }
     } catch (err) {
@@ -64,22 +90,32 @@ export function useCoverData(profileId: string) {
         description: "Failed to load cover data",
       });
       if (!localStorage.getItem(`cover_data_${profileId}`)) {
-        setCoverData(DEFAULT_COVER_DATA);
+        const defaultData = { ...DEFAULT_COVER_DATA };
+        if (profile) {
+          const authorName = `${profile.first_name} ${profile.last_name}`.trim();
+          defaultData.authorText = authorName;
+        }
+        setCoverData(defaultData);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [profileId, toast]);
+  }, [profileId, toast, profile]);
 
   useEffect(() => {
     console.log('Profile ID in useCoverData:', profileId);
     if (profileId) {
       fetchCoverData();
     } else {
-      setCoverData(DEFAULT_COVER_DATA);
+      const defaultData = { ...DEFAULT_COVER_DATA };
+      if (profile) {
+        const authorName = `${profile.first_name} ${profile.last_name}`.trim();
+        defaultData.authorText = authorName;
+      }
+      setCoverData(defaultData);
       setIsLoading(false);
     }
-  }, [profileId, fetchCoverData]);
+  }, [profileId, fetchCoverData, profile]);
 
   const saveCoverData = async (newCoverData: CoverData) => {
     if (!profileId) {
@@ -135,7 +171,9 @@ export function useCoverData(profileId: string) {
   };
 
   return {
-    coverData: coverData || DEFAULT_COVER_DATA,
+    coverData: coverData || (profile ? 
+      { ...DEFAULT_COVER_DATA, authorText: `${profile.first_name} ${profile.last_name}`.trim() } : 
+      DEFAULT_COVER_DATA),
     isLoading,
     error,
     saveCoverData,
