@@ -46,6 +46,9 @@ const BookPreviewContent = ({
   // Calculate dimensions based on device while maintaining aspect ratio
   const maxWidth = isMobile ? "90%" : "600px";
   const maxHeight = isMobile ? "75vh" : "90vh";
+  
+  // Get book title from cover data
+  const bookTitle = coverData?.title || "My Book";
 
   return (
     <div 
@@ -81,6 +84,7 @@ const BookPreviewContent = ({
                 mediaItem={currentStoryInfo.mediaItem}
                 isMobile={isMobile}
                 globalPageNumber={currentPage}
+                bookTitle={bookTitle}
               />
             )
           )}

@@ -19,6 +19,7 @@ interface PageViewProps {
   mediaItem?: StoryMediaItem;
   isMobile?: boolean;
   globalPageNumber?: number; // Added to display the page number at the bottom
+  bookTitle?: string; // Add book title prop
 }
 
 const PageView = ({ 
@@ -28,7 +29,8 @@ const PageView = ({
   isMediaPage = false,
   mediaItem,
   isMobile = false,
-  globalPageNumber = 1
+  globalPageNumber = 1,
+  bookTitle = "My Book" // Default book title
 }: PageViewProps) => {
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
@@ -64,6 +66,11 @@ const PageView = ({
   if (isMediaPage && mediaItem) {
     return (
       <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
+        {/* Book title at top */}
+        <div className="text-center italic text-green-800 font-serif pt-6">
+          {bookTitle}
+        </div>
+        
         <div className="max-w-full max-h-[75%] flex justify-center items-center">
           {mediaItem.content_type.startsWith("image/") ? (
             <div className="max-h-full">
@@ -123,9 +130,9 @@ const PageView = ({
 
   return (
     <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col">
-      {/* Story title at top - for all pages of the story */}
+      {/* Book title at top - for all pages */}
       <div className="text-center italic text-green-800 font-serif pt-6">
-        {story.title || "Untitled Story"}
+        {bookTitle}
       </div>
       
       <div className="flex-1 mx-auto book-content px-12 py-10 overflow-y-auto">
