@@ -38,7 +38,7 @@
 
 .book-text {
   font-family: 'Playfair Display', serif;
-  font-size: 12pt;
+  font-size: 11pt;
   line-height: 1.6;
   overflow-wrap: break-word;
   word-break: normal;
@@ -48,13 +48,22 @@
 /* Text indentation for paragraphs to match book format */
 .book-page p {
   text-indent: 2em;
-  margin-bottom: 1em;
-  font-size: 12pt;
+  margin-bottom: 0; /* Remove space between paragraphs */
+  font-size: 11pt;
+  text-align: justify; /* Justify text on both sides */
 }
 
 /* First paragraph of chapters should not be indented */
 .book-page .chapter-start p:first-of-type {
   text-indent: 0;
+}
+
+/* Story title on first page */
+.book-page h1 {
+  font-size: 16pt;
+  text-align: center;
+  margin-bottom: 1.5em;
+  font-weight: bold;
 }
 
 /* Ensure media content stays within page bounds */

@@ -118,6 +118,9 @@ const PageView = ({
     );
   }
 
+  // Check if this is the first page of the story to display the title with larger font
+  const isFirstPage = pageNumber === 1;
+
   return (
     <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col">
       {/* Story title at top - for all pages of the story */}
@@ -127,15 +130,21 @@ const PageView = ({
       
       <div className="flex-1 mx-auto book-content px-12 py-10 overflow-y-auto">
         {/* Story Content */}
-        <div className="prose max-w-none font-serif text-[12pt]">
+        <div className="prose max-w-none font-serif text-[11pt]">
+          {isFirstPage && (
+            <h1 className="text-center font-serif text-[16pt] mb-6 font-bold">
+              {story.title || "Untitled Story"}
+            </h1>
+          )}
+          
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => (
-              <p key={index} className="mb-4 leading-relaxed indent-8 text-[12pt]">
+              <p key={index} className="indent-8 text-[11pt] text-justify">
                 {paragraph}
               </p>
             ))
           ) : (
-            <p className="text-gray-400 italic text-[12pt]">No content on this page</p>
+            <p className="text-gray-400 italic text-[11pt]">No content on this page</p>
           )}
         </div>
       </div>
