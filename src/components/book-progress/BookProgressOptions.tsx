@@ -2,14 +2,20 @@
 import { Book, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 interface BookProgressOptionsProps {
+  profileId: string;
   onEditCover: () => void;
-  onPreviewBook: () => void;
 }
 
-const BookProgressOptions = ({ onEditCover, onPreviewBook }: BookProgressOptionsProps) => {
+const BookProgressOptions = ({ profileId, onEditCover }: BookProgressOptionsProps) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  
+  const handlePreviewBook = () => {
+    navigate(`/profile/${profileId}/book-preview`);
+  };
   
   return (
     <div className="space-y-3">
@@ -26,7 +32,7 @@ const BookProgressOptions = ({ onEditCover, onPreviewBook }: BookProgressOptions
         variant="outline" 
         size={isMobile ? "default" : "lg"} 
         className={`${isMobile ? "w-full" : "w-[200px]"} justify-start`}
-        onClick={onPreviewBook}
+        onClick={handlePreviewBook}
       >
         <Eye className="mr-2" size={isMobile ? 16 : 20} />
         <span className={isMobile ? "text-sm" : ""}>Preview Book</span>
