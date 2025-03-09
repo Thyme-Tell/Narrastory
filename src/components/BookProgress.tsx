@@ -21,7 +21,6 @@ const MIN_PAGES_REQUIRED = 32;
 const BookProgress = ({ profileId }: BookProgressProps) => {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const isMobile = useIsMobile();
   
   const { 
@@ -85,15 +84,6 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     setIsEditorOpen(false);
   };
 
-  const handleOpenPreview = () => {
-    console.log("Opening book preview, isMobile:", isMobile);
-    setIsPreviewOpen(true);
-  };
-
-  const handleClosePreview = () => {
-    setIsPreviewOpen(false);
-  };
-
   const handleSaveCover = async (newCoverData: CoverData) => {
     console.log("Saving new cover data:", newCoverData);
     await saveCoverData(newCoverData);
@@ -131,8 +121,8 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
           
           <div className="flex flex-col space-y-6">
             <BookProgressOptions 
+              profileId={profileId}
               onEditCover={handleOpenCoverEditor}
-              onPreviewBook={handleOpenPreview}
             />
 
             <BookProgressBar 
@@ -154,10 +144,10 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       <BookEditorModals
         profileId={profileId}
         isEditorOpen={isEditorOpen}
-        isPreviewOpen={isPreviewOpen}
+        isPreviewOpen={false}
         coverData={coverData}
         onCloseCoverEditor={handleCloseCoverEditor}
-        onClosePreview={handleClosePreview}
+        onClosePreview={() => {}}
         onSaveCover={handleSaveCover}
       />
     </div>

@@ -10,6 +10,7 @@ import StoryBookSettings from "./pages/storybooks/[id]/settings";
 import PasswordResetRequest from "./components/PasswordResetRequest";
 import PasswordResetConfirm from "./components/PasswordResetConfirm";
 import { AuthProvider } from "./contexts/AuthContext";
+import BookPreviewPage from "./pages/BookPreviewPage";
 
 // Wrapper component to pass the storyBookId from URL params
 const StoryBookSettingsWrapper = () => {
@@ -32,6 +33,7 @@ function App() {
           <Route path="/storybooks/:id/settings" element={<StoryBookSettingsWrapper />} />
           <Route path="/reset-password" element={<PasswordResetRequest />} />
           <Route path="/reset-password/confirm" element={<PasswordResetConfirm />} />
+          <Route path="/profile/:profileId/book-preview" element={<BookPreviewPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
