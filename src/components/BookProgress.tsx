@@ -1,6 +1,7 @@
+
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
-import { calculateStoryPages, calculateTotalPages, getPageContent, mapPageToStory } from "@/utils/bookPagination";
+import { calculateTotalPages } from "@/utils/bookPagination";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
@@ -23,7 +24,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
       
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
-        .select("id, title, content, created_at, profile_id")
+        .select("id, title, content, created_at, profile_id, share_token")
         .eq("profile_id", profileId)
         .order("created_at", { ascending: false });
 
@@ -32,7 +33,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
         return [];
       }
 
-      return storiesData;
+      return storiesData as Story[];
     },
     enabled: !!profileId,
   });
@@ -44,7 +45,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
       
       const { data, error } = await supabase
         .from("story_media")
-        .select("id, story_id, media_url, media_type, created_at")
+        .select("id, story_id, file_path, media_type, content_type, file_name, caption, created_at")
         .eq("profile_id", profileId)
         .order("created_at", { ascending: true });
 
@@ -53,7 +54,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
         return [];
       }
 
-      return data;
+      return data as StoryMediaItem[];
     },
     enabled: !!profileId,
   });
@@ -64,8 +65,10 @@ export function BookProgress({ profileId }: { profileId?: string }) {
       const mediaMap = new Map<string, StoryMediaItem[]>();
       
       mediaItems.forEach(item => {
-        const existingItems = mediaMap.get(item.story_id) || [];
-        mediaMap.set(item.story_id, [...existingItems, item]);
+        if (item && item.story_id) {
+          const existingItems = mediaMap.get(item.story_id) || [];
+          mediaMap.set(item.story_id, [...existingItems, item]);
+        }
       });
       
       setStoryMediaMap(mediaMap);

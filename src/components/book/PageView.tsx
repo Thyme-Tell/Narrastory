@@ -34,24 +34,6 @@ const PageView = ({
   globalPageNumber = 1,
   bookTitle = "My Book" // Default book title
 }: PageViewProps) => {
-  const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
-    queryKey: ["story-media", story.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("story_media")
-        .select("*")
-        .eq("story_id", story.id)
-        .order("created_at", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching media:", error);
-        return [];
-      }
-
-      return data as StoryMediaItem[];
-    },
-  });
-
   const { data: profileInfo } = useQuery({
     queryKey: ["profile-info", story.id],
     queryFn: async () => {
@@ -97,12 +79,12 @@ const PageView = ({
       </div>
       
       {/* Content area - maximized with reduced padding */}
-      <div className="flex-1 overflow-hidden px-8 pb-0">
+      <div className="flex-1 overflow-hidden px-8 pb-1">
         {children}
       </div>
       
       {/* Page number footer - minimized bottom margin */}
-      <div className="w-full text-center py-[2px]">
+      <div className="w-full text-center py-[1px]">
         <span className="text-gray-700">{globalPageNumber}</span>
       </div>
     </div>

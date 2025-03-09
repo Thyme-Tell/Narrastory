@@ -90,8 +90,7 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
   const effectiveLineLimit = LINES_PER_PAGE - PAGE_MARGIN_LINES;
   
-  // Create properly formatted lines from paragraphs
-  const allFormattedParagraphs: string[][] = [];
+  // Create properly formatted lines from all paragraphs
   const allLines: { text: string, paragraphIndex: number }[] = [];
   
   paragraphs.forEach((paragraph, pIndex) => {
@@ -100,7 +99,6 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
     
     // Split paragraph into lines without breaking words
     const paragraphLines = splitTextIntoLines(paragraph, CHARS_PER_LINE);
-    allFormattedParagraphs.push(paragraphLines);
     
     // Add each line with its paragraph index
     paragraphLines.forEach(line => {
@@ -108,20 +106,24 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
     });
     
     // Add an empty line after each paragraph for spacing
-    allLines.push({ text: '', paragraphIndex: pIndex });
+    if (pIndex < paragraphs.length - 1) {
+      allLines.push({ text: '', paragraphIndex: pIndex });
+    }
   });
   
   // Calculate which lines belong on the requested page
   const startLine = (pageNumber - 1) * effectiveLineLimit;
-  const endLine = startLine + effectiveLineLimit;
+  const endLine = Math.min(startLine + effectiveLineLimit, allLines.length);
+  
+  // Get all lines for this page
   const pageLines = allLines.slice(startLine, endLine);
   
-  // Group the lines back into paragraphs, ensuring no sentence is broken mid-phrase
+  // Group the lines back into paragraphs
   const resultParagraphs: string[] = [];
   let currentParagraph = '';
   let currentParagraphIndex = -1;
   
-  pageLines.forEach(line => {
+  pageLines.forEach((line, index) => {
     if (line.paragraphIndex !== currentParagraphIndex) {
       // New paragraph started
       if (currentParagraph) {
@@ -136,8 +138,9 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
         currentParagraph = '';
       }
     } else {
-      // Continue paragraph - add a space between lines
-      currentParagraph += ' ' + line.text;
+      // Continue paragraph
+      // For better flow, add a space between lines within the same paragraph
+      currentParagraph += (currentParagraph.endsWith('-') ? '' : ' ') + line.text;
     }
   });
   
