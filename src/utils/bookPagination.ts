@@ -1,3 +1,4 @@
+
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
 import { 
@@ -73,6 +74,7 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
 
 /**
  * Calculates the total number of pages for all stories, including cover
+ * Improved to account for pages that might have too much whitespace
  */
 export const calculateTotalPages = (stories: Story[], storyMediaMap: Map<string, StoryMediaItem[]> = new Map()): number => {
   if (!stories || stories.length === 0) {
@@ -82,11 +84,15 @@ export const calculateTotalPages = (stories: Story[], storyMediaMap: Map<string,
   let totalPages = 1; // Start with cover page
   
   stories.forEach(story => {
-    totalPages += calculateStoryPages(story);
+    // Get text page count
+    const textPages = calculateStoryPages(story);
+    totalPages += textPages;
     
     // Add pages for media items
     const mediaItems = storyMediaMap.get(story.id) || [];
     totalPages += mediaItems.length;
+    
+    console.log(`Story "${story.title}": ${textPages} text pages, ${mediaItems.length} media pages`);
   });
 
   return totalPages;

@@ -45,7 +45,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
       
       const { data, error } = await supabase
         .from("story_media")
-        .select("id, story_id, file_path, media_type, content_type, file_name, caption, created_at")
+        .select("id, story_id, file_path, content_type, file_name, caption, created_at")
         .eq("profile_id", profileId)
         .order("created_at", { ascending: true });
 

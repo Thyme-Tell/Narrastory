@@ -1,4 +1,3 @@
-
 import { Story } from "@/types/supabase";
 
 // Book physical measurements in inches
@@ -30,7 +29,7 @@ export const LINE_HEIGHT_PX = Math.round(FONT_SIZE_PX * LINE_HEIGHT_RATIO);
 export const CHARS_PER_INCH = 10; // Approximate for 12pt font
 export const CHARS_PER_LINE = Math.floor(CONTENT_WIDTH_INCHES * CHARS_PER_INCH);
 
-// Lines per page calculation
+// Updated for more efficient space usage
 export const LINES_PER_PAGE = Math.floor(CONTENT_HEIGHT_PX / LINE_HEIGHT_PX);
 
 export interface Page {
@@ -62,10 +61,24 @@ export function paginateContent(content: string): Page[] {
     // Split paragraph into lines without breaking words
     const paragraphLines = splitParagraphIntoLines(paragraph, CHARS_PER_LINE);
     
+    // Add a small buffer to ensure we don't leave too much whitespace
+    const remainingLines = LINES_PER_PAGE - currentLines;
+    
     // Check if this paragraph would overflow the current page
     if (currentLines + paragraphLines.length > LINES_PER_PAGE) {
+      // If we're near the end of the page (less than 15% remaining), start a new page
+      // This prevents large whitespace gaps at the bottom of pages
+      if (remainingLines < Math.floor(LINES_PER_PAGE * 0.15) && currentLines > 0) {
+        pages.push({
+          content: currentPage,
+          pageNumber: pageNumber++
+        });
+        currentPage = [];
+        currentLines = 0;
+      }
+      
       // Complete the current page if it has content
-      if (currentLines > 0) {
+      else if (currentLines > 0) {
         pages.push({
           content: currentPage,
           pageNumber: pageNumber++

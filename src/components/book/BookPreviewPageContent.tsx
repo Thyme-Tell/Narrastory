@@ -76,7 +76,7 @@ const BookPage: React.FC<BookPageProps> = ({
           top: `${MARGIN_PX}px`,
           left: `${MARGIN_PX}px`,
           width: `${BOOK_WIDTH_PX - (MARGIN_PX * 2)}px`,
-          height: `${BOOK_HEIGHT_PX - (MARGIN_PX * 2)}px`,
+          height: `${BOOK_HEIGHT_PX - (MARGIN_PX * 2) - 30}px`, // Adjust to eliminate whitespace
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
@@ -84,7 +84,7 @@ const BookPage: React.FC<BookPageProps> = ({
           {mediaItem.content_type.startsWith("image/") ? (
             <div style={{ 
               maxWidth: '100%', 
-              maxHeight: '75%', 
+              maxHeight: '80%', // Increased from 75% to fill more space
               textAlign: 'center' 
             }}>
               <img 
@@ -92,7 +92,7 @@ const BookPage: React.FC<BookPageProps> = ({
                 alt={mediaItem.caption || "Story image"} 
                 style={{ 
                   maxWidth: '100%', 
-                  maxHeight: '250px', 
+                  maxHeight: '280px', // Increased from 250px
                   objectFit: 'contain',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
                   borderRadius: '4px'
@@ -135,7 +135,7 @@ const BookPage: React.FC<BookPageProps> = ({
     );
   }
 
-  // Text content page
+  // Text content page - optimized to use full height
   return (
     <div className="book-page-exact" style={{
       width: `${BOOK_WIDTH_PX}px`,
@@ -150,7 +150,8 @@ const BookPage: React.FC<BookPageProps> = ({
         fontStyle: 'italic',
         paddingTop: '8px',
         fontSize: `${FONT_SIZE_PX * 0.9}px`,
-        color: '#2d3748' 
+        color: '#2d3748',
+        height: '20px' // Fixed height header
       }}>
         {bookTitle}
       </div>
@@ -161,29 +162,33 @@ const BookPage: React.FC<BookPageProps> = ({
           fontSize: `${FONT_SIZE_PX * 1.5}px`,
           fontWeight: 'bold',
           textAlign: 'center',
-          marginTop: `${MARGIN_PX / 2}px`,
-          marginBottom: `${MARGIN_PX / 2}px`,
+          marginTop: `${MARGIN_PX / 3}px`, // Reduced margin to save space
+          marginBottom: `${MARGIN_PX / 3}px`, // Reduced margin to save space
+          height: '40px' // Fixed height title
         }}>
           {story.title || "Untitled Story"}
         </h1>
       )}
       
-      {/* Text content with precise margins */}
+      {/* Text content with precise margins - optimized for space */}
       <div 
         ref={pageContentRef}
         style={{ 
           position: 'absolute',
-          top: pageNumber === 1 ? `${MARGIN_PX + 40}px` : `${MARGIN_PX}px`,
+          top: pageNumber === 1 ? `${MARGIN_PX + 30}px` : `${MARGIN_PX + 10}px`, // Adjusted spacing
           left: `${MARGIN_PX}px`,
           width: `${BOOK_WIDTH_PX - (MARGIN_PX * 2)}px`,
           height: pageNumber === 1 
-            ? `${BOOK_HEIGHT_PX - (MARGIN_PX * 2) - 40}px` 
-            : `${BOOK_HEIGHT_PX - (MARGIN_PX * 2)}px`,
+            ? `${BOOK_HEIGHT_PX - (MARGIN_PX * 2) - 30 - 20}px`  // Adjusted for title page
+            : `${BOOK_HEIGHT_PX - (MARGIN_PX * 2) - 20 - 20}px`, // Adjusted for regular page
           overflow: 'hidden',
           fontFamily: 'Playfair Display, serif',
           fontSize: `${FONT_SIZE_PX}px`,
           lineHeight: `${LINE_HEIGHT_PX}px`,
           textAlign: 'justify',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start', // Start from top to eliminate bottom whitespace
         }}
       >
         {pageContent.length > 0 ? (
@@ -195,7 +200,7 @@ const BookPage: React.FC<BookPageProps> = ({
                   textIndent: '2em',
                   margin: '0',
                   padding: '0',
-                  marginBottom: `${LINE_HEIGHT_PX / 2}px`,
+                  marginBottom: `${Math.floor(LINE_HEIGHT_PX / 3)}px`, // Reduced margin between paragraphs
                   fontSize: `${FONT_SIZE_PX}px`,
                   lineHeight: `${LINE_HEIGHT_PX}px`,
                 }}
@@ -217,6 +222,7 @@ const BookPage: React.FC<BookPageProps> = ({
         right: '0', 
         textAlign: 'center',
         fontSize: `${FONT_SIZE_PX * 0.9}px`,
+        height: '20px' // Fixed height footer
       }}>
         {globalPageNumber}
       </div>

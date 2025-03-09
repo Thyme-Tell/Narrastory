@@ -349,10 +349,10 @@
   flex-direction: column;
 }
 
-/* Updated book text styles for consistency */
+/* Updated book text styles for consistency and eliminating whitespace */
 .story-content p {
   text-indent: 2em;
-  margin-bottom: 0.4em; /* Reduced margin between paragraphs */
+  margin-bottom: 0.3em; /* Further reduced margin between paragraphs */
   font-size: 11pt;
   line-height: 1.45; /* Slightly reduced line height */
   text-align: justify;
@@ -366,16 +366,16 @@
 .book-page-wrapper h1 {
   font-size: 16pt;
   text-align: center;
-  margin-bottom: 1em; /* Reduced top margin */
-  margin-top: 0.5em; /* Reduced top margin */
+  margin-bottom: 0.8em; /* Reduced bottom margin */
+  margin-top: 0.4em; /* Reduced top margin */
   font-weight: bold;
 }
 
-/* Media sizing constraints to prevent overflow */
+/* Media sizing constraints to prevent overflow and use space efficiently */
 .book-page-wrapper img,
 .book-page-wrapper video {
   max-width: 100%;
-  max-height: 380px;
+  max-height: 400px; /* Increased from 380px to use more space */
   object-fit: contain;
 }
 
@@ -402,16 +402,16 @@
   .story-content p {
     font-size: 10pt;
     line-height: 1.4;
-    margin-bottom: 0.4em; /* Further reduced margin for mobile */
+    margin-bottom: 0.3em; /* Further reduced margin for mobile */
   }
   
   .book-page-wrapper img,
   .book-page-wrapper video {
-    max-height: 300px;
+    max-height: 320px; /* Increased from 300px */
   }
 }
 
-/* Exact 5x8 inch book format with 1-inch margins */
+/* Exact 5x8 inch book format with 1-inch margins - optimized space usage */
 .book-page-exact {
   width: 480px; /* 5 inches at 96 DPI */
   height: 768px; /* 8 inches at 96 DPI */
@@ -421,6 +421,8 @@
   overflow: hidden;
   font-family: 'Playfair Display', serif;
   page-break-after: always;
+  display: flex;
+  flex-direction: column;
 }
 
 .book-preview-exact-container {
@@ -431,7 +433,7 @@
   margin: 0 auto;
 }
 
-/* Print-specific styles */
+/* Print-specific styles - optimized to eliminate whitespace */
 @media print {
   body {
     margin: 0;
@@ -479,11 +481,12 @@
   p {
     font-size: 12pt !important;
     line-height: 1.5 !important;
+    margin-bottom: 0.3em !important; /* Reduced space between paragraphs */
   }
   
   h1 {
     font-size: 18pt !important;
-    margin-top: 0.5in !important;
-    margin-bottom: 0.5in !important;
+    margin-top: 0.4in !important; /* Reduced from 0.5in */
+    margin-bottom: 0.4in !important; /* Reduced from 0.5in */
   }
 }
