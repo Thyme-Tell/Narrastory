@@ -1,32 +1,18 @@
-
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
-
-// Constants for book dimensions and content
-const CHARS_PER_LINE = 45; // Reduced from 50 to be more conservative
-const LINES_PER_PAGE = 26; // Increased from 23 to reduce bottom margin
-const PAGE_MARGIN_LINES = 4; // Reduced from 6 to allow more content
+import { 
+  paginateContent, 
+  calculateStoryPagesExact, 
+  getPageContentExact,
+  CHARS_PER_LINE, 
+  LINES_PER_PAGE 
+} from "./paginationUtils";
 
 /**
  * Calculates how many pages a story will take based on its content
  */
 export const calculateStoryPages = (story: Story): number => {
-  if (!story.content || story.content.trim() === '') {
-    return 1; // At least one page even if empty
-  }
-
-  const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
-  let totalLines = 0;
-
-  // Calculate lines needed for each paragraph
-  paragraphs.forEach(paragraph => {
-    // Each paragraph starts on a new line
-    const paragraphLines = Math.ceil(paragraph.length / CHARS_PER_LINE);
-    totalLines += paragraphLines + 1; // +1 for paragraph spacing
-  });
-
-  // Calculate pages needed, accounting for margins
-  return Math.max(1, Math.ceil(totalLines / (LINES_PER_PAGE - PAGE_MARGIN_LINES)));
+  return calculateStoryPagesExact(story);
 };
 
 /**
@@ -49,9 +35,9 @@ const splitTextIntoLines = (text: string, maxCharsPerLine: number): string[] => 
         currentLine = '';
       }
       
-      // If the word itself is longer than max chars, we'll need to split it
+      // If the word itself is longer than max chars, hyphenate it
       if (word.length > maxCharsPerLine) {
-        // Split the word and add hyphens at appropriate places
+        // Split the word and add hyphens
         let remaining = word;
         while (remaining.length > maxCharsPerLine) {
           const segment = remaining.substring(0, maxCharsPerLine - 1) + '-';
@@ -82,74 +68,7 @@ const splitTextIntoLines = (text: string, maxCharsPerLine: number): string[] => 
  * Returns an array of paragraph segments to display
  */
 export const getPageContent = (story: Story, pageNumber: number): string[] => {
-  if (!story.content || story.content.trim() === '') {
-    return [];
-  }
-
-  // Split content into paragraphs
-  const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
-  const effectiveLineLimit = LINES_PER_PAGE - PAGE_MARGIN_LINES;
-  
-  // Create properly formatted lines from all paragraphs
-  const allLines: { text: string, paragraphIndex: number }[] = [];
-  
-  paragraphs.forEach((paragraph, pIndex) => {
-    // Skip empty paragraphs
-    if (paragraph.trim() === '') return;
-    
-    // Split paragraph into lines without breaking words
-    const paragraphLines = splitTextIntoLines(paragraph, CHARS_PER_LINE);
-    
-    // Add each line with its paragraph index
-    paragraphLines.forEach(line => {
-      allLines.push({ text: line, paragraphIndex: pIndex });
-    });
-    
-    // Add an empty line after each paragraph for spacing
-    if (pIndex < paragraphs.length - 1) {
-      allLines.push({ text: '', paragraphIndex: pIndex });
-    }
-  });
-  
-  // Calculate which lines belong on the requested page
-  const startLine = (pageNumber - 1) * effectiveLineLimit;
-  const endLine = Math.min(startLine + effectiveLineLimit, allLines.length);
-  
-  // Get all lines for this page
-  const pageLines = allLines.slice(startLine, endLine);
-  
-  // Group the lines back into paragraphs
-  const resultParagraphs: string[] = [];
-  let currentParagraph = '';
-  let currentParagraphIndex = -1;
-  
-  pageLines.forEach((line, index) => {
-    if (line.paragraphIndex !== currentParagraphIndex) {
-      // New paragraph started
-      if (currentParagraph) {
-        resultParagraphs.push(currentParagraph);
-      }
-      currentParagraph = line.text;
-      currentParagraphIndex = line.paragraphIndex;
-    } else if (line.text === '') {
-      // Empty line marks paragraph end
-      if (currentParagraph) {
-        resultParagraphs.push(currentParagraph);
-        currentParagraph = '';
-      }
-    } else {
-      // Continue paragraph
-      // For better flow, add a space between lines within the same paragraph
-      currentParagraph += (currentParagraph.endsWith('-') ? '' : ' ') + line.text;
-    }
-  });
-  
-  // Add the last paragraph if any
-  if (currentParagraph) {
-    resultParagraphs.push(currentParagraph);
-  }
-  
-  return resultParagraphs;
+  return getPageContentExact(story, pageNumber);
 };
 
 /**
