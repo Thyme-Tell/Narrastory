@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import MediaCarousel from "./media/MediaCarousel";
 import { StoryMediaItem } from "@/types/media";
-import { generateQRCodeUrl } from "@/utils/qrCodeUtils";
+import { generateQRCodeUrl, generateShortVideoUrl } from "@/utils/qrCodeUtils";
 
 interface StoryMediaProps {
   storyId: string;
@@ -20,7 +20,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
         .from("story_media")
         .select("*")
         .eq("story_id", storyId)
-        .order("created_at", { ascending: true }); // Changed to ascending order
+        .order("created_at", { ascending: true });
 
       if (error) {
         console.error("Error fetching media:", error);
@@ -33,6 +33,38 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
       }
 
       return data as StoryMediaItem[];
+    },
+  });
+
+  // Fetch profile name for generating short URLs
+  const { data: profileInfo } = useQuery({
+    queryKey: ["profile-info", storyId],
+    queryFn: async () => {
+      // First get the profile ID from the story
+      const { data: storyData, error: storyError } = await supabase
+        .from("stories")
+        .select("profile_id")
+        .eq("id", storyId)
+        .single();
+      
+      if (storyError) {
+        console.error("Error fetching story:", storyError);
+        return null;
+      }
+      
+      // Then get the profile details
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .eq("id", storyData.profile_id)
+        .single();
+        
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        return null;
+      }
+      
+      return profileData;
     },
   });
 
@@ -66,16 +98,30 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
         .from("story-media")
         .getPublicUrl(item.file_path);
       
+      // Generate user-friendly name for shorter URL
+      const userName = profileInfo ? 
+        `${profileInfo.first_name}-${profileInfo.last_name}` : 
+        `user-${item.id.substring(0, 6)}`;
+      
+      // Generate the short URL for the video
+      const shortUrl = generateShortVideoUrl(
+        profileInfo?.id || "", 
+        userName, 
+        item.id
+      );
+      
       // Generate QR code URL and log for debugging
-      const qrCodeUrl = generateQRCodeUrl(data.publicUrl);
+      const qrCodeUrl = generateQRCodeUrl(shortUrl);
       console.log("Generated QR for video:", {
         videoUrl: data.publicUrl,
+        shortUrl,
         qrCodeUrl
       });
       
       return {
         ...item,
-        qrCodeUrl
+        qrCodeUrl,
+        shortUrl
       };
     }
     return item;
@@ -83,7 +129,7 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
 
   return (
     <MediaCarousel
-      mediaItems={mediaItems}
+      mediaItems={mediaItemsWithQR}
       onCaptionUpdate={handleCaptionUpdate}
       onDelete={refetch}
     />

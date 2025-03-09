@@ -9,7 +9,7 @@ import VideoMedia from "@/components/VideoMedia";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPageContent } from "@/utils/bookPagination";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { generateQRCodeUrl } from "@/utils/qrCodeUtils";
+import { generateQRCodeUrl, generateShortVideoUrl } from "@/utils/qrCodeUtils";
 import { getVideoThumbnail } from "@/components/VideoMedia";
 
 interface PageViewProps {
@@ -48,6 +48,24 @@ const PageView = ({
       }
 
       return data as StoryMediaItem[];
+    },
+  });
+
+  const { data: profileInfo } = useQuery({
+    queryKey: ["profile-info", story.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .eq("id", story.profile_id)
+        .single();
+        
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
     },
   });
 
@@ -99,8 +117,19 @@ const PageView = ({
       );
     } else if (mediaItem.content_type.startsWith("video/")) {
       const videoUrl = getPublicUrl(mediaItem.file_path);
-      const qrCodeUrl = generateQRCodeUrl(videoUrl);
-      console.log("Video in book preview:", { videoUrl, qrCodeUrl, mediaItem });
+      
+      const userName = profileInfo ? 
+        `${profileInfo.first_name}-${profileInfo.last_name}` : 
+        `user-${mediaItem.id.substring(0, 6)}`;
+      
+      const shortUrl = generateShortVideoUrl(
+        profileInfo?.id || "", 
+        userName, 
+        mediaItem.id
+      );
+      
+      const qrCodeUrl = generateQRCodeUrl(shortUrl);
+      console.log("Video in book preview:", { videoUrl, shortUrl, qrCodeUrl, mediaItem });
       
       const thumbnailUrl = getVideoThumbnail(mediaItem.id);
       
@@ -147,11 +176,11 @@ const PageView = ({
                     console.error("QR code loading error:", e, qrCodeUrl);
                     const target = e.target as HTMLImageElement;
                     target.onerror = null;
-                    target.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(videoUrl);
+                    target.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(shortUrl);
                   }}
                 />
-                <p className="text-xs text-center mt-2 text-gray-500 break-all px-4 max-w-[90%]">
-                  {videoUrl}
+                <p className="text-xs text-center mt-2 text-gray-500 max-w-[90%]">
+                  {shortUrl}
                 </p>
               </div>
             </div>

@@ -22,3 +22,14 @@ export const safeEncodeUrl = (url: string): string => {
     return encodeURIComponent(url);
   }
 };
+
+// Generate a shorter, more user-friendly URL for videos
+export const generateShortVideoUrl = (profileId: string, userName: string, videoId: string): string => {
+  // Replace spaces with hyphens and make lowercase for URL-friendliness
+  const userNameForUrl = userName.replace(/\s+/g, '-').toLowerCase();
+  
+  // Generate a short identifier from the video ID (first 6 characters)
+  const shortId = videoId.substring(0, 6);
+  
+  return `app.narrastory.com/video/${userNameForUrl}/${shortId}`;
+};

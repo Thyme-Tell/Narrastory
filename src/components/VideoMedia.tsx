@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,8 +39,14 @@ const DEFAULT_THUMBNAILS = [
   "photo-1486312338219-ce68d2c6f44d", // macbook
 ];
 
+// Map to store generated thumbnails
+const thumbnailCache = new Map<string, string>();
+
 const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMediaProps) => {
   const { toast } = useToast();
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>("");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const { data } = supabase.storage
     .from("story-media")
     .getPublicUrl(media.file_path);
@@ -52,6 +59,63 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
       options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
     }
   };
+
+  // Generate thumbnail from the actual video
+  useEffect(() => {
+    if (thumbnailCache.has(media.id)) {
+      setThumbnailUrl(thumbnailCache.get(media.id)!);
+      return;
+    }
+
+    // Create a video element to extract the thumbnail
+    const videoElement = document.createElement('video');
+    videoElement.crossOrigin = "anonymous";
+    videoElement.src = data.publicUrl;
+    
+    // Try to get the poster when metadata is loaded
+    videoElement.addEventListener('loadedmetadata', () => {
+      videoElement.currentTime = 1; // Skip to 1 second to avoid black frames
+    });
+
+    // When seek completes, capture the frame
+    videoElement.addEventListener('seeked', () => {
+      try {
+        // Create a canvas to draw the video frame
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        
+        // Draw the video frame to the canvas
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+          
+          // Get the data URL from the canvas
+          const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
+          thumbnailCache.set(media.id, thumbnailDataUrl);
+          setThumbnailUrl(thumbnailDataUrl);
+          
+          console.log("Generated video thumbnail for:", media.id);
+        }
+      } catch (error) {
+        console.error("Error generating thumbnail:", error);
+        setThumbnailUrl(getFallbackThumbnail(media.id));
+      }
+      
+      // Clean up
+      videoElement.remove();
+    });
+
+    // Handle errors
+    videoElement.addEventListener('error', () => {
+      console.error("Error loading video for thumbnail:", videoElement.error);
+      setThumbnailUrl(getFallbackThumbnail(media.id));
+      videoElement.remove();
+    });
+
+    // Load the video but don't play it
+    videoElement.load();
+  }, [data.publicUrl, media.id]);
 
   const handleDelete = async () => {
     try {
@@ -88,10 +152,9 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
     }
   };
 
-  // Generate a semi-random thumbnail for this video
-  const getVideoThumbnail = () => {
-    // Use a deterministic approach based on the video's ID to always get the same thumbnail for the same video
-    const index = media.id.charCodeAt(0) % DEFAULT_THUMBNAILS.length;
+  // Generate a fallback thumbnail if needed
+  const getFallbackThumbnail = (mediaId: string) => {
+    const index = mediaId.charCodeAt(0) % DEFAULT_THUMBNAILS.length;
     return `https://images.unsplash.com/${DEFAULT_THUMBNAILS[index]}`;
   };
 
@@ -155,7 +218,12 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
 };
 
 // Export the thumbnail generator for use in other components
-export const getVideoThumbnail = (mediaId: string) => {
+export const getVideoThumbnail = (mediaId: string): string => {
+  if (thumbnailCache.has(mediaId)) {
+    return thumbnailCache.get(mediaId)!;
+  }
+  
+  // Return fallback thumbnail if not in cache
   const index = mediaId.charCodeAt(0) % DEFAULT_THUMBNAILS.length;
   return `https://images.unsplash.com/${DEFAULT_THUMBNAILS[index]}`;
 };
