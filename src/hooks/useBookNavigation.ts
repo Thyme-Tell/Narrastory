@@ -50,6 +50,7 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
       });
       
       setStoryMediaMap(mediaMap);
+      console.log("Media map updated:", mediaMap);
     }
   }, [allMediaItems]);
 
@@ -67,15 +68,21 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
     // Calculate starting page for each story
     stories.forEach((story) => {
       pageStartIndices.push(pageCount);
-      pageCount += calculateStoryPages(story);
+      
+      // Add text pages
+      const textPages = calculateStoryPages(story);
+      pageCount += textPages;
       
       // Add pages for media items if any
       const mediaItems = storyMediaMap.get(story.id) || [];
       pageCount += mediaItems.length;
+      
+      console.log(`Story ${story.title}: ${textPages} text pages, ${mediaItems.length} media pages`);
     });
 
     setStoryPages(pageStartIndices);
     setTotalPageCount(pageCount);
+    console.log("Total page count:", pageCount, "Story pages:", pageStartIndices);
   }, [stories, storyMediaMap]);
 
   // Handle page navigation
@@ -105,6 +112,15 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
       const mediaItems = storyMediaMap.get(story.id) || [];
       const totalStoryPages = storyTextPages + mediaItems.length;
       
+      // Debug logging
+      console.log(`Page ${currentPage} - Checking story ${i}:`, {
+        currentPageCount,
+        storyTextPages,
+        mediaItems: mediaItems.length,
+        totalStoryPages,
+        storyRange: `${currentPageCount} to ${currentPageCount + totalStoryPages - 1}`
+      });
+      
       // If current page falls within this story's range
       if (currentPage < currentPageCount + totalStoryPages) {
         const pageOffset = currentPage - currentPageCount;
@@ -115,7 +131,7 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
           if (mediaIndex < mediaItems.length) {
             return {
               story,
-              pageWithinStory: 1, // Not relevant for media pages
+              pageWithinStory: pageOffset + 1, // Keep consistent 1-based numbering
               totalPagesInStory: totalStoryPages,
               isMediaPage: true,
               mediaItem: mediaItems[mediaIndex]
@@ -126,8 +142,9 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
         // Regular text page
         return {
           story,
-          pageWithinStory: pageOffset + 1, // Convert to 1-based
-          totalPagesInStory: totalStoryPages
+          pageWithinStory: pageOffset + 1, // Convert to 1-based for display
+          totalPagesInStory: totalStoryPages,
+          isMediaPage: false
         };
       }
       

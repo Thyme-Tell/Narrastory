@@ -44,19 +44,20 @@ const BookPreviewContent = ({
   isMobile = false,
 }: BookPreviewContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  // Effect for iOS-specific fixes
+  // Effect to handle rendering and scaling issues
   useEffect(() => {
-    if (isMobile && containerRef.current) {
+    if (containerRef.current) {
       // Force repaint on iOS devices to fix rendering issues
       setTimeout(() => {
         if (containerRef.current) {
           containerRef.current.style.opacity = '0.99';
-          setTimeout(() => {
+          requestAnimationFrame(() => {
             if (containerRef.current) {
               containerRef.current.style.opacity = '1';
             }
-          }, 10);
+          });
         }
       }, 100);
     }
@@ -64,6 +65,9 @@ const BookPreviewContent = ({
   
   // Get book title from cover data
   const bookTitle = coverData?.titleText || "My Book";
+
+  // Log for debugging
+  console.log("Rendering page:", currentPage, "Story info:", currentStoryInfo);
 
   return (
     <div 
@@ -78,51 +82,65 @@ const BookPreviewContent = ({
         flexDirection: "column",
         width: "400px",  // Fixed width for consistency
         height: "640px", // Fixed height (5:8 ratio)
-        maxHeight: isMobile ? "70vh" : "90vh",
+        maxHeight: isMobile ? "80vh" : "90vh",
         margin: "0 auto",
         transition: "transform 0.2s ease-out",
+        overflow: "hidden", // Prevent content overflow
       }}
       ref={containerRef}
       data-is-mobile={isMobile ? "true" : "false"}
       data-page-number={currentPage}
     >
-      {/* Book Pages */}
-      {isStoriesLoading || isCoverLoading ? (
-        <Skeleton className="w-full h-full" />
-      ) : (
-        <>
-          {currentPage === 0 ? (
-            // Cover Page
-            <BookCover 
-              coverData={coverData} 
-              authorName={authorName}
-            />
-          ) : (
-            // Content Pages
-            currentStoryInfo && currentStoryInfo.story && (
-              <PageView 
-                story={currentStoryInfo.story} 
-                pageNumber={currentStoryInfo.pageWithinStory}
-                totalPagesInStory={currentStoryInfo.totalPagesInStory}
-                isMediaPage={currentStoryInfo.isMediaPage}
-                mediaItem={currentStoryInfo.mediaItem}
-                isMobile={isMobile}
-                globalPageNumber={currentPage}
-                bookTitle={bookTitle}
+      <div 
+        ref={contentRef}
+        className="book-content-wrapper"
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          position: "relative"
+        }}
+      >
+        {/* Book Pages */}
+        {isStoriesLoading || isCoverLoading ? (
+          <Skeleton className="w-full h-full" />
+        ) : (
+          <>
+            {currentPage === 0 ? (
+              // Cover Page
+              <BookCover 
+                coverData={coverData} 
+                authorName={authorName}
               />
-            )
-          )}
-        </>
-      )}
+            ) : (
+              // Content Pages
+              currentStoryInfo && currentStoryInfo.story && (
+                <PageView 
+                  story={currentStoryInfo.story} 
+                  pageNumber={currentStoryInfo.pageWithinStory}
+                  totalPagesInStory={currentStoryInfo.totalPagesInStory}
+                  isMediaPage={currentStoryInfo.isMediaPage}
+                  mediaItem={currentStoryInfo.mediaItem}
+                  isMobile={isMobile}
+                  globalPageNumber={currentPage}
+                  bookTitle={bookTitle}
+                />
+              )
+            )}
+          </>
+        )}
 
-      {/* Page Turn Buttons */}
-      <BookPreviewControls
-        currentPage={currentPage}
-        totalPageCount={totalPageCount}
-        goToNextPage={goToNextPage}
-        goToPrevPage={goToPrevPage}
-        isMobile={isMobile}
-      />
+        {/* Page Turn Buttons */}
+        <BookPreviewControls
+          currentPage={currentPage}
+          totalPageCount={totalPageCount}
+          goToNextPage={goToNextPage}
+          goToPrevPage={goToPrevPage}
+          isMobile={isMobile}
+        />
+      </div>
     </div>
   );
 };

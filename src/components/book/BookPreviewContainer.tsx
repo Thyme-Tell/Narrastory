@@ -37,24 +37,66 @@ const BookPreviewContainer = ({
   
   // Setup touch events and iOS fixes
   useEffect(() => {
-    if (isMobile && bookContainerRef.current) {
-      bookContainerRef.current.style.touchAction = 'pan-y';
+    if (bookContainerRef.current) {
+      // Set fixed dimensions for consistent layout
+      const container = bookContainerRef.current;
       
-      // iOS-specific fix: force layout recalculation
-      if (isIOSDevice) {
-        setTimeout(() => {
-          if (bookContainerRef.current) {
-            bookContainerRef.current.style.opacity = '0.99';
-            requestAnimationFrame(() => {
-              if (bookContainerRef.current) {
-                bookContainerRef.current.style.opacity = '1';
-              }
-            });
-          }
-        }, 200);
+      // Force appropriate sizing
+      if (isMobile) {
+        container.style.touchAction = 'pan-y';
+        
+        // iOS-specific fix
+        if (isIOSDevice) {
+          setTimeout(() => {
+            if (container) {
+              // Force layout recalculation
+              container.style.opacity = '0.99';
+              requestAnimationFrame(() => {
+                if (container) {
+                  container.style.opacity = '1';
+                }
+              });
+            }
+          }, 200);
+        }
       }
     }
   }, [isMobile, isIOSDevice]);
+
+  // Handle swipe navigation on mobile
+  useEffect(() => {
+    if (!isMobile || !bookContainerRef.current) return;
+    
+    let startX = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+    };
+    
+    const handleTouchEnd = (e: TouchEvent) => {
+      const endX = e.changedTouches[0].clientX;
+      const diffX = endX - startX;
+      
+      // Threshold for swipe detection
+      if (Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          // Swipe right - go to previous page
+          goToPrevPage();
+        } else {
+          // Swipe left - go to next page
+          goToNextPage();
+        }
+      }
+    };
+    
+    const container = bookContainerRef.current;
+    container.addEventListener('touchstart', handleTouchStart);
+    container.addEventListener('touchend', handleTouchEnd);
+    
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile, goToNextPage, goToPrevPage]);
 
   return (
     <div 
@@ -74,6 +116,8 @@ const BookPreviewContainer = ({
           WebkitPerspective: '1000',
         } : {})
       }}
+      data-page={currentPage}
+      data-total-pages={totalPageCount}
     >
       <BookPreviewContent
         currentPage={currentPage}
