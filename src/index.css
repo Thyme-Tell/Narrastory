@@ -274,6 +274,21 @@
   .book-preview-mobile-content {
     padding: 12px !important;
   }
+  
+  /* Ensure book preview is visible on mobile devices */
+  [data-is-mobile="true"].book-format {
+    max-width: 90vw !important;
+    max-height: 70vh !important;
+    margin: 0 auto;
+  }
+  
+  /* Ensure the preview container takes full height on mobile */
+  .book-preview-mobile-container {
+    height: calc(100vh - 120px) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 /* Animations for mobile transitions */
@@ -302,5 +317,11 @@
   /* Ensure buttons have enough spacing */
   .mobile-button-spacing > * {
     margin: 0.25rem !important;
+  }
+  
+  /* Fix for book preview on iOS devices */
+  .ios-book-preview-fix {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
   }
 }

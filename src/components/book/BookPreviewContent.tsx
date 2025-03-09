@@ -44,8 +44,8 @@ const BookPreviewContent = ({
   isMobile = false,
 }: BookPreviewContentProps) => {
   // Calculate dimensions based on device while maintaining aspect ratio
-  const maxWidth = isMobile ? "90%" : "600px";
-  const maxHeight = isMobile ? "75vh" : "90vh";
+  const maxWidth = isMobile ? "90vw" : "600px";
+  const maxHeight = isMobile ? "70vh" : "90vh";
   
   // Get book title from cover data
   const bookTitle = coverData?.titleText || "My Book";
@@ -59,8 +59,10 @@ const BookPreviewContent = ({
         maxWidth,
         height: "auto",
         maxHeight,
-        aspectRatio: "5/8"
+        aspectRatio: "5/8",
+        willChange: "transform" // Performance optimization for mobile
       }}
+      data-is-mobile={isMobile ? "true" : "false"} // For debugging
     >
       {/* Book Pages */}
       {isStoriesLoading || isCoverLoading ? (

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +86,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   };
 
   const handleOpenPreview = () => {
+    console.log("Opening book preview, isMobile:", isMobile);
     setIsPreviewOpen(true);
   };
 
