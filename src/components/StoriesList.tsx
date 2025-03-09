@@ -1,12 +1,6 @@
-import StoryCard from "./StoryCard";
 
-interface Story {
-  id: string;
-  title: string | null;
-  content: string;
-  created_at: string;
-  share_token: string | null;
-}
+import StoryCard from "./StoryCard";
+import { Story } from "@/types/supabase";
 
 interface StoriesListProps {
   stories: Story[];

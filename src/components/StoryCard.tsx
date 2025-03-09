@@ -1,18 +1,14 @@
+
 import { useState } from "react";
 import { useStoryOperations } from "./story/StoryOperations";
 import StoryEditForm from "./StoryEditForm";
 import StoryContent from "./StoryContent";
 import StoryHeader from "./story/StoryHeader";
 import ShareDialog from "./story/ShareDialog";
+import { Story } from "@/types/supabase";
 
 interface StoryCardProps {
-  story: {
-    id: string;
-    title: string | null;
-    content: string;
-    created_at: string;
-    share_token: string | null;
-  };
+  story: Story;
   onUpdate: () => void;
 }
 
