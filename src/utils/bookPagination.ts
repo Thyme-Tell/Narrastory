@@ -4,7 +4,7 @@ import { StoryMediaItem } from "@/types/media";
 
 // Constants for book dimensions and content
 const CHARS_PER_LINE = 45; // Reduced from 50 to be more conservative
-const LINES_PER_PAGE = 20; // Reduced from 25 to ensure content fits
+const LINES_PER_PAGE = 23; // Increased from 20 to reduce bottom margin
 const PAGE_MARGIN_LINES = 6; // Space for header and footer
 
 /**
@@ -30,6 +30,54 @@ export const calculateStoryPages = (story: Story): number => {
 };
 
 /**
+ * Splits text into lines without breaking words
+ * @param text Text to split into lines
+ * @param maxCharsPerLine Maximum characters per line
+ * @returns Array of lines
+ */
+const splitTextIntoLines = (text: string, maxCharsPerLine: number): string[] => {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+
+  words.forEach(word => {
+    // If adding this word would exceed line length
+    if ((currentLine.length + word.length + 1) > maxCharsPerLine) {
+      // Push current line if it's not empty
+      if (currentLine.length > 0) {
+        lines.push(currentLine);
+        currentLine = '';
+      }
+      
+      // If the word itself is longer than max chars, we'll need to split it
+      if (word.length > maxCharsPerLine) {
+        // Split the word and add hyphens at appropriate places
+        let remaining = word;
+        while (remaining.length > maxCharsPerLine) {
+          const segment = remaining.substring(0, maxCharsPerLine - 1) + '-';
+          lines.push(segment);
+          remaining = remaining.substring(maxCharsPerLine - 1);
+        }
+        currentLine = remaining;
+      } else {
+        // Normal case, just add the word to the empty line
+        currentLine = word;
+      }
+    } else {
+      // Add word to current line with a space if needed
+      currentLine = currentLine.length > 0 ? `${currentLine} ${word}` : word;
+    }
+  });
+
+  // Don't forget the last line
+  if (currentLine.length > 0) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+};
+
+/**
  * Calculates which paragraphs should be displayed on a specific page of a story
  * Returns an array of paragraph segments to display
  */
@@ -42,93 +90,67 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
   const effectiveLineLimit = LINES_PER_PAGE - PAGE_MARGIN_LINES;
   
-  // Calculate exact character and line positions for more accurate pagination
-  const allLinePositions: { text: string, paragraph: number, isLastLine: boolean }[] = [];
+  // Create properly formatted lines from paragraphs
+  const allLines: { text: string, paragraphIndex: number }[] = [];
   
   paragraphs.forEach((paragraph, pIndex) => {
     // Skip empty paragraphs
     if (paragraph.trim() === '') return;
     
-    // Split paragraph into lines based on character limit
-    let remainingText = paragraph;
-    while (remainingText.length > 0) {
-      const lineText = remainingText.slice(0, CHARS_PER_LINE);
-      const isLastLine = remainingText.length <= CHARS_PER_LINE;
-      
-      allLinePositions.push({
-        text: lineText,
-        paragraph: pIndex,
-        isLastLine
-      });
-      
-      remainingText = remainingText.slice(lineText.length);
-    }
+    // Split paragraph into lines without breaking words
+    const paragraphLines = splitTextIntoLines(paragraph, CHARS_PER_LINE);
+    
+    // Add each line with its paragraph index
+    paragraphLines.forEach(line => {
+      allLines.push({ text: line, paragraphIndex: pIndex });
+    });
     
     // Add an empty line after each paragraph for spacing
-    allLinePositions.push({
-      text: '',
-      paragraph: pIndex,
-      isLastLine: true
-    });
+    allLines.push({ text: '', paragraphIndex: pIndex });
   });
   
   // Calculate which lines belong on the requested page
   const startLine = (pageNumber - 1) * effectiveLineLimit;
   const endLine = startLine + effectiveLineLimit;
-  const pageLines = allLinePositions.slice(startLine, endLine);
+  const pageLines = allLines.slice(startLine, endLine);
   
   // Group the lines back into paragraphs
-  const pageContent: string[] = [];
+  const resultParagraphs: string[] = [];
   let currentParagraph = '';
-  let lastParagraphIndex = -1;
+  let currentParagraphIndex = -1;
   
   pageLines.forEach(line => {
-    // If this is from a new paragraph or it's the first line
-    if (line.paragraph !== lastParagraphIndex || lastParagraphIndex === -1) {
-      // If we have content from the previous paragraph, add it to the result
-      if (currentParagraph.trim()) {
-        pageContent.push(currentParagraph);
+    if (line.paragraphIndex !== currentParagraphIndex) {
+      // New paragraph started
+      if (currentParagraph) {
+        resultParagraphs.push(currentParagraph);
       }
-      
-      // Start a new paragraph
       currentParagraph = line.text;
-      lastParagraphIndex = line.paragraph;
-    } else {
-      // Continue the same paragraph
-      currentParagraph += line.text;
-    }
-    
-    // If this is the last line of a paragraph, prepare for the next one
-    if (line.isLastLine) {
-      if (currentParagraph.trim()) {
-        pageContent.push(currentParagraph);
+      currentParagraphIndex = line.paragraphIndex;
+    } else if (line.text === '') {
+      // Empty line marks paragraph end
+      if (currentParagraph) {
+        resultParagraphs.push(currentParagraph);
+        currentParagraph = '';
       }
-      currentParagraph = '';
-      lastParagraphIndex = -1;
+    } else {
+      // Continue paragraph
+      currentParagraph += ' ' + line.text;
     }
   });
   
-  // Add the last paragraph if there's remaining content
-  if (currentParagraph.trim()) {
-    pageContent.push(currentParagraph);
+  // Add the last paragraph if any
+  if (currentParagraph) {
+    resultParagraphs.push(currentParagraph);
   }
   
-  // If this pagination method produces no content but we know there should be content
-  // (e.g., due to calculation errors), fall back to a simpler approach
-  if (pageContent.length === 0 && pageNumber <= calculateStoryPages(story)) {
-    // Simple fallback: just return the whole paragraph that should appear on this page
-    const paragraphsPerPage = Math.max(1, Math.floor(paragraphs.length / calculateStoryPages(story)));
-    const startParagraph = (pageNumber - 1) * paragraphsPerPage;
-    return paragraphs.slice(startParagraph, startParagraph + paragraphsPerPage);
-  }
-  
-  return pageContent;
+  return resultParagraphs;
 };
 
 /**
  * Calculates the total number of pages for all stories, including cover
  */
-export const calculateTotalPages = (stories: Story[], storyMediaMap: Map<string, StoryMediaItem[]>): number => {
+export const calculateTotalPages = (stories: Story[], storyMediaMap: Map<string, StoryMediaItem[]> = new Map()): number => {
   if (!stories || stories.length === 0) {
     return 1; // Just the cover page
   }
@@ -154,7 +176,7 @@ export interface PageMapping {
   pageWithinStory: number; // 1-based page number within the story
 }
 
-export const mapPageToStory = (globalPage: number, stories: Story[], storyMediaMap: Map<string, StoryMediaItem[]>): PageMapping => {
+export const mapPageToStory = (globalPage: number, stories: Story[], storyMediaMap: Map<string, StoryMediaItem[]> = new Map()): PageMapping => {
   if (globalPage === 0) {
     return { storyIndex: -1, pageWithinStory: 0 }; // Cover page
   }

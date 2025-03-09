@@ -352,11 +352,14 @@
 /* Updated book text styles for consistency */
 .story-content p {
   text-indent: 2em;
-  margin-bottom: 0.75em;
+  margin-bottom: 0.6em; /* Reduced margin between paragraphs */
   font-size: 11pt;
   line-height: 1.5;
   text-align: justify;
   max-width: 100%;
+  word-break: normal; /* Prevent words from breaking across lines */
+  overflow-wrap: normal;
+  hyphens: manual;
 }
 
 /* Standardize heading styles within the book */
@@ -399,6 +402,7 @@
   .story-content p {
     font-size: 10pt;
     line-height: 1.4;
+    margin-bottom: 0.5em; /* Reduced margin for mobile */
   }
   
   .book-page-wrapper img,
