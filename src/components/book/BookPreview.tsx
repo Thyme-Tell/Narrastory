@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,17 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const { toast } = useToast();
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
   const isMobile = useIsMobile();
+  const [isRendered, setIsRendered] = useState(false);
+  
+  // Debug logging for mobile visibility issues
+  useEffect(() => {
+    if (open) {
+      console.log("BookPreview opened, isMobile:", isMobile);
+      setIsRendered(true);
+    } else {
+      setIsRendered(false);
+    }
+  }, [open, isMobile]);
   
   // Fetch stories for the book content
   const { data: stories, isLoading: isStoriesLoading } = useQuery({
@@ -110,6 +121,18 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, currentPage, totalPageCount, onClose, goToNextPage, goToPrevPage]);
 
+  // Fix for mobile devices - prevent body scrolling when preview is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
   if (!open) return null;
 
   // Get the current story to display
@@ -117,7 +140,12 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const authorName = profile ? `${profile.first_name} ${profile.last_name}` : "";
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-start overflow-hidden w-full">
+    <div 
+      className="fixed inset-0 bg-black/80 z-[999] flex flex-col items-center justify-start overflow-hidden w-full"
+      style={{ touchAction: "none" }}
+      data-is-mobile={isMobile ? "true" : "false"} // For debugging
+      data-is-rendered={isRendered ? "true" : "false"} // For debugging
+    >
       {/* Header */}
       <BookPreviewHeader
         totalPageCount={totalPageCount}
