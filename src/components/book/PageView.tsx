@@ -92,17 +92,17 @@ const PageView = ({
       flexDirection: "column"
     }}>
       {/* Book title header */}
-      <div className="text-center italic text-green-800 font-serif pt-2 pb-1">
+      <div className="text-center italic text-green-800 font-serif pt-1 pb-0">
         {bookTitle}
       </div>
       
-      {/* Content area - decreased bottom margin */}
-      <div className="flex-1 overflow-hidden px-8 pb-1">
+      {/* Content area - maximized with reduced padding */}
+      <div className="flex-1 overflow-hidden px-8 pb-0">
         {children}
       </div>
       
-      {/* Page number footer - reduced bottom margin */}
-      <div className="w-full text-center py-1">
+      {/* Page number footer - minimized bottom margin */}
+      <div className="w-full text-center py-[2px]">
         <span className="text-gray-700">{globalPageNumber}</span>
       </div>
     </div>
@@ -225,7 +225,7 @@ const PageView = ({
       <div className="h-full overflow-y-auto book-content">
         <div className="prose max-w-none font-serif text-[11pt]">
           {isFirstPage && (
-            <h1 className="text-center font-serif text-[16pt] mb-4 font-bold">
+            <h1 className="text-center font-serif text-[16pt] mb-3 font-bold">
               {story.title || "Untitled Story"}
             </h1>
           )}
@@ -233,7 +233,7 @@ const PageView = ({
           {pageContent.length > 0 ? (
             <div className="story-content">
               {pageContent.map((paragraph, index) => (
-                <p key={index} className="indent-8 text-[11pt] text-justify mb-3">
+                <p key={index} className="indent-8 text-[11pt] text-justify mb-2">
                   {paragraph}
                 </p>
               ))}

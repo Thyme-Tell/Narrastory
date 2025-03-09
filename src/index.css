@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -352,9 +353,9 @@
 /* Updated book text styles for consistency */
 .story-content p {
   text-indent: 2em;
-  margin-bottom: 0.6em; /* Reduced margin between paragraphs */
+  margin-bottom: 0.4em; /* Reduced margin between paragraphs */
   font-size: 11pt;
-  line-height: 1.5;
+  line-height: 1.45; /* Slightly reduced line height */
   text-align: justify;
   max-width: 100%;
   word-break: normal; /* Prevent words from breaking across lines */
@@ -366,8 +367,8 @@
 .book-page-wrapper h1 {
   font-size: 16pt;
   text-align: center;
-  margin-bottom: 1.5em;
-  margin-top: 0.75em;
+  margin-bottom: 1em; /* Reduced top margin */
+  margin-top: 0.5em; /* Reduced top margin */
   font-weight: bold;
 }
 
@@ -402,7 +403,7 @@
   .story-content p {
     font-size: 10pt;
     line-height: 1.4;
-    margin-bottom: 0.5em; /* Reduced margin for mobile */
+    margin-bottom: 0.4em; /* Further reduced margin for mobile */
   }
   
   .book-page-wrapper img,

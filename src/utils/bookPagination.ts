@@ -4,8 +4,8 @@ import { StoryMediaItem } from "@/types/media";
 
 // Constants for book dimensions and content
 const CHARS_PER_LINE = 45; // Reduced from 50 to be more conservative
-const LINES_PER_PAGE = 23; // Increased from 20 to reduce bottom margin
-const PAGE_MARGIN_LINES = 6; // Space for header and footer
+const LINES_PER_PAGE = 26; // Increased from 23 to reduce bottom margin
+const PAGE_MARGIN_LINES = 4; // Reduced from 6 to allow more content
 
 /**
  * Calculates how many pages a story will take based on its content

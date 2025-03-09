@@ -86,6 +86,7 @@ const BookPreviewContent = ({
         margin: "0 auto",
         transition: "transform 0.2s ease-out",
         overflow: "hidden", // Prevent content overflow
+        padding: "0", // Remove padding to maximize content area
       }}
       ref={containerRef}
       data-is-mobile={isMobile ? "true" : "false"}
@@ -100,7 +101,8 @@ const BookPreviewContent = ({
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          position: "relative"
+          position: "relative",
+          padding: "0", // Remove padding to maximize content area
         }}
       >
         {/* Book Pages */}
