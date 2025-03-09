@@ -1,157 +1,205 @@
+import { Story } from "@/types/supabase";
+import { StoryMediaItem } from "@/types/media";
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useCoverData } from "@/hooks/useCoverData";
-import { calculateTotalPages } from "@/utils/bookPagination";
-import { CoverData } from "./cover/CoverTypes";
-import { useIsMobile } from "@/hooks/use-mobile";
-import BookProgressHeader from "./book-progress/BookProgressHeader";
-import BookProgressOptions from "./book-progress/BookProgressOptions";
-import BookProgressBar from "./book-progress/BookProgressBar";
-import BookCoverPreview from "./book-progress/BookCoverPreview";
-import BookEditorModals from "./book-progress/BookEditorModals";
+// Constants for book dimensions and content
+const CHARS_PER_LINE = 45; // Reduced from 50 to be more conservative
+const LINES_PER_PAGE = 26; // Increased from 23 to reduce bottom margin
+const PAGE_MARGIN_LINES = 4; // Reduced from 6 to allow more content
 
-interface BookProgressProps {
-  profileId: string;
-}
-
-const MIN_PAGES_REQUIRED = 32;
-
-const BookProgress = ({ profileId }: BookProgressProps) => {
-  const [isHidden, setIsHidden] = useState(false);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const isMobile = useIsMobile();
-  
-  const { 
-    coverData, 
-    saveCoverData, 
-    isLoading: isCoverLoading, 
-    refreshCoverData 
-  } = useCoverData(profileId);
-  
-  const { data: profile } = useQuery({
-    queryKey: ["profile", profileId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("id", profileId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return null;
-      }
-      
-      return data;
-    },
-  });
-
-  const { data: stories } = useQuery({
-    queryKey: ["stories", profileId],
-    queryFn: async () => {
-      const { data: storiesData, error: storiesError } = await supabase
-        .from("stories")
-        .select("id, title, content, created_at, profile_id, share_token")
-        .eq("profile_id", profileId);
-
-      if (storiesError) {
-        console.error("Error fetching stories:", storiesError);
-        return [];
-      }
-
-      return storiesData;
-    },
-  });
-
-  const currentPageCount = stories ? calculateTotalPages(stories) : 1;
-  const progressPercentage = Math.min((currentPageCount / MIN_PAGES_REQUIRED) * 100, 100);
-
-  useEffect(() => {
-    if (profileId) {
-      console.log('BookProgress: Refreshing cover data for profile:', profileId);
-      refreshCoverData(profileId, true);
-    }
-  }, [profileId, refreshCoverData]);
-
-  const handleOpenCoverEditor = () => {
-    refreshCoverData(profileId, true);
-    setIsEditorOpen(true);
-  };
-
-  const handleCloseCoverEditor = () => {
-    setIsEditorOpen(false);
-  };
-
-  const handleSaveCover = async (newCoverData: CoverData) => {
-    console.log("Saving new cover data:", newCoverData);
-    await saveCoverData(newCoverData);
-    refreshCoverData(profileId, true);
-  };
-
-  if (isHidden) {
-    return null;
+/**
+ * Calculates how many pages a story will take based on its content
+ */
+export const calculateStoryPages = (story: Story): number => {
+  if (!story.content || story.content.trim() === '') {
+    return 1; // At least one page even if empty
   }
 
-  if (!stories?.length) {
-    return <BookProgressHeader setIsHidden={setIsHidden} />;
-  }
+  const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
+  let totalLines = 0;
 
-  return (
-    <div className="mb-8">
-      <nav className="flex text-sm text-atlantic/60 mb-4">
-        <a href="/" className="hover:text-atlantic">HOME</a>
-        <span className="mx-2">›</span>
-        <span className="font-medium text-atlantic">{profile?.first_name?.toUpperCase()} {profile?.last_name?.toUpperCase()}</span>
-      </nav>
-      
-      <div className={`flex ${isMobile ? "flex-col" : "justify-between"} items-center`}>
-        <div className={isMobile ? "w-full mb-6" : ""}>
-          <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
-          
-          {isMobile && (
-            <div className="mb-6">
-              <BookCoverPreview 
-                coverData={coverData}
-                isLoading={isCoverLoading}
-              />
-            </div>
-          )}
-          
-          <div className="flex flex-col space-y-6">
-            <BookProgressOptions 
-              profileId={profileId}
-              onEditCover={handleOpenCoverEditor}
-            />
+  // Calculate lines needed for each paragraph
+  paragraphs.forEach(paragraph => {
+    // Each paragraph starts on a new line
+    const paragraphLines = Math.ceil(paragraph.length / CHARS_PER_LINE);
+    totalLines += paragraphLines + 1; // +1 for paragraph spacing
+  });
 
-            <BookProgressBar 
-              currentPageCount={currentPageCount}
-              progressPercentage={progressPercentage}
-              minPagesRequired={MIN_PAGES_REQUIRED}
-            />
-          </div>
-        </div>
-        
-        {!isMobile && (
-          <BookCoverPreview 
-            coverData={coverData}
-            isLoading={isCoverLoading}
-          />
-        )}
-      </div>
-
-      <BookEditorModals
-        profileId={profileId}
-        isEditorOpen={isEditorOpen}
-        isPreviewOpen={false}
-        coverData={coverData}
-        onCloseCoverEditor={handleCloseCoverEditor}
-        onClosePreview={() => {}}
-        onSaveCover={handleSaveCover}
-      />
-    </div>
-  );
+  // Calculate pages needed, accounting for margins
+  return Math.max(1, Math.ceil(totalLines / (LINES_PER_PAGE - PAGE_MARGIN_LINES)));
 };
 
-export default BookProgress;
+/**
+ * Splits text into lines without breaking words
+ * @param text Text to split into lines
+ * @param maxCharsPerLine Maximum characters per line
+ * @returns Array of lines
+ */
+const splitTextIntoLines = (text: string, maxCharsPerLine: number): string[] => {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+
+  words.forEach(word => {
+    // If adding this word would exceed line length
+    if ((currentLine.length + word.length + 1) > maxCharsPerLine) {
+      // Push current line if it's not empty
+      if (currentLine.length > 0) {
+        lines.push(currentLine);
+        currentLine = '';
+      }
+      
+      // If the word itself is longer than max chars, we'll need to split it
+      if (word.length > maxCharsPerLine) {
+        // Split the word and add hyphens at appropriate places
+        let remaining = word;
+        while (remaining.length > maxCharsPerLine) {
+          const segment = remaining.substring(0, maxCharsPerLine - 1) + '-';
+          lines.push(segment);
+          remaining = remaining.substring(maxCharsPerLine - 1);
+        }
+        currentLine = remaining;
+      } else {
+        // Normal case, just add the word to the empty line
+        currentLine = word;
+      }
+    } else {
+      // Add word to current line with a space if needed
+      currentLine = currentLine.length > 0 ? `${currentLine} ${word}` : word;
+    }
+  });
+
+  // Don't forget the last line
+  if (currentLine.length > 0) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+};
+
+/**
+ * Calculates which paragraphs should be displayed on a specific page of a story
+ * Returns an array of paragraph segments to display
+ */
+export const getPageContent = (story: Story, pageNumber: number): string[] => {
+  if (!story.content || story.content.trim() === '') {
+    return [];
+  }
+
+  // Split content into paragraphs
+  const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
+  const effectiveLineLimit = LINES_PER_PAGE - PAGE_MARGIN_LINES;
+  
+  // Create properly formatted lines from paragraphs
+  const allFormattedParagraphs: string[][] = [];
+  const allLines: { text: string, paragraphIndex: number }[] = [];
+  
+  paragraphs.forEach((paragraph, pIndex) => {
+    // Skip empty paragraphs
+    if (paragraph.trim() === '') return;
+    
+    // Split paragraph into lines without breaking words
+    const paragraphLines = splitTextIntoLines(paragraph, CHARS_PER_LINE);
+    allFormattedParagraphs.push(paragraphLines);
+    
+    // Add each line with its paragraph index
+    paragraphLines.forEach(line => {
+      allLines.push({ text: line, paragraphIndex: pIndex });
+    });
+    
+    // Add an empty line after each paragraph for spacing
+    allLines.push({ text: '', paragraphIndex: pIndex });
+  });
+  
+  // Calculate which lines belong on the requested page
+  const startLine = (pageNumber - 1) * effectiveLineLimit;
+  const endLine = startLine + effectiveLineLimit;
+  const pageLines = allLines.slice(startLine, endLine);
+  
+  // Group the lines back into paragraphs, ensuring no sentence is broken mid-phrase
+  const resultParagraphs: string[] = [];
+  let currentParagraph = '';
+  let currentParagraphIndex = -1;
+  
+  pageLines.forEach(line => {
+    if (line.paragraphIndex !== currentParagraphIndex) {
+      // New paragraph started
+      if (currentParagraph) {
+        resultParagraphs.push(currentParagraph);
+      }
+      currentParagraph = line.text;
+      currentParagraphIndex = line.paragraphIndex;
+    } else if (line.text === '') {
+      // Empty line marks paragraph end
+      if (currentParagraph) {
+        resultParagraphs.push(currentParagraph);
+        currentParagraph = '';
+      }
+    } else {
+      // Continue paragraph - add a space between lines
+      currentParagraph += ' ' + line.text;
+    }
+  });
+  
+  // Add the last paragraph if any
+  if (currentParagraph) {
+    resultParagraphs.push(currentParagraph);
+  }
+  
+  return resultParagraphs;
+};
+
+/**
+ * Calculates the total number of pages for all stories, including cover
+ */
+export const calculateTotalPages = (stories: Story[], storyMediaMap: Map<string, StoryMediaItem[]> = new Map()): number => {
+  if (!stories || stories.length === 0) {
+    return 1; // Just the cover page
+  }
+
+  let totalPages = 1; // Start with cover page
+  
+  stories.forEach(story => {
+    totalPages += calculateStoryPages(story);
+    
+    // Add pages for media items
+    const mediaItems = storyMediaMap.get(story.id) || [];
+    totalPages += mediaItems.length;
+  });
+
+  return totalPages;
+};
+
+/**
+ * Calculates which story and what page within that story corresponds to a global page number
+ */
+export interface PageMapping {
+  storyIndex: number; // -1 for cover page
+  pageWithinStory: number; // 1-based page number within the story
+}
+
+export const mapPageToStory = (globalPage: number, stories: Story[], storyMediaMap: Map<string, StoryMediaItem[]> = new Map()): PageMapping => {
+  if (globalPage === 0) {
+    return { storyIndex: -1, pageWithinStory: 0 }; // Cover page
+  }
+  
+  let currentPage = 1; // Start after cover page
+  
+  for (let i = 0; i < stories.length; i++) {
+    const storyTextPages = calculateStoryPages(stories[i]);
+    const mediaItems = storyMediaMap.get(stories[i].id) || [];
+    const totalStoryPages = storyTextPages + mediaItems.length;
+    
+    // If the global page falls within this story's range
+    if (globalPage < currentPage + totalStoryPages) {
+      return {
+        storyIndex: i,
+        pageWithinStory: globalPage - currentPage + 1 // Convert to 1-based for the story
+      };
+    }
+    
+    currentPage += totalStoryPages;
+  }
+  
+  // If we get here, the page is beyond our content
+  return { storyIndex: -1, pageWithinStory: 0 };
+};

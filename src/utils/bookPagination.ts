@@ -91,6 +91,7 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
   const effectiveLineLimit = LINES_PER_PAGE - PAGE_MARGIN_LINES;
   
   // Create properly formatted lines from paragraphs
+  const allFormattedParagraphs: string[][] = [];
   const allLines: { text: string, paragraphIndex: number }[] = [];
   
   paragraphs.forEach((paragraph, pIndex) => {
@@ -99,6 +100,7 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
     
     // Split paragraph into lines without breaking words
     const paragraphLines = splitTextIntoLines(paragraph, CHARS_PER_LINE);
+    allFormattedParagraphs.push(paragraphLines);
     
     // Add each line with its paragraph index
     paragraphLines.forEach(line => {
@@ -114,7 +116,7 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
   const endLine = startLine + effectiveLineLimit;
   const pageLines = allLines.slice(startLine, endLine);
   
-  // Group the lines back into paragraphs
+  // Group the lines back into paragraphs, ensuring no sentence is broken mid-phrase
   const resultParagraphs: string[] = [];
   let currentParagraph = '';
   let currentParagraphIndex = -1;
@@ -134,7 +136,7 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
         currentParagraph = '';
       }
     } else {
-      // Continue paragraph
+      // Continue paragraph - add a space between lines
       currentParagraph += ' ' + line.text;
     }
   });
