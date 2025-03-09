@@ -4,6 +4,7 @@ export type Story = {
   title: string | null;
   content: string;
   created_at: string;
+  profile_id: string;
   share_token: string | null;
 };
 
