@@ -59,58 +59,32 @@ const BookPreviewContent = ({
           }, 10);
         }
       }, 100);
-      
-      console.log("BookPreviewContent mounted for mobile:", { isMobile, currentPage });
     }
   }, [isMobile, currentPage]);
-  
-  // Calculate dimensions based on viewport and device
-  const getContainerStyle = () => {
-    // Base styles present in all cases
-    const baseStyle: React.CSSProperties = {
-      transform: `scale(${zoomLevel})`,
-      transformOrigin: 'center',
-      aspectRatio: "5/8",
-      willChange: "transform", // Performance optimization
-      backgroundColor: "#f5f5f0", // Ensure background is visible
-      position: "relative",
-      overflow: "hidden",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-      display: "flex",
-      flexDirection: "column",
-      opacity: 1, // Ensure visibility
-    };
-
-    // Mobile specific adjustments
-    if (isMobile) {
-      return {
-        ...baseStyle,
-        height: "70vh", // Fixed height to ensure visibility
-        maxWidth: "85vw",
-        margin: "0 auto",
-        border: "1px solid rgba(0,0,0,0.1)", // Extra border to help with visibility
-      };
-    }
-
-    // Desktop sizing
-    return {
-      ...baseStyle,
-      maxWidth: "600px",
-      maxHeight: "90vh",
-    };
-  };
   
   // Get book title from cover data
   const bookTitle = coverData?.titleText || "My Book";
 
   return (
     <div 
-      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format page-transition"
-      style={getContainerStyle()}
+      className="fixed-book-container"
+      style={{
+        transform: `scale(${zoomLevel})`,
+        transformOrigin: 'center',
+        backgroundColor: "#f5f5f0",
+        position: "relative",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        display: "flex",
+        flexDirection: "column",
+        width: "400px",  // Fixed width for consistency
+        height: "640px", // Fixed height (5:8 ratio)
+        maxHeight: isMobile ? "70vh" : "90vh",
+        margin: "0 auto",
+        transition: "transform 0.2s ease-out",
+      }}
+      ref={containerRef}
       data-is-mobile={isMobile ? "true" : "false"}
       data-page-number={currentPage}
-      data-zoom-level={zoomLevel}
-      ref={containerRef}
     >
       {/* Book Pages */}
       {isStoriesLoading || isCoverLoading ? (

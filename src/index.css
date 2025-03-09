@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -323,5 +322,87 @@
   .ios-book-preview-fix {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
+  }
+}
+
+/* Book Format CSS - Updated for consistent sizing */
+.fixed-book-container {
+  aspect-ratio: 5/8;
+  width: 400px;
+  height: 640px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f0;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-page-wrapper {
+  width: 100%;
+  height: 100%;
+  background-color: #f5f5f0;
+  font-family: 'Playfair Display', serif;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Updated book text styles for consistency */
+.story-content p {
+  text-indent: 2em;
+  margin-bottom: 0.75em;
+  font-size: 11pt;
+  line-height: 1.5;
+  text-align: justify;
+  max-width: 100%;
+}
+
+/* Standardize heading styles within the book */
+.book-page-wrapper h1 {
+  font-size: 16pt;
+  text-align: center;
+  margin-bottom: 1.5em;
+  margin-top: 0.75em;
+  font-weight: bold;
+}
+
+/* Media sizing constraints to prevent overflow */
+.book-page-wrapper img,
+.book-page-wrapper video {
+  max-width: 100%;
+  max-height: 380px;
+  object-fit: contain;
+}
+
+/* QR code specific styling */
+.book-page-wrapper .qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure animations are consistent */
+.book-preview-outer-container {
+  transition: all 0.3s ease-out;
+}
+
+@media (max-width: 768px) {
+  .fixed-book-container {
+    width: 320px;
+    height: 512px;
+    max-height: 70vh;
+  }
+  
+  .story-content p {
+    font-size: 10pt;
+    line-height: 1.4;
+  }
+  
+  .book-page-wrapper img,
+  .book-page-wrapper video {
+    max-height: 300px;
   }
 }

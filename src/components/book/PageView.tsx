@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Story } from "@/types/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -79,21 +80,45 @@ const PageView = ({
     return data.publicUrl;
   };
 
+  // Common page wrapper with fixed dimensions and consistent styling
+  const BookPageWrapper = ({ children }: { children: React.ReactNode }) => (
+    <div className="book-page-wrapper" style={{
+      width: "100%",
+      height: "100%",
+      position: "relative",
+      backgroundColor: "#f5f5f0",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column"
+    }}>
+      {/* Book title header */}
+      <div className="text-center italic text-green-800 font-serif pt-4 pb-2">
+        {bookTitle}
+      </div>
+      
+      {/* Content area */}
+      <div className="flex-1 overflow-hidden px-8">
+        {children}
+      </div>
+      
+      {/* Page number footer */}
+      <div className="w-full text-center py-4">
+        <span className="text-gray-700">{globalPageNumber}</span>
+      </div>
+    </div>
+  );
+
   if (isMediaPage && mediaItem) {
     if (mediaItem.content_type.startsWith("image/")) {
       return (
-        <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
-          <div className="text-center italic text-green-800 font-serif pt-6 w-full">
-            {bookTitle}
-          </div>
-          
-          <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1">
+        <BookPageWrapper>
+          <div className="flex flex-col items-center justify-center h-full max-h-[75%]">
             <div className="max-h-full flex flex-col items-center">
               <div className="media-display">
                 <img 
                   src={getPublicUrl(mediaItem.file_path)} 
                   alt={mediaItem.caption || "Image"} 
-                  className="max-h-[60vh] max-w-full object-contain rounded-lg" 
+                  className="max-h-[380px] max-w-full object-contain rounded-lg" 
                   onError={(e) => {
                     console.error("Error loading image:", e);
                     const target = e.target as HTMLImageElement;
@@ -109,11 +134,7 @@ const PageView = ({
               )}
             </div>
           </div>
-          
-          <div className="absolute bottom-8 w-full text-center">
-            <span className="text-gray-700">{globalPageNumber}</span>
-          </div>
-        </div>
+        </BookPageWrapper>
       );
     } else if (mediaItem.content_type.startsWith("video/")) {
       const videoUrl = getPublicUrl(mediaItem.file_path);
@@ -129,17 +150,11 @@ const PageView = ({
       );
       
       const qrCodeUrl = generateQRCodeUrl(shortUrl);
-      console.log("Video in book preview:", { videoUrl, shortUrl, qrCodeUrl, mediaItem });
-      
       const thumbnailUrl = getVideoThumbnail(mediaItem.id);
       
       return (
-        <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
-          <div className="text-center italic text-green-800 font-serif pt-6 w-full">
-            {bookTitle}
-          </div>
-          
-          <div className="max-w-full max-h-[75%] flex flex-col justify-center items-center flex-1 space-y-4">
+        <BookPageWrapper>
+          <div className="flex flex-col items-center justify-center h-full space-y-4">
             <div className="flex flex-col items-center">
               <div className="relative mb-4">
                 <div className="w-64 h-40 bg-gray-100 rounded-lg overflow-hidden">
@@ -160,7 +175,7 @@ const PageView = ({
                   </div>
                 </div>
                 {mediaItem.caption && (
-                  <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%] no-indent">
+                  <p className="text-sm text-center italic mt-2 text-gray-500 text-[11pt] mx-auto max-w-[80%] no-indent">
                     {mediaItem.caption}
                   </p>
                 )}
@@ -171,9 +186,9 @@ const PageView = ({
                 <img 
                   src={qrCodeUrl} 
                   alt="QR Code to view video" 
-                  className="w-40 h-40"
+                  className="w-32 h-32"
                   onError={(e) => {
-                    console.error("QR code loading error:", e, qrCodeUrl);
+                    console.error("QR code loading error:", e);
                     const target = e.target as HTMLImageElement;
                     target.onerror = null;
                     target.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(shortUrl);
@@ -185,20 +200,12 @@ const PageView = ({
               </div>
             </div>
           </div>
-          
-          <div className="absolute bottom-8 w-full text-center">
-            <span className="text-gray-700">{globalPageNumber}</span>
-          </div>
-        </div>
+        </BookPageWrapper>
       );
     } else {
       return (
-        <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
-          <div className="text-center italic text-green-800 font-serif pt-6 w-full">
-            {bookTitle}
-          </div>
-          
-          <div className="flex-1 flex items-center justify-center">
+        <BookPageWrapper>
+          <div className="flex items-center justify-center h-full">
             <div className="text-center p-8 bg-gray-100 rounded-lg">
               <p className="text-lg font-medium text-gray-800">Unsupported Media</p>
               <p className="text-sm text-gray-600 mt-2">
@@ -206,11 +213,7 @@ const PageView = ({
               </p>
             </div>
           </div>
-          
-          <div className="absolute bottom-8 w-full text-center">
-            <span className="text-gray-700">{globalPageNumber}</span>
-          </div>
-        </div>
+        </BookPageWrapper>
       );
     }
   }
@@ -218,12 +221,8 @@ const PageView = ({
   const isFirstPage = pageNumber === 1;
 
   return (
-    <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col">
-      <div className="text-center italic text-green-800 font-serif pt-6">
-        {bookTitle}
-      </div>
-      
-      <div className="flex-1 mx-auto book-content px-12 py-10 overflow-y-auto">
+    <BookPageWrapper>
+      <div className="h-full overflow-y-auto book-content pb-4">
         <div className="prose max-w-none font-serif text-[11pt]">
           {isFirstPage && (
             <h1 className="text-center font-serif text-[16pt] mb-6 font-bold">
@@ -232,21 +231,19 @@ const PageView = ({
           )}
           
           {pageContent.length > 0 ? (
-            pageContent.map((paragraph, index) => (
-              <p key={index} className="indent-8 text-[11pt] text-justify">
-                {paragraph}
-              </p>
-            ))
+            <div className="story-content">
+              {pageContent.map((paragraph, index) => (
+                <p key={index} className="indent-8 text-[11pt] text-justify mb-4">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           ) : (
             <p className="text-gray-400 italic text-[11pt]">No content on this page</p>
           )}
         </div>
       </div>
-      
-      <div className="w-full text-center pb-8">
-        <span className="text-gray-700">{globalPageNumber}</span>
-      </div>
-    </div>
+    </BookPageWrapper>
   );
 };
 

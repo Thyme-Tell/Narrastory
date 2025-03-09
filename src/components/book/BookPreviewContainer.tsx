@@ -37,22 +37,17 @@ const BookPreviewContainer = ({
   
   // Setup touch events and iOS fixes
   useEffect(() => {
-    console.log("BookPreviewContainer mounted, isMobile:", isMobile);
-    
-    // Setup touch event handling for mobile
     if (isMobile && bookContainerRef.current) {
       bookContainerRef.current.style.touchAction = 'pan-y';
       
       // iOS-specific fix: force layout recalculation
       if (isIOSDevice) {
         setTimeout(() => {
-          // Force repaint by temporarily changing opacity
           if (bookContainerRef.current) {
             bookContainerRef.current.style.opacity = '0.99';
             requestAnimationFrame(() => {
               if (bookContainerRef.current) {
                 bookContainerRef.current.style.opacity = '1';
-                console.log("iOS repaint forced");
               }
             });
           }
@@ -63,10 +58,16 @@ const BookPreviewContainer = ({
 
   return (
     <div 
-      className={`flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto book-preview-mobile-container ${isMobile ? 'pt-2 pb-6' : 'p-4'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
+      className="book-preview-outer-container"
       ref={bookContainerRef}
       style={{
-        /* iOS specific rendering fixes */
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "auto",
+        padding: isMobile ? "2px 0 6px" : "16px",
         ...(isIOSDevice ? {
           WebkitTransform: 'translateZ(0)',
           WebkitBackfaceVisibility: 'hidden',

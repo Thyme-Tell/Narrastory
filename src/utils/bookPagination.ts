@@ -3,8 +3,8 @@ import { Story } from "@/types/supabase";
 
 // Constants for book dimensions and content
 const CHARS_PER_LINE = 50; // Approximate characters per line
-const LINES_PER_PAGE = 30; // Approximate lines per page
-const PAGE_MARGIN_LINES = 4; // Top and bottom margins in line count
+const LINES_PER_PAGE = 25; // Reduced from 30 to prevent overflow
+const PAGE_MARGIN_LINES = 6; // Increased from 4 to account for headers/footers
 
 /**
  * Calculates how many pages a story will take based on its content
