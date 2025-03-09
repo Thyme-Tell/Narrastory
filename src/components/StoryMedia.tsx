@@ -1,8 +1,10 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import MediaCarousel from "./media/MediaCarousel";
 import { StoryMediaItem } from "@/types/media";
+import { generateQRCodeUrl } from "@/utils/qrCodeUtils";
 
 interface StoryMediaProps {
   storyId: string;
@@ -56,6 +58,21 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
     });
     refetch();
   };
+
+  // Generate QR codes for videos if needed
+  const mediaItemsWithQR = mediaItems.map(item => {
+    if (item.content_type.startsWith('video/')) {
+      const { data } = supabase.storage
+        .from("story-media")
+        .getPublicUrl(item.file_path);
+      
+      return {
+        ...item,
+        qrCodeUrl: generateQRCodeUrl(data.publicUrl)
+      };
+    }
+    return item;
+  });
 
   return (
     <MediaCarousel

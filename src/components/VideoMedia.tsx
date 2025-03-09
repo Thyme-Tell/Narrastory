@@ -1,3 +1,4 @@
+
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import MediaCaption from "./MediaCaption";
@@ -28,6 +29,14 @@ interface VideoMediaProps {
   onDelete?: () => void;
   onVideoClick?: (url: string) => void;
 }
+
+// The default thumbnail images if we can't generate a real one
+const DEFAULT_THUMBNAILS = [
+  "photo-1518770660439-4636190af475", // circuit board
+  "photo-1488590528505-98d2b5aba04b", // laptop
+  "photo-1461749280684-dccba630e2f6", // programming
+  "photo-1486312338219-ce68d2c6f44d", // macbook
+];
 
 const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMediaProps) => {
   const { toast } = useToast();
@@ -77,6 +86,13 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
         variant: "destructive",
       });
     }
+  };
+
+  // Generate a semi-random thumbnail for this video
+  const getVideoThumbnail = () => {
+    // Use a deterministic approach based on the video's ID to always get the same thumbnail for the same video
+    const index = media.id.charCodeAt(0) % DEFAULT_THUMBNAILS.length;
+    return `https://images.unsplash.com/${DEFAULT_THUMBNAILS[index]}`;
   };
 
   return (
@@ -136,6 +152,12 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
       />
     </div>
   );
+};
+
+// Export the thumbnail generator for use in other components
+export const getVideoThumbnail = (mediaId: string) => {
+  const index = mediaId.charCodeAt(0) % DEFAULT_THUMBNAILS.length;
+  return `https://images.unsplash.com/${DEFAULT_THUMBNAILS[index]}`;
 };
 
 export default VideoMedia;
