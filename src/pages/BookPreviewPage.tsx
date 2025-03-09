@@ -20,6 +20,15 @@ const BookPreviewPage = () => {
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId || "");
   const isMobile = useIsMobile();
   const [isRendered, setIsRendered] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
+  
+  // Detect iOS device
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOSDevice(isIOS);
+    console.log("iOS device detection:", isIOS);
+  }, []);
   
   // Set up page rendering
   useEffect(() => {
@@ -34,13 +43,29 @@ const BookPreviewPage = () => {
     // Setup touch event handling for mobile
     if (isMobile && bookContainerRef.current) {
       bookContainerRef.current.style.touchAction = 'pan-y';
+      
+      // iOS-specific fix: force layout recalculation
+      if (isIOSDevice) {
+        setTimeout(() => {
+          // Force repaint by temporarily changing opacity
+          if (bookContainerRef.current) {
+            bookContainerRef.current.style.opacity = '0.99';
+            requestAnimationFrame(() => {
+              if (bookContainerRef.current) {
+                bookContainerRef.current.style.opacity = '1';
+                console.log("iOS repaint forced");
+              }
+            });
+          }
+        }, 200);
+      }
     }
     
     return () => {
       // Restore scrolling when component unmounts
       document.body.style.overflow = '';
     };
-  }, [isMobile]);
+  }, [isMobile, isIOSDevice]);
   
   // Fetch stories for the book content
   const { data: stories, isLoading: isStoriesLoading } = useQuery({
@@ -104,7 +129,8 @@ const BookPreviewPage = () => {
     zoomIn,
     zoomOut,
     toggleBookmark,
-    jumpToPage
+    jumpToPage,
+    storyMediaMap
   } = useBookNavigation(stories, true);
 
   // Handle keyboard navigation
@@ -139,13 +165,14 @@ const BookPreviewPage = () => {
 
   return (
     <div 
-      className={`fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-start overflow-hidden w-full h-full ios-book-preview-fix ${isRendered ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-start overflow-hidden w-full h-full ios-book-preview-fix ${isRendered ? 'opacity-100' : 'opacity-0'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
       style={{ 
         touchAction: "none",
         transition: "opacity 0.25s ease-in-out",
       }}
       data-is-mobile={isMobile ? "true" : "false"}
       data-is-rendered={isRendered ? "true" : "false"}
+      data-is-ios={isIOSDevice ? "true" : "false"}
     >
       {/* Header */}
       <BookPreviewHeader
@@ -172,14 +199,23 @@ const BookPreviewPage = () => {
               onSelectPage={jumpToPage}
               bookmarks={bookmarks}
               storyPages={storyPages}
+              storyMediaMap={storyMediaMap}
             />
           </div>
         )}
 
         {/* Book Content */}
         <div 
-          className={`flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto book-preview-mobile-container ${isMobile ? 'pt-2 pb-6' : 'p-4'}`}
+          className={`flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto book-preview-mobile-container ${isMobile ? 'pt-2 pb-6' : 'p-4'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
           ref={bookContainerRef}
+          style={{
+            /* iOS specific rendering fixes */
+            ...(isIOSDevice ? {
+              WebkitTransform: 'translateZ(0)',
+              WebkitBackfaceVisibility: 'hidden',
+              WebkitPerspective: '1000',
+            } : {})
+          }}
         >
           <BookPreviewContent
             currentPage={currentPage}

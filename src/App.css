@@ -70,11 +70,38 @@
   .book-format {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
+    /* iOS-specific optimizations */
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
   }
   
   /* Larger tap targets for mobile */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
+  }
+  
+  /* iOS Safari specific fixes */
+  .ios-safari-render-fix {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+/* iOS fixes for book preview */
+@supports (-webkit-touch-callout: none) {
+  /* iOS only styles */
+  .book-format {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  .ios-book-preview-fix {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+    transform: translateZ(0);
   }
 }

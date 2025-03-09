@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
@@ -43,22 +43,52 @@ const BookPreviewContent = ({
   currentStoryInfo,
   isMobile = false,
 }: BookPreviewContentProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Effect for iOS-specific fixes
+  useEffect(() => {
+    if (isMobile && containerRef.current) {
+      // Force repaint on iOS devices to fix rendering issues
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.style.opacity = '0.99';
+          setTimeout(() => {
+            if (containerRef.current) {
+              containerRef.current.style.opacity = '1';
+            }
+          }, 10);
+        }
+      }, 100);
+      
+      console.log("BookPreviewContent mounted for mobile:", { isMobile, currentPage });
+    }
+  }, [isMobile, currentPage]);
+  
   // Calculate dimensions based on viewport and device
   const getContainerStyle = () => {
     // Base styles present in all cases
-    const baseStyle = {
+    const baseStyle: React.CSSProperties = {
       transform: `scale(${zoomLevel})`,
       transformOrigin: 'center',
       aspectRatio: "5/8",
-      willChange: "transform", // Performance optimization for mobile
+      willChange: "transform", // Performance optimization
+      backgroundColor: "#f5f5f0", // Ensure background is visible
+      position: "relative",
+      overflow: "hidden",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      display: "flex",
+      flexDirection: "column",
+      opacity: 1, // Ensure visibility
     };
 
     // Mobile specific adjustments
     if (isMobile) {
       return {
         ...baseStyle,
-        maxWidth: "90vw",
-        maxHeight: "70vh",
+        height: "70vh", // Fixed height to ensure visibility
+        maxWidth: "85vw",
+        margin: "0 auto",
+        border: "1px solid rgba(0,0,0,0.1)", // Extra border to help with visibility
       };
     }
 
@@ -78,6 +108,9 @@ const BookPreviewContent = ({
       className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format page-transition"
       style={getContainerStyle()}
       data-is-mobile={isMobile ? "true" : "false"}
+      data-page-number={currentPage}
+      data-zoom-level={zoomLevel}
+      ref={containerRef}
     >
       {/* Book Pages */}
       {isStoriesLoading || isCoverLoading ? (

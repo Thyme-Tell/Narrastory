@@ -7,15 +7,31 @@ export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean>(() => {
     // Initial server-side compatible check
     if (typeof window !== 'undefined') {
-      return window.innerWidth < MOBILE_BREAKPOINT
+      // Use both width and user agent detection for reliability
+      const windowWidth = window.innerWidth < MOBILE_BREAKPOINT;
+      const userAgent = window.navigator.userAgent;
+      const isMobileDevice = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      return windowWidth || isMobileDevice;
     }
     return false
   })
 
   React.useEffect(() => {
-    // Function to check device width
+    // Function to check device width and user agent
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+      const windowWidth = window.innerWidth < MOBILE_BREAKPOINT;
+      const userAgent = window.navigator.userAgent;
+      const isMobileDevice = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      setIsMobile(windowWidth || isMobileDevice);
+      
+      // Add debug information to console
+      console.log("Mobile detection:", { 
+        width: window.innerWidth, 
+        isMobileByWidth: windowWidth,
+        userAgent,
+        isMobileByUA: isMobileDevice,
+        finalResult: windowWidth || isMobileDevice
+      });
     }
     
     // Initial check
@@ -26,7 +42,10 @@ export function useIsMobile() {
     
     // Media query observer for better responsiveness
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const handleMqlChange = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    const handleMqlChange = (e: MediaQueryListEvent) => {
+      // When media query changes, recheck everything
+      checkIfMobile();
+    }
     
     // Modern browsers
     if (mql.addEventListener) {
