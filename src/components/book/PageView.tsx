@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getPageContent } from "@/utils/bookPagination";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { generateQRCodeUrl } from "@/utils/qrCodeUtils";
+import { getVideoThumbnail } from "@/components/VideoMedia";
 
 interface PageViewProps {
   story: Story;
@@ -61,9 +62,7 @@ const PageView = ({
   };
 
   if (isMediaPage && mediaItem) {
-    // Handle based on media type
     if (mediaItem.content_type.startsWith("image/")) {
-      // For images, use the same display as before
       return (
         <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
           <div className="text-center italic text-green-800 font-serif pt-6 w-full">
@@ -99,9 +98,11 @@ const PageView = ({
         </div>
       );
     } else if (mediaItem.content_type.startsWith("video/")) {
-      // For videos, use QR code + thumbnail layout
       const videoUrl = getPublicUrl(mediaItem.file_path);
       const qrCodeUrl = generateQRCodeUrl(videoUrl);
+      console.log("Video in book preview:", { videoUrl, qrCodeUrl, mediaItem });
+      
+      const thumbnailUrl = getVideoThumbnail(mediaItem.id);
       
       return (
         <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
@@ -111,12 +112,11 @@ const PageView = ({
           
           <div className="max-w-full max-h-[75%] flex flex-col justify-center items-center flex-1 space-y-4">
             <div className="flex flex-col items-center">
-              {/* Video Thumbnail */}
               <div className="relative mb-4">
                 <div className="w-64 h-40 bg-gray-100 rounded-lg overflow-hidden">
                   <div className="aspect-video relative">
                     <img 
-                      src={`https://images.unsplash.com/photo-1518770660439-4636190af475`} 
+                      src={thumbnailUrl}
                       alt="Video thumbnail" 
                       className="w-full h-full object-cover rounded-lg" 
                     />
@@ -137,15 +137,20 @@ const PageView = ({
                 )}
               </div>
               
-              {/* QR Code */}
               <div className="flex flex-col items-center">
                 <p className="text-center mb-2 font-medium">Scan to watch video</p>
                 <img 
                   src={qrCodeUrl} 
                   alt="QR Code to view video" 
-                  className="w-32 h-32"
+                  className="w-40 h-40"
+                  onError={(e) => {
+                    console.error("QR code loading error:", e, qrCodeUrl);
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(videoUrl);
+                  }}
                 />
-                <p className="text-xs text-center mt-2 text-gray-500 break-all px-4">
+                <p className="text-xs text-center mt-2 text-gray-500 break-all px-4 max-w-[90%]">
                   {videoUrl}
                 </p>
               </div>
@@ -158,7 +163,6 @@ const PageView = ({
         </div>
       );
     } else {
-      // For unsupported media types
       return (
         <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
           <div className="text-center italic text-green-800 font-serif pt-6 w-full">
@@ -182,7 +186,6 @@ const PageView = ({
     }
   }
 
-  // For regular text pages, keep the original rendering
   const isFirstPage = pageNumber === 1;
 
   return (

@@ -66,9 +66,16 @@ const StoryMedia = ({ storyId }: StoryMediaProps) => {
         .from("story-media")
         .getPublicUrl(item.file_path);
       
+      // Generate QR code URL and log for debugging
+      const qrCodeUrl = generateQRCodeUrl(data.publicUrl);
+      console.log("Generated QR for video:", {
+        videoUrl: data.publicUrl,
+        qrCodeUrl
+      });
+      
       return {
         ...item,
-        qrCodeUrl: generateQRCodeUrl(data.publicUrl)
+        qrCodeUrl
       };
     }
     return item;
