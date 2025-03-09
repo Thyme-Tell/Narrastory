@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -44,6 +45,7 @@
 .book-format {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   background-color: #f5f5f0; /* Cream paper color */
+  touch-action: none; /* Prevent unwanted touch behaviors */
 }
 
 /* Improved book cover styling */
@@ -56,4 +58,23 @@
 
 .book-cover:hover {
   transform: perspective(1000px) rotateY(4deg);
+}
+
+/* Page transition animation */
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Improved mobile support */
+@media (max-width: 768px) {
+  .book-format {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Larger tap targets for mobile */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

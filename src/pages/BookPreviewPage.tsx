@@ -24,10 +24,20 @@ const BookPreviewPage = () => {
   // Set up page rendering
   useEffect(() => {
     console.log("BookPreviewPage mounted, isMobile:", isMobile);
+    
+    // Mark as rendered for animation purposes
     setIsRendered(true);
+    
+    // Prevent scrolling on body while preview is open
     document.body.style.overflow = 'hidden';
     
+    // Setup touch event handling for mobile
+    if (isMobile && bookContainerRef.current) {
+      bookContainerRef.current.style.touchAction = 'pan-y';
+    }
+    
     return () => {
+      // Restore scrolling when component unmounts
       document.body.style.overflow = '';
     };
   }, [isMobile]);
@@ -129,8 +139,11 @@ const BookPreviewPage = () => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-start overflow-hidden w-full"
-      style={{ touchAction: "none" }}
+      className={`fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-start overflow-hidden w-full h-full ios-book-preview-fix ${isRendered ? 'opacity-100' : 'opacity-0'}`}
+      style={{ 
+        touchAction: "none",
+        transition: "opacity 0.25s ease-in-out",
+      }}
       data-is-mobile={isMobile ? "true" : "false"}
       data-is-rendered={isRendered ? "true" : "false"}
     >
@@ -152,7 +165,7 @@ const BookPreviewPage = () => {
       <div className="flex-1 w-full flex overflow-hidden">
         {/* TOC Sidebar */}
         {showToc && (
-          <div className={`${isMobile ? "w-48" : "w-64"} h-full bg-muted p-4 overflow-y-auto animate-slide-in-right`}>
+          <div className={`${isMobile ? "w-48 toc-mobile" : "w-64"} h-full bg-muted p-4 overflow-y-auto animate-slide-in-right`}>
             <TableOfContents 
               stories={stories || []} 
               currentPage={currentPage}
@@ -165,7 +178,7 @@ const BookPreviewPage = () => {
 
         {/* Book Content */}
         <div 
-          className="flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto"
+          className={`flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto book-preview-mobile-container ${isMobile ? 'pt-2 pb-6' : 'p-4'}`}
           ref={bookContainerRef}
         >
           <BookPreviewContent

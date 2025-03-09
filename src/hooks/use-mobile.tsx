@@ -4,36 +4,53 @@ import * as React from "react"
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+  const [isMobile, setIsMobile] = React.useState<boolean>(() => {
+    // Initial server-side compatible check
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < MOBILE_BREAKPOINT
+    }
+    return false
+  })
 
   React.useEffect(() => {
-    // Immediate check on mount
+    // Function to check device width
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     
-    checkIfMobile() // Initial check
+    // Initial check
+    checkIfMobile()
     
-    // Listen for window resize events
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    mql.addEventListener("change", checkIfMobile)
-    
-    // In case of inconsistencies, also check based on window.innerWidth directly
+    // Set up resize listener
     window.addEventListener("resize", checkIfMobile)
     
+    // Media query observer for better responsiveness
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const handleMqlChange = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    
+    // Modern browsers
+    if (mql.addEventListener) {
+      mql.addEventListener('change', handleMqlChange)
+    } 
+    // Safari < 14
+    else if ('addListener' in mql) {
+      // @ts-ignore - older API
+      mql.addListener(handleMqlChange)
+    }
+    
     return () => {
-      mql.removeEventListener("change", checkIfMobile)
       window.removeEventListener("resize", checkIfMobile)
+      
+      if (mql.removeEventListener) {
+        mql.removeEventListener('change', handleMqlChange)
+      } 
+      // Safari < 14
+      else if ('removeListener' in mql) {
+        // @ts-ignore - older API
+        mql.removeListener(handleMqlChange)
+      }
     }
   }, [])
 
-  // If isMobile is undefined (during SSR or initial render), use a fallback detection
-  // based on the userAgent as a secondary check
-  if (isMobile === undefined && typeof navigator !== 'undefined') {
-    const userAgent = navigator.userAgent.toLowerCase()
-    const mobileDevice = /iphone|ipad|ipod|android|blackberry|windows phone|opera mini|silk/i.test(userAgent)
-    return mobileDevice
-  }
-
-  return !!isMobile
+  return isMobile
 }

@@ -43,26 +43,41 @@ const BookPreviewContent = ({
   currentStoryInfo,
   isMobile = false,
 }: BookPreviewContentProps) => {
-  // Calculate dimensions based on device while maintaining aspect ratio
-  const maxWidth = isMobile ? "90vw" : "600px";
-  const maxHeight = isMobile ? "70vh" : "90vh";
+  // Calculate dimensions based on viewport and device
+  const getContainerStyle = () => {
+    // Base styles present in all cases
+    const baseStyle = {
+      transform: `scale(${zoomLevel})`,
+      transformOrigin: 'center',
+      aspectRatio: "5/8",
+      willChange: "transform", // Performance optimization for mobile
+    };
+
+    // Mobile specific adjustments
+    if (isMobile) {
+      return {
+        ...baseStyle,
+        maxWidth: "90vw",
+        maxHeight: "70vh",
+      };
+    }
+
+    // Desktop sizing
+    return {
+      ...baseStyle,
+      maxWidth: "600px",
+      maxHeight: "90vh",
+    };
+  };
   
   // Get book title from cover data
   const bookTitle = coverData?.titleText || "My Book";
 
   return (
     <div 
-      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format"
-      style={{ 
-        transform: `scale(${zoomLevel})`,
-        transformOrigin: 'center',
-        maxWidth,
-        height: "auto",
-        maxHeight,
-        aspectRatio: "5/8",
-        willChange: "transform" // Performance optimization for mobile
-      }}
-      data-is-mobile={isMobile ? "true" : "false"} // For debugging
+      className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format page-transition"
+      style={getContainerStyle()}
+      data-is-mobile={isMobile ? "true" : "false"}
     >
       {/* Book Pages */}
       {isStoriesLoading || isCoverLoading ? (
