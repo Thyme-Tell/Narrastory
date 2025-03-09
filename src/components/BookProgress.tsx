@@ -71,12 +71,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   useEffect(() => {
     if (profileId) {
       console.log('BookProgress: Refreshing cover data for profile:', profileId);
-      refreshCoverData();
+      refreshCoverData(profileId, true);
     }
   }, [profileId, refreshCoverData]);
 
   const handleOpenCoverEditor = () => {
-    refreshCoverData();
+    refreshCoverData(profileId, true);
     setIsEditorOpen(true);
   };
 
@@ -87,7 +87,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
   const handleSaveCover = async (newCoverData: CoverData) => {
     console.log("Saving new cover data:", newCoverData);
     await saveCoverData(newCoverData);
-    refreshCoverData();
+    refreshCoverData(profileId, true);
   };
 
   if (isHidden) {
