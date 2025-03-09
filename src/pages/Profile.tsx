@@ -1,3 +1,4 @@
+
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,7 +60,7 @@ const Profile = () => {
       
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
-        .select("id, title, content, created_at, share_token")
+        .select("id, title, content, created_at, profile_id, share_token")
         .eq("profile_id", id)
         .order("created_at", { ascending: false });
 
