@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
-import BookProgress from "@/components/BookProgress";
+import { BookProgress } from "@/components/BookProgress";
 import { Menu } from "lucide-react";
 import { useEffect } from "react";
 import {
