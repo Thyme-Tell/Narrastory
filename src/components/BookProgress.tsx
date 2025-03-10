@@ -16,7 +16,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
   const { data: stories, isLoading: isLoadingStories } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
-      if (!profileId) return [];
+      if (!profileId) return [] as Story[];
       
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
@@ -26,7 +26,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
 
       if (storiesError) {
         console.error("Error fetching stories:", storiesError);
-        return [];
+        return [] as Story[];
       }
 
       return storiesData as Story[];
@@ -37,7 +37,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
   const { data: mediaItems, isLoading: isLoadingMedia } = useQuery({
     queryKey: ["media", profileId],
     queryFn: async () => {
-      if (!profileId) return [];
+      if (!profileId) return [] as StoryMediaItem[];
       
       const { data, error } = await supabase
         .from("story_media")
@@ -47,7 +47,7 @@ export function BookProgress({ profileId }: { profileId?: string }) {
 
       if (error) {
         console.error("Error fetching media:", error);
-        return [];
+        return [] as StoryMediaItem[];
       }
 
       return data as StoryMediaItem[];
@@ -72,11 +72,11 @@ export function BookProgress({ profileId }: { profileId?: string }) {
   }, [mediaItems]);
 
   // Create a type guard to properly narrow the type
-  const hasStories = stories !== undefined && stories.length > 0;
+  const hasStories = stories !== undefined && Array.isArray(stories) && stories.length > 0;
   
   // Only call calculateTotalPages when stories exist
   const totalPages = hasStories 
-    ? calculateTotalPages(stories, storyMediaMap) 
+    ? calculateTotalPages(stories as Story[], storyMediaMap) 
     : 1;
 
   if (isLoadingStories || isLoadingMedia) {
