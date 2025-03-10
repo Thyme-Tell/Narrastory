@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -32,6 +33,7 @@ const FormField = ({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
+      className="placeholder:opacity-50"
     />
   </div>
 );

@@ -75,15 +75,15 @@ export function BookProgress({ profileId }: { profileId?: string }) {
     }
   }, [mediaItems]);
 
-  const totalPages = stories && stories.length > 0 
-    ? calculateTotalPages(stories, storyMediaMap)
-    : 1;
+  // Fix: Use a type guard to prevent infinite type instantiation
+  const hasStories = stories && stories.length > 0;
+  const totalPages = hasStories ? calculateTotalPages(stories, storyMediaMap) : 1;
 
   if (isLoadingStories || isLoadingMedia) {
     return <div className="p-4 bg-white/90 rounded-lg shadow-sm">Loading book progress...</div>;
   }
 
-  if (!stories || stories.length === 0) {
+  if (!hasStories) {
     return (
       <div className="p-4 bg-white/90 rounded-lg shadow-sm">
         <h3 className="font-semibold text-lg mb-2">Your Book</h3>
