@@ -4,21 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoverData } from "@/hooks/useCoverData";
 import { calculateTotalPages } from "@/utils/bookPagination";
-import { CoverData } from "./cover/CoverTypes";
+import { Story, StoryMedia } from "@/types/supabase";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BookProgressHeader from "./book-progress/BookProgressHeader";
 import BookProgressOptions from "./book-progress/BookProgressOptions";
 import BookProgressBar from "./book-progress/BookProgressBar";
 import BookCoverPreview from "./book-progress/BookCoverPreview";
 import BookEditorModals from "./book-progress/BookEditorModals";
+import { CoverData } from "./cover/CoverTypes";
 
-interface BookProgressProps {
-  profileId: string;
-}
-
-const MIN_PAGES_REQUIRED = 32;
-
-const BookProgress = ({ profileId }: BookProgressProps) => {
+export function BookProgress({ profileId }: { profileId: string }) {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -48,7 +43,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
     },
   });
 
-  const { data: stories } = useQuery({
+  const { data: stories = [] } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
       const { data: storiesData, error: storiesError } = await supabase
@@ -61,12 +56,12 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
         return [];
       }
 
-      return storiesData;
+      return storiesData as Story[];
     },
   });
 
-  const currentPageCount = stories ? calculateTotalPages(stories) : 1;
-  const progressPercentage = Math.min((currentPageCount / MIN_PAGES_REQUIRED) * 100, 100);
+  const currentPageCount = stories.length ? calculateTotalPages(stories) : 1;
+  const progressPercentage = Math.min((currentPageCount / 32) * 100, 100);
 
   useEffect(() => {
     if (profileId) {
@@ -128,7 +123,7 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
             <BookProgressBar 
               currentPageCount={currentPageCount}
               progressPercentage={progressPercentage}
-              minPagesRequired={MIN_PAGES_REQUIRED}
+              minPagesRequired={32}
             />
           </div>
         </div>
@@ -152,6 +147,4 @@ const BookProgress = ({ profileId }: BookProgressProps) => {
       />
     </div>
   );
-};
-
-export default BookProgress;
+}
