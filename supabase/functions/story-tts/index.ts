@@ -22,7 +22,7 @@ serve(async (req) => {
     if (!storyId) {
       return new Response(
         JSON.stringify({ error: 'Story ID is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -36,7 +36,7 @@ serve(async (req) => {
     if (!supabaseUrl || !supabaseKey) {
       return new Response(
         JSON.stringify({ error: 'Missing Supabase environment variables' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
     
@@ -80,20 +80,24 @@ serve(async (req) => {
       )
     } catch (funcError) {
       console.error('Error in audio generation process:', funcError.message)
+      
+      // Always return a 200 status with error in the body
       return new Response(
         JSON.stringify({ error: funcError.message }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
   } catch (error) {
     console.error('Error:', error.message, error.stack)
+    
+    // Always return a 200 status with error in the body
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )

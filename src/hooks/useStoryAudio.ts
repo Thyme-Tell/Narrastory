@@ -16,9 +16,13 @@ export const useStoryAudio = (storyId: string) => {
     try {
       console.log('Requesting audio for story:', storyId);
       
-      const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
+      const response = await supabase.functions.invoke('story-tts', {
         body: { storyId }
       });
+
+      console.log('Full response from edge function:', response);
+      
+      const { data, error: invokeError } = response;
 
       if (invokeError) {
         console.error('Function invocation error:', invokeError);
@@ -34,7 +38,7 @@ export const useStoryAudio = (storyId: string) => {
       if (data.error) {
         // Special handling for quota exceeded error
         if (data.error.includes('quota exceeded')) {
-          throw new Error('The text-to-speech service is currently unavailable due to quota limits. Please try again later.');
+          throw new Error('The text-to-speech service is currently unavailable due to quota limits. Please try again later or upgrade your plan.');
         }
         throw new Error(data.error);
       }
@@ -72,9 +76,11 @@ export const useStoryAudio = (storyId: string) => {
         // Simply call the same function that handles both generating and checking
         // But don't display toast messages for initial loading
         setIsLoading(true);
-        const { data, error } = await supabase.functions.invoke('story-tts', {
+        const response = await supabase.functions.invoke('story-tts', {
           body: { storyId }
         });
+        
+        const { data, error } = response;
         
         if (error) {
           console.error('Error checking for existing audio:', error);
