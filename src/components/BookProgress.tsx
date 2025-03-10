@@ -13,7 +13,8 @@ import { Progress } from "./ui/progress";
 export function BookProgress({ profileId }: { profileId?: string }) {
   const [storyMediaMap, setStoryMediaMap] = useState<Map<string, StoryMediaItem[]>>(new Map());
 
-  const { data: stories, isLoading: isLoadingStories } = useQuery({
+  // Define explicit type for stories query result
+  const { data: stories, isLoading: isLoadingStories } = useQuery<Story[], Error>({
     queryKey: ["stories", profileId],
     queryFn: async () => {
       if (!profileId) return [] as Story[];
@@ -34,7 +35,8 @@ export function BookProgress({ profileId }: { profileId?: string }) {
     enabled: !!profileId,
   });
 
-  const { data: mediaItems, isLoading: isLoadingMedia } = useQuery({
+  // Define explicit type for media items query result
+  const { data: mediaItems, isLoading: isLoadingMedia } = useQuery<StoryMediaItem[], Error>({
     queryKey: ["media", profileId],
     queryFn: async () => {
       if (!profileId) return [] as StoryMediaItem[];
@@ -72,12 +74,15 @@ export function BookProgress({ profileId }: { profileId?: string }) {
   }, [mediaItems]);
 
   // Create a type guard to properly narrow the type
-  const hasStories = stories !== undefined && Array.isArray(stories) && stories.length > 0;
+  const hasStories = Array.isArray(stories) && stories.length > 0;
   
+  // Initialize totalPages with a default value
+  let totalPages = 1; // Default to 1 page (cover page)
+
   // Only call calculateTotalPages when stories exist
-  const totalPages = hasStories 
-    ? calculateTotalPages(stories as Story[], storyMediaMap) 
-    : 1;
+  if (hasStories) {
+    totalPages = calculateTotalPages(stories, storyMediaMap);
+  }
 
   if (isLoadingStories || isLoadingMedia) {
     return <div className="p-4 bg-white rounded-lg shadow-sm">Loading book progress...</div>;
