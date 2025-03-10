@@ -16,9 +16,6 @@ export const useStoryAudio = (storyId: string) => {
     try {
       console.log('Requesting audio for story:', storyId);
       
-      // Make a single call to the edge function that will either:
-      // 1. Return an existing audio URL if it exists
-      // 2. Generate a new audio file if one doesn't exist
       const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
         body: { storyId }
       });
@@ -35,6 +32,10 @@ export const useStoryAudio = (storyId: string) => {
       console.log('Audio response:', data);
 
       if (data.error) {
+        // Special handling for quota exceeded error
+        if (data.error.includes('quota exceeded')) {
+          throw new Error('The text-to-speech service is currently unavailable due to quota limits. Please try again later.');
+        }
         throw new Error(data.error);
       }
 
@@ -52,10 +53,11 @@ export const useStoryAudio = (storyId: string) => {
       }
     } catch (err: any) {
       console.error('Error with audio:', err);
-      setError(err.message || 'An unknown error occurred');
+      const errorMessage = err.message || 'An unknown error occurred';
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: `Failed to get audio: ${err.message || 'Unknown error'}`,
+        description: `Failed to get audio: ${errorMessage}`,
         variant: "destructive",
       });
       return null;

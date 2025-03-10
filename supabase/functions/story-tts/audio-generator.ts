@@ -37,14 +37,23 @@ export async function generateAudio(
   )
 
   if (!response.ok) {
-    let errorText = '';
+    let errorData;
     try {
-      errorText = await response.text();
+      errorData = await response.json();
+      console.error('ElevenLabs API error:', response.status, JSON.stringify(errorData));
+      
+      // Check for quota exceeded error
+      if (errorData.detail?.status === 'quota_exceeded') {
+        throw new Error('ElevenLabs quota exceeded. Please try again later or upgrade your plan.');
+      }
+      
+      throw new Error(errorData.detail?.message || 'Failed to generate audio');
     } catch (e) {
-      errorText = 'Failed to read error response';
+      if (e.message.includes('quota exceeded')) {
+        throw e;
+      }
+      throw new Error(`Failed to generate audio: ${response.status} ${await response.text()}`);
     }
-    console.error('ElevenLabs API error:', response.status, errorText)
-    throw new Error(`Failed to generate audio: ${response.status} ${errorText}`)
   }
 
   console.log('Audio generated successfully')
