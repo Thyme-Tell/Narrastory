@@ -71,9 +71,13 @@ export function BookProgress({ profileId }: { profileId?: string }) {
     }
   }, [mediaItems]);
 
-  // Use type guard to prevent TypeScript error
-  const hasStories = stories && stories.length > 0;
-  const totalPages = hasStories ? calculateTotalPages(stories, storyMediaMap) : 1;
+  // Create a type guard to properly narrow the type
+  const hasStories = stories !== undefined && stories.length > 0;
+  
+  // Only call calculateTotalPages when stories exist
+  const totalPages = hasStories 
+    ? calculateTotalPages(stories, storyMediaMap) 
+    : 1;
 
   if (isLoadingStories || isLoadingMedia) {
     return <div className="p-4 bg-white rounded-lg shadow-sm">Loading book progress...</div>;
