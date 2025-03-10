@@ -27,6 +27,17 @@
 /* Import Playfair Display font for book typography */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
+/* Apply Apache red to all links for better accessibility */
+a {
+  color: #A33D29;
+  text-decoration: none;
+  transition: text-decoration 0.2s;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 /* Card styles */
 .bg-card {
   background-color: white !important;
