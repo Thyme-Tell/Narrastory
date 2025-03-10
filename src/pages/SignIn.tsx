@@ -152,13 +152,13 @@ const SignIn = () => {
             </Button>
 
             <div className="text-center space-y-2">
-              <Link to="/reset-password" className="text-primary hover:underline text-sm">
+              <Link to="/reset-password" className="text-apache hover:underline text-sm">
                 Forgot your password?
               </Link>
               
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
-                <Link to="/" className="text-primary hover:underline">
+                <Link to="/" className="text-apache hover:underline">
                   Sign up for Narra
                 </Link>
               </p>

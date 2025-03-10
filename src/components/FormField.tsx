@@ -23,7 +23,7 @@ const FormField = ({
 }: FormFieldProps) => (
   <div className="space-y-2 text-left">
     <Label htmlFor={name} className="block text-left">
-      {label} {required && "*"}
+      {label} {required && <span className="text-apache">*</span>}
     </Label>
     <Input
       id={name}

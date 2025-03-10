@@ -19,7 +19,7 @@ export function StoryBookCard({ storybook }: StoryBookCardProps) {
       to={`/storybooks/${storybook.id}`}
       className="block border rounded-lg p-6 hover:shadow-lg transition-shadow bg-white"
     >
-      <h2 className="text-xl font-semibold mb-2">{storybook.title}</h2>
+      <h2 className="text-xl font-semibold mb-2 text-apache">{storybook.title}</h2>
       {storybook.description && (
         <p className="text-gray-600 mb-4">{storybook.description}</p>
       )}
