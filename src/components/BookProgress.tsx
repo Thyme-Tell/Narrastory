@@ -13,8 +13,8 @@ import { Progress } from "./ui/progress";
 export function BookProgress({ profileId }: { profileId?: string }) {
   const [storyMediaMap, setStoryMediaMap] = useState<Map<string, StoryMediaItem[]>>(new Map());
 
-  // Define explicit type for stories query result
-  const { data: stories, isLoading: isLoadingStories } = useQuery<Story[], Error>({
+  // Explicitly specify the return type for the query function
+  const { data: stories, isLoading: isLoadingStories } = useQuery<Story[]>({
     queryKey: ["stories", profileId],
     queryFn: async () => {
       if (!profileId) return [] as Story[];
@@ -35,8 +35,8 @@ export function BookProgress({ profileId }: { profileId?: string }) {
     enabled: !!profileId,
   });
 
-  // Define explicit type for media items query result
-  const { data: mediaItems, isLoading: isLoadingMedia } = useQuery<StoryMediaItem[], Error>({
+  // Explicitly specify the return type for the query function
+  const { data: mediaItems, isLoading: isLoadingMedia } = useQuery<StoryMediaItem[]>({
     queryKey: ["media", profileId],
     queryFn: async () => {
       if (!profileId) return [] as StoryMediaItem[];
