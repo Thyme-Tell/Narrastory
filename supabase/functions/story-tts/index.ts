@@ -20,7 +20,10 @@ serve(async (req) => {
     const { storyId } = await req.json()
 
     if (!storyId) {
-      throw new Error('Story ID is required')
+      return new Response(
+        JSON.stringify({ error: 'Story ID is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     console.log(`Processing audio request for story: ${storyId}`)
@@ -31,7 +34,10 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase environment variables')
+      return new Response(
+        JSON.stringify({ error: 'Missing Supabase environment variables' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
     
     const supabase = createClient(supabaseUrl, supabaseKey)
@@ -53,25 +59,35 @@ serve(async (req) => {
     // No existing audio found, generate new audio
     console.log('No existing audio found, generating new audio...')
     
-    // Fetch story content from database
-    const story = await fetchStoryContent(storyId)
-    
-    // Generate audio using ElevenLabs API
-    console.log(`Calling ElevenLabs API with standard voice ID: ${STANDARD_VOICE_ID}`)
-    const audioBuffer = await generateAudio(story, STANDARD_VOICE_ID)
-    
-    // Upload to Supabase Storage
-    const filename = `${storyId}-${Date.now()}.mp3`
-    const publicUrl = await uploadAudioFile(filename, audioBuffer)
-    
-    // Save audio metadata
-    await saveAudioMetadata(storyId, publicUrl, STANDARD_VOICE_ID)
-
-    return new Response(
-      JSON.stringify({ audioUrl: publicUrl }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
+    try {
+      // Fetch story content from database
+      const story = await fetchStoryContent(storyId)
+      
+      // Generate audio using ElevenLabs API
+      console.log(`Calling ElevenLabs API with standard voice ID: ${STANDARD_VOICE_ID}`)
+      const audioBuffer = await generateAudio(story, STANDARD_VOICE_ID)
+      
+      // Upload to Supabase Storage
+      const filename = `${storyId}-${Date.now()}.mp3`
+      const publicUrl = await uploadAudioFile(filename, audioBuffer)
+      
+      // Save audio metadata
+      await saveAudioMetadata(storyId, publicUrl, STANDARD_VOICE_ID)
+  
+      return new Response(
+        JSON.stringify({ audioUrl: publicUrl }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } catch (funcError) {
+      console.error('Error in audio generation process:', funcError.message)
+      return new Response(
+        JSON.stringify({ error: funcError.message }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
   } catch (error) {
     console.error('Error:', error.message, error.stack)
     return new Response(

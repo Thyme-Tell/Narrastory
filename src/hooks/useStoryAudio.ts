@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -51,10 +52,10 @@ export const useStoryAudio = (storyId: string) => {
       }
     } catch (err: any) {
       console.error('Error with audio:', err);
-      setError(err.message);
+      setError(err.message || 'An unknown error occurred');
       toast({
         title: "Error",
-        description: `Failed to get audio: ${err.message}`,
+        description: `Failed to get audio: ${err.message || 'Unknown error'}`,
         variant: "destructive",
       });
       return null;
@@ -69,12 +70,22 @@ export const useStoryAudio = (storyId: string) => {
         // Simply call the same function that handles both generating and checking
         // But don't display toast messages for initial loading
         setIsLoading(true);
-        const result = await supabase.functions.invoke('story-tts', {
+        const { data, error } = await supabase.functions.invoke('story-tts', {
           body: { storyId }
         });
         
-        if (result.data?.audioUrl) {
-          setAudioUrl(result.data.audioUrl);
+        if (error) {
+          console.error('Error checking for existing audio:', error);
+          return;
+        }
+
+        if (data?.error) {
+          console.error('Function returned error:', data.error);
+          return;
+        }
+        
+        if (data?.audioUrl) {
+          setAudioUrl(data.audioUrl);
         }
       } catch (err) {
         console.error('Error checking for existing audio:', err);
