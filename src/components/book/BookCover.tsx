@@ -21,8 +21,8 @@ const BookCover = ({ coverData, authorName }: BookCoverProps) => {
         <CoverCanvas 
           coverData={coverData} 
           width={isMobile ? 300 : 600}
-          height={isMobile ? 480 : 800}
-          scale={2} // Add scale factor for higher resolution
+          height={isMobile ? 480 : 960}
+          scale={2}
           className="w-full h-full object-contain"
         />
       </div>
