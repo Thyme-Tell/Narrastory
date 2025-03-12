@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BookPreviewControlsProps {
@@ -36,6 +36,19 @@ const BookPreviewControls = ({
         <ChevronLeft className={iconSize} />
         <span className="sr-only">Previous page</span>
       </Button>
+      
+      {onDownloadPDF && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onDownloadPDF}
+          className={`${buttonSize} rounded-full bg-background/80 pointer-events-auto absolute bottom-4 left-1/2 transform -translate-x-1/2`}
+          title="Download PDF"
+        >
+          <Download className={iconSize} />
+          <span className="sr-only">Download PDF</span>
+        </Button>
+      )}
       
       <Button 
         variant="ghost" 
