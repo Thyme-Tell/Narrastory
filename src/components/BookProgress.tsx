@@ -1,16 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoverData } from "@/hooks/useCoverData";
-import { calculateTotalPages } from "@/utils/bookPagination";
 import { Story } from "@/types/supabase";
-import { Pencil, BookOpen, BookText } from "lucide-react";
+import { CoverData } from "./cover/CoverTypes";
+import { useNavigate } from "react-router-dom";
 import BookProgressHeader from "./book-progress/BookProgressHeader";
 import BookCoverPreview from "./book-progress/BookCoverPreview";
 import BookEditorModals from "./book-progress/BookEditorModals";
-import { CoverData } from "./cover/CoverTypes";
-import { Button } from "./ui/button";
-import { useNavigate } from "react-router-dom";
+import BookProgressInfo from "./book-progress/BookProgressInfo";
+import BookProgressStats from "./book-progress/BookProgressStats";
+import BookProgressActions from "./book-progress/BookProgressActions";
 
 export function BookProgress({ profileId }: { profileId: string }) {
   const [isHidden, setIsHidden] = useState(false);
@@ -59,8 +60,6 @@ export function BookProgress({ profileId }: { profileId: string }) {
     },
   });
 
-  const currentPageCount = stories.length ? calculateTotalPages(stories) : 1;
-
   useEffect(() => {
     if (profileId) {
       console.log('BookProgress: Refreshing cover data for profile:', profileId);
@@ -106,43 +105,17 @@ export function BookProgress({ profileId }: { profileId: string }) {
     <div className="mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <h1 className="text-2xl font-bold">{coverData.titleText || "My Stories"}</h1>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={handleOpenCoverEditor}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          </div>
+          <BookProgressInfo 
+            coverData={coverData}
+            profileFirstName={profile?.first_name}
+            profileLastName={profile?.last_name}
+            onOpenCoverEditor={handleOpenCoverEditor}
+          />
           
-          <div className="mb-4">
-            <p className="text-base text-muted-foreground">by {profile?.first_name} {profile?.last_name}</p>
-          </div>
-
-          <div className="bg-muted/30 rounded-lg p-4 mb-6">
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center text-muted-foreground">
-                <BookOpen className="h-4 w-4 mr-2 text-[#155B4A]" />
-                <span className="text-foreground font-medium">{currentPageCount}</span>&nbsp;<span>pages</span>
-                <span className="text-xs ml-2">(Minimum: 32)</span>
-              </div>
-              
-              <div className="flex items-center text-muted-foreground">
-                <BookText className="h-4 w-4 mr-2 text-[#A33D29]" />
-                <span className="text-foreground font-medium">{stories.length}</span>&nbsp;<span>stories</span>
-                <Button 
-                  variant="link" 
-                  className="h-auto p-0 ml-2 text-[#A33D29]"
-                  onClick={scrollToTableOfContents}
-                >
-                  View stories
-                </Button>
-              </div>
-            </div>
-          </div>
+          <BookProgressStats 
+            stories={stories}
+            scrollToTableOfContents={scrollToTableOfContents}
+          />
         </div>
 
         <div className="space-y-4">
@@ -153,36 +126,10 @@ export function BookProgress({ profileId }: { profileId: string }) {
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              onClick={handlePreviewBook}
-            >
-              <BookOpen className="mr-2 h-4 w-4" />
-              Preview Book
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleOpenCoverEditor}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Cover
-            </Button>
-          </div>
-
-          <Button
-            variant="secondary"
-            className="w-full relative bg-[#b3b3b3] hover:bg-[#a6a6a6] text-[#4d4d4d]"
-            disabled
-          >
-            <span className="inline-flex items-center">
-              <span className="bg-[#AF4623] text-white text-xs px-2 py-0.5 rounded-full mr-2">
-                Coming Soon
-              </span>
-              Order Book
-            </span>
-          </Button>
+          <BookProgressActions 
+            onPreviewBook={handlePreviewBook}
+            onOpenCoverEditor={handleOpenCoverEditor}
+          />
         </div>
       </div>
 
