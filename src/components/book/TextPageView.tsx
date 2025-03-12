@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -96,9 +95,9 @@ const TextPageView = ({
         <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-in pointer-events-none">
           <Button
             variant="outline"
-            className="rounded-full shadow-md bg-white hover:bg-gray-100 border-[#A33D29]/20 hover:border-[#A33D29]/50 transition-all duration-300 animate-fade-in gap-2 pointer-events-none"
+            className="rounded-full shadow-md bg-white hover:bg-gray-100 border-[#A33D29]/20 hover:border-[#A33D29]/50 transition-all duration-300 animate-fade-in gap-2 pointer-events-none font-sans"
           >
-            <span className="text-[#A33D29]">Scroll down to read more</span>
+            <span className="text-[#A33D29] font-sans">Scroll down to read more</span>
             <ChevronsDown className="h-5 w-5 text-[#A33D29]" />
           </Button>
         </div>
