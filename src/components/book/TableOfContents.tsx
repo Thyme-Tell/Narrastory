@@ -2,7 +2,7 @@
 import React from "react";
 import { Story } from "@/types/supabase";
 import { calculateStoryPages } from "@/utils/bookPagination";
-import { Bookmark, FileImage, FileText } from "lucide-react";
+import { Bookmark, FileImage, FileText, Book } from "lucide-react";
 import { StoryMediaItem } from "@/types/media";
 
 interface TableOfContentsProps {
@@ -23,6 +23,11 @@ const TableOfContents = ({
   storyMediaMap = new Map()
 }: TableOfContentsProps) => {
   if (stories.length === 0) return null;
+  
+  // Helper function to calculate word count
+  const calculateWordCount = (content: string): number => {
+    return content.trim().split(/\s+/).length;
+  };
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -41,6 +46,7 @@ const TableOfContents = ({
         const startPage = storyPages[index];
         const storyTextPages = calculateStoryPages(story);
         const mediaItems = storyMediaMap.get(story.id) || [];
+        const wordCount = calculateWordCount(story.content);
         
         return (
           <div key={story.id} className="mb-4">
@@ -48,7 +54,16 @@ const TableOfContents = ({
               className={`p-2 mb-1 rounded cursor-pointer ${currentPage === startPage ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
               onClick={() => onSelectPage(startPage)}
             >
-              <span className="font-medium block truncate">{story.title || "Untitled Story"}</span>
+              <div className="flex items-center justify-between">
+                <span className="font-medium block truncate">{story.title || "Untitled Story"}</span>
+                <div className="flex items-center text-xs ml-2">
+                  <Book className="h-3 w-3 mr-1" />
+                  <span>{wordCount}</span>
+                </div>
+              </div>
+              <div className="text-xs opacity-75 mt-1">
+                {new Date(story.created_at).toLocaleDateString()}
+              </div>
             </div>
             
             {/* Text pages */}

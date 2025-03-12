@@ -12,6 +12,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ArrowDown } from "lucide-react";
 
 interface ProfileHeaderProps {
   firstName: string;
@@ -60,9 +61,16 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold font-sans text-left">
-        Your Stories
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold font-sans text-left">
+          Your Stories
+        </h1>
+        <div className="flex items-center text-sm text-muted-foreground">
+          <ArrowDown className="h-3.5 w-3.5 mr-1" />
+          <span>Recent first</span>
+        </div>
+      </div>
+      
       <Button 
         className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
         onClick={() => setIsDialogOpen(true)}

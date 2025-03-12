@@ -75,7 +75,7 @@ const BookPreviewLayout = ({
       <div className="flex-1 w-full flex overflow-hidden">
         {/* TOC Sidebar */}
         {showToc && (
-          <div className={`${isMobile ? "w-48 toc-mobile" : "w-64"} h-full bg-muted p-4 overflow-y-auto animate-slide-in-right`}>
+          <div className={`${isMobile ? "w-56 toc-mobile" : "w-72"} h-full bg-muted p-4 overflow-y-auto animate-slide-in-right border-r border-gray-300`}>
             <TableOfContents 
               stories={stories || []} 
               currentPage={currentPage}
