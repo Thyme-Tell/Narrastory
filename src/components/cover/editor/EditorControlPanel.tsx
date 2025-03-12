@@ -33,7 +33,7 @@ const EditorControlPanel = ({
   onFontSizeChange,
   onLayoutChange,
 }: EditorControlPanelProps) => {
-  const [activeTab, setActiveTab] = useState("background");
+  const [activeTab, setActiveTab] = useState("text");
   const isMobile = useIsMobile();
 
   return (
@@ -42,14 +42,14 @@ const EditorControlPanel = ({
       <div className="px-4 pt-4 pb-2 border-b">
         <h2 className="text-lg font-semibold mb-3">Edit Cover</h2>
         <Tabs 
-          defaultValue="background" 
+          defaultValue="text" 
           value={activeTab} 
           onValueChange={setActiveTab}
           className="w-full"
         >
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="background">Background</TabsTrigger>
             <TabsTrigger value="text">Text</TabsTrigger>
+            <TabsTrigger value="background">Background</TabsTrigger>
             <TabsTrigger value="layout">Layout</TabsTrigger>
           </TabsList>
         </Tabs>
