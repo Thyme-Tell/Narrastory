@@ -1,14 +1,10 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
 import { StoryMediaItem } from "@/types/media";
-import ImageMedia from "@/components/ImageMedia";
-import VideoMedia from "@/components/VideoMedia";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronDown } from "lucide-react";
 import { getPageContent } from "@/utils/bookPagination";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PageViewProps {
   story: Story;
@@ -31,6 +27,23 @@ const PageView = ({
   globalPageNumber = 1,
   bookTitle = "My Book" // Default book title
 }: PageViewProps) => {
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const checkScrollable = () => {
+      if (contentRef.current) {
+        const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
+        setShowScrollIndicator(isScrollable);
+      }
+    };
+    
+    checkScrollable();
+    window.addEventListener('resize', checkScrollable);
+    
+    return () => window.removeEventListener('resize', checkScrollable);
+  }, [story, pageNumber]);
+
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
     queryFn: async () => {
@@ -125,12 +138,15 @@ const PageView = ({
   const isFirstPage = pageNumber === 1;
 
   return (
-    <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col">
+    <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col relative">
       <div className="text-center italic text-green-800 font-serif pt-6">
         {bookTitle}
       </div>
       
-      <div className="flex-1 mx-auto book-content px-12 py-10 overflow-y-auto">
+      <div 
+        ref={contentRef}
+        className="flex-1 mx-auto book-content px-12 py-8 overflow-y-auto"
+      >
         <div className="prose max-w-none font-serif text-[11pt]">
           {isFirstPage && (
             <h1 className="text-center font-serif text-[16pt] mb-6 font-bold">
@@ -149,6 +165,15 @@ const PageView = ({
           )}
         </div>
       </div>
+      
+      {showScrollIndicator && (
+        <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-in pointer-events-none">
+          <div className="flex flex-col items-center text-green-800 animate-bounce">
+            <span className="text-xs font-serif mb-1">Scroll down to read more</span>
+            <ChevronDown className="h-4 w-4" />
+          </div>
+        </div>
+      )}
       
       <div className="w-full text-center pb-8">
         <span className="text-gray-700">{globalPageNumber}</span>
