@@ -170,6 +170,7 @@ export type Database = {
           id: string
           profile_id: string
           share_token: string | null
+          summary: string | null
           title: string | null
           updated_at: string
         }
@@ -179,6 +180,7 @@ export type Database = {
           id?: string
           profile_id: string
           share_token?: string | null
+          summary?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -188,6 +190,7 @@ export type Database = {
           id?: string
           profile_id?: string
           share_token?: string | null
+          summary?: string | null
           title?: string | null
           updated_at?: string
         }
