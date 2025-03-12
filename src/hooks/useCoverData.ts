@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -131,16 +132,22 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(newCoverData));
+      // Make sure we save all properties including the backgroundImage
+      const dataToSave = {
+        ...newCoverData,
+        backgroundImage: newCoverData.backgroundImage || null // Ensure we explicitly save null if no image
+      };
+      
+      localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(dataToSave));
       localStorage.setItem(`cover_data_saving_${profileId}`, new Date().toISOString());
       
-      setCoverData(newCoverData);
+      setCoverData(dataToSave);
       
       const { data, error } = await supabase.functions.invoke('save-cover-data', {
         method: 'POST',
         body: {
           profileId: profileId,
-          coverData: newCoverData
+          coverData: dataToSave // Send the complete data including backgroundImage
         },
       });
 
