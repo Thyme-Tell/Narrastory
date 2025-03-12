@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -132,11 +131,11 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Make sure we explicitly handle the backgroundImage property
-      // If it's undefined or doesn't exist, set it to null for database storage
+      // Make sure backgroundImage is explicitly included, keeping its value
+      // If it's undefined, use an empty string instead of null to preserve the field
       const dataToSave = {
         ...newCoverData,
-        backgroundImage: newCoverData.backgroundImage !== undefined ? newCoverData.backgroundImage : null
+        backgroundImage: newCoverData.backgroundImage || null
       };
       
       console.log('Data being saved (with explicit backgroundImage):', dataToSave);
@@ -150,7 +149,7 @@ export function useCoverData(profileId: string) {
         method: 'POST',
         body: {
           profileId: profileId,
-          coverData: dataToSave // Send the complete data including backgroundImage
+          coverData: dataToSave
         },
       });
 

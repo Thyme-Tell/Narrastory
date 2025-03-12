@@ -32,10 +32,13 @@ serve(async (req) => {
     
     console.log('Received cover data for saving:', JSON.stringify(coverData, null, 2));
     
-    // Explicitly check for backgroundImage to ensure it's included in the save
+    // Don't modify the backgroundImage property - preserve whatever was sent
+    // Only check if it exists in the object to ensure consistent structure
     if (!('backgroundImage' in coverData)) {
-      console.log('Adding explicit null backgroundImage property');
+      console.log('Adding explicit backgroundImage property as it was missing');
       coverData.backgroundImage = null;
+    } else {
+      console.log('Background image present:', coverData.backgroundImage);
     }
     
     // Create a Supabase client with the service role key
