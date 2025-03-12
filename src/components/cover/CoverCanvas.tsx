@@ -6,9 +6,10 @@ interface CoverCanvasProps {
   coverData: CoverData;
   width: number;
   height: number;
+  className?: string; // Add className as an optional prop
 }
 
-const CoverCanvas = ({ coverData, width, height }: CoverCanvasProps) => {
+const CoverCanvas = ({ coverData, width, height, className = "" }: CoverCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Base font sizes as percentage of canvas width
@@ -239,7 +240,7 @@ const CoverCanvas = ({ coverData, width, height }: CoverCanvasProps) => {
       ref={canvasRef}
       width={width}
       height={height}
-      className="max-w-full h-auto mx-auto"
+      className={`max-w-full h-auto mx-auto ${className}`.trim()}
     />
   );
 };
