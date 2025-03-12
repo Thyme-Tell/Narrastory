@@ -54,7 +54,7 @@ const StoriesList = ({ stories, isLoading, onUpdate, sortOrder }: StoriesListPro
 
   return (
     <div className="space-y-4">
-      {/* Table of Contents */}
+      {/* Your Story List (Previously Table of Contents) */}
       <div className="border rounded-lg bg-white shadow-sm overflow-hidden" data-toc-container>
         <Button 
           variant="ghost" 
@@ -63,7 +63,7 @@ const StoriesList = ({ stories, isLoading, onUpdate, sortOrder }: StoriesListPro
         >
           <div className="flex items-center space-x-2">
             <List className="h-5 w-5 text-[#A33D29]" />
-            <span className="font-medium">Table of Contents</span>
+            <span className="font-medium">Your Story List</span>
           </div>
           {isTocOpen ? (
             <ChevronUp className="h-5 w-5" />
