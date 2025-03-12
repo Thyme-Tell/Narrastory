@@ -18,6 +18,7 @@ const BookCover = ({ coverData, authorName }: BookCoverProps) => {
         coverData={coverData} 
         width={600}
         height={800}
+        scale={2} // Add scale factor for higher resolution
       />
       
       {/* Removing the redundant "By {authorName}" text that was causing duplication */}

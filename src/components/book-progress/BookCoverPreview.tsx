@@ -13,6 +13,11 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
   const previewWidth = isMobile ? "50vw" : "300px";
   const maxWidth = isMobile ? "min(50vw, 220px)" : "300px";
   
+  // Calculate appropriate dimensions for high resolution
+  const canvasWidth = isMobile ? 300 : 500;  // Higher base value
+  const canvasHeight = isMobile ? 480 : 800; // Maintaining 5:8 aspect ratio
+  const scale = 2; // Use a higher scale factor for better resolution
+  
   if (isLoading) {
     return (
       <div style={{ width: previewWidth, maxWidth }} className="mx-auto">
@@ -29,8 +34,9 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
         
         <CoverCanvas 
           coverData={coverData} 
-          width={isMobile ? 200 : 300}
-          height={isMobile ? 320 : 480}
+          width={isMobile ? 300 : 300}  // Keep display dimensions the same
+          height={isMobile ? 480 : 480}
+          scale={scale} // Apply the scale factor for higher resolution
         />
       </div>
     </div>

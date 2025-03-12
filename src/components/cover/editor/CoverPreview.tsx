@@ -38,6 +38,7 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
             coverData={coverData} 
             width={isMobile ? 200 : 240}
             height={isMobile ? 320 : 384}
+            scale={2} // Add scale factor for higher resolution
             className="mx-auto"
           />
         </div>
