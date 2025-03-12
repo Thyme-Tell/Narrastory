@@ -173,8 +173,7 @@ export function useCoverEditor(
       const fileName = `${profileId}_${Date.now()}.${fileExt}`;
       const filePath = `${profileId}/${fileName}`;
       
-      // Create a persistent local URL for preview that won't be revoked during component renders
-      // Revoke any existing blob URL first
+      // Create a persistent local URL for preview
       if (localImageUrl && localImageUrl.startsWith('blob:')) {
         URL.revokeObjectURL(localImageUrl);
       }
@@ -196,16 +195,22 @@ export function useCoverEditor(
       }));
       
       // Upload the file to Supabase storage
-      const { data: uploadData, error } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('book-covers')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
         });
-        
-      if (error) {
-        console.error("Error uploading image:", error);
-        throw error;
+
+      if (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        // Don't throw error - we'll keep using the local preview
+        toast({
+          variant: "destructive",
+          title: "Upload issue",
+          description: "Image will be available for preview but might not be saved permanently.",
+        });
+        return;
       }
       
       // Get the public URL
@@ -215,12 +220,9 @@ export function useCoverEditor(
         
       console.log('Uploaded image URL:', data.publicUrl);
       
-      // Save the remote URL in state, but keep displaying the local blob URL
-      // for consistent preview. The remote URL will be used when saving.
+      // Keep using the local blob URL for display
       setCoverData(prev => ({
         ...prev,
-        // Keep using the local blob URL for display
-        // The remote URL will be used when saving
         backgroundImage: objectUrl
       }));
       
@@ -230,23 +232,13 @@ export function useCoverEditor(
       });
       
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("Error in handleUploadImage:", error);
+      // Don't reset the background image on error
       toast({
         variant: "destructive",
-        title: "Upload failed",
-        description: "Failed to upload background image. Please try again.",
+        title: "Upload issue",
+        description: "Image will be available for preview but might not be saved permanently.",
       });
-      
-      // Reset the background image if upload failed
-      setCoverData(prev => ({
-        ...prev,
-        backgroundImage: undefined
-      }));
-      
-      if (localImageUrl && localImageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(localImageUrl);
-        setLocalImageUrl(null);
-      }
     } finally {
       setIsUploading(false);
     }
