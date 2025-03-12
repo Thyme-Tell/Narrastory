@@ -103,7 +103,7 @@ export function BookProgress({ profileId }: { profileId: string }) {
 
   return (
     <div className="mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
         <div>
           <BookProgressInfo 
             coverData={coverData}

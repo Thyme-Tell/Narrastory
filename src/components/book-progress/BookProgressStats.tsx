@@ -13,7 +13,7 @@ const BookProgressStats = ({ stories, scrollToTableOfContents }: BookProgressSta
   const currentPageCount = stories.length ? calculateTotalPages(stories) : 1;
   
   return (
-    <div className="bg-muted/30 rounded-lg p-3">
+    <div className="bg-muted/30 rounded-lg p-3 mt-2">
       <div className="grid grid-cols-1 md:flex md:flex-col md:space-y-2">
         <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-0">
           <div className="flex items-center text-muted-foreground">
