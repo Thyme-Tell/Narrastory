@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -137,8 +138,5 @@ export const useStoryAudio = (storyId: string) => {
     error,
     generateAudio,
     updatePlaybackStats,
-    // Only return provider-related functionality, remove voice selection
-    changeProvider: tts.changeProvider,
-    currentProvider: tts.currentProvider,
   };
 };
