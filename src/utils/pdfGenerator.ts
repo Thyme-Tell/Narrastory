@@ -46,7 +46,7 @@ export const generateBookPDF = async (
 
   // Add table of contents page
   pdf.addPage();
-  addTableOfContentsPage(pdf, stories, coverData?.titleText || "My Book");
+  addTableOfContentsPage(pdf, stories, coverData?.titleText || "My Book", storyMediaMap);
 
   // Add content pages
   let pageNumber = 2; // Start after cover and TOC
@@ -86,7 +86,12 @@ export const generateBookPDF = async (
 /**
  * Adds a table of contents page to the PDF
  */
-const addTableOfContentsPage = (pdf: jsPDF, stories: Story[], bookTitle: string): void => {
+const addTableOfContentsPage = (
+  pdf: jsPDF, 
+  stories: Story[], 
+  bookTitle: string,
+  storyMediaMap: Map<string, StoryMediaItem[]>
+): void => {
   // Set page background
   pdf.setFillColor("#f5f5f0");
   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
