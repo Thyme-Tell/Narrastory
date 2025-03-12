@@ -134,7 +134,7 @@ export function BookProgress({ profileId }: { profileId: string }) {
           
           <div className="grid grid-cols-2 gap-4">
             <Button
-              variant="secondary"
+              variant="outline"
               onClick={handlePreviewBook}
             >
               <BookOpen className="mr-2 h-4 w-4" />
