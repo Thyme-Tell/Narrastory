@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
@@ -30,10 +29,7 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     generateAudio, 
     updatePlaybackStats,
     changeProvider,
-    currentProvider,
-    voices,
-    currentVoiceId,
-    setCurrentVoiceId
+    currentProvider
   } = useStoryAudio(storyId);
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
   const { toast } = useToast();
@@ -112,17 +108,14 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
                 <Settings className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80">
+            <PopoverContent className="w-60">
               <div className="space-y-4">
                 <h4 className="font-medium">Text-to-Speech Settings</h4>
                 <TTSProviderSelector
                   currentProvider={currentProvider}
                   providers={availableProviders}
-                  voices={voices}
-                  currentVoiceId={currentVoiceId}
                   isLoading={isLoading}
                   onProviderChange={handleProviderChange}
-                  onVoiceChange={setCurrentVoiceId}
                 />
               </div>
             </PopoverContent>

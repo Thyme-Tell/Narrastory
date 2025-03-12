@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +19,7 @@ export const useStoryAudio = (storyId: string) => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
-  // Use our new TTS hook
+  // Use our TTS hook with fixed voice selection
   const tts = useTTS({
     defaultProvider: 'elevenlabs',
     defaultVoiceId,
@@ -138,11 +137,8 @@ export const useStoryAudio = (storyId: string) => {
     error,
     generateAudio,
     updatePlaybackStats,
-    // Add provider-related functionality
+    // Only return provider-related functionality, remove voice selection
     changeProvider: tts.changeProvider,
     currentProvider: tts.currentProvider,
-    voices: tts.voices,
-    currentVoiceId: tts.currentVoiceId,
-    setCurrentVoiceId: tts.setCurrentVoiceId,
   };
 };

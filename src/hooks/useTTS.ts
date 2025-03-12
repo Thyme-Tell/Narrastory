@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { TTSOptions, TTSResult, TTSVoice, TTSError } from '@/services/tts/TTSProvider';
+import { TTSOptions, TTSResult } from '@/services/tts/TTSProvider';
 import { TTSFactory, TTSProviderType } from '@/services/tts/TTSFactory';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,7 +13,6 @@ interface UseTTSOptions {
 export const useTTS = (options: UseTTSOptions = {}) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [voices, setVoices] = useState<TTSVoice[]>([]);
   const [currentProvider, setCurrentProvider] = useState<TTSProviderType | null>(null);
   const [currentVoiceId, setCurrentVoiceId] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -47,15 +46,13 @@ export const useTTS = (options: UseTTSOptions = {}) => {
         // Set default voice if provided
         if (options.defaultVoiceId) {
           setCurrentVoiceId(options.defaultVoiceId);
-        }
-        
-        // Load available voices
-        const availableVoices = await provider.getAvailableVoices();
-        setVoices(availableVoices);
-        
-        // If no default voice set but voices available, use the first one
-        if (!currentVoiceId && availableVoices.length > 0 && !options.defaultVoiceId) {
-          setCurrentVoiceId(availableVoices[0].id);
+        } else {
+          // Set default voices based on provider
+          if (providerType === 'elevenlabs') {
+            setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM"); // Default ElevenLabs voice
+          } else if (providerType === 'amazon-polly') {
+            setCurrentVoiceId("Joanna"); // Default Amazon Polly voice
+          }
         }
         
         setIsInitialized(true);
@@ -82,19 +79,16 @@ export const useTTS = (options: UseTTSOptions = {}) => {
       return null;
     }
     
-    if (!text || text.trim() === '') {
-      setError('Text is required');
-      toast({
-        title: "Cannot Generate Audio",
-        description: "No text content provided. Please add some text before generating audio.",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
     if (!currentVoiceId) {
-      setError('No voice selected');
-      return null;
+      // Set default voice if none is selected
+      if (currentProvider === 'elevenlabs') {
+        setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM");
+      } else if (currentProvider === 'amazon-polly') {
+        setCurrentVoiceId("Joanna");
+      } else {
+        setError('No voice selected');
+        return null;
+      }
     }
     
     setIsLoading(true);
@@ -170,7 +164,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
     }
   }, [isInitialized, currentProvider, currentVoiceId, toast, options.onError]);
 
-  // Change the TTS provider
+  // Change the TTS provider and set default voice for that provider
   const changeProvider = useCallback(async (providerType: TTSProviderType) => {
     try {
       let provider = TTSFactory.getProvider(providerType);
@@ -182,15 +176,11 @@ export const useTTS = (options: UseTTSOptions = {}) => {
       TTSFactory.setActiveProvider(providerType);
       setCurrentProvider(providerType);
       
-      // Load available voices for the new provider
-      const availableVoices = await provider.getAvailableVoices();
-      setVoices(availableVoices);
-      
-      // Reset voice selection
-      if (availableVoices.length > 0) {
-        setCurrentVoiceId(availableVoices[0].id);
-      } else {
-        setCurrentVoiceId(null);
+      // Set default voice based on provider
+      if (providerType === 'elevenlabs') {
+        setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM");
+      } else if (providerType === 'amazon-polly') {
+        setCurrentVoiceId("Joanna");
       }
       
       return true;
@@ -206,11 +196,10 @@ export const useTTS = (options: UseTTSOptions = {}) => {
     isInitialized,
     audioUrl,
     error,
-    voices,
     currentProvider,
     currentVoiceId,
     generateAudio,
     changeProvider,
-    setCurrentVoiceId,
+    setCurrentVoiceId, // Keep this function for internal use
   };
 };
