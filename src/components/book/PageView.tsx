@@ -28,21 +28,35 @@ const PageView = ({
   bookTitle = "My Book" // Default book title
 }: PageViewProps) => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const checkScrollable = () => {
       if (contentRef.current) {
         const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
-        setShowScrollIndicator(isScrollable);
+        setShowScrollIndicator(isScrollable && !hasScrolled);
+      }
+    };
+
+    const handleScroll = () => {
+      if (contentRef.current && contentRef.current.scrollTop > 20) {
+        setHasScrolled(true);
+        setShowScrollIndicator(false);
       }
     };
     
     checkScrollable();
+    const currentRef = contentRef.current;
+    
+    currentRef?.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', checkScrollable);
     
-    return () => window.removeEventListener('resize', checkScrollable);
-  }, [story, pageNumber]);
+    return () => {
+      currentRef?.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', checkScrollable);
+    };
+  }, [story, pageNumber, hasScrolled]);
 
   const { data: mediaItems = [], isLoading: isMediaLoading } = useQuery({
     queryKey: ["story-media", story.id],
@@ -168,9 +182,9 @@ const PageView = ({
       
       {showScrollIndicator && (
         <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-in pointer-events-none">
-          <div className="flex flex-col items-center text-green-800 animate-bounce">
-            <span className="text-xs font-serif mb-1">Scroll down to read more</span>
-            <ChevronDown className="h-4 w-4" />
+          <div className="bg-gradient-to-r from-[#fdfcfb] to-[#e2d1c3] p-4 rounded-lg shadow-lg flex flex-col items-center">
+            <span className="text-[#A33D29] text-sm font-serif mb-1">Scroll down to read more</span>
+            <ChevronDown className="h-5 w-5 text-[#A33D29]" />
           </div>
         </div>
       )}
