@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,15 +12,36 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowDown, Phone, Pencil } from "lucide-react";
+import { 
+  ArrowDown, 
+  ArrowUp,
+  Phone, 
+  Pencil 
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProfileHeaderProps {
   firstName: string;
   lastName: string;
   profileId: string;
+  onUpdate: () => void;
+  sortOrder: 'newest' | 'oldest';
+  onSortChange: (order: 'newest' | 'oldest') => void;
 }
 
-const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHeaderProps & { onUpdate: () => void }) => {
+const ProfileHeader = ({ 
+  firstName, 
+  lastName, 
+  profileId, 
+  onUpdate, 
+  sortOrder, 
+  onSortChange 
+}: ProfileHeaderProps) => {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -64,10 +86,32 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
         <h1 className="text-xl font-semibold font-sans text-left">
           Your Stories
         </h1>
-        <div className="flex items-center text-sm text-muted-foreground">
-          <ArrowDown className="h-3.5 w-3.5 mr-1" />
-          <span>Recent first</span>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+            {sortOrder === 'newest' ? (
+              <ArrowDown className="h-3.5 w-3.5 mr-1" />
+            ) : (
+              <ArrowUp className="h-3.5 w-3.5 mr-1" />
+            )}
+            <span>{sortOrder === 'newest' ? 'Recent first' : 'Oldest first'}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => onSortChange('newest')}
+              className={`${sortOrder === 'newest' ? 'bg-accent' : ''}`}
+            >
+              <ArrowDown className="h-3.5 w-3.5 mr-2" />
+              Recent first
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onSortChange('oldest')}
+              className={`${sortOrder === 'oldest' ? 'bg-accent' : ''}`}
+            >
+              <ArrowUp className="h-3.5 w-3.5 mr-2" />
+              Oldest first
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

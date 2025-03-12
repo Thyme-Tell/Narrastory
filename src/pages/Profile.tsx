@@ -1,3 +1,4 @@
+
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +7,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
 import { Menu } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,7 @@ const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
@@ -150,12 +152,15 @@ const Profile = () => {
             lastName={profile.last_name}
             profileId={profile.id}
             onUpdate={refetchStories}
+            sortOrder={sortOrder}
+            onSortChange={setSortOrder}
           />
           
           <StoriesList 
             stories={stories || []}
             isLoading={isLoadingStories}
             onUpdate={refetchStories}
+            sortOrder={sortOrder}
           />
         </div>
       </div>

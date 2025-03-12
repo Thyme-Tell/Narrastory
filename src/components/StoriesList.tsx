@@ -17,9 +17,10 @@ interface StoriesListProps {
   stories: Story[];
   isLoading: boolean;
   onUpdate: () => void;
+  sortOrder: 'newest' | 'oldest';
 }
 
-const StoriesList = ({ stories, isLoading, onUpdate }: StoriesListProps) => {
+const StoriesList = ({ stories, isLoading, onUpdate, sortOrder }: StoriesListProps) => {
   const [isTocOpen, setIsTocOpen] = useState(false);
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
 
@@ -33,10 +34,15 @@ const StoriesList = ({ stories, isLoading, onUpdate }: StoriesListProps) => {
     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
   };
 
-  // Sort stories in reverse chronological order (newest first)
-  const sortedStories = [...stories].sort((a, b) => 
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  // Sort stories based on sortOrder
+  const sortedStories = [...stories].sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    
+    return sortOrder === 'newest' 
+      ? dateB - dateA  // newest first
+      : dateA - dateB; // oldest first
+  });
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading stories...</p>;
