@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
@@ -32,14 +31,8 @@ serve(async (req) => {
     
     console.log('Received cover data for saving:', JSON.stringify(coverData, null, 2));
     
-    // Don't modify the backgroundImage property - preserve whatever was sent
-    // Only check if it exists in the object to ensure consistent structure
-    if (!('backgroundImage' in coverData)) {
-      console.log('Adding explicit backgroundImage property as it was missing');
-      coverData.backgroundImage = null;
-    } else {
-      console.log('Background image present:', coverData.backgroundImage);
-    }
+    // Preserve backgroundImage exactly as received - do not modify it
+    console.log('Background image value:', coverData.backgroundImage);
     
     // Create a Supabase client with the service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';

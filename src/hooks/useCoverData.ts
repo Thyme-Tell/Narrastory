@@ -131,14 +131,13 @@ export function useCoverData(profileId: string) {
     try {
       console.log('Saving cover data:', newCoverData);
       
-      // Make sure backgroundImage is explicitly included, keeping its value
-      // If it's undefined, use an empty string instead of null to preserve the field
+      // Ensure we preserve the backgroundImage value exactly as provided
       const dataToSave = {
         ...newCoverData,
-        backgroundImage: newCoverData.backgroundImage || null
+        backgroundImage: newCoverData.backgroundImage // Don't modify the value
       };
       
-      console.log('Data being saved (with explicit backgroundImage):', dataToSave);
+      console.log('Data being saved:', dataToSave);
       
       localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(dataToSave));
       localStorage.setItem(`cover_data_saving_${profileId}`, new Date().toISOString());

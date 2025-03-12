@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -174,19 +173,7 @@ export function useCoverEditor(
       const objectUrl = URL.createObjectURL(file);
       setLocalImageUrl(objectUrl);
       
-      // Set the local image for UI preview only
-      setCoverData(prev => ({
-        ...prev,
-        backgroundImage: objectUrl,
-        backgroundSettings: {
-          ...prev.backgroundSettings,
-          position: 'center',
-          scale: 1,
-          opacity: 1,
-          blur: 0
-        }
-      }));
-      
+      // Upload the file to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('book-covers')
         .upload(filePath, file, {
@@ -199,7 +186,7 @@ export function useCoverEditor(
         toast({
           variant: "destructive",
           title: "Upload issue",
-          description: "Image will be available for preview but might not be saved permanently.",
+          description: "Failed to upload image. Please try again.",
         });
         return;
       }
@@ -208,16 +195,20 @@ export function useCoverEditor(
         .from('book-covers')
         .getPublicUrl(filePath);
         
-      console.log('Uploaded image URL:', data.publicUrl);
+      console.log('Got public URL after upload:', data.publicUrl);
       
-      // Store the remote URL for saving later
+      // Update both remote URL and cover data with the permanent URL
       setRemoteImageUrl(data.publicUrl);
-      
-      // Now update the coverData with the remote URL to ensure it's saved
       setCoverData(prev => ({
         ...prev,
         backgroundImage: data.publicUrl
       }));
+      
+      // Save the updated cover data immediately
+      onSave({
+        ...coverData,
+        backgroundImage: data.publicUrl
+      });
       
       toast({
         title: "Image uploaded",
@@ -229,7 +220,7 @@ export function useCoverEditor(
       toast({
         variant: "destructive",
         title: "Upload issue",
-        description: "Image will be available for preview but might not be saved permanently.",
+        description: "Failed to upload image. Please try again.",
       });
     } finally {
       setIsUploading(false);
