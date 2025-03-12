@@ -57,11 +57,11 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   useEffect(() => {
     if (!stories || stories.length === 0) {
       setStoryPages([]);
-      setTotalPageCount(1); // Just the cover
+      setTotalPageCount(2); // Cover + TOC
       return;
     }
 
-    let pageCount = 1; // Start with cover page
+    let pageCount = 2; // Start with cover + TOC page
     const pageStartIndices: number[] = [];
 
     // Calculate starting page for each story
@@ -93,11 +93,19 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
 
   // Find which story is displayed on the current page
   const getCurrentStory = () => {
-    if (currentPage === 0 || !stories || stories.length === 0) {
+    if (currentPage === 0) {
+      return null; // Cover page
+    }
+    
+    if (currentPage === 1) {
+      return { isTableOfContentsPage: true }; // TOC page
+    }
+    
+    if (!stories || stories.length === 0) {
       return null;
     }
     
-    let currentPageCount = 1; // Start after cover
+    let currentPageCount = 2; // Start after cover and TOC
     
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
