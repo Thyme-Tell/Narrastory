@@ -1,3 +1,4 @@
+
 import { useRef, useEffect } from "react";
 import { CoverData } from "./CoverTypes";
 
@@ -72,12 +73,19 @@ const CoverCanvas = ({
     
     function drawTexts() {
       if (coverData.titleText) {
-        // Calculate font sizes based on canvas dimensions
-        const baseTitleSize = Math.floor((canvas.width * 0.08) * scale); // 8% of canvas width
-        const baseAuthorSize = Math.floor((canvas.width * 0.045) * scale); // 4.5% of canvas width
+        // Calculate base font size as a percentage of canvas width
+        const baseTitleSize = Math.floor(canvas.width * 0.08); // 8% of canvas width
+        
+        // Apply the user's size preference as a multiplier (default is 1.0)
+        // titleSize ranges from 18-24, so we map it to 0.85-1.15 multiplier
+        const titleSizeMultiplier = coverData.titleSize ? 
+          (0.85 + ((coverData.titleSize - 18) / (24 - 18)) * 0.3) : 1.0;
+        
+        // Calculate final title size with user preferences applied
+        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier * scale);
 
         // Draw title
-        ctx.font = `bold ${baseTitleSize}px 'Rosemartin', serif`;
+        ctx.font = `bold ${finalTitleSize}px 'Rosemartin', serif`;
         ctx.fillStyle = coverData.titleColor || '#303441';
         ctx.textAlign = 'center';
         
@@ -91,25 +99,41 @@ const CoverCanvas = ({
         }
         
         // Handle multiline text
-        const titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, baseTitleSize);
+        const titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, finalTitleSize);
         titleLines.forEach((line, index) => {
-          ctx.fillText(line, canvas.width / 2, titleY + index * (baseTitleSize * 1.2));
+          ctx.fillText(line, canvas.width / 2, titleY + index * (finalTitleSize * 1.2));
         });
       }
       
       if (coverData.authorText) {
-        const baseAuthorSize = Math.floor((canvas.width * 0.045) * scale);
-        ctx.font = `${baseAuthorSize}px 'Rosemartin', serif`;
+        // Calculate base author font size
+        const baseAuthorSize = Math.floor(canvas.width * 0.045); // 4.5% of canvas width
+        
+        // Apply user's size preference (default is 1.0)
+        // authorSize ranges from 12-16, so we map it to 0.9-1.1 multiplier
+        const authorSizeMultiplier = coverData.authorSize ? 
+          (0.9 + ((coverData.authorSize - 12) / (16 - 12)) * 0.2) : 1.0;
+        
+        // Calculate final author size with user preferences applied
+        const finalAuthorSize = Math.floor(baseAuthorSize * authorSizeMultiplier * scale);
+        
+        ctx.font = `${finalAuthorSize}px 'Rosemartin', serif`;
         ctx.fillStyle = coverData.authorColor || '#303441';
         ctx.textAlign = 'center';
         
+        // Get title size for spacing calculation
+        const baseTitleSize = Math.floor(canvas.width * 0.08);
+        const titleSizeMultiplier = coverData.titleSize ? 
+          (0.85 + ((coverData.titleSize - 18) / (24 - 18)) * 0.3) : 1.0;
+        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier * scale);
+        
         let authorY;
         if (coverData.layout === 'top') {
-          authorY = canvas.height * 0.3 + ((coverData.titleText ? ((canvas.width * 0.08) * scale * 1.5) : 0));
+          authorY = canvas.height * 0.3 + ((coverData.titleText ? (finalTitleSize * 1.5) : 0));
         } else if (coverData.layout === 'bottom') {
-          authorY = canvas.height * 0.75 + ((coverData.titleText ? ((canvas.width * 0.08) * scale * 1.5) : 0));
+          authorY = canvas.height * 0.75 + ((coverData.titleText ? (finalTitleSize * 1.5) : 0));
         } else { // centered
-          authorY = canvas.height * 0.55 + ((coverData.titleText ? ((canvas.width * 0.08) * scale * 1.5) : 0));
+          authorY = canvas.height * 0.55 + ((coverData.titleText ? (finalTitleSize * 1.5) : 0));
         }
         
         ctx.fillText(coverData.authorText, canvas.width / 2, authorY);
