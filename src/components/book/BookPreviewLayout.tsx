@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BookPreviewHeader from "./BookPreviewHeader";
@@ -23,6 +22,7 @@ interface BookPreviewLayoutProps {
   children: React.ReactNode;
   isRendered: boolean;
   isIOSDevice: boolean;
+  onDownloadPDF?: () => void;
 }
 
 const BookPreviewLayout = ({
@@ -42,7 +42,8 @@ const BookPreviewLayout = ({
   jumpToPage,
   children,
   isRendered,
-  isIOSDevice
+  isIOSDevice,
+  onDownloadPDF
 }: BookPreviewLayoutProps) => {
   const isMobile = useIsMobile();
 
@@ -69,6 +70,7 @@ const BookPreviewLayout = ({
         onZoomOut={onZoomOut}
         onToggleBookmark={onToggleBookmark}
         onClose={onClose}
+        onDownloadPDF={onDownloadPDF}
         isMobile={isMobile}
       />
 

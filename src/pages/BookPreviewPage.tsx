@@ -83,6 +83,7 @@ const BookPreviewPage = () => {
       jumpToPage={bookNavigation.jumpToPage}
       isRendered={isRendered}
       isIOSDevice={isIOSDevice}
+      onDownloadPDF={handleDownloadPDF}
     >
       <BookPreviewContainer
         currentPage={bookNavigation.currentPage}
