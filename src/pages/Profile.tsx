@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,21 +152,14 @@ const Profile = () => {
             onUpdate={refetchStories}
           />
           
-          <div>
-            <p className="text-muted-foreground mb-[15px] text-left">
-              or call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> for a friendly interview.
-            </p>
-            
-            <StoriesList 
-              stories={stories || []}
-              isLoading={isLoadingStories}
-              onUpdate={refetchStories}
-            />
-          </div>
+          <StoriesList 
+            stories={stories || []}
+            isLoading={isLoadingStories}
+            onUpdate={refetchStories}
+          />
         </div>
       </div>
       
-      {/* Add ScrollToTopButton component */}
       <ScrollToTopButton />
     </div>
   );
