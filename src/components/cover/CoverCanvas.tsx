@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { CoverData } from "./CoverTypes";
 
@@ -53,13 +52,11 @@ const CoverCanvas = ({
         let drawWidth, drawHeight, x, y;
         
         if (imgRatio > canvasRatio) {
-          // Image is wider than canvas (relative to height)
           drawHeight = canvas.height;
           drawWidth = canvas.height * imgRatio;
           x = (canvas.width - drawWidth) / 2;
           y = 0;
         } else {
-          // Image is taller than canvas (relative to width)
           drawWidth = canvas.width;
           drawHeight = canvas.width / imgRatio;
           x = 0;
@@ -67,19 +64,20 @@ const CoverCanvas = ({
         }
         
         ctx.drawImage(img, x, y, drawWidth, drawHeight);
-        
-        // Redraw text on top of the image
         drawTexts();
       };
     } else {
-      // If no image, just draw the texts
       drawTexts();
     }
     
     function drawTexts() {
       if (coverData.titleText) {
-        const titleSize = (coverData.titleSize || 36) * scale;
-        ctx.font = `bold ${titleSize}px 'Rosemartin', serif`;
+        // Calculate font sizes based on canvas dimensions
+        const baseTitleSize = Math.floor((canvas.width * 0.08) * scale); // 8% of canvas width
+        const baseAuthorSize = Math.floor((canvas.width * 0.045) * scale); // 4.5% of canvas width
+
+        // Draw title
+        ctx.font = `bold ${baseTitleSize}px 'Rosemartin', serif`;
         ctx.fillStyle = coverData.titleColor || '#303441';
         ctx.textAlign = 'center';
         
@@ -93,25 +91,25 @@ const CoverCanvas = ({
         }
         
         // Handle multiline text
-        const titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, titleSize);
+        const titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, baseTitleSize);
         titleLines.forEach((line, index) => {
-          ctx.fillText(line, canvas.width / 2, titleY + index * (titleSize * 1.2));
+          ctx.fillText(line, canvas.width / 2, titleY + index * (baseTitleSize * 1.2));
         });
       }
       
       if (coverData.authorText) {
-        const authorSize = (coverData.authorSize || 24) * scale;
-        ctx.font = `${authorSize}px 'Rosemartin', serif`;
+        const baseAuthorSize = Math.floor((canvas.width * 0.045) * scale);
+        ctx.font = `${baseAuthorSize}px 'Rosemartin', serif`;
         ctx.fillStyle = coverData.authorColor || '#303441';
         ctx.textAlign = 'center';
         
         let authorY;
         if (coverData.layout === 'top') {
-          authorY = canvas.height * 0.3 + (coverData.titleText ? ((coverData.titleSize || 36) * scale * 1.5) : 0);
+          authorY = canvas.height * 0.3 + ((coverData.titleText ? ((canvas.width * 0.08) * scale * 1.5) : 0));
         } else if (coverData.layout === 'bottom') {
-          authorY = canvas.height * 0.75 + (coverData.titleText ? ((coverData.titleSize || 36) * scale * 1.5) : 0);
+          authorY = canvas.height * 0.75 + ((coverData.titleText ? ((canvas.width * 0.08) * scale * 1.5) : 0));
         } else { // centered
-          authorY = canvas.height * 0.55 + (coverData.titleText ? ((coverData.titleSize || 36) * scale * 1.5) : 0);
+          authorY = canvas.height * 0.55 + ((coverData.titleText ? ((canvas.width * 0.08) * scale * 1.5) : 0));
         }
         
         ctx.fillText(coverData.authorText, canvas.width / 2, authorY);
