@@ -11,6 +11,16 @@ export interface CoverData {
   titlePosition?: { x: number; y: number };
   authorPosition?: { x: number; y: number };
   layout?: 'centered' | 'top' | 'bottom';
+  backgroundSettings?: {
+    position: 'center' | 'fill' | 'fit' | 'stretch';
+    scale: number;
+    opacity: number;
+    blur: number;
+    overlay?: {
+      color: string;
+      opacity: number;
+    };
+  };
 }
 
 export interface CoverEditorProps {
@@ -25,6 +35,9 @@ export interface BackgroundTabProps {
   coverData: CoverData;
   onBackgroundColorChange: (color: string) => void;
   onRemoveImage: () => void;
+  onUploadImage: (file: File) => Promise<void>;
+  onBackgroundSettingsChange: (settings: Partial<CoverData['backgroundSettings']>) => void;
+  isUploading: boolean;
 }
 
 export interface TextTabProps {
@@ -47,4 +60,10 @@ export const DEFAULT_COVER_DATA: CoverData = {
   titleSize: 21,
   authorSize: 14,
   layout: 'centered',
+  backgroundSettings: {
+    position: 'center',
+    scale: 1,
+    opacity: 1,
+    blur: 0
+  }
 };

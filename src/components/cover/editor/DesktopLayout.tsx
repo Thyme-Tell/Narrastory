@@ -15,6 +15,8 @@ interface DesktopLayoutProps {
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
   onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
+  onUploadImage: (file: File) => Promise<void>;
+  onBackgroundSettingsChange: (settings: Partial<CoverData['backgroundSettings']>) => void;
 }
 
 const DesktopLayout = ({
@@ -28,6 +30,8 @@ const DesktopLayout = ({
   onTextColorChange,
   onFontSizeChange,
   onLayoutChange,
+  onUploadImage,
+  onBackgroundSettingsChange,
 }: DesktopLayoutProps) => {
   return (
     <div className="flex flex-row h-[90vh] bg-white">
@@ -44,6 +48,8 @@ const DesktopLayout = ({
           onTextColorChange={onTextColorChange}
           onFontSizeChange={onFontSizeChange}
           onLayoutChange={onLayoutChange}
+          onUploadImage={onUploadImage}
+          onBackgroundSettingsChange={onBackgroundSettingsChange}
         />
       </div>
       

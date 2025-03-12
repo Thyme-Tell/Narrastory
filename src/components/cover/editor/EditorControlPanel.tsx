@@ -19,6 +19,8 @@ interface EditorControlPanelProps {
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
   onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
+  onUploadImage: (file: File) => Promise<void>;
+  onBackgroundSettingsChange: (settings: Partial<CoverData['backgroundSettings']>) => void;
 }
 
 const EditorControlPanel = ({
@@ -32,6 +34,8 @@ const EditorControlPanel = ({
   onTextColorChange,
   onFontSizeChange,
   onLayoutChange,
+  onUploadImage,
+  onBackgroundSettingsChange,
 }: EditorControlPanelProps) => {
   const [activeTab, setActiveTab] = useState("background");
   const isMobile = useIsMobile();
@@ -62,6 +66,9 @@ const EditorControlPanel = ({
             coverData={coverData}
             onBackgroundColorChange={onBackgroundColorChange}
             onRemoveImage={onRemoveImage}
+            onUploadImage={onUploadImage}
+            onBackgroundSettingsChange={onBackgroundSettingsChange}
+            isUploading={isUploading}
           />
         )}
         

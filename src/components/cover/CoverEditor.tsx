@@ -25,7 +25,9 @@ const CoverEditor = ({
     handleRemoveImage,
     handleTextChange,
     handleFontSizeChange,
-    handleLayoutChange
+    handleLayoutChange,
+    handleUploadImage,
+    handleBackgroundSettingsChange
   } = useCoverEditor(profileId, initialCoverData, onSave, onClose);
   
   useEffect(() => {
@@ -49,6 +51,8 @@ const CoverEditor = ({
             onTextColorChange={handleTextColorChange}
             onFontSizeChange={handleFontSizeChange}
             onLayoutChange={handleLayoutChange}
+            onUploadImage={handleUploadImage}
+            onBackgroundSettingsChange={handleBackgroundSettingsChange}
           />
         ) : (
           <DesktopLayout
@@ -62,6 +66,8 @@ const CoverEditor = ({
             onTextColorChange={handleTextColorChange}
             onFontSizeChange={handleFontSizeChange}
             onLayoutChange={handleLayoutChange}
+            onUploadImage={handleUploadImage}
+            onBackgroundSettingsChange={handleBackgroundSettingsChange}
           />
         )}
       </DialogContent>

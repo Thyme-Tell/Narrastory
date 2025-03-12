@@ -21,6 +21,12 @@ export function useCoverEditor(
       titleSize: 21,
       authorSize: 14,
       layout: 'centered',
+      backgroundSettings: {
+        position: 'center',
+        scale: 1,
+        opacity: 1,
+        blur: 0
+      }
     }
   );
   const [isUploading, setIsUploading] = useState(false);
@@ -133,6 +139,89 @@ export function useCoverEditor(
     });
   };
 
+  const handleUploadImage = async (file: File) => {
+    try {
+      setIsUploading(true);
+      
+      // Generate a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${profileId}_${Date.now()}.${fileExt}`;
+      const filePath = `${profileId}/${fileName}`;
+      
+      // Create a local URL for preview first
+      const objectUrl = URL.createObjectURL(file);
+      
+      // Update state with local preview immediately
+      setCoverData(prev => ({
+        ...prev,
+        backgroundImage: objectUrl,
+        backgroundSettings: {
+          ...prev.backgroundSettings,
+          position: 'center',
+          scale: 1,
+          opacity: 1,
+          blur: 0
+        }
+      }));
+      
+      // Upload the file to Supabase storage
+      const { error } = await supabase.storage
+        .from('book-covers')
+        .upload(filePath, file);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Get the public URL
+      const { data } = supabase.storage
+        .from('book-covers')
+        .getPublicUrl(filePath);
+        
+      // Update state with the actual URL
+      setCoverData(prev => ({
+        ...prev,
+        backgroundImage: data.publicUrl
+      }));
+      
+      toast({
+        title: "Image uploaded",
+        description: "Background image has been uploaded successfully",
+      });
+      
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Failed to upload background image. Please try again.",
+      });
+      
+      // Reset the background image if upload failed
+      setCoverData(prev => ({
+        ...prev,
+        backgroundImage: undefined
+      }));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleBackgroundSettingsChange = (settings: Partial<CoverData['backgroundSettings']>) => {
+    setCoverData(prev => ({
+      ...prev,
+      backgroundSettings: {
+        ...prev.backgroundSettings || {
+          position: 'center',
+          scale: 1,
+          opacity: 1,
+          blur: 0
+        },
+        ...settings
+      }
+    }));
+  };
+
   return {
     coverData,
     isUploading,
@@ -142,6 +231,8 @@ export function useCoverEditor(
     handleRemoveImage,
     handleTextChange,
     handleFontSizeChange,
-    handleLayoutChange
+    handleLayoutChange,
+    handleUploadImage,
+    handleBackgroundSettingsChange
   };
 }

@@ -46,29 +46,125 @@ const CoverCanvas = ({
       img.src = coverData.backgroundImage;
       
       img.onload = () => {
-        // Center and cover the canvas with the image
-        const imgRatio = img.width / img.height;
-        const canvasRatio = canvas.width / canvas.height;
+        // Apply background settings if available
+        const settings = coverData.backgroundSettings || {
+          position: 'center',
+          scale: 1,
+          opacity: 1,
+          blur: 0
+        };
         
-        let drawWidth, drawHeight, x, y;
+        // Create a temporary canvas for applying filters if needed
+        let sourceCanvas = document.createElement('canvas');
+        let sourceCtx = sourceCanvas.getContext('2d');
+        sourceCanvas.width = img.width;
+        sourceCanvas.height = img.height;
         
-        if (imgRatio > canvasRatio) {
-          drawHeight = canvas.height;
-          drawWidth = canvas.height * imgRatio;
-          x = (canvas.width - drawWidth) / 2;
-          y = 0;
-        } else {
-          drawWidth = canvas.width;
-          drawHeight = canvas.width / imgRatio;
-          x = 0;
-          y = (canvas.height - drawHeight) / 2;
+        if (!sourceCtx) {
+          // Fallback if we can't get context
+          drawImageWithSettings(ctx, img, settings);
+          drawTexts();
+          return;
         }
         
-        ctx.drawImage(img, x, y, drawWidth, drawHeight);
+        // Draw the image to the source canvas first
+        sourceCtx.drawImage(img, 0, 0);
+        
+        // Apply blur if specified
+        if (settings.blur && settings.blur > 0) {
+          sourceCtx.filter = `blur(${settings.blur * 10}px)`;
+          sourceCtx.drawImage(sourceCanvas, 0, 0);
+          sourceCtx.filter = 'none';
+        }
+        
+        // Now draw the processed image to the main canvas
+        drawImageWithSettings(ctx, sourceCanvas, settings);
+        drawTexts();
+      };
+      
+      img.onerror = () => {
+        console.error("Failed to load background image");
         drawTexts();
       };
     } else {
       drawTexts();
+    }
+    
+    function drawImageWithSettings(
+      ctx: CanvasRenderingContext2D, 
+      image: HTMLImageElement | HTMLCanvasElement, 
+      settings: NonNullable<CoverData['backgroundSettings']>
+    ) {
+      // Save the current state
+      ctx.save();
+      
+      // Set global alpha for opacity
+      if (settings.opacity !== undefined) {
+        ctx.globalAlpha = settings.opacity;
+      }
+      
+      // Calculate dimensions based on position setting
+      const imgRatio = image.width / image.height;
+      const canvasRatio = canvas.width / canvas.height;
+      
+      let drawWidth, drawHeight, x, y;
+      
+      switch (settings.position) {
+        case 'fill':
+          // Cover the entire canvas (may crop the image)
+          if (imgRatio > canvasRatio) {
+            drawHeight = canvas.height;
+            drawWidth = canvas.height * imgRatio;
+            x = (canvas.width - drawWidth) / 2;
+            y = 0;
+          } else {
+            drawWidth = canvas.width;
+            drawHeight = canvas.width / imgRatio;
+            x = 0;
+            y = (canvas.height - drawHeight) / 2;
+          }
+          break;
+          
+        case 'fit':
+          // Fit entire image within canvas (may have whitespace)
+          if (imgRatio > canvasRatio) {
+            drawWidth = canvas.width;
+            drawHeight = canvas.width / imgRatio;
+            x = 0;
+            y = (canvas.height - drawHeight) / 2;
+          } else {
+            drawHeight = canvas.height;
+            drawWidth = canvas.height * imgRatio;
+            x = (canvas.width - drawWidth) / 2;
+            y = 0;
+          }
+          break;
+          
+        case 'stretch':
+          // Stretch to fill canvas (may distort image)
+          drawWidth = canvas.width;
+          drawHeight = canvas.height;
+          x = 0;
+          y = 0;
+          break;
+          
+        case 'center':
+        default:
+          // Center the image at its natural size
+          const scaledWidth = image.width * settings.scale;
+          const scaledHeight = image.height * settings.scale;
+          x = (canvas.width - scaledWidth) / 2;
+          y = (canvas.height - scaledHeight) / 2;
+          drawWidth = scaledWidth;
+          drawHeight = scaledHeight;
+          break;
+      }
+      
+      // Draw the image with the calculated dimensions
+      ctx.drawImage(image, x, y, drawWidth, drawHeight);
+      
+      // Restore the original state
+      ctx.restore();
     }
     
     function drawTexts() {
