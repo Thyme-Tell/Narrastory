@@ -64,7 +64,7 @@ const MediaPageView = ({
                   console.error("Error loading image:", e);
                   handleMediaError();
                   const target = e.target as HTMLImageElement;
-                  target.onerror = null;
+                  target.onerror = null; 
                   target.src = "/placeholder.svg";
                 }}
               />
