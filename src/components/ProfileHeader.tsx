@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,26 +71,28 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Button 
-          className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
-          onClick={() => window.location.href = "tel:+15072003303"}
-        >
-          <Phone className="mr-2 h-4 w-4" />
-          Share Your Story by Phone
-        </Button>
+        <div className="space-y-2">
+          <Button 
+            className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+            onClick={() => window.location.href = "tel:+15072003303"}
+          >
+            <Phone className="mr-2 h-4 w-4" />
+            Share Your Story by Phone
+          </Button>
+          <p className="text-sm text-muted-foreground text-center">
+            <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a>
+          </p>
+        </div>
         
         <Button 
           variant="outline"
           onClick={() => setIsDialogOpen(true)}
+          className="h-[40px]"
         >
           <Pencil className="mr-2 h-4 w-4" />
-          Write a Story Instead
+          Write a Story
         </Button>
       </div>
-      
-      <p className="text-sm text-muted-foreground text-left">
-        Call us at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> for a friendly interview.
-      </p>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-white">
