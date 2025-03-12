@@ -5,16 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCoverData } from "@/hooks/useCoverData";
 import { calculateTotalPages } from "@/utils/bookPagination";
 import { Story } from "@/types/supabase";
-import { Pencil } from "lucide-react";
+import { Pencil, BookOpen } from "lucide-react";
 import BookProgressHeader from "./book-progress/BookProgressHeader";
 import BookCoverPreview from "./book-progress/BookCoverPreview";
 import BookEditorModals from "./book-progress/BookEditorModals";
 import { CoverData } from "./cover/CoverTypes";
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom";
 
 export function BookProgress({ profileId }: { profileId: string }) {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const navigate = useNavigate();
   
   const { 
     coverData, 
@@ -82,6 +84,10 @@ export function BookProgress({ profileId }: { profileId: string }) {
     refreshCoverData();
   };
 
+  const handlePreviewBook = () => {
+    navigate(`/book-preview/${profileId}`);
+  };
+
   if (isHidden) {
     return null;
   }
@@ -108,7 +114,6 @@ export function BookProgress({ profileId }: { profileId: string }) {
           
           <div className="mb-4">
             <p className="text-base text-muted-foreground">by {profile?.first_name} {profile?.last_name}</p>
-            <p className="text-sm text-muted-foreground">A Narra Story Book</p>
           </div>
 
           <div className="bg-muted/30 rounded-lg p-4 mb-6">
@@ -128,6 +133,15 @@ export function BookProgress({ profileId }: { profileId: string }) {
             />
           </div>
           
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={handlePreviewBook}
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            Preview Book
+          </Button>
+
           <Button
             variant="outline"
             className="w-full"
