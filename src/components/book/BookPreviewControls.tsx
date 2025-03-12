@@ -20,9 +20,17 @@ const BookPreviewControls = ({
   onDownloadPDF,
   isMobile = false,
 }: BookPreviewControlsProps) => {
-  const buttonSize = isMobile ? "h-10 w-10" : "h-14 w-14"; // Increased from h-8/h-12 to h-10/h-14
-  const iconSize = isMobile ? "h-6 w-6" : "h-8 w-8"; // Increased from h-4/h-6 to h-6/h-8
-  const marginClass = isMobile ? "mx-2" : "mx-3"; // Increased margins slightly
+  const buttonSize = isMobile ? "h-10 w-10" : "h-14 w-14";
+  const iconSize = isMobile ? "h-6 w-6" : "h-8 w-8";
+  const marginClass = isMobile ? "mx-2" : "mx-3";
+
+  // Add a handler to prevent event bubbling issues
+  const handleDownloadClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
+    if (onDownloadPDF) {
+      onDownloadPDF();
+    }
+  };
 
   return (
     <div className="absolute inset-0 flex justify-between items-center pointer-events-none">
@@ -41,7 +49,7 @@ const BookPreviewControls = ({
         <Button
           variant="ghost"
           size="icon"
-          onClick={onDownloadPDF}
+          onClick={handleDownloadClick}
           className={`${buttonSize} rounded-full bg-background/80 pointer-events-auto absolute bottom-4 right-1/2 transform translate-x-1/2`}
           title="Download PDF"
         >
