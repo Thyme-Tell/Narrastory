@@ -1,8 +1,11 @@
+
+import { useState } from "react";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import MediaCaption from "./MediaCaption";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -31,6 +34,7 @@ interface VideoMediaProps {
 
 const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMediaProps) => {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const { data } = supabase.storage
     .from("story-media")
     .getPublicUrl(media.file_path);
@@ -41,7 +45,8 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
     quality: {
       default: 720,
       options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
-    }
+    },
+    preload: 'metadata'
   };
 
   const handleDelete = async () => {
@@ -79,13 +84,28 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
     }
   };
 
+  const handlePlayerReady = () => {
+    console.log("Plyr is ready");
+    setIsLoading(false);
+  };
+
+  const handleVideoLoadError = () => {
+    console.error("Video failed to load");
+    setIsLoading(false);
+  };
+
   return (
     <div className="space-y-2">
       <div className="relative">
         <div 
-          className="max-h-[550px] rounded-lg overflow-hidden cursor-pointer"
+          className="max-h-[550px] rounded-lg overflow-hidden cursor-pointer relative"
           onClick={() => onVideoClick?.(data.publicUrl)}
         >
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-60 z-10">
+              <LoadingSpinner className="h-8 w-8 text-green-800" />
+            </div>
+          )}
           <Plyr
             source={{
               type: "video",
@@ -93,13 +113,16 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
                 {
                   src: data.publicUrl,
                   type: media.content_type,
+                  size: 720,
                 },
               ],
             }}
             options={videoOptions}
+            onReady={handlePlayerReady}
+            onError={handleVideoLoadError}
           />
         </div>
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 z-20">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
