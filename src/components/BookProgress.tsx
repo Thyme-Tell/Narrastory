@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -124,23 +123,22 @@ export function BookProgress({ profileId }: { profileId: string }) {
           </div>
 
           <div className="bg-muted/30 rounded-lg p-4 mb-6">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded-full bg-[#155B4A]" />
-                <span>{currentPageCount} pages</span>
-                <span className="text-muted-foreground">(Minimum: 32 pages)</span>
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center text-muted-foreground">
+                <BookOpen className="h-4 w-4 mr-2 text-[#155B4A]" />
+                <span className="text-foreground font-medium">{currentPageCount}</span> pages
+                <span className="text-xs ml-2">(Minimum: 32)</span>
               </div>
               
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded-full bg-[#A33D29]" />
-                <span>{stories.length} stories</span>
+              <div className="flex items-center text-muted-foreground">
+                <BookText className="h-4 w-4 mr-2 text-[#A33D29]" />
+                <span className="text-foreground font-medium">{stories.length}</span> stories
                 <Button 
                   variant="link" 
-                  className="h-auto p-0 text-[#A33D29]"
+                  className="h-auto p-0 ml-2 text-[#A33D29]"
                   onClick={scrollToTableOfContents}
                 >
-                  <BookText className="h-4 w-4 mr-1" />
-                  <span>View table of contents</span>
+                  View table of contents
                 </Button>
               </div>
             </div>
