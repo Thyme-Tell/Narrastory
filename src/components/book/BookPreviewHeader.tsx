@@ -37,7 +37,7 @@ const BookPreviewHeader = ({
     <div className="w-full bg-white p-4 flex flex-wrap items-center justify-between gap-2">
       <div className={`flex ${isMobile ? 'flex-wrap' : ''} items-center gap-2`}>
         <Button 
-          variant="outline" 
+          variant={showToc ? "default" : "outline"}
           size={isMobile ? "icon" : "sm"}
           onClick={onToggleToc}
           className={isMobile ? "p-2" : ""}

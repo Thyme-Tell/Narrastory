@@ -150,7 +150,6 @@ const BookPreviewContent = ({
         totalPageCount={totalPageCount}
         goToNextPage={goToNextPage}
         goToPrevPage={goToPrevPage}
-        onDownloadPDF={onDownloadPDF}
         isMobile={isMobile}
       />
     </div>
