@@ -33,7 +33,6 @@ export function useCoverEditor(
   const [remoteImageUrl, setRemoteImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Fetch profile data to get the author name
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
     queryFn: async () => {
@@ -54,7 +53,6 @@ export function useCoverEditor(
     },
   });
 
-  // Set author name from profile when available
   useEffect(() => {
     if (profile && (!coverData.authorText || coverData.authorText === "")) {
       const authorName = `${profile.first_name} ${profile.last_name}`.trim();
@@ -65,7 +63,6 @@ export function useCoverEditor(
     }
   }, [profile, coverData.authorText]);
 
-  // Cleanup local blob URLs when component unmounts
   useEffect(() => {
     return () => {
       if (localImageUrl && localImageUrl.startsWith('blob:')) {
@@ -75,13 +72,13 @@ export function useCoverEditor(
   }, [localImageUrl]);
 
   const handleSave = () => {
-    // Create a copy of the cover data for saving
     const dataToSave = { ...coverData };
     
-    // If we have a remote image URL from Supabase, use that instead of the blob URL
-    if (remoteImageUrl && localImageUrl && coverData.backgroundImage === localImageUrl) {
+    if (remoteImageUrl) {
       console.log('Saving with remote image URL:', remoteImageUrl);
       dataToSave.backgroundImage = remoteImageUrl;
+    } else {
+      dataToSave.backgroundImage = undefined;
     }
     
     onSave(dataToSave);
@@ -114,7 +111,6 @@ export function useCoverEditor(
   };
 
   const handleRemoveImage = () => {
-    // Revoke the old blob URL if it exists
     if (localImageUrl && localImageUrl.startsWith('blob:')) {
       URL.revokeObjectURL(localImageUrl);
       setLocalImageUrl(null);
@@ -169,12 +165,10 @@ export function useCoverEditor(
     try {
       setIsUploading(true);
       
-      // Generate a unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${profileId}_${Date.now()}.${fileExt}`;
       const filePath = `${profileId}/${fileName}`;
       
-      // Create a persistent local URL for preview
       if (localImageUrl && localImageUrl.startsWith('blob:')) {
         URL.revokeObjectURL(localImageUrl);
       }
@@ -182,7 +176,6 @@ export function useCoverEditor(
       const objectUrl = URL.createObjectURL(file);
       setLocalImageUrl(objectUrl);
       
-      // Update state with local preview immediately
       setCoverData(prev => ({
         ...prev,
         backgroundImage: objectUrl,
@@ -195,7 +188,6 @@ export function useCoverEditor(
         }
       }));
       
-      // Upload the file to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('book-covers')
         .upload(filePath, file, {
@@ -205,7 +197,6 @@ export function useCoverEditor(
 
       if (uploadError) {
         console.error("Error uploading image:", uploadError);
-        // Don't throw error - we'll keep using the local preview
         toast({
           variant: "destructive",
           title: "Upload issue",
@@ -214,21 +205,13 @@ export function useCoverEditor(
         return;
       }
       
-      // Get the public URL
       const { data } = supabase.storage
         .from('book-covers')
         .getPublicUrl(filePath);
         
       console.log('Uploaded image URL:', data.publicUrl);
       
-      // Save the remote URL for later use when saving
       setRemoteImageUrl(data.publicUrl);
-      
-      // Keep using the local blob URL for display
-      setCoverData(prev => ({
-        ...prev,
-        backgroundImage: objectUrl
-      }));
       
       toast({
         title: "Image uploaded",
@@ -237,7 +220,6 @@ export function useCoverEditor(
       
     } catch (error) {
       console.error("Error in handleUploadImage:", error);
-      // Don't reset the background image on error
       toast({
         variant: "destructive",
         title: "Upload issue",
