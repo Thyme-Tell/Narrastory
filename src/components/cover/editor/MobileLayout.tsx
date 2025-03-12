@@ -32,12 +32,12 @@ const MobileLayout = ({
   return (
     <div className="flex flex-col h-[100vh] bg-white overflow-hidden">
       {/* Preview section - top 40% */}
-      <div className="w-full" style={{ height: "40%" }}>
+      <div className="w-full flex items-center justify-center" style={{ height: "40%" }}>
         <CoverPreview coverData={coverData} isLoading={isUploading} />
       </div>
       
       {/* Controls section - bottom 60% */}
-      <div className="w-full" style={{ height: "60%" }}>
+      <div className="w-full overflow-y-auto" style={{ height: "60%" }}>
         <EditorControlPanel
           coverData={coverData}
           onSave={onSave}

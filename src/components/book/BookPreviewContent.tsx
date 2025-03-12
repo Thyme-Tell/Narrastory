@@ -88,7 +88,8 @@ const BookPreviewContent = ({
       return {
         ...baseStyle,
         height: "70vh", // Fixed height to ensure visibility
-        maxWidth: "85vw",
+        width: "85vw",    // Set width to be proportional
+        maxWidth: "85vw", // Ensure it's not too wide
         margin: "0 auto",
         border: "1px solid rgba(0,0,0,0.1)", // Extra border to help with visibility
       };

@@ -89,6 +89,16 @@
     -webkit-perspective: 1000;
     -webkit-transform: translate3d(0,0,0);
     transform: translate3d(0,0,0);
+    width: 85vw !important;
+    height: auto !important;
+    max-height: 75vh !important;
+  }
+  
+  /* Mobile-specific cover preview fixes */
+  .book-preview-container canvas {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
   }
   
   /* Larger tap targets for mobile */
@@ -117,5 +127,12 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
     transform: translateZ(0);
+  }
+  
+  /* Fix for canvas scaling on iOS */
+  canvas.book-cover-canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
   }
 }
