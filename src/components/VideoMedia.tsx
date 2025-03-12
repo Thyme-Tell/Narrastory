@@ -46,7 +46,18 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
       default: 720,
       options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240]
     },
-    preload: 'metadata'
+    preload: 'metadata',
+    // Add event listeners for ready and error events
+    events: {
+      ready: () => {
+        console.log("Plyr is ready");
+        setIsLoading(false);
+      },
+      error: () => {
+        console.error("Video failed to load");
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleDelete = async () => {
@@ -84,16 +95,6 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
     }
   };
 
-  const handlePlayerReady = () => {
-    console.log("Plyr is ready");
-    setIsLoading(false);
-  };
-
-  const handleVideoLoadError = () => {
-    console.error("Video failed to load");
-    setIsLoading(false);
-  };
-
   return (
     <div className="space-y-2">
       <div className="relative">
@@ -118,8 +119,6 @@ const VideoMedia = ({ media, onCaptionUpdate, onDelete, onVideoClick }: VideoMed
               ],
             }}
             options={videoOptions}
-            onReady={handlePlayerReady}
-            onError={handleVideoLoadError}
           />
         </div>
         <div className="absolute top-2 right-2 z-20">
