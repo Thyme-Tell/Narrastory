@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 const Profile = () => {
   const { id } = useParams();
@@ -165,6 +166,9 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      
+      {/* Add ScrollToTopButton component */}
+      <ScrollToTopButton />
     </div>
   );
 };
