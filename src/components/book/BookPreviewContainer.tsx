@@ -17,15 +17,20 @@ interface BookPreviewContainerProps {
   goToNextPage: () => void;
   goToPrevPage: () => void;
   currentStoryInfo: {
-    story: Story;
-    pageWithinStory: number;
-    totalPagesInStory: number;
+    story?: Story;
+    pageWithinStory?: number;
+    totalPagesInStory?: number;
     isMediaPage?: boolean;
     mediaItem?: StoryMediaItem;
+    isTableOfContentsPage?: boolean;
   } | null;
   isIOSDevice?: boolean;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
+  bookmarks?: number[];
+  storyPages?: number[];
+  storyMediaMap?: Map<string, StoryMediaItem[]>;
+  jumpToPage?: (page: number) => void;
 }
 
 const BookPreviewContainer = ({
@@ -43,6 +48,10 @@ const BookPreviewContainer = ({
   isIOSDevice = false,
   onDownloadPDF,
   isGeneratingPDF = false,
+  bookmarks = [],
+  storyPages = [],
+  storyMediaMap = new Map(),
+  jumpToPage = () => {}
 }: BookPreviewContainerProps) => {
   const isMobile = window.innerWidth < 768;
 
@@ -52,7 +61,7 @@ const BookPreviewContainer = ({
         currentPage={currentPage}
         totalPageCount={totalPageCount}
         zoomLevel={zoomLevel}
-        stories={stories}
+        stories={stories || []}
         isStoriesLoading={isStoriesLoading || isGeneratingPDF}
         isCoverLoading={isCoverLoading}
         coverData={coverData}
@@ -62,6 +71,10 @@ const BookPreviewContainer = ({
         currentStoryInfo={currentStoryInfo}
         isMobile={isMobile}
         onDownloadPDF={onDownloadPDF}
+        bookmarks={bookmarks}
+        storyPages={storyPages}
+        storyMediaMap={storyMediaMap}
+        jumpToPage={jumpToPage}
       />
     </div>
   );

@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
 import { getPageContent } from "@/utils/bookPagination";
+import { Button } from "@/components/ui/button";
 
 interface TextPageViewProps {
   story: Story;
@@ -21,7 +21,6 @@ const TextPageView = ({
   const [hasScrolled, setHasScrolled] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
-  // Reset hasScrolled state when the page changes
   useEffect(() => {
     setHasScrolled(false);
   }, [globalPageNumber, story, pageNumber]);
@@ -35,9 +34,16 @@ const TextPageView = ({
     };
 
     const handleScroll = () => {
-      if (contentRef.current && contentRef.current.scrollTop > 20) {
-        setHasScrolled(true);
-        setShowScrollIndicator(false);
+      if (contentRef.current) {
+        if (contentRef.current.scrollTop > 20) {
+          setHasScrolled(true);
+        }
+        
+        const isAtBottom = contentRef.current.scrollHeight - contentRef.current.scrollTop <= contentRef.current.clientHeight + 10;
+        
+        if (contentRef.current.scrollTop > 20 || isAtBottom) {
+          setShowScrollIndicator(false);
+        }
       }
     };
     
@@ -87,10 +93,13 @@ const TextPageView = ({
       
       {showScrollIndicator && (
         <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-in pointer-events-none">
-          <div className="bg-white py-3 px-6 rounded-full shadow-lg flex items-center space-x-2 scale-70">
-            <span className="text-[#A33D29] text-base font-serif">Scroll down to read more</span>
+          <Button
+            variant="outline"
+            className="rounded-full shadow-md bg-white hover:bg-gray-100 border-[#A33D29]/20 hover:border-[#A33D29]/50 transition-all duration-300 animate-fade-in gap-2 pointer-events-none"
+          >
+            <span className="text-[#A33D29]">Scroll down to read more</span>
             <ChevronsDown className="h-5 w-5 text-[#A33D29]" />
-          </div>
+          </Button>
         </div>
       )}
       

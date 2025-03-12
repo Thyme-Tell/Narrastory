@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Book, ZoomIn, ZoomOut, Bookmark, X } from "lucide-react";
+import { Book, ZoomIn, ZoomOut, Bookmark, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ interface BookPreviewHeaderProps {
   onZoomOut: () => void;
   onToggleBookmark: () => void;
   onClose: () => void;
+  onDownloadPDF?: () => void;
   isMobile?: boolean;
 }
 
@@ -29,13 +30,14 @@ const BookPreviewHeader = ({
   onZoomOut,
   onToggleBookmark,
   onClose,
+  onDownloadPDF,
   isMobile = false,
 }: BookPreviewHeaderProps) => {
   return (
     <div className="w-full bg-white p-4 flex flex-wrap items-center justify-between gap-2">
       <div className={`flex ${isMobile ? 'flex-wrap' : ''} items-center gap-2`}>
         <Button 
-          variant="outline" 
+          variant={showToc ? "default" : "outline"}
           size={isMobile ? "icon" : "sm"}
           onClick={onToggleToc}
           className={isMobile ? "p-2" : ""}
@@ -66,6 +68,18 @@ const BookPreviewHeader = ({
           <Bookmark className="h-4 w-4" />
           {!isMobile && <span className="ml-2">{bookmarks.includes(currentPage) ? "Bookmarked" : "Bookmark"}</span>}
         </Button>
+
+        {onDownloadPDF && (
+          <Button 
+            variant="outline" 
+            size={isMobile ? "icon" : "sm"}
+            onClick={onDownloadPDF}
+            className={isMobile ? "p-2" : ""}
+          >
+            <Download className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Download</span>}
+          </Button>
+        )}
       </div>
       
       <div className="flex items-center gap-2">

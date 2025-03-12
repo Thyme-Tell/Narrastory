@@ -33,7 +33,7 @@ function App() {
           <Route path="/storybooks/:id/settings" element={<StoryBookSettingsWrapper />} />
           <Route path="/reset-password" element={<PasswordResetRequest />} />
           <Route path="/reset-password/confirm" element={<PasswordResetConfirm />} />
-          <Route path="/profile/:profileId/book-preview" element={<BookPreviewPage />} />
+          <Route path="/book-preview/:profileId" element={<BookPreviewPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

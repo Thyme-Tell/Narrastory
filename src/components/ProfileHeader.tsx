@@ -12,14 +12,36 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { 
+  ArrowDown, 
+  ArrowUp,
+  Phone, 
+  Pencil 
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProfileHeaderProps {
   firstName: string;
   lastName: string;
   profileId: string;
+  onUpdate: () => void;
+  sortOrder: 'newest' | 'oldest';
+  onSortChange: (order: 'newest' | 'oldest') => void;
 }
 
-const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHeaderProps & { onUpdate: () => void }) => {
+const ProfileHeader = ({ 
+  firstName, 
+  lastName, 
+  profileId, 
+  onUpdate, 
+  sortOrder, 
+  onSortChange 
+}: ProfileHeaderProps) => {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -60,15 +82,61 @@ const ProfileHeader = ({ firstName, lastName, profileId, onUpdate }: ProfileHead
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold font-sans text-left">
-        Your Stories
-      </h1>
-      <Button 
-        className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
-        onClick={() => setIsDialogOpen(true)}
-      >
-        Write a New Story
-      </Button>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold font-sans text-left">
+          Your Stories
+        </h1>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+            {sortOrder === 'newest' ? (
+              <ArrowDown className="h-3.5 w-3.5 mr-1" />
+            ) : (
+              <ArrowUp className="h-3.5 w-3.5 mr-1" />
+            )}
+            <span>{sortOrder === 'newest' ? 'Recent first' : 'Oldest first'}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => onSortChange('newest')}
+              className={`${sortOrder === 'newest' ? 'bg-accent' : ''}`}
+            >
+              <ArrowDown className="h-3.5 w-3.5 mr-2" />
+              Recent first
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onSortChange('oldest')}
+              className={`${sortOrder === 'oldest' ? 'bg-accent' : ''}`}
+            >
+              <ArrowUp className="h-3.5 w-3.5 mr-2" />
+              Oldest first
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Button 
+            className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+            onClick={() => window.location.href = "tel:+15072003303"}
+          >
+            <Phone className="mr-2 h-4 w-4" />
+            Share Your Story by Phone
+          </Button>
+          <p className="text-sm text-muted-foreground text-center">
+            <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a>
+          </p>
+        </div>
+        
+        <Button 
+          variant="outline"
+          onClick={() => setIsDialogOpen(true)}
+          className="h-[40px]"
+        >
+          <Pencil className="mr-2 h-4 w-4" />
+          Write a Story
+        </Button>
+      </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-white">

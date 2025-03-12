@@ -8,6 +8,7 @@ import AudioPlayer from "./AudioPlayer";
 import { useStoryAudio } from "@/hooks/useStoryAudio";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StoryContentProps {
   title: string | null;
@@ -21,6 +22,12 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
   const { isLoading, audioUrl, error, generateAudio, updatePlaybackStats } = useStoryAudio(storyId);
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+
+  // Calculate estimated audio duration based on word count
+  // Average reading speed is about 150 words per minute
+  const wordCount = content.trim().split(/\s+/).length;
+  const estimatedMinutes = Math.max(1, Math.ceil(wordCount / 150));
 
   const handleListen = async () => {
     console.log('Listen button clicked for story:', storyId);
@@ -52,7 +59,8 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
+      {/* Responsive title and listen button layout */}
+      <div className={`${isMobile ? 'flex flex-col space-y-3' : 'flex justify-between items-center'} mb-4`}>
         {title && (
           <h3 className="font-semibold text-lg text-left">{title}</h3>
         )}
@@ -61,14 +69,14 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
           size="sm"
           onClick={handleListen}
           disabled={isLoading || !content || content.trim() === ''}
-          className="ml-auto"
+          className={isMobile ? 'self-start' : 'ml-auto'}
         >
           {isLoading ? (
             <LoadingSpinner className="mr-2 h-4 w-4" />
           ) : (
             <Headphones className="mr-2 h-4 w-4" />
           )}
-          Listen
+          Listen ({estimatedMinutes} min)
         </Button>
       </div>
       

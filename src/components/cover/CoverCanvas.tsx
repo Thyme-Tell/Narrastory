@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { CoverData } from "./CoverTypes";
 
@@ -26,7 +25,7 @@ const CoverCanvas = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas dimensions
+    // Set canvas dimensions with high resolution scaling
     canvas.width = width * scale;
     canvas.height = height * scale;
     

@@ -2,6 +2,7 @@
 import React from "react";
 import { CoverData } from "@/components/cover/CoverTypes";
 import CoverCanvas from "@/components/cover/CoverCanvas";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BookCoverProps {
   coverData: CoverData;
@@ -9,18 +10,22 @@ interface BookCoverProps {
 }
 
 const BookCover = ({ coverData, authorName }: BookCoverProps) => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="w-full h-full relative flex items-center justify-center bg-white book-page">
       {/* Left-side gradient */}
       <div className="absolute left-0 top-0 w-[20px] h-full bg-gradient-to-r from-gray-400/40 to-transparent"></div>
       
-      <CoverCanvas 
-        coverData={coverData} 
-        width={600}
-        height={800}
-      />
-      
-      {/* Removing the redundant "By {authorName}" text that was causing duplication */}
+      <div className="w-full h-full flex items-center justify-center">
+        <CoverCanvas 
+          coverData={coverData} 
+          width={isMobile ? 300 : 600}
+          height={isMobile ? 480 : 960}
+          scale={2}
+          className="w-full h-full object-contain"
+        />
+      </div>
     </div>
   );
 };

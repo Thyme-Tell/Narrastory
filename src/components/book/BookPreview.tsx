@@ -94,7 +94,8 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     zoomIn,
     zoomOut,
     toggleBookmark,
-    jumpToPage
+    jumpToPage,
+    storyMediaMap
   } = useBookNavigation(stories, open);
 
   // Handle keyboard navigation
@@ -184,7 +185,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             currentPage={currentPage}
             totalPageCount={totalPageCount}
             zoomLevel={zoomLevel}
-            stories={stories}
+            stories={stories || []}
             isStoriesLoading={isStoriesLoading}
             isCoverLoading={isCoverLoading}
             coverData={coverData}
@@ -193,6 +194,10 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             goToPrevPage={goToPrevPage}
             currentStoryInfo={currentStoryInfo}
             isMobile={isMobile}
+            bookmarks={bookmarks}
+            storyPages={storyPages}
+            storyMediaMap={storyMediaMap}
+            jumpToPage={jumpToPage}
           />
         </div>
       </div>

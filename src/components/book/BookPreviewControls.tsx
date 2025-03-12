@@ -8,7 +8,6 @@ interface BookPreviewControlsProps {
   totalPageCount: number;
   goToNextPage: () => void;
   goToPrevPage: () => void;
-  onDownloadPDF?: () => void;
   isMobile?: boolean;
 }
 
@@ -17,7 +16,6 @@ const BookPreviewControls = ({
   totalPageCount,
   goToNextPage,
   goToPrevPage,
-  onDownloadPDF,
   isMobile = false,
 }: BookPreviewControlsProps) => {
   const buttonSize = isMobile ? "h-10 w-10" : "h-14 w-14";

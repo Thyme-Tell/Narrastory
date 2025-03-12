@@ -23,6 +23,7 @@ interface BookPreviewLayoutProps {
   children: React.ReactNode;
   isRendered: boolean;
   isIOSDevice: boolean;
+  onDownloadPDF?: () => void;
 }
 
 const BookPreviewLayout = ({
@@ -42,7 +43,8 @@ const BookPreviewLayout = ({
   jumpToPage,
   children,
   isRendered,
-  isIOSDevice
+  isIOSDevice,
+  onDownloadPDF
 }: BookPreviewLayoutProps) => {
   const isMobile = useIsMobile();
 
@@ -69,13 +71,14 @@ const BookPreviewLayout = ({
         onZoomOut={onZoomOut}
         onToggleBookmark={onToggleBookmark}
         onClose={onClose}
+        onDownloadPDF={onDownloadPDF}
         isMobile={isMobile}
       />
 
       <div className="flex-1 w-full flex overflow-hidden">
-        {/* TOC Sidebar */}
+        {/* TOC Sidebar - Now with solid white background */}
         {showToc && (
-          <div className={`${isMobile ? "w-48 toc-mobile" : "w-64"} h-full bg-muted p-4 overflow-y-auto animate-slide-in-right`}>
+          <div className={`${isMobile ? "w-56 toc-mobile" : "w-72"} h-full bg-white p-4 overflow-y-auto animate-slide-in-right border-r border-gray-300`}>
             <TableOfContents 
               stories={stories || []} 
               currentPage={currentPage}

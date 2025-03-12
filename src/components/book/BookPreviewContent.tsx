@@ -20,14 +20,19 @@ interface BookPreviewContentProps {
   goToNextPage: () => void;
   goToPrevPage: () => void;
   currentStoryInfo: {
-    story: Story;
-    pageWithinStory: number;
-    totalPagesInStory: number;
+    story?: Story;
+    pageWithinStory?: number;
+    totalPagesInStory?: number;
     isMediaPage?: boolean;
     mediaItem?: StoryMediaItem;
+    isTableOfContentsPage?: boolean;
   } | null;
   isMobile?: boolean;
   onDownloadPDF?: () => void;
+  bookmarks: number[];
+  storyPages: number[];
+  storyMediaMap: Map<string, StoryMediaItem[]>;
+  jumpToPage: (pageIndex: number) => void;
 }
 
 const BookPreviewContent = ({
@@ -44,6 +49,10 @@ const BookPreviewContent = ({
   currentStoryInfo,
   isMobile = false,
   onDownloadPDF,
+  bookmarks,
+  storyPages,
+  storyMediaMap,
+  jumpToPage
 }: BookPreviewContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +97,8 @@ const BookPreviewContent = ({
       return {
         ...baseStyle,
         height: "70vh", // Fixed height to ensure visibility
-        maxWidth: "85vw",
+        width: "85vw",    // Set width to be proportional
+        maxWidth: "85vw", // Ensure it's not too wide
         margin: "0 auto",
         border: "1px solid rgba(0,0,0,0.1)", // Extra border to help with visibility
       };
@@ -130,8 +140,8 @@ const BookPreviewContent = ({
             currentStoryInfo && currentStoryInfo.story && (
               <PageView 
                 story={currentStoryInfo.story} 
-                pageNumber={currentStoryInfo.pageWithinStory}
-                totalPagesInStory={currentStoryInfo.totalPagesInStory}
+                pageNumber={currentStoryInfo.pageWithinStory || 1}
+                totalPagesInStory={currentStoryInfo.totalPagesInStory || 1}
                 isMediaPage={currentStoryInfo.isMediaPage}
                 mediaItem={currentStoryInfo.mediaItem}
                 isMobile={isMobile}
@@ -149,7 +159,6 @@ const BookPreviewContent = ({
         totalPageCount={totalPageCount}
         goToNextPage={goToNextPage}
         goToPrevPage={goToPrevPage}
-        onDownloadPDF={onDownloadPDF}
         isMobile={isMobile}
       />
     </div>

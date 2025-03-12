@@ -1,10 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { Story } from "@/types/supabase";
-import { calculateStoryPages, calculateTotalPages, mapPageToStory } from "@/utils/bookPagination";
+import { calculateStoryPages } from "@/utils/bookPagination";
 import { StoryMediaItem } from "@/types/media";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+type StoryInfo = {
+  story?: Story;
+  pageWithinStory?: number;
+  totalPagesInStory?: number;
+  isMediaPage?: boolean;
+  mediaItem?: StoryMediaItem;
+  isTableOfContentsPage?: boolean;
+} | null;
 
 export const useBookNavigation = (stories: Story[] | undefined, open: boolean) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -57,11 +66,11 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   useEffect(() => {
     if (!stories || stories.length === 0) {
       setStoryPages([]);
-      setTotalPageCount(1); // Just the cover
+      setTotalPageCount(1); // Just cover page
       return;
     }
 
-    let pageCount = 1; // Start with cover page
+    let pageCount = 1; // Start with cover page only
     const pageStartIndices: number[] = [];
 
     // Calculate starting page for each story
@@ -92,8 +101,12 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   };
 
   // Find which story is displayed on the current page
-  const getCurrentStory = () => {
-    if (currentPage === 0 || !stories || stories.length === 0) {
+  const getCurrentStory = (): StoryInfo => {
+    if (currentPage === 0) {
+      return null; // Cover page
+    }
+    
+    if (!stories || stories.length === 0) {
       return null;
     }
     

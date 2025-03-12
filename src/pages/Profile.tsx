@@ -7,7 +7,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
 import { Menu } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +16,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
@@ -150,21 +152,20 @@ const Profile = () => {
             lastName={profile.last_name}
             profileId={profile.id}
             onUpdate={refetchStories}
+            sortOrder={sortOrder}
+            onSortChange={setSortOrder}
           />
           
-          <div>
-            <p className="text-muted-foreground mb-[15px] text-left">
-              or call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a> for a friendly interview.
-            </p>
-            
-            <StoriesList 
-              stories={stories || []}
-              isLoading={isLoadingStories}
-              onUpdate={refetchStories}
-            />
-          </div>
+          <StoriesList 
+            stories={stories || []}
+            isLoading={isLoadingStories}
+            onUpdate={refetchStories}
+            sortOrder={sortOrder}
+          />
         </div>
       </div>
+      
+      <ScrollToTopButton />
     </div>
   );
 };

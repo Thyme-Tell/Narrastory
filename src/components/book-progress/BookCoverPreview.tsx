@@ -10,27 +10,28 @@ interface BookCoverPreviewProps {
 
 const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
   const isMobile = useIsMobile();
-  const previewWidth = isMobile ? "50vw" : "300px";
-  const maxWidth = isMobile ? "min(50vw, 220px)" : "300px";
+  const width = isMobile ? 150 : 150;
+  const height = Math.round(width * (8/5));
+  const scale = 2;
   
   if (isLoading) {
     return (
-      <div style={{ width: previewWidth, maxWidth }} className="mx-auto">
-        <div className="w-full aspect-[5/8] bg-gray-200 rounded-lg animate-pulse"></div>
+      <div className="w-full flex justify-center p-[10px]">
+        <div className="w-[150px] aspect-[5/8] bg-gray-200 rounded-lg animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div style={{ width: previewWidth, maxWidth }} className="mx-auto book-cover-container">
-      <div className="overflow-hidden rounded-lg relative book-cover">
-        {/* Left-side gradient */}
-        <div className="absolute left-0 top-0 w-[10px] h-full bg-gradient-to-r from-gray-400/40 to-transparent z-10"></div>
-        
+    <div className="w-full flex justify-center p-[10px]">
+      <div className="w-[150px] h-full overflow-hidden rounded-lg relative aspect-[5/8] bg-white">
+        <div className="absolute left-0 top-0 w-[10px] h-full bg-gradient-to-r from-gray-400/40 to-transparent z-10" />
         <CoverCanvas 
           coverData={coverData} 
-          width={isMobile ? 200 : 300}
-          height={isMobile ? 320 : 480}
+          width={width}
+          height={height}
+          scale={scale}
+          className="w-full h-full object-contain"
         />
       </div>
     </div>

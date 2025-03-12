@@ -1,9 +1,12 @@
+
 import { useState } from "react";
 import { useStoryOperations } from "./story/StoryOperations";
 import StoryEditForm from "./StoryEditForm";
 import StoryContent from "./StoryContent";
 import StoryHeader from "./story/StoryHeader";
 import ShareDialog from "./story/ShareDialog";
+import { formatDistanceToNow } from "date-fns";
+import { Book } from "lucide-react";
 
 interface StoryCardProps {
   story: {
@@ -24,6 +27,12 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     storyId: story.id,
     onUpdate,
   });
+
+  // Calculate word count
+  const wordCount = story.content.trim().split(/\s+/).length;
+  
+  // Format the created_at date
+  const formattedDate = formatDistanceToNow(new Date(story.created_at), { addSuffix: true });
 
   const onSave = async (title: string, content: string, date: Date) => {
     const success = await handleSave(title, content, date);
@@ -61,6 +70,17 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             onDelete={handleDelete}
             onShare={onShare}
           />
+          
+          {/* Story Metadata */}
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-2">
+            <span>{formattedDate}</span>
+            <span>•</span>
+            <div className="flex items-center">
+              <Book className="h-3.5 w-3.5 mr-1" />
+              <span>{wordCount} words</span>
+            </div>
+          </div>
+          
           <StoryContent
             title={story.title}
             content={story.content}
