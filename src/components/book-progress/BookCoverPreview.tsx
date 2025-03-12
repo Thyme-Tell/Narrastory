@@ -28,7 +28,7 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
   }
 
   return (
-    <div style={{ width: previewWidth }} className="mx-auto book-cover-container">
+    <div style={{ width: previewWidth }} className="mx-auto book-cover-container p-[10px]">
       <div className="w-full overflow-hidden rounded-lg relative book-cover aspect-[5/8]">
         {/* Left-side gradient */}
         <div className="absolute left-0 top-0 w-[10px] h-full bg-gradient-to-r from-gray-400/40 to-transparent z-10"></div>
