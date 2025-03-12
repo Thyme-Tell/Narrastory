@@ -10,13 +10,14 @@ interface BookCoverPreviewProps {
 
 const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
   const isMobile = useIsMobile();
-  const previewWidth = isMobile ? "50vw" : "300px";
-  const maxWidth = isMobile ? "min(50vw, 220px)" : "300px";
+  // Reduce width by 50%
+  const previewWidth = isMobile ? "25vw" : "150px";
+  const maxWidth = isMobile ? "min(25vw, 110px)" : "150px";
   
   // Calculate appropriate dimensions for high resolution
-  const canvasWidth = isMobile ? 300 : 500;  // Higher base value
-  const canvasHeight = isMobile ? 480 : 800; // Maintaining 5:8 aspect ratio
-  const scale = 2; // Use a higher scale factor for better resolution
+  const canvasWidth = isMobile ? 150 : 250;  // 50% of previous values
+  const canvasHeight = isMobile ? 240 : 400; // Maintaining 5:8 aspect ratio
+  const scale = 2; // Keep the scale factor for high resolution
   
   if (isLoading) {
     return (
@@ -34,9 +35,9 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
         
         <CoverCanvas 
           coverData={coverData} 
-          width={isMobile ? 300 : 300}  // Keep display dimensions the same
-          height={isMobile ? 480 : 480}
-          scale={scale} // Apply the scale factor for higher resolution
+          width={isMobile ? 150 : 150}  // 50% of previous values
+          height={isMobile ? 240 : 240}
+          scale={scale} // Keep the scale factor for high resolution
         />
       </div>
     </div>

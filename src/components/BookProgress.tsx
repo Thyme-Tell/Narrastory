@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,11 +95,11 @@ export function BookProgress({ profileId }: { profileId: string }) {
   return (
     <div className="mb-8">
       <div className={`flex ${isMobile ? "flex-col" : "justify-between"} items-center`}>
-        <div className={isMobile ? "w-full mb-6" : ""}>
+        <div className={isMobile ? "w-full mb-6" : "flex-1"}>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
           
           {isMobile && (
-            <div className="mb-6">
+            <div className="mb-6 flex justify-center">
               <BookCoverPreview 
                 coverData={coverData}
                 isLoading={isCoverLoading}
@@ -123,10 +122,12 @@ export function BookProgress({ profileId }: { profileId: string }) {
         </div>
         
         {!isMobile && (
-          <BookCoverPreview 
-            coverData={coverData}
-            isLoading={isCoverLoading}
-          />
+          <div className="ml-4 flex-shrink-0">
+            <BookCoverPreview 
+              coverData={coverData}
+              isLoading={isCoverLoading}
+            />
+          </div>
         )}
       </div>
 
