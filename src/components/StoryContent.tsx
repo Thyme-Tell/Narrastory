@@ -22,6 +22,11 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
   const { toast } = useToast();
 
+  // Calculate estimated audio duration based on word count
+  // Average reading speed is about 150 words per minute
+  const wordCount = content.trim().split(/\s+/).length;
+  const estimatedMinutes = Math.max(1, Math.ceil(wordCount / 150));
+
   const handleListen = async () => {
     console.log('Listen button clicked for story:', storyId);
     
@@ -68,7 +73,7 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
           ) : (
             <Headphones className="mr-2 h-4 w-4" />
           )}
-          Listen
+          Listen ({estimatedMinutes} min)
         </Button>
       </div>
       
