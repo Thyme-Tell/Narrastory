@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,13 +152,15 @@ export function BookProgress({ profileId }: { profileId: string }) {
 
           <Button
             variant="secondary"
-            className="w-full relative bg-[#F1F1F1] hover:bg-[#E5E5E5] text-gray-500"
+            className="w-full relative bg-[#b3b3b3] hover:bg-[#a6a6a6] text-[#4d4d4d]"
             disabled
           >
-            <div className="absolute -top-3 right-0 bg-[#AF4623] text-white text-xs px-2 py-0.5 rounded-full">
-              Coming Soon
-            </div>
-            Order Book
+            <span className="inline-flex items-center">
+              <span className="bg-[#AF4623] text-white text-xs px-2 py-0.5 rounded-full mr-2">
+                Coming Soon
+              </span>
+              Order Book
+            </span>
           </Button>
         </div>
       </div>
