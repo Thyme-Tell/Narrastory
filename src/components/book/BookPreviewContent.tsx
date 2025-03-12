@@ -4,7 +4,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
 import BookPreviewControls from "./BookPreviewControls";
-import TableOfContentsPage from "./TableOfContentsPage";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
 import { StoryMediaItem } from "@/types/media";
@@ -135,15 +134,6 @@ const BookPreviewContent = ({
             <BookCover 
               coverData={coverData} 
               authorName={authorName}
-            />
-          ) : currentPage === 1 ? (
-            // Table of Contents Page
-            <TableOfContentsPage
-              stories={stories || []}
-              bookTitle={bookTitle}
-              storyPages={storyPages}
-              storyMediaMap={storyMediaMap}
-              onSelectPage={jumpToPage}
             />
           ) : (
             // Content Pages

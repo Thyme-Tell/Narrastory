@@ -21,7 +21,7 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   const [showToc, setShowToc] = useState(false);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [storyPages, setStoryPages] = useState<number[]>([]);
-  const [totalPageCount, setTotalPageCount] = useState(1); // TOC page by default
+  const [totalPageCount, setTotalPageCount] = useState(1); // Cover page by default
   const [storyMediaMap, setStoryMediaMap] = useState<Map<string, StoryMediaItem[]>>(new Map());
 
   // Fetch media items for all stories
@@ -66,11 +66,11 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   useEffect(() => {
     if (!stories || stories.length === 0) {
       setStoryPages([]);
-      setTotalPageCount(1); // Just TOC page
+      setTotalPageCount(1); // Just cover page
       return;
     }
 
-    let pageCount = 1; // Start with TOC page only
+    let pageCount = 1; // Start with cover page only
     const pageStartIndices: number[] = [];
 
     // Calculate starting page for each story
@@ -103,18 +103,14 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   // Find which story is displayed on the current page
   const getCurrentStory = (): StoryInfo => {
     if (currentPage === 0) {
-      return { isTableOfContentsPage: true }; // Cover page
-    }
-    
-    if (currentPage === 1) {
-      return { isTableOfContentsPage: true }; // Table of Contents page
+      return null; // Cover page
     }
     
     if (!stories || stories.length === 0) {
       return null;
     }
     
-    let currentPageCount = 1; // Start after TOC
+    let currentPageCount = 1; // Start after cover
     
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
