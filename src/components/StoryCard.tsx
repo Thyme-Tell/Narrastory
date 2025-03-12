@@ -94,6 +94,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
         open={showShareDialog}
         onOpenChange={setShowShareDialog}
         shareUrl={shareUrl}
+        storyTitle={story.title}
       />
     </div>
   );
