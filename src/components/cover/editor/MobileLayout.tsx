@@ -31,13 +31,13 @@ const MobileLayout = ({
 }: MobileLayoutProps) => {
   return (
     <div className="flex flex-col h-[100vh] bg-white overflow-hidden">
-      {/* Preview section - top 40% */}
-      <div className="w-full flex items-center justify-center" style={{ height: "40%" }}>
+      {/* Preview section - top 45% to ensure enough space for the full cover */}
+      <div className="w-full flex items-center justify-center" style={{ height: "45%" }}>
         <CoverPreview coverData={coverData} isLoading={isUploading} />
       </div>
       
-      {/* Controls section - bottom 60% */}
-      <div className="w-full overflow-y-auto" style={{ height: "60%" }}>
+      {/* Controls section - bottom 55% */}
+      <div className="w-full overflow-y-auto" style={{ height: "55%" }}>
         <EditorControlPanel
           coverData={coverData}
           onSave={onSave}

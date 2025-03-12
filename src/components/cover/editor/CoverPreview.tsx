@@ -24,9 +24,9 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
     <div className="w-full h-full flex items-center justify-center bg-gray-100 p-4">
       <div className="book-preview-container flex items-center justify-center h-full">
         <div 
-          className="max-h-full w-full relative" 
+          className="max-h-full relative" 
           style={{ 
-            maxWidth: isMobile ? "280px" : "240px",
+            maxWidth: isMobile ? "240px" : "200px",
             height: "auto",
             aspectRatio: "5/8",
             display: "flex",
@@ -36,8 +36,8 @@ const CoverPreview = ({ coverData, isLoading = false }: CoverPreviewProps) => {
         >
           <CoverCanvas 
             coverData={coverData} 
-            width={isMobile ? 280 : 240}
-            height={isMobile ? 448 : 384}
+            width={isMobile ? 240 : 200}
+            height={isMobile ? 384 : 320}
             scale={2}
             className="w-full h-full object-contain"
           />
