@@ -26,7 +26,7 @@ const PageView = ({
   mediaItem,
   isMobile = false,
   globalPageNumber = 1,
-  bookTitle = "My Book" // Default book title
+  bookTitle = "My Book"
 }: PageViewProps) => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -183,9 +183,9 @@ const PageView = ({
       
       {showScrollIndicator && (
         <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-in pointer-events-none">
-          <div className="bg-white py-4 px-8 rounded-full shadow-lg flex items-center space-x-2">
-            <span className="text-[#A33D29] text-lg font-serif">Scroll down to read more</span>
-            <ChevronsDown className="h-6 w-6 text-[#A33D29]" />
+          <div className="bg-white py-3 px-6 rounded-full shadow-lg flex items-center space-x-2 scale-70">
+            <span className="text-[#A33D29] text-base font-serif">Scroll down to read more</span>
+            <ChevronsDown className="h-5 w-5 text-[#A33D29]" />
           </div>
         </div>
       )}
