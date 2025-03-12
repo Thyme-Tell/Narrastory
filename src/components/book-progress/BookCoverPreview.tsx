@@ -14,9 +14,9 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
   const previewWidth = isMobile ? "25vw" : "150px";
   const maxWidth = isMobile ? "min(25vw, 110px)" : "150px";
   
-  // Calculate appropriate dimensions for high resolution
-  const canvasWidth = isMobile ? 150 : 250;  // 50% of previous values
-  const canvasHeight = isMobile ? 240 : 400; // Maintaining 5:8 aspect ratio
+  // Calculate appropriate dimensions with 5:8 aspect ratio
+  const width = isMobile ? 125 : 150;
+  const height = Math.round(width * (8/5)); // Exact 5:8 aspect ratio
   const scale = 2; // Keep the scale factor for high resolution
   
   if (isLoading) {
@@ -29,15 +29,15 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
 
   return (
     <div style={{ width: previewWidth, maxWidth }} className="mx-auto book-cover-container">
-      <div className="overflow-hidden rounded-lg relative book-cover">
+      <div className="overflow-hidden rounded-lg relative book-cover aspect-[5/8]">
         {/* Left-side gradient */}
         <div className="absolute left-0 top-0 w-[10px] h-full bg-gradient-to-r from-gray-400/40 to-transparent z-10"></div>
         
         <CoverCanvas 
           coverData={coverData} 
-          width={isMobile ? 150 : 150}  // 50% of previous values
-          height={isMobile ? 240 : 240}
-          scale={scale} // Keep the scale factor for high resolution
+          width={width}
+          height={height}
+          scale={scale}
         />
       </div>
     </div>
