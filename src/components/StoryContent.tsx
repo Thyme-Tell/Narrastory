@@ -3,12 +3,15 @@ import { useState } from "react";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
 import { Button } from "@/components/ui/button";
-import { Headphones } from "lucide-react";
+import { Headphones, Settings } from "lucide-react";
 import AudioPlayer from "./AudioPlayer";
 import { useStoryAudio } from "@/hooks/useStoryAudio";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import TTSProviderSelector from "./TTSProviderSelector";
+import { TTSFactory } from "@/services/tts/TTSFactory";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface StoryContentProps {
   title: string | null;
@@ -19,7 +22,19 @@ interface StoryContentProps {
 
 const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) => {
   const [showPlayer, setShowPlayer] = useState(false);
-  const { isLoading, audioUrl, error, generateAudio, updatePlaybackStats } = useStoryAudio(storyId);
+  const [showTTSSettings, setShowTTSSettings] = useState(false);
+  const { 
+    isLoading, 
+    audioUrl, 
+    error, 
+    generateAudio, 
+    updatePlaybackStats,
+    changeProvider,
+    currentProvider,
+    voices,
+    currentVoiceId,
+    setCurrentVoiceId
+  } = useStoryAudio(storyId);
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -57,6 +72,26 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     }
   };
 
+  const handleProviderChange = async (provider: string) => {
+    try {
+      await changeProvider(provider as any);
+      toast({
+        title: "Provider Changed",
+        description: `Switched to ${provider} voice service`,
+      });
+    } catch (err) {
+      console.error('Error changing provider:', err);
+      toast({
+        title: "Error",
+        description: "Failed to change provider",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Get available providers from factory
+  const availableProviders = TTSFactory.getRegisteredProviderTypes();
+
   return (
     <>
       {/* Responsive title and listen button layout */}
@@ -64,20 +99,49 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         {title && (
           <h3 className="font-semibold text-lg text-left">{title}</h3>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleListen}
-          disabled={isLoading || !content || content.trim() === ''}
-          className={isMobile ? 'self-start' : 'ml-auto'}
-        >
-          {isLoading ? (
-            <LoadingSpinner className="mr-2 h-4 w-4" />
-          ) : (
-            <Headphones className="mr-2 h-4 w-4" />
-          )}
-          Listen ({estimatedMinutes} min)
-        </Button>
+        
+        <div className={`${isMobile ? 'self-start' : 'ml-auto'} flex space-x-2`}>
+          <Popover open={showTTSSettings} onOpenChange={setShowTTSSettings}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9"
+                title="TTS Settings"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <h4 className="font-medium">Text-to-Speech Settings</h4>
+                <TTSProviderSelector
+                  currentProvider={currentProvider}
+                  providers={availableProviders}
+                  voices={voices}
+                  currentVoiceId={currentVoiceId}
+                  isLoading={isLoading}
+                  onProviderChange={handleProviderChange}
+                  onVoiceChange={setCurrentVoiceId}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleListen}
+            disabled={isLoading || !content || content.trim() === ''}
+          >
+            {isLoading ? (
+              <LoadingSpinner className="mr-2 h-4 w-4" />
+            ) : (
+              <Headphones className="mr-2 h-4 w-4" />
+            )}
+            Listen ({estimatedMinutes} min)
+          </Button>
+        </div>
       </div>
       
       {error && (

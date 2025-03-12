@@ -2,12 +2,30 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTTS } from '@/hooks/useTTS';
+import { TTSFactory } from '@/services/tts/TTSFactory';
+
+// Initialize the TTS Factory with ElevenLabs as the default provider
+const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
+
+// Ensure ElevenLabs provider is registered
+if (!TTSFactory.getProvider('elevenlabs')) {
+  TTSFactory.createProvider('elevenlabs');
+  TTSFactory.setActiveProvider('elevenlabs');
+}
 
 export const useStoryAudio = (storyId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Use our new TTS hook
+  const tts = useTTS({
+    defaultProvider: 'elevenlabs',
+    defaultVoiceId,
+    onError: (err) => console.error('TTS error:', err)
+  });
 
   const generateAudio = useCallback(async () => {
     setIsLoading(true);
@@ -16,45 +34,15 @@ export const useStoryAudio = (storyId: string) => {
     try {
       console.log('Requesting audio for story:', storyId);
       
-      const response = await supabase.functions.invoke('story-tts', {
-        body: { storyId }
-      });
-
-      console.log('Full response from edge function:', response);
+      // Use the TTS abstraction layer to generate audio
+      const generatedUrl = await tts.generateAudio('', {}, storyId);
       
-      const { data, error: invokeError } = response;
-
-      if (invokeError) {
-        console.error('Function invocation error:', invokeError);
-        throw new Error(`Function invocation error: ${invokeError.message}`);
+      if (generatedUrl) {
+        setAudioUrl(generatedUrl);
+        return generatedUrl;
       }
       
-      if (!data) {
-        throw new Error('No data returned from edge function');
-      }
-
-      console.log('Audio response:', data);
-
-      if (data.error) {
-        // Special handling for quota exceeded error
-        if (data.error.includes('quota exceeded')) {
-          throw new Error('The text-to-speech service is currently unavailable due to quota limits. Please try again later or upgrade your plan.');
-        }
-        throw new Error(data.error);
-      }
-
-      if (data.audioUrl) {
-        setAudioUrl(data.audioUrl);
-        
-        toast({
-          title: "Success",
-          description: "Audio ready for playback",
-        });
-        
-        return data.audioUrl;
-      } else {
-        throw new Error('No audio URL returned from edge function');
-      }
+      return null;
     } catch (err: any) {
       console.error('Error with audio:', err);
       const errorMessage = err.message || 'An unknown error occurred';
@@ -68,7 +56,7 @@ export const useStoryAudio = (storyId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [storyId, toast]);
+  }, [storyId, toast, tts]);
 
   useEffect(() => {
     const fetchExistingAudio = async () => {
@@ -150,5 +138,11 @@ export const useStoryAudio = (storyId: string) => {
     error,
     generateAudio,
     updatePlaybackStats,
+    // Add provider-related functionality
+    changeProvider: tts.changeProvider,
+    currentProvider: tts.currentProvider,
+    voices: tts.voices,
+    currentVoiceId: tts.currentVoiceId,
+    setCurrentVoiceId: tts.setCurrentVoiceId,
   };
 };
