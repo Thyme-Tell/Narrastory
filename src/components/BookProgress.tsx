@@ -133,27 +133,27 @@ export function BookProgress({ profileId }: { profileId: string }) {
             />
           </div>
           
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={handlePreviewBook}
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            Preview Book
-          </Button>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              variant="secondary"
+              onClick={handlePreviewBook}
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              Preview Book
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={handleOpenCoverEditor}
+            >
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit Cover
+            </Button>
+          </div>
 
           <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleOpenCoverEditor}
-          >
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit Cover
-          </Button>
-
-          <Button
             variant="secondary"
-            className="w-full relative"
+            className="w-full relative bg-[#F1F1F1] hover:bg-[#E5E5E5] text-gray-500"
             disabled
           >
             <div className="absolute -top-3 right-0 bg-[#AF4623] text-white text-xs px-2 py-0.5 rounded-full">
