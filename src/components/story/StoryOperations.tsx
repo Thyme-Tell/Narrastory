@@ -1,3 +1,4 @@
+
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -99,6 +100,7 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
   };
 
   const handleShare = async (story: { share_token: string | null; title: string | null }) => {
+    // Generate a share token if one doesn't exist
     if (!story.share_token) {
       const { data, error } = await supabase
         .from("stories")
@@ -119,27 +121,8 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
       onUpdate();
     }
 
-    const shareUrl = `${window.location.origin}/stories/${story.share_token}`;
-
-    if (isMobile && navigator.share) {
-      try {
-        await navigator.share({
-          title: story.title || "My Story",
-          text: "Check out my story on Narra",
-          url: shareUrl,
-        });
-        toast({
-          title: "Success",
-          description: "Story shared successfully",
-        });
-        return true;
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          return false;
-        }
-      }
-    }
-    
+    // On mobile devices, we prefer to use the native share dialog
+    // but we'll let the ShareDialog component handle this now
     return false;
   };
 
