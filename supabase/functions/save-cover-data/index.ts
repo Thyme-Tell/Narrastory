@@ -30,6 +30,14 @@ serve(async (req) => {
       );
     }
     
+    console.log('Received cover data for saving:', JSON.stringify(coverData, null, 2));
+    
+    // Explicitly check for backgroundImage to ensure it's included in the save
+    if (!('backgroundImage' in coverData)) {
+      console.log('Adding explicit null backgroundImage property');
+      coverData.backgroundImage = null;
+    }
+    
     // Create a Supabase client with the service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -53,6 +61,7 @@ serve(async (req) => {
     }
     
     console.log('About to upsert cover data for profile:', profileId);
+    console.log('Cover data to save:', JSON.stringify(coverData, null, 2));
     
     // Use upsert to handle both insert and update cases
     const { data, error } = await supabase
@@ -81,7 +90,7 @@ serve(async (req) => {
       console.error('Error verifying saved data:', fetchError);
       // Continue anyway since we did save successfully
     } else {
-      console.log('Cover data saved and verified:', !!savedData);
+      console.log('Cover data saved and verified:', JSON.stringify(savedData?.cover_data, null, 2));
     }
     
     return new Response(

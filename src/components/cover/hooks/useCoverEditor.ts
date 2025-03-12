@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -75,8 +74,8 @@ export function useCoverEditor(
   const handleSave = () => {
     const dataToSave = { ...coverData };
     
-    // Always use the remote URL for saving to ensure persistence
-    dataToSave.backgroundImage = remoteImageUrl || undefined;
+    // Always use the remote URL for saving
+    dataToSave.backgroundImage = remoteImageUrl;
     
     console.log('Saving cover with data:', dataToSave);
     onSave(dataToSave);
@@ -117,7 +116,7 @@ export function useCoverEditor(
     setRemoteImageUrl(null);
     setCoverData({
       ...coverData,
-      backgroundImage: undefined,
+      backgroundImage: null,
     });
   };
 
@@ -174,7 +173,7 @@ export function useCoverEditor(
       const objectUrl = URL.createObjectURL(file);
       setLocalImageUrl(objectUrl);
       
-      // Set the local image for UI preview
+      // Set the local image for UI preview only
       setCoverData(prev => ({
         ...prev,
         backgroundImage: objectUrl,
@@ -213,11 +212,8 @@ export function useCoverEditor(
       // Store the remote URL for saving later
       setRemoteImageUrl(data.publicUrl);
       
-      // Update the preview with the remote URL to ensure consistency
-      setCoverData(prev => ({
-        ...prev,
-        backgroundImage: data.publicUrl
-      }));
+      // Keep the local preview with blob URL for UI, but store the remote URL for saving
+      // Do NOT update the coverData.backgroundImage here as it would replace our local preview
       
       toast({
         title: "Image uploaded",
