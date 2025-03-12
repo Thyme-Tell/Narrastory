@@ -30,7 +30,7 @@ const BookPreviewControls = ({
         size="icon" 
         onClick={goToPrevPage}
         disabled={currentPage === 0}
-        className={`${buttonSize} rounded-full bg-background/90 backdrop-blur-sm shadow-md hover:bg-background/95 pointer-events-auto ${marginClass} transition-all duration-200`}
+        className={`${buttonSize} rounded-full bg-[#00000033] backdrop-blur-sm shadow-md hover:bg-[#00000055] pointer-events-auto ${marginClass} transition-all duration-200`}
       >
         <ChevronLeft className={`${iconSize} text-primary`} />
         <span className="sr-only">Previous page</span>
@@ -41,7 +41,7 @@ const BookPreviewControls = ({
         size="icon" 
         onClick={goToNextPage}
         disabled={currentPage === totalPageCount - 1}
-        className={`${buttonSize} rounded-full bg-background/90 backdrop-blur-sm shadow-md hover:bg-background/95 pointer-events-auto ${marginClass} transition-all duration-200`}
+        className={`${buttonSize} rounded-full bg-[#00000033] backdrop-blur-sm shadow-md hover:bg-[#00000055] pointer-events-auto ${marginClass} transition-all duration-200`}
       >
         <ChevronRight className={`${iconSize} text-primary`} />
         <span className="sr-only">Next page</span>
