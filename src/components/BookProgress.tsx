@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCoverData } from "@/hooks/useCoverData";
 import { calculateTotalPages } from "@/utils/bookPagination";
 import { Story } from "@/types/supabase";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Pencil } from "lucide-react";
 import BookProgressHeader from "./book-progress/BookProgressHeader";
 import BookCoverPreview from "./book-progress/BookCoverPreview";
@@ -16,7 +15,6 @@ import { Button } from "./ui/button";
 export function BookProgress({ profileId }: { profileId: string }) {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const isMobile = useIsMobile();
   
   const { 
     coverData, 
@@ -94,29 +92,31 @@ export function BookProgress({ profileId }: { profileId: string }) {
 
   return (
     <div className="mb-8">
-      <div className="max-w-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <h1 className="text-2xl font-bold">Wildflowers & Wonde</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleOpenCoverEditor}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="mb-4">
-          <p className="text-base text-muted-foreground">by {profile?.first_name} {profile?.last_name}</p>
-          <p className="text-sm text-muted-foreground">A Narra Story Book</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <h1 className="text-2xl font-bold">{coverData.titleText || "My Stories"}</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleOpenCoverEditor}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="mb-4">
+            <p className="text-base text-muted-foreground">by {profile?.first_name} {profile?.last_name}</p>
+            <p className="text-sm text-muted-foreground">A Narra Story Book</p>
+          </div>
 
-        <div className="bg-muted/30 rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 rounded-full bg-[#155B4A]" />
-            <span>{currentPageCount} pages</span>
-            <span className="text-muted-foreground">(Minimum: 32 pages)</span>
+          <div className="bg-muted/30 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 rounded-full bg-[#155B4A]" />
+              <span>{currentPageCount} pages</span>
+              <span className="text-muted-foreground">(Minimum: 32 pages)</span>
+            </div>
           </div>
         </div>
 
