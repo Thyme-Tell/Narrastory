@@ -10,12 +10,12 @@ interface BookCoverPreviewProps {
 
 const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
   const isMobile = useIsMobile();
-  // Reduce width by 50%
-  const previewWidth = isMobile ? "25vw" : "150px";
-  const maxWidth = isMobile ? "min(25vw, 110px)" : "150px";
+  // Reduce width by 50% and ensure proper sizing on mobile
+  const previewWidth = isMobile ? "110px" : "150px"; // Fixed width for mobile instead of vw
+  const maxWidth = previewWidth; // Use same fixed width
   
   // Calculate appropriate dimensions with 5:8 aspect ratio
-  const width = isMobile ? 125 : 150;
+  const width = isMobile ? 110 : 150;
   const height = Math.round(width * (8/5)); // Exact 5:8 aspect ratio
   const scale = 2; // Keep the scale factor for high resolution
   
@@ -28,8 +28,8 @@ const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
   }
 
   return (
-    <div style={{ width: previewWidth, maxWidth }} className="mx-auto book-cover-container">
-      <div className="overflow-hidden rounded-lg relative book-cover aspect-[5/8]">
+    <div style={{ width: previewWidth }} className="mx-auto book-cover-container">
+      <div className="w-full overflow-hidden rounded-lg relative book-cover aspect-[5/8]">
         {/* Left-side gradient */}
         <div className="absolute left-0 top-0 w-[10px] h-full bg-gradient-to-r from-gray-400/40 to-transparent z-10"></div>
         
