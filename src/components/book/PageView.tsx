@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { StoryMediaItem } from "@/types/media";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronsDown } from "lucide-react";
 import { getPageContent } from "@/utils/bookPagination";
 
 interface PageViewProps {
@@ -182,9 +183,9 @@ const PageView = ({
       
       {showScrollIndicator && (
         <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-in pointer-events-none">
-          <div className="bg-gradient-to-r from-[#fdfcfb] to-[#e2d1c3] p-4 rounded-lg shadow-lg flex flex-col items-center">
-            <span className="text-[#A33D29] text-sm font-serif mb-1">Scroll down to read more</span>
-            <ChevronDown className="h-5 w-5 text-[#A33D29]" />
+          <div className="bg-white py-4 px-8 rounded-full shadow-lg flex items-center space-x-2">
+            <span className="text-[#A33D29] text-lg font-serif">Scroll down to read more</span>
+            <ChevronsDown className="h-6 w-6 text-[#A33D29]" />
           </div>
         </div>
       )}
