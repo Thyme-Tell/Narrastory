@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,10 +17,10 @@ const BookPreviewControls = ({
   goToPrevPage,
   isMobile = false,
 }: BookPreviewControlsProps) => {
-  // Increased button and icon sizes for better visibility
-  const buttonSize = isMobile ? "h-12 w-12" : "h-16 w-16";
+  // Slightly smaller button sizes but keep icon sizes the same for visibility
+  const buttonSize = isMobile ? "h-10 w-10" : "h-14 w-14";
   const iconSize = isMobile ? "h-8 w-8" : "h-10 w-10";
-  const marginClass = isMobile ? "mx-3" : "mx-4";
+  const marginClass = isMobile ? "mx-5" : "mx-8"; // Increased horizontal spacing
 
   return (
     <div className="absolute inset-0 flex justify-between items-center pointer-events-none">
