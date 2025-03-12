@@ -2,7 +2,6 @@
 import React from "react";
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
-import { calculateStoryPages } from "@/utils/bookPagination";
 
 interface TableOfContentsPageProps {
   stories: Story[];
@@ -21,11 +20,14 @@ const TableOfContentsPage: React.FC<TableOfContentsPageProps> = ({
   return (
     <div className="book-page w-full h-full overflow-y-auto">
       <div className="book-content p-6">
-        <h1 className="text-center text-xl font-semibold mb-6">Table of Contents</h1>
+        <h1 className="text-center text-xl font-semibold mb-6">Your Story List</h1>
         
         {/* Stories entries - simplified to only show title and page number */}
         {stories.map((story, index) => {
           const startPage = storyPages[index];
+          
+          // Skip if startPage is undefined
+          if (typeof startPage !== 'number') return null;
           
           return (
             <div key={story.id} className="mb-4">

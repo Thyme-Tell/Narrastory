@@ -1,9 +1,19 @@
+
 import { useState, useEffect } from "react";
 import { Story } from "@/types/supabase";
 import { calculateStoryPages } from "@/utils/bookPagination";
 import { StoryMediaItem } from "@/types/media";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+type StoryInfo = {
+  story?: Story;
+  pageWithinStory?: number;
+  totalPagesInStory?: number;
+  isMediaPage?: boolean;
+  mediaItem?: StoryMediaItem;
+  isTableOfContentsPage?: boolean;
+} | null;
 
 export const useBookNavigation = (stories: Story[] | undefined, open: boolean) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -91,9 +101,13 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   };
 
   // Find which story is displayed on the current page
-  const getCurrentStory = () => {
+  const getCurrentStory = (): StoryInfo => {
     if (currentPage === 0) {
-      return { isTableOfContentsPage: true }; // TOC page is now the first page
+      return { isTableOfContentsPage: true }; // Cover page
+    }
+    
+    if (currentPage === 1) {
+      return { isTableOfContentsPage: true }; // Table of Contents page
     }
     
     if (!stories || stories.length === 0) {

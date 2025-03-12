@@ -21,9 +21,9 @@ interface BookPreviewContentProps {
   goToNextPage: () => void;
   goToPrevPage: () => void;
   currentStoryInfo: {
-    story: Story;
-    pageWithinStory: number;
-    totalPagesInStory: number;
+    story?: Story;
+    pageWithinStory?: number;
+    totalPagesInStory?: number;
     isMediaPage?: boolean;
     mediaItem?: StoryMediaItem;
     isTableOfContentsPage?: boolean;
@@ -150,8 +150,8 @@ const BookPreviewContent = ({
             currentStoryInfo && currentStoryInfo.story && (
               <PageView 
                 story={currentStoryInfo.story} 
-                pageNumber={currentStoryInfo.pageWithinStory}
-                totalPagesInStory={currentStoryInfo.totalPagesInStory}
+                pageNumber={currentStoryInfo.pageWithinStory || 1}
+                totalPagesInStory={currentStoryInfo.totalPagesInStory || 1}
                 isMediaPage={currentStoryInfo.isMediaPage}
                 mediaItem={currentStoryInfo.mediaItem}
                 isMobile={isMobile}

@@ -1,3 +1,4 @@
+
 import React from "react";
 import BookPreviewContent from "./BookPreviewContent";
 import { CoverData } from "@/components/cover/CoverTypes";
