@@ -32,6 +32,11 @@ const PageView = ({
   const [hasScrolled, setHasScrolled] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
+  // Reset hasScrolled state when the page changes
+  useEffect(() => {
+    setHasScrolled(false);
+  }, [globalPageNumber, story, pageNumber]);
+  
   useEffect(() => {
     const checkScrollable = () => {
       if (contentRef.current) {
