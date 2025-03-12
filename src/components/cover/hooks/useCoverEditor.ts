@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -29,8 +30,8 @@ export function useCoverEditor(
     }
   );
   const [isUploading, setIsUploading] = useState(false);
-  const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
-  const [remoteImageUrl, setRemoteImageUrl] = useState<string | null>(null);
+  const [localImageUrl, setLocalImageUrl] = useState<string | null>(initialCoverData?.backgroundImage || null);
+  const [remoteImageUrl, setRemoteImageUrl] = useState<string | null>(initialCoverData?.backgroundImage || null);
   const { toast } = useToast();
 
   const { data: profile } = useQuery({
@@ -74,13 +75,10 @@ export function useCoverEditor(
   const handleSave = () => {
     const dataToSave = { ...coverData };
     
-    if (remoteImageUrl) {
-      console.log('Saving with remote image URL:', remoteImageUrl);
-      dataToSave.backgroundImage = remoteImageUrl;
-    } else {
-      dataToSave.backgroundImage = undefined;
-    }
+    // Always use the remote URL for saving to ensure persistence
+    dataToSave.backgroundImage = remoteImageUrl || undefined;
     
+    console.log('Saving cover with data:', dataToSave);
     onSave(dataToSave);
     onClose();
     toast({
@@ -176,6 +174,7 @@ export function useCoverEditor(
       const objectUrl = URL.createObjectURL(file);
       setLocalImageUrl(objectUrl);
       
+      // Set the local image for UI preview
       setCoverData(prev => ({
         ...prev,
         backgroundImage: objectUrl,
@@ -211,7 +210,14 @@ export function useCoverEditor(
         
       console.log('Uploaded image URL:', data.publicUrl);
       
+      // Store the remote URL for saving later
       setRemoteImageUrl(data.publicUrl);
+      
+      // Update the preview with the remote URL to ensure consistency
+      setCoverData(prev => ({
+        ...prev,
+        backgroundImage: data.publicUrl
+      }));
       
       toast({
         title: "Image uploaded",
