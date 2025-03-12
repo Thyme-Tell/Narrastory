@@ -1,4 +1,3 @@
-
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { Story } from "@/types/supabase";
@@ -45,8 +44,12 @@ export const generateBookPDF = async (
   // Add cover page
   await addCoverPage(pdf, coverData, authorName);
 
+  // Add table of contents page
+  pdf.addPage();
+  addTableOfContentsPage(pdf, stories, coverData?.titleText || "My Book");
+
   // Add content pages
-  let pageNumber = 1;
+  let pageNumber = 2; // Start after cover and TOC
   const bookTitle = coverData?.titleText || "My Book";
 
   // Process each story
@@ -78,6 +81,113 @@ export const generateBookPDF = async (
 
   // Return the PDF as base64 data URL
   return pdf.output('datauristring');
+};
+
+/**
+ * Adds a table of contents page to the PDF
+ */
+const addTableOfContentsPage = (pdf: jsPDF, stories: Story[], bookTitle: string): void => {
+  // Set page background
+  pdf.setFillColor("#f5f5f0");
+  pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
+  
+  // Add header
+  addHeader(pdf, bookTitle);
+  
+  // Add ToC title
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(TITLE_FONT_SIZE);
+  pdf.setTextColor("#000000");
+  pdf.text("Table of Contents", PAGE_WIDTH_POINTS / 2, MARGIN_POINTS * 2, { align: "center" });
+  
+  // Set up for content entries
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(BODY_FONT_SIZE);
+  const lineHeight = BODY_FONT_SIZE * LINE_HEIGHT_FACTOR;
+  let yPosition = MARGIN_POINTS * 3;
+  
+  // Add entries
+  // First add cover
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Cover", MARGIN_POINTS, yPosition);
+  pdf.text("1", PAGE_WIDTH_POINTS - MARGIN_POINTS, yPosition, { align: "right" });
+  yPosition += lineHeight * 1.5;
+  
+  // Add Table of Contents entry
+  pdf.text("Table of Contents", MARGIN_POINTS, yPosition);
+  pdf.text("2", PAGE_WIDTH_POINTS - MARGIN_POINTS, yPosition, { align: "right" });
+  yPosition += lineHeight * 2; // Extra space after TOC entry
+  
+  // Add story entries
+  let currentPage = 3; // Cover + TOC + first story title page
+  
+  for (let i = 0; i < stories.length; i++) {
+    const story = stories[i];
+    
+    // Add story title
+    pdf.setFont("helvetica", "bold");
+    pdf.text(story.title || "Untitled Story", MARGIN_POINTS, yPosition);
+    pdf.text(currentPage.toString(), PAGE_WIDTH_POINTS - MARGIN_POINTS, yPosition, { align: "right" });
+    yPosition += lineHeight * 1.5;
+    currentPage++; // Move past title page
+    
+    // Estimate story pages (simplified for TOC)
+    const contentLength = story.content.length;
+    const estimatedPages = Math.max(1, Math.ceil(contentLength / 2000)); // Rough estimate
+    
+    // Add page ranges for story content
+    pdf.setFont("helvetica", "italic");
+    const pageRange = `${currentPage}${estimatedPages > 1 ? `-${currentPage + estimatedPages - 1}` : ""}`;
+    
+    // Indent this entry
+    pdf.text(`Content`, MARGIN_POINTS + 20, yPosition);
+    pdf.text(pageRange, PAGE_WIDTH_POINTS - MARGIN_POINTS, yPosition, { align: "right" });
+    yPosition += lineHeight;
+    
+    currentPage += estimatedPages;
+    
+    // Add line for story media if any
+    const mediaItems = storyMediaMap.get(story.id) || [];
+    if (mediaItems.length > 0) {
+      pdf.text(`Media (${mediaItems.length})`, MARGIN_POINTS + 20, yPosition);
+      const mediaRange = `${currentPage}${mediaItems.length > 1 ? `-${currentPage + mediaItems.length - 1}` : ""}`;
+      pdf.text(mediaRange, PAGE_WIDTH_POINTS - MARGIN_POINTS, yPosition, { align: "right" });
+      yPosition += lineHeight;
+      
+      currentPage += mediaItems.length;
+    }
+    
+    // Add extra space between stories
+    yPosition += lineHeight * 0.5;
+    
+    // Check if we need a new page for the TOC
+    if (yPosition > PAGE_HEIGHT_POINTS - MARGIN_POINTS * 2 && i < stories.length - 1) {
+      pdf.addPage();
+      
+      // Set page background
+      pdf.setFillColor("#f5f5f0");
+      pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
+      
+      // Add header
+      addHeader(pdf, bookTitle);
+      
+      // Reset y position
+      yPosition = MARGIN_POINTS * 2;
+      
+      // Add continuation indicator
+      pdf.setFont("helvetica", "italic");
+      pdf.setFontSize(BODY_FONT_SIZE - 2);
+      pdf.text("(Table of Contents continued)", PAGE_WIDTH_POINTS / 2, yPosition, { align: "center" });
+      yPosition += lineHeight * 2;
+      
+      // Reset font for entries
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(BODY_FONT_SIZE);
+    }
+  }
+  
+  // Add page number at bottom
+  addFooter(pdf, 2); // TOC is page 2
 };
 
 /**
