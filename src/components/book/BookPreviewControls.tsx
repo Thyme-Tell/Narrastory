@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,10 +21,10 @@ const BookPreviewControls = ({
   // Slightly smaller button sizes but keep icon sizes the same for visibility
   const buttonSize = isMobile ? "h-10 w-10" : "h-14 w-14";
   const iconSize = isMobile ? "h-8 w-8" : "h-10 w-10";
-  const marginClass = isMobile ? "mx-5" : "mx-8"; // Increased horizontal spacing
+  const marginClass = isMobile ? "mx-2" : "mx-2"; // Move buttons to the edges
 
   return (
-    <div className="absolute inset-0 flex justify-between items-center pointer-events-none">
+    <div className="absolute inset-0 flex justify-between items-center pointer-events-none px-2">
       <Button 
         variant="ghost" 
         size="icon" 
