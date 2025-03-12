@@ -1,4 +1,3 @@
-
 import React from "react";
 import BookPreviewContent from "./BookPreviewContent";
 import { CoverData } from "@/components/cover/CoverTypes";
@@ -17,9 +16,9 @@ interface BookPreviewContainerProps {
   goToNextPage: () => void;
   goToPrevPage: () => void;
   currentStoryInfo: {
-    story: Story;
-    pageWithinStory: number;
-    totalPagesInStory: number;
+    story?: Story;
+    pageWithinStory?: number;
+    totalPagesInStory?: number;
     isMediaPage?: boolean;
     mediaItem?: StoryMediaItem;
     isTableOfContentsPage?: boolean;

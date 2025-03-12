@@ -76,7 +76,7 @@ const BookPreviewLayout = ({
       />
 
       <div className="flex-1 w-full flex overflow-hidden">
-        {/* TOC Sidebar */}
+        {/* TOC Sidebar - Now with solid white background */}
         {showToc && (
           <div className={`${isMobile ? "w-56 toc-mobile" : "w-72"} h-full bg-white p-4 overflow-y-auto animate-slide-in-right border-r border-gray-300`}>
             <TableOfContents 

@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Story } from "@/types/supabase";
-import { calculateStoryPages, calculateTotalPages, mapPageToStory } from "@/utils/bookPagination";
+import { calculateStoryPages } from "@/utils/bookPagination";
 import { StoryMediaItem } from "@/types/media";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +11,7 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   const [showToc, setShowToc] = useState(false);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [storyPages, setStoryPages] = useState<number[]>([]);
-  const [totalPageCount, setTotalPageCount] = useState(1); // Cover page by default
+  const [totalPageCount, setTotalPageCount] = useState(1); // TOC page by default
   const [storyMediaMap, setStoryMediaMap] = useState<Map<string, StoryMediaItem[]>>(new Map());
 
   // Fetch media items for all stories
@@ -57,11 +56,11 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   useEffect(() => {
     if (!stories || stories.length === 0) {
       setStoryPages([]);
-      setTotalPageCount(2); // Cover + TOC
+      setTotalPageCount(1); // Just TOC page
       return;
     }
 
-    let pageCount = 2; // Start with cover + TOC page
+    let pageCount = 1; // Start with TOC page only
     const pageStartIndices: number[] = [];
 
     // Calculate starting page for each story
@@ -94,18 +93,14 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
   // Find which story is displayed on the current page
   const getCurrentStory = () => {
     if (currentPage === 0) {
-      return null; // Cover page
-    }
-    
-    if (currentPage === 1) {
-      return { isTableOfContentsPage: true }; // TOC page
+      return { isTableOfContentsPage: true }; // TOC page is now the first page
     }
     
     if (!stories || stories.length === 0) {
       return null;
     }
     
-    let currentPageCount = 2; // Start after cover and TOC
+    let currentPageCount = 1; // Start after TOC
     
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
