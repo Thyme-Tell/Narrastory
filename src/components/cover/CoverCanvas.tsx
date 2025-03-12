@@ -1,270 +1,191 @@
 
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { CoverData } from "./CoverTypes";
 
 interface CoverCanvasProps {
   coverData: CoverData;
-  width: number;
-  height: number;
-  className?: string; // Add className as an optional prop
+  width?: number;
+  height?: number;
+  scale?: number;
+  className?: string;
 }
 
-const CoverCanvas = ({ coverData, width, height, className = "" }: CoverCanvasProps) => {
+const CoverCanvas = ({ 
+  coverData,
+  width = 400,
+  height = 600,
+  scale = 1,
+  className = ""
+}: CoverCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageObj, setImageObj] = useState<HTMLImageElement | null>(null);
-  
-  // Base font sizes as percentage of canvas width
-  const baseTitleSize = width * 0.08;  // 8% of width
-  const baseAuthorSize = width * 0.045; // 4.5% of width
 
-  // Effect to preload image when backgroundImage changes
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (coverData.backgroundImage) {
-      setImageLoaded(false);
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      
-      img.onload = () => {
-        if (isMounted) {
-          setImageObj(img);
-          setImageLoaded(true);
-        }
-      };
-      
-      img.onerror = (e) => {
-        console.error("Error loading background image", e);
-        if (isMounted) {
-          setImageLoaded(false);
-          setImageObj(null);
-        }
-      };
-      
-      img.src = coverData.backgroundImage;
-    } else {
-      setImageObj(null);
-      setImageLoaded(false);
-    }
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [coverData.backgroundImage]);
-
-  // Effect to render canvas when coverData or image loading state changes
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Set canvas dimensions
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Apply background color
+    
+    // Draw background color
     if (coverData.backgroundColor) {
       ctx.fillStyle = coverData.backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-
-    // Draw background image if available and loaded
-    if (coverData.backgroundImage && imageObj && imageLoaded) {
-      const settings = coverData.backgroundSettings || {
-        position: 'center',
-        scale: 1,
-        opacity: 1,
-        blur: 0
+    
+    // Draw background image if available
+    if (coverData.backgroundImage) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = coverData.backgroundImage;
+      
+      img.onload = () => {
+        // Center and cover the canvas with the image
+        const imgRatio = img.width / img.height;
+        const canvasRatio = canvas.width / canvas.height;
+        
+        let drawWidth, drawHeight, x, y;
+        
+        if (imgRatio > canvasRatio) {
+          drawHeight = canvas.height;
+          drawWidth = canvas.height * imgRatio;
+          x = (canvas.width - drawWidth) / 2;
+          y = 0;
+        } else {
+          drawWidth = canvas.width;
+          drawHeight = canvas.width / imgRatio;
+          x = 0;
+          y = (canvas.height - drawHeight) / 2;
+        }
+        
+        ctx.drawImage(img, x, y, drawWidth, drawHeight);
+        drawTexts();
       };
-      
-      // Save current state
-      ctx.save();
-      
-      // Apply opacity
-      ctx.globalAlpha = settings.opacity;
-      
-      // Calculate position and dimensions
-      let sx = 0, sy = 0, sWidth = imageObj.width, sHeight = imageObj.height;
-      let dx = 0, dy = 0, dWidth = canvas.width, dHeight = canvas.height;
-      
-      if (settings.position === 'center') {
-        // Center the image
-        const aspectRatio = imageObj.width / imageObj.height;
-        const canvasAspectRatio = canvas.width / canvas.height;
-        
-        if (aspectRatio > canvasAspectRatio) {
-          // Image is wider than canvas (relative to their heights)
-          dHeight = canvas.width / aspectRatio;
-          dy = (canvas.height - dHeight) / 2;
-        } else {
-          // Image is taller than canvas (relative to their widths)
-          dWidth = canvas.height * aspectRatio;
-          dx = (canvas.width - dWidth) / 2;
-        }
-        
-        // Apply scale
-        const scaledWidth = dWidth * settings.scale;
-        const scaledHeight = dHeight * settings.scale;
-        dx = dx - (scaledWidth - dWidth) / 2;
-        dy = dy - (scaledHeight - dHeight) / 2;
-        dWidth = scaledWidth;
-        dHeight = scaledHeight;
-      } else if (settings.position === 'fill') {
-        // Fill: cover the entire canvas, maintaining aspect ratio
-        const aspectRatio = imageObj.width / imageObj.height;
-        const canvasAspectRatio = canvas.width / canvas.height;
-        
-        if (aspectRatio > canvasAspectRatio) {
-          // Image is wider, crop the sides
-          sWidth = (imageObj.height * canvasAspectRatio);
-          sx = (imageObj.width - sWidth) / 2;
-        } else {
-          // Image is taller, crop top and bottom
-          sHeight = (imageObj.width / canvasAspectRatio);
-          sy = (imageObj.height - sHeight) / 2;
-        }
-        
-        // Apply scale by adjusting source rectangle
-        const scaleCenterX = sx + sWidth / 2;
-        const scaleCenterY = sy + sHeight / 2;
-        const scaledSWidth = sWidth / settings.scale;
-        const scaledSHeight = sHeight / settings.scale;
-        sx = scaleCenterX - scaledSWidth / 2;
-        sy = scaleCenterY - scaledSHeight / 2;
-        sWidth = scaledSWidth;
-        sHeight = scaledSHeight;
-      } else if (settings.position === 'fit') {
-        // Fit: contain the entire image within the canvas
-        const aspectRatio = imageObj.width / imageObj.height;
-        const canvasAspectRatio = canvas.width / canvas.height;
-        
-        if (aspectRatio > canvasAspectRatio) {
-          // Image is wider, fit to width
-          dWidth = canvas.width;
-          dHeight = canvas.width / aspectRatio;
-          dy = (canvas.height - dHeight) / 2;
-        } else {
-          // Image is taller, fit to height
-          dHeight = canvas.height;
-          dWidth = canvas.height * aspectRatio;
-          dx = (canvas.width - dWidth) / 2;
-        }
-        
-        // Apply scale
-        const scaledWidth = dWidth * settings.scale;
-        const scaledHeight = dHeight * settings.scale;
-        dx = dx - (scaledWidth - dWidth) / 2;
-        dy = dy - (scaledHeight - dHeight) / 2;
-        dWidth = scaledWidth;
-        dHeight = scaledHeight;
-      } else if (settings.position === 'stretch') {
-        // Stretch: stretch the image to fill the canvas
-        // No adjustments needed, full canvas dimensions used
-        
-        // Scale is applied to source dimensions (inverse relationship)
-        const scaleCenterX = sx + sWidth / 2;
-        const scaleCenterY = sy + sHeight / 2;
-        const scaledSWidth = sWidth / settings.scale;
-        const scaledSHeight = sHeight / settings.scale;
-        sx = scaleCenterX - scaledSWidth / 2;
-        sy = scaleCenterY - scaledSHeight / 2;
-        sWidth = scaledSWidth;
-        sHeight = scaledSHeight;
-      }
-      
-      // Apply blur if needed
-      if (settings.blur > 0) {
-        ctx.filter = `blur(${settings.blur}px)`;
-      }
-      
-      // Draw the image
-      ctx.drawImage(imageObj, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-      
-      // Reset context state
-      ctx.filter = 'none';
-      ctx.globalAlpha = 1;
-      ctx.restore();
+    } else {
+      drawTexts();
     }
     
-    // Draw text content
-    drawText();
-
-    function drawText() {
-      // Calculate font sizes based on base size and user's custom size
-      // User's custom size acts as a multiplier to the responsive base size
-      const titleFontSize = baseTitleSize * (coverData.titleSize ? coverData.titleSize / 21 : 1);
-      const authorFontSize = baseAuthorSize * (coverData.authorSize ? coverData.authorSize / 14 : 1);
-      
-      // Determine text positions based on layout
-      const layout = coverData.layout || 'centered';
-      let titleY, authorY;
-      
-      if (layout === 'top') {
-        titleY = height * 0.2; // 20% from top
-        authorY = height * 0.3; // 30% from top
-      } else if (layout === 'bottom') {
-        titleY = height * 0.7; // 70% from top
-        authorY = height * 0.8; // 80% from top
-      } else { // centered
-        titleY = height * 0.45; // 45% from top
-        authorY = height * 0.55; // 55% from top
-      }
-
-      // Draw title text
+    function drawTexts() {
       if (coverData.titleText) {
-        ctx.font = `bold ${titleFontSize}px 'Georgia', serif`;
-        ctx.fillStyle = coverData.titleColor || "#000000";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        // Calculate base font size as a percentage of canvas width
+        const baseTitleSize = Math.floor(canvas.width * 0.08); // 8% of canvas width
         
-        // Handle multi-line titles
-        const words = coverData.titleText.split(' ');
-        let line = '';
-        let lines = [];
-        const maxWidth = canvas.width * 0.8; // 80% of canvas width
+        // Apply the user's size preference as a multiplier (default is 1.0)
+        // titleSize ranges from 18-24, so we map it to 0.85-1.15 multiplier
+        const titleSizeMultiplier = coverData.titleSize ? 
+          (0.85 + ((coverData.titleSize - 18) / (24 - 18)) * 0.3) : 1.0;
         
-        for (let i = 0; i < words.length; i++) {
-          const testLine = line + words[i] + ' ';
-          const metrics = ctx.measureText(testLine);
-          
-          if (metrics.width > maxWidth && i > 0) {
-            lines.push(line);
-            line = words[i] + ' ';
-          } else {
-            line = testLine;
-          }
+        // Calculate final title size with user preferences applied
+        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier * scale);
+
+        // Draw title
+        ctx.font = `bold ${finalTitleSize}px 'Rosemartin', serif`;
+        ctx.fillStyle = coverData.titleColor || '#303441';
+        ctx.textAlign = 'center';
+        
+        let titleY;
+        if (coverData.layout === 'top') {
+          titleY = canvas.height * 0.2;
+        } else if (coverData.layout === 'bottom') {
+          titleY = canvas.height * 0.65;
+        } else { // centered
+          titleY = canvas.height * 0.45;
         }
-        lines.push(line);
         
-        // Adjust starting position for multi-line text
-        let startY = titleY - ((lines.length - 1) * titleFontSize * 0.6); 
-        
-        lines.forEach(line => {
-          ctx.fillText(line.trim(), canvas.width / 2, startY);
-          startY += titleFontSize * 1.2; // Line height
+        // Handle multiline text
+        const titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, finalTitleSize);
+        titleLines.forEach((line, index) => {
+          ctx.fillText(line, canvas.width / 2, titleY + index * (finalTitleSize * 1.2));
         });
       }
-
-      // Draw author text
+      
       if (coverData.authorText) {
-        ctx.font = `${authorFontSize}px 'Georgia', serif`;
-        ctx.fillStyle = coverData.authorColor || "#000000";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        // Calculate base author font size
+        const baseAuthorSize = Math.floor(canvas.width * 0.045); // 4.5% of canvas width
+        
+        // Apply user's size preference (default is 1.0)
+        // authorSize ranges from 12-16, so we map it to 0.9-1.1 multiplier
+        const authorSizeMultiplier = coverData.authorSize ? 
+          (0.9 + ((coverData.authorSize - 12) / (16 - 12)) * 0.2) : 1.0;
+        
+        // Calculate final author size with user preferences applied
+        const finalAuthorSize = Math.floor(baseAuthorSize * authorSizeMultiplier * scale);
+        
+        ctx.font = `${finalAuthorSize}px 'Rosemartin', serif`;
+        ctx.fillStyle = coverData.authorColor || '#303441';
+        ctx.textAlign = 'center';
+        
+        // Get title size for spacing calculation
+        const baseTitleSize = Math.floor(canvas.width * 0.08);
+        const titleSizeMultiplier = coverData.titleSize ? 
+          (0.85 + ((coverData.titleSize - 18) / (24 - 18)) * 0.3) : 1.0;
+        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier * scale);
+        
+        let authorY;
+        if (coverData.layout === 'top') {
+          authorY = canvas.height * 0.3 + ((coverData.titleText ? (finalTitleSize * 1.5) : 0));
+        } else if (coverData.layout === 'bottom') {
+          authorY = canvas.height * 0.75 + ((coverData.titleText ? (finalTitleSize * 1.5) : 0));
+        } else { // centered
+          authorY = canvas.height * 0.55 + ((coverData.titleText ? (finalTitleSize * 1.5) : 0));
+        }
+        
         ctx.fillText(coverData.authorText, canvas.width / 2, authorY);
       }
     }
-  }, [coverData, width, height, baseTitleSize, baseAuthorSize, imageLoaded, imageObj]);
+    
+  }, [coverData, width, height, scale]);
+
+  // Utility function to wrap text for canvas
+  const wrapText = (
+    ctx: CanvasRenderingContext2D, 
+    text: string, 
+    maxWidth: number,
+    fontSize: number
+  ): string[] => {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = ctx.measureText(currentLine + ' ' + word).width;
+      
+      if (width < maxWidth) {
+        currentLine += ' ' + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    
+    lines.push(currentLine);
+    return lines;
+  };
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className={`max-w-full h-auto mx-auto ${className}`.trim()}
-    />
+    <div className="book-cover-container">
+      <canvas
+        ref={canvasRef}
+        className={`shadow-lg rounded-md book-canvas ${className}`}
+        style={{ 
+          width: `${width}px`, 
+          height: `${height}px`,
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: 'contain',
+          aspectRatio: '5/8'
+        }}
+      />
+      <div className="book-spine-overlay"></div>
+      <div className="book-cover-overlay"></div>
+    </div>
   );
 };
 

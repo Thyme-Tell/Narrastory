@@ -15,8 +15,6 @@ interface MobileLayoutProps {
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
   onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
-  onUploadImage: (file: File) => Promise<void>;
-  onBackgroundSettingsChange: (settings: Partial<CoverData['backgroundSettings']>) => void;
 }
 
 const MobileLayout = ({
@@ -30,8 +28,6 @@ const MobileLayout = ({
   onTextColorChange,
   onFontSizeChange,
   onLayoutChange,
-  onUploadImage,
-  onBackgroundSettingsChange,
 }: MobileLayoutProps) => {
   return (
     <div className="flex flex-col h-[100vh] bg-white overflow-hidden">
@@ -53,8 +49,6 @@ const MobileLayout = ({
           onTextColorChange={onTextColorChange}
           onFontSizeChange={onFontSizeChange}
           onLayoutChange={onLayoutChange}
-          onUploadImage={onUploadImage}
-          onBackgroundSettingsChange={onBackgroundSettingsChange}
         />
       </div>
     </div>

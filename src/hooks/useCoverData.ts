@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -130,23 +129,18 @@ export function useCoverData(profileId: string) {
     }
 
     try {
-      console.log('Saving cover data:', JSON.stringify(newCoverData, null, 2));
+      console.log('Saving cover data:', newCoverData);
       
-      // Important: Make a deep copy to avoid modifying the original object
-      const dataToSave = JSON.parse(JSON.stringify(newCoverData));
-      
-      console.log('Data being saved:', JSON.stringify(dataToSave, null, 2));
-      
-      localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(dataToSave));
+      localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(newCoverData));
       localStorage.setItem(`cover_data_saving_${profileId}`, new Date().toISOString());
       
-      setCoverData(dataToSave);
+      setCoverData(newCoverData);
       
       const { data, error } = await supabase.functions.invoke('save-cover-data', {
         method: 'POST',
         body: {
           profileId: profileId,
-          coverData: dataToSave
+          coverData: newCoverData
         },
       });
 

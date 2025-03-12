@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -20,19 +21,12 @@ export function useCoverEditor(
       titleSize: 21,
       authorSize: 14,
       layout: 'centered',
-      backgroundSettings: {
-        position: 'center',
-        scale: 1,
-        opacity: 1,
-        blur: 0
-      }
     }
   );
   const [isUploading, setIsUploading] = useState(false);
-  const [localImageUrl, setLocalImageUrl] = useState<string | null>(initialCoverData?.backgroundImage || null);
-  const [remoteImageUrl, setRemoteImageUrl] = useState<string | null>(initialCoverData?.backgroundImage || null);
   const { toast } = useToast();
 
+  // Fetch profile data to get the author name
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
     queryFn: async () => {
@@ -53,6 +47,7 @@ export function useCoverEditor(
     },
   });
 
+  // Set author name from profile when available
   useEffect(() => {
     if (profile && (!coverData.authorText || coverData.authorText === "")) {
       const authorName = `${profile.first_name} ${profile.last_name}`.trim();
@@ -63,22 +58,8 @@ export function useCoverEditor(
     }
   }, [profile, coverData.authorText]);
 
-  useEffect(() => {
-    return () => {
-      if (localImageUrl && localImageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(localImageUrl);
-      }
-    };
-  }, [localImageUrl]);
-
   const handleSave = () => {
-    const dataToSave = { ...coverData };
-    
-    // Always use the remote URL for saving, this is the persistent URL
-    dataToSave.backgroundImage = remoteImageUrl;
-    
-    console.log('Saving cover with data:', dataToSave);
-    onSave(dataToSave);
+    onSave(coverData);
     onClose();
     toast({
       title: "Cover saved",
@@ -108,15 +89,9 @@ export function useCoverEditor(
   };
 
   const handleRemoveImage = () => {
-    if (localImageUrl && localImageUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(localImageUrl);
-      setLocalImageUrl(null);
-    }
-    
-    setRemoteImageUrl(null);
     setCoverData({
       ...coverData,
-      backgroundImage: null,
+      backgroundImage: undefined,
     });
   };
 
@@ -158,90 +133,6 @@ export function useCoverEditor(
     });
   };
 
-  const handleUploadImage = async (file: File) => {
-    try {
-      setIsUploading(true);
-      
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${profileId}_${Date.now()}.${fileExt}`;
-      const filePath = `${profileId}/${fileName}`;
-      
-      if (localImageUrl && localImageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(localImageUrl);
-      }
-      
-      const objectUrl = URL.createObjectURL(file);
-      setLocalImageUrl(objectUrl);
-      
-      // Upload the file to Supabase storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('book-covers')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error("Error uploading image:", uploadError);
-        toast({
-          variant: "destructive",
-          title: "Upload issue",
-          description: "Failed to upload image. Please try again.",
-        });
-        return;
-      }
-      
-      const { data } = supabase.storage
-        .from('book-covers')
-        .getPublicUrl(filePath);
-        
-      console.log('Got public URL after upload:', data.publicUrl);
-      
-      // Update both remote URL and cover data with the permanent URL
-      setRemoteImageUrl(data.publicUrl);
-      setCoverData(prev => ({
-        ...prev,
-        backgroundImage: data.publicUrl
-      }));
-      
-      // Save the updated cover data immediately
-      onSave({
-        ...coverData,
-        backgroundImage: data.publicUrl
-      });
-      
-      toast({
-        title: "Image uploaded",
-        description: "Background image has been uploaded successfully",
-      });
-      
-    } catch (error) {
-      console.error("Error in handleUploadImage:", error);
-      toast({
-        variant: "destructive",
-        title: "Upload issue",
-        description: "Failed to upload image. Please try again.",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleBackgroundSettingsChange = (settings: Partial<CoverData['backgroundSettings']>) => {
-    setCoverData(prev => ({
-      ...prev,
-      backgroundSettings: {
-        ...prev.backgroundSettings || {
-          position: 'center',
-          scale: 1,
-          opacity: 1,
-          blur: 0
-        },
-        ...settings
-      }
-    }));
-  };
-
   return {
     coverData,
     isUploading,
@@ -251,8 +142,6 @@ export function useCoverEditor(
     handleRemoveImage,
     handleTextChange,
     handleFontSizeChange,
-    handleLayoutChange,
-    handleUploadImage,
-    handleBackgroundSettingsChange
+    handleLayoutChange
   };
 }
