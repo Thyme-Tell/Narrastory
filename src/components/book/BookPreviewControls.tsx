@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BookPreviewControlsProps {
@@ -32,7 +32,7 @@ const BookPreviewControls = ({
         disabled={currentPage === 0}
         className={`${buttonSize} rounded-full bg-background/90 backdrop-blur-sm shadow-md hover:bg-background/95 pointer-events-auto ${marginClass} transition-all duration-200`}
       >
-        <ArrowBigLeft className={`${iconSize} text-primary`} />
+        <ChevronLeft className={`${iconSize} text-primary`} />
         <span className="sr-only">Previous page</span>
       </Button>
       
@@ -43,7 +43,7 @@ const BookPreviewControls = ({
         disabled={currentPage === totalPageCount - 1}
         className={`${buttonSize} rounded-full bg-background/90 backdrop-blur-sm shadow-md hover:bg-background/95 pointer-events-auto ${marginClass} transition-all duration-200`}
       >
-        <ArrowBigRight className={`${iconSize} text-primary`} />
+        <ChevronRight className={`${iconSize} text-primary`} />
         <span className="sr-only">Next page</span>
       </Button>
     </div>
