@@ -1,13 +1,13 @@
 
 import { TTSProvider, TTSProviderConfig } from './TTSProvider';
-import { ElevenLabsProvider } from './providers/ElevenLabsProvider';
-import { AmazonPollyProvider } from './providers/AmazonPollyProvider';
+import { ElevenLabsProvider, ElevenLabsConfig } from './providers/ElevenLabsProvider';
+import { AmazonPollyProvider, AmazonPollyConfig } from './providers/AmazonPollyProvider';
 
 // Add more providers as needed
 export type TTSProviderType = 'elevenlabs' | 'amazon-polly';
 
 /**
- * TTS Factory to create instances of TTS providers
+ * TTS Factory to create provider instances
  */
 export class TTSFactory {
   private static providers: Map<TTSProviderType, TTSProvider> = new Map();
@@ -33,10 +33,20 @@ export class TTSFactory {
 
     switch (type) {
       case 'elevenlabs':
-        provider = new ElevenLabsProvider(config);
+        // Create a properly typed config for ElevenLabs
+        const elevenLabsConfig: ElevenLabsConfig = {
+          apiKey: config?.apiKey || '',
+          ...config
+        };
+        provider = new ElevenLabsProvider(elevenLabsConfig);
         break;
       case 'amazon-polly':
-        provider = new AmazonPollyProvider(config);
+        // Create a properly typed config for Amazon Polly
+        const amazonPollyConfig: AmazonPollyConfig = {
+          region: config?.region || 'us-east-1',
+          ...config
+        };
+        provider = new AmazonPollyProvider(amazonPollyConfig);
         break;
       default:
         throw new Error(`Unsupported TTS provider type: ${type}`);
