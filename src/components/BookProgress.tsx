@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoverData } from "@/hooks/useCoverData";
 import { calculateTotalPages } from "@/utils/bookPagination";
 import { Story } from "@/types/supabase";
-import { Pencil, BookOpen } from "lucide-react";
+import { Pencil, BookOpen, BookText } from "lucide-react";
 import BookProgressHeader from "./book-progress/BookProgressHeader";
 import BookCoverPreview from "./book-progress/BookCoverPreview";
 import BookEditorModals from "./book-progress/BookEditorModals";
@@ -87,6 +88,13 @@ export function BookProgress({ profileId }: { profileId: string }) {
     navigate(`/book-preview/${profileId}`);
   };
 
+  const scrollToTableOfContents = () => {
+    const tocElement = document.querySelector('[data-toc-container]');
+    if (tocElement) {
+      tocElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   if (isHidden) {
     return null;
   }
@@ -116,10 +124,25 @@ export function BookProgress({ profileId }: { profileId: string }) {
           </div>
 
           <div className="bg-muted/30 rounded-lg p-4 mb-6">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full bg-[#155B4A]" />
-              <span>{currentPageCount} pages</span>
-              <span className="text-muted-foreground">(Minimum: 32 pages)</span>
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full bg-[#155B4A]" />
+                <span>{currentPageCount} pages</span>
+                <span className="text-muted-foreground">(Minimum: 32 pages)</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full bg-[#A33D29]" />
+                <span>{stories.length} stories</span>
+                <Button 
+                  variant="link" 
+                  className="h-auto p-0 text-[#A33D29]"
+                  onClick={scrollToTableOfContents}
+                >
+                  <BookText className="h-4 w-4 mr-1" />
+                  <span>View table of contents</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

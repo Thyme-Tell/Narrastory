@@ -49,7 +49,7 @@ const StoriesList = ({ stories, isLoading, onUpdate }: StoriesListProps) => {
   return (
     <div className="space-y-4">
       {/* Table of Contents */}
-      <div className="border rounded-lg bg-white shadow-sm overflow-hidden">
+      <div className="border rounded-lg bg-white shadow-sm overflow-hidden" data-toc-container>
         <Button 
           variant="ghost" 
           className="w-full flex justify-between items-center p-4 h-auto"
