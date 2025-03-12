@@ -20,9 +20,7 @@ const BookCover = ({ coverData, authorName }: BookCoverProps) => {
         height={800}
       />
       
-      <div className="absolute bottom-8 w-full text-center">
-        <p className="text-white text-shadow font-medium">By {authorName}</p>
-      </div>
+      {/* Removing the redundant "By {authorName}" text that was causing duplication */}
     </div>
   );
 };

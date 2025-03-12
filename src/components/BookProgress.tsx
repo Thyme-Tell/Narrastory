@@ -95,12 +95,6 @@ export function BookProgress({ profileId }: { profileId: string }) {
 
   return (
     <div className="mb-8">
-      <nav className="flex text-sm text-atlantic/60 mb-4">
-        <a href="/" className="hover:text-atlantic">HOME</a>
-        <span className="mx-2">›</span>
-        <span className="font-medium text-atlantic">{profile?.first_name?.toUpperCase()} {profile?.last_name?.toUpperCase()}</span>
-      </nav>
-      
       <div className={`flex ${isMobile ? "flex-col" : "justify-between"} items-center`}>
         <div className={isMobile ? "w-full mb-6" : ""}>
           <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>

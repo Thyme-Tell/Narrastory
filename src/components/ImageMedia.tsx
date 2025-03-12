@@ -1,7 +1,10 @@
+
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import MediaCaption from "./MediaCaption";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +33,7 @@ interface ImageMediaProps {
 
 const ImageMedia = ({ media, onImageClick, onStartCrop, onCaptionUpdate, onDelete }: ImageMediaProps) => {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const { data } = supabase.storage
     .from("story-media")
     .getPublicUrl(media.file_path);
@@ -72,13 +76,20 @@ const ImageMedia = ({ media, onImageClick, onStartCrop, onCaptionUpdate, onDelet
   return (
     <div className="space-y-2">
       <div className="relative">
-        <div className="max-h-[550px] overflow-hidden rounded-lg">
+        <div className="max-h-[550px] overflow-hidden rounded-lg relative">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-60">
+              <LoadingSpinner className="h-8 w-8 text-green-800" />
+            </div>
+          )}
           <img
             src={data.publicUrl}
             alt={media.file_name}
-            className="w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
+            className={`w-full h-full object-contain cursor-pointer hover:opacity-90 transition-all ${isLoading ? 'opacity-0' : 'opacity-100'}`}
             onClick={() => onImageClick(data.publicUrl)}
             loading="lazy"
+            onLoad={() => setIsLoading(false)}
+            onError={() => setIsLoading(false)}
           />
         </div>
         <div className="absolute top-2 right-2">

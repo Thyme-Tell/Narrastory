@@ -1,21 +1,31 @@
 
-import React, { useRef, useEffect } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React from "react";
 import BookPreviewContent from "./BookPreviewContent";
+import { CoverData } from "@/components/cover/CoverTypes";
+import { Story } from "@/types/supabase";
+import { StoryMediaItem } from "@/types/media";
 
 interface BookPreviewContainerProps {
   currentPage: number;
   totalPageCount: number;
   zoomLevel: number;
-  stories: any[] | undefined;
+  stories: Story[] | undefined;
   isStoriesLoading: boolean;
   isCoverLoading: boolean;
-  coverData: any;
+  coverData: CoverData;
   authorName: string;
   goToNextPage: () => void;
   goToPrevPage: () => void;
-  currentStoryInfo: any;
-  isIOSDevice: boolean;
+  currentStoryInfo: {
+    story: Story;
+    pageWithinStory: number;
+    totalPagesInStory: number;
+    isMediaPage?: boolean;
+    mediaItem?: StoryMediaItem;
+  } | null;
+  isIOSDevice?: boolean;
+  onDownloadPDF?: () => void;
+  isGeneratingPDF?: boolean;
 }
 
 const BookPreviewContainer = ({
@@ -30,56 +40,20 @@ const BookPreviewContainer = ({
   goToNextPage,
   goToPrevPage,
   currentStoryInfo,
-  isIOSDevice
+  isIOSDevice = false,
+  onDownloadPDF,
+  isGeneratingPDF = false,
 }: BookPreviewContainerProps) => {
-  const isMobile = useIsMobile();
-  const bookContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Setup touch events and iOS fixes
-  useEffect(() => {
-    console.log("BookPreviewContainer mounted, isMobile:", isMobile);
-    
-    // Setup touch event handling for mobile
-    if (isMobile && bookContainerRef.current) {
-      bookContainerRef.current.style.touchAction = 'pan-y';
-      
-      // iOS-specific fix: force layout recalculation
-      if (isIOSDevice) {
-        setTimeout(() => {
-          // Force repaint by temporarily changing opacity
-          if (bookContainerRef.current) {
-            bookContainerRef.current.style.opacity = '0.99';
-            requestAnimationFrame(() => {
-              if (bookContainerRef.current) {
-                bookContainerRef.current.style.opacity = '1';
-                console.log("iOS repaint forced");
-              }
-            });
-          }
-        }, 200);
-      }
-    }
-  }, [isMobile, isIOSDevice]);
+  const isMobile = window.innerWidth < 768;
 
   return (
-    <div 
-      className={`flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto book-preview-mobile-container ${isMobile ? 'pt-2 pb-6' : 'p-4'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
-      ref={bookContainerRef}
-      style={{
-        /* iOS specific rendering fixes */
-        ...(isIOSDevice ? {
-          WebkitTransform: 'translateZ(0)',
-          WebkitBackfaceVisibility: 'hidden',
-          WebkitPerspective: '1000',
-        } : {})
-      }}
-    >
+    <div className="flex-1 overflow-hidden flex items-center justify-center p-4">
       <BookPreviewContent
         currentPage={currentPage}
         totalPageCount={totalPageCount}
         zoomLevel={zoomLevel}
         stories={stories}
-        isStoriesLoading={isStoriesLoading}
+        isStoriesLoading={isStoriesLoading || isGeneratingPDF}
         isCoverLoading={isCoverLoading}
         coverData={coverData}
         authorName={authorName}
@@ -87,9 +61,10 @@ const BookPreviewContainer = ({
         goToPrevPage={goToPrevPage}
         currentStoryInfo={currentStoryInfo}
         isMobile={isMobile}
+        onDownloadPDF={onDownloadPDF}
       />
     </div>
   );
-};
+}
 
 export default BookPreviewContainer;

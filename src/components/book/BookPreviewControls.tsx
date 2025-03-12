@@ -8,6 +8,7 @@ interface BookPreviewControlsProps {
   totalPageCount: number;
   goToNextPage: () => void;
   goToPrevPage: () => void;
+  onDownloadPDF?: () => void;
   isMobile?: boolean;
 }
 
@@ -16,11 +17,12 @@ const BookPreviewControls = ({
   totalPageCount,
   goToNextPage,
   goToPrevPage,
+  onDownloadPDF,
   isMobile = false,
 }: BookPreviewControlsProps) => {
-  const buttonSize = isMobile ? "h-10 w-10" : "h-14 w-14"; // Increased from h-8/h-12 to h-10/h-14
-  const iconSize = isMobile ? "h-6 w-6" : "h-8 w-8"; // Increased from h-4/h-6 to h-6/h-8
-  const marginClass = isMobile ? "mx-2" : "mx-3"; // Increased margins slightly
+  const buttonSize = isMobile ? "h-10 w-10" : "h-14 w-14";
+  const iconSize = isMobile ? "h-6 w-6" : "h-8 w-8";
+  const marginClass = isMobile ? "mx-2" : "mx-3";
 
   return (
     <div className="absolute inset-0 flex justify-between items-center pointer-events-none">
@@ -34,6 +36,7 @@ const BookPreviewControls = ({
         <ChevronLeft className={iconSize} />
         <span className="sr-only">Previous page</span>
       </Button>
+      
       <Button 
         variant="ghost" 
         size="icon" 

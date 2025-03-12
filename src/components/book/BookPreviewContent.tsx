@@ -27,6 +27,7 @@ interface BookPreviewContentProps {
     mediaItem?: StoryMediaItem;
   } | null;
   isMobile?: boolean;
+  onDownloadPDF?: () => void;
 }
 
 const BookPreviewContent = ({
@@ -42,6 +43,7 @@ const BookPreviewContent = ({
   goToPrevPage,
   currentStoryInfo,
   isMobile = false,
+  onDownloadPDF,
 }: BookPreviewContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -147,6 +149,7 @@ const BookPreviewContent = ({
         totalPageCount={totalPageCount}
         goToNextPage={goToNextPage}
         goToPrevPage={goToPrevPage}
+        onDownloadPDF={onDownloadPDF}
         isMobile={isMobile}
       />
     </div>
