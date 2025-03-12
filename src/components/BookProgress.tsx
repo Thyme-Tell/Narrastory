@@ -1,16 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoverData } from "@/hooks/useCoverData";
 import { calculateTotalPages } from "@/utils/bookPagination";
-import { Story, StoryMedia } from "@/types/supabase";
+import { Story } from "@/types/supabase";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Pencil } from "lucide-react";
 import BookProgressHeader from "./book-progress/BookProgressHeader";
-import BookProgressOptions from "./book-progress/BookProgressOptions";
-import BookProgressBar from "./book-progress/BookProgressBar";
 import BookCoverPreview from "./book-progress/BookCoverPreview";
 import BookEditorModals from "./book-progress/BookEditorModals";
 import { CoverData } from "./cover/CoverTypes";
+import { Button } from "./ui/button";
 
 export function BookProgress({ profileId }: { profileId: string }) {
   const [isHidden, setIsHidden] = useState(false);
@@ -60,7 +61,6 @@ export function BookProgress({ profileId }: { profileId: string }) {
   });
 
   const currentPageCount = stories.length ? calculateTotalPages(stories) : 1;
-  const progressPercentage = Math.min((currentPageCount / 32) * 100, 100);
 
   useEffect(() => {
     if (profileId) {
@@ -94,41 +94,60 @@ export function BookProgress({ profileId }: { profileId: string }) {
 
   return (
     <div className="mb-8">
-      <div className={`flex ${isMobile ? "flex-col" : "justify-between"} items-center`}>
-        <div className={isMobile ? "w-full mb-6" : "flex-1"}>
-          <h1 className="text-4xl font-rosemartin text-atlantic mb-8">{profile?.first_name} {profile?.last_name}</h1>
-          
-          {isMobile && (
-            <div className="mb-6 flex justify-center">
-              <BookCoverPreview 
-                coverData={coverData}
-                isLoading={isCoverLoading}
-              />
-            </div>
-          )}
-          
-          <div className="flex flex-col space-y-6">
-            <BookProgressOptions 
-              profileId={profileId}
-              onEditCover={handleOpenCoverEditor}
-            />
-
-            <BookProgressBar 
-              currentPageCount={currentPageCount}
-              progressPercentage={progressPercentage}
-              minPagesRequired={32}
-            />
-          </div>
+      <div className="max-w-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <h1 className="text-2xl font-bold">Wildflowers & Wonde</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleOpenCoverEditor}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
         </div>
         
-        {!isMobile && (
-          <div className="ml-4 flex-shrink-0">
+        <div className="mb-4">
+          <p className="text-base text-muted-foreground">by {profile?.first_name} {profile?.last_name}</p>
+          <p className="text-sm text-muted-foreground">A Narra Story Book</p>
+        </div>
+
+        <div className="bg-muted/30 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full bg-[#155B4A]" />
+            <span>{currentPageCount} pages</span>
+            <span className="text-muted-foreground">(Minimum: 32 pages)</span>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-muted/30 rounded-lg p-4">
             <BookCoverPreview 
               coverData={coverData}
               isLoading={isCoverLoading}
             />
           </div>
-        )}
+          
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleOpenCoverEditor}
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit Cover
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="w-full relative"
+            disabled
+          >
+            <div className="absolute -top-3 right-0 bg-[#AF4623] text-white text-xs px-2 py-0.5 rounded-full">
+              Coming Soon
+            </div>
+            Order Book
+          </Button>
+        </div>
       </div>
 
       <BookEditorModals
