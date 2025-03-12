@@ -19,7 +19,6 @@ const BookProgressStats = ({ stories, scrollToTableOfContents }: BookProgressSta
           <div className="flex items-center text-muted-foreground">
             <BookOpen className="h-4 w-4 mr-2 text-[#155B4A]" />
             <span className="text-foreground font-medium">{currentPageCount}</span>&nbsp;<span>pages</span>
-            <span className="text-xs ml-2">(Minimum: 32)</span>
           </div>
           
           <div className="flex items-center text-muted-foreground">
@@ -30,7 +29,7 @@ const BookProgressStats = ({ stories, scrollToTableOfContents }: BookProgressSta
               className="h-auto p-0 ml-2 text-[#A33D29]"
               onClick={scrollToTableOfContents}
             >
-              View stories
+              View
             </Button>
           </div>
         </div>
