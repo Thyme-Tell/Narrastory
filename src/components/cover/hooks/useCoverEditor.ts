@@ -30,6 +30,7 @@ export function useCoverEditor(
   );
   const [isUploading, setIsUploading] = useState(false);
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
+  const [remoteImageUrl, setRemoteImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Fetch profile data to get the author name
@@ -77,11 +78,10 @@ export function useCoverEditor(
     // Create a copy of the cover data for saving
     const dataToSave = { ...coverData };
     
-    // If we're using a local image URL (blob), we need to replace it with the remote URL
-    if (localImageUrl && coverData.backgroundImage && coverData.backgroundImage.startsWith('blob:')) {
-      // This means we already have the image uploaded to Supabase
-      // Keep using the remote URL that should be stored in the coverData
-      console.log('Saving with remote image URL');
+    // If we have a remote image URL from Supabase, use that instead of the blob URL
+    if (remoteImageUrl && localImageUrl && coverData.backgroundImage === localImageUrl) {
+      console.log('Saving with remote image URL:', remoteImageUrl);
+      dataToSave.backgroundImage = remoteImageUrl;
     }
     
     onSave(dataToSave);
@@ -120,6 +120,7 @@ export function useCoverEditor(
       setLocalImageUrl(null);
     }
     
+    setRemoteImageUrl(null);
     setCoverData({
       ...coverData,
       backgroundImage: undefined,
@@ -219,6 +220,9 @@ export function useCoverEditor(
         .getPublicUrl(filePath);
         
       console.log('Uploaded image URL:', data.publicUrl);
+      
+      // Save the remote URL for later use when saving
+      setRemoteImageUrl(data.publicUrl);
       
       // Keep using the local blob URL for display
       setCoverData(prev => ({
