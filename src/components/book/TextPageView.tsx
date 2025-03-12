@@ -35,9 +35,19 @@ const TextPageView = ({
     };
 
     const handleScroll = () => {
-      if (contentRef.current && contentRef.current.scrollTop > 20) {
-        setHasScrolled(true);
-        setShowScrollIndicator(false);
+      if (contentRef.current) {
+        // Check if user has scrolled down by some amount
+        if (contentRef.current.scrollTop > 20) {
+          setHasScrolled(true);
+        }
+        
+        // Check if user has reached the end of the content
+        const isAtBottom = contentRef.current.scrollHeight - contentRef.current.scrollTop <= contentRef.current.clientHeight + 10;
+        
+        // Hide indicator if scrolled significantly OR reached the bottom
+        if (contentRef.current.scrollTop > 20 || isAtBottom) {
+          setShowScrollIndicator(false);
+        }
       }
     };
     
