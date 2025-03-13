@@ -68,6 +68,10 @@ export const renderText = (
   const { titleSize: finalTitleSize, authorSize: finalAuthorSize } = 
     calculateFontSizes(canvas.height, coverData.titleSize, coverData.authorSize);
   
+  // Variables to track title text bounds
+  let titleY;
+  let titleHeight = 0;
+  
   // Draw title if provided
   if (coverData.titleText) {
     // Set up title styling
@@ -76,7 +80,6 @@ export const renderText = (
     ctx.textAlign = 'center';
     
     // Determine vertical position based on layout
-    let titleY;
     if (coverData.layout === 'top') {
       titleY = canvas.height * 0.2;
     } else if (coverData.layout === 'bottom') {
@@ -88,6 +91,10 @@ export const renderText = (
     // Handle multiline text
     const titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, finalTitleSize);
     
+    // Calculate total height of the title text
+    titleHeight = titleLines.length * (finalTitleSize * 1.2);
+    
+    // Draw the title text lines
     titleLines.forEach((line, index) => {
       ctx.fillText(line, canvas.width / 2, titleY + index * (finalTitleSize * 1.2));
     });
@@ -99,22 +106,24 @@ export const renderText = (
     ctx.fillStyle = coverData.authorColor || '#303441';
     ctx.textAlign = 'center';
     
-    // Get number of title lines for calculating spacing
-    let titleLines = 0;
-    if (coverData.titleText) {
-      titleLines = wrapText(ctx, coverData.titleText, canvas.width * 0.8, finalTitleSize).length;
-    }
+    // Add spacing between title and author
+    // Use a minimum spacing of 1.5x the author font size
+    const minSpacing = finalAuthorSize * 1.5;
     
-    // Add extra spacing between title and author
-    const titleAuthorSpacing = finalTitleSize * 1.2; // One full line height of spacing
-    
+    // Calculate author Y position based on title position and height
     let authorY;
     if (coverData.layout === 'top') {
-      authorY = canvas.height * 0.2 + (titleLines * (finalTitleSize * 1.2)) + titleAuthorSpacing;
+      authorY = titleY + titleHeight + minSpacing;
     } else if (coverData.layout === 'bottom') {
-      authorY = canvas.height * 0.65 + (titleLines * (finalTitleSize * 1.2)) + titleAuthorSpacing;
+      authorY = titleY + titleHeight + minSpacing;
     } else { // centered
-      authorY = canvas.height * 0.45 + (titleLines * (finalTitleSize * 1.2)) + titleAuthorSpacing;
+      authorY = titleY + titleHeight + minSpacing;
+    }
+    
+    // Ensure author is within canvas bounds
+    const maxY = canvas.height - (finalAuthorSize * 2);
+    if (authorY > maxY) {
+      authorY = maxY;
     }
     
     ctx.fillText(coverData.authorText, canvas.width / 2, authorY);
