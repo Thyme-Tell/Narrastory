@@ -15,7 +15,7 @@ const BookProgressInfo = ({
   profileLastName, 
   onOpenCoverEditor 
 }: BookProgressInfoProps) => {
-  // Use author from cover data if available, otherwise use profile name
+  // Always use author from cover data if available
   const authorText = coverData.authorText || 
     (profileFirstName || profileLastName ? 
       `${profileFirstName || ''} ${profileLastName || ''}`.trim() : 

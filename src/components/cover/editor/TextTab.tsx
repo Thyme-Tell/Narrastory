@@ -21,7 +21,10 @@ const TextTab = ({
         />
         
         <div>
-          <Label className="block mb-2">Title Size: {coverData.titleSize}pt</Label>
+          <Label className="block mb-2">
+            Title Size: {coverData.titleSize}pt 
+            <span className="text-xs text-muted-foreground ml-2">(36-42pt equivalent)</span>
+          </Label>
           <Slider
             value={[coverData.titleSize || 20]}
             min={18}
@@ -42,7 +45,10 @@ const TextTab = ({
         />
         
         <div>
-          <Label className="block mb-2">Author Size: {coverData.authorSize}pt</Label>
+          <Label className="block mb-2">
+            Author Size: {coverData.authorSize}pt
+            <span className="text-xs text-muted-foreground ml-2">(18-24pt equivalent)</span>
+          </Label>
           <Slider
             value={[coverData.authorSize || 14]}
             min={12}

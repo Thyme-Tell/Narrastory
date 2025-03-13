@@ -12,6 +12,15 @@ interface BookCoverProps {
 const BookCover = ({ coverData, authorName }: BookCoverProps) => {
   const isMobile = useIsMobile();
   
+  // Use coverData.authorText if available, otherwise fall back to authorName
+  const displayAuthorName = coverData.authorText || authorName;
+  
+  // Create a copy of coverData with the correct author
+  const coverDataWithAuthor = {
+    ...coverData,
+    authorText: displayAuthorName
+  };
+  
   return (
     <div className="w-full h-full relative flex items-center justify-center bg-white book-page">
       {/* Left-side gradient */}
@@ -19,7 +28,7 @@ const BookCover = ({ coverData, authorName }: BookCoverProps) => {
       
       <div className="w-full h-full flex items-center justify-center">
         <CoverCanvas 
-          coverData={coverData} 
+          coverData={coverDataWithAuthor} 
           width={isMobile ? 300 : 600}
           height={isMobile ? 480 : 960}
           scale={2}
