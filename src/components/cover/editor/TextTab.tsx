@@ -1,8 +1,9 @@
 
+import React from 'react';
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { TextTabProps } from "../CoverTypes";
+import { Label } from "@/components/ui/label";
+import { TextTabProps } from '../CoverTypes';
 
 const TextTab = ({ 
   coverData, 
@@ -11,42 +12,52 @@ const TextTab = ({
 }: TextTabProps) => {
   return (
     <div className="space-y-6">
-      <div>
-        <Label className="block mb-2">Title</Label>
-        <Input
-          value={coverData.titleText || ""}
-          onChange={(e) => onTextChange(e, 'title')}
-          placeholder="Book title"
-          className="mb-4"
-        />
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="title-text" className="mb-2">Title</Label>
+          <Input
+            id="title-text"
+            value={coverData.titleText || ""}
+            onChange={(e) => onTextChange(e, 'title')}
+            placeholder="Enter book title"
+          />
+        </div>
         
         <div>
-          <Label className="block mb-2">Title Size: {coverData.titleSize}pt</Label>
+          <div className="flex justify-between items-center mb-2">
+            <Label htmlFor="title-size">Title Size: {coverData.titleSize}px</Label>
+          </div>
           <Slider
-            value={[coverData.titleSize || 20]}
-            min={18}
-            max={24}
+            id="title-size"
+            defaultValue={[coverData.titleSize || 21]}
+            min={12}
+            max={36}
             step={1}
             onValueChange={(value) => onFontSizeChange(value, 'title')}
           />
         </div>
       </div>
       
-      <div>
-        <Label className="block mb-2">Author</Label>
-        <Input
-          value={coverData.authorText || ""}
-          onChange={(e) => onTextChange(e, 'author')}
-          placeholder="Author name"
-          className="mb-4"
-        />
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="author-text" className="mb-2">Author</Label>
+          <Input
+            id="author-text"
+            value={coverData.authorText || ""}
+            onChange={(e) => onTextChange(e, 'author')}
+            placeholder="Enter author name"
+          />
+        </div>
         
         <div>
-          <Label className="block mb-2">Author Size: {coverData.authorSize}pt</Label>
+          <div className="flex justify-between items-center mb-2">
+            <Label htmlFor="author-size">Author Size: {coverData.authorSize}px</Label>
+          </div>
           <Slider
-            value={[coverData.authorSize || 14]}
-            min={12}
-            max={16}
+            id="author-size"
+            defaultValue={[coverData.authorSize || 14]}
+            min={10}
+            max={24}
             step={1}
             onValueChange={(value) => onFontSizeChange(value, 'author')}
           />

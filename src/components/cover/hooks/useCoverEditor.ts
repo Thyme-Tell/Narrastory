@@ -11,8 +11,15 @@ export function useCoverEditor(
   onSave: (coverData: CoverData) => void,
   onClose: () => void
 ) {
-  const [coverData, setCoverData] = useState<CoverData>(
-    initialCoverData || {
+  // Initialize with the provided initialCoverData or fallback to defaults
+  const [coverData, setCoverData] = useState<CoverData>(() => {
+    if (initialCoverData) {
+      return {
+        ...initialCoverData
+      };
+    }
+    
+    return {
       backgroundColor: "#CADCDA",
       titleText: "My Stories",
       authorText: "",
@@ -21,8 +28,9 @@ export function useCoverEditor(
       titleSize: 21,
       authorSize: 14,
       layout: 'centered',
-    }
-  );
+    };
+  });
+  
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -47,7 +55,7 @@ export function useCoverEditor(
     },
   });
 
-  // Set author name from profile when available
+  // Set author name from profile when available and only if author text is not already set
   useEffect(() => {
     if (profile && (!coverData.authorText || coverData.authorText === "")) {
       const authorName = `${profile.first_name} ${profile.last_name}`.trim();

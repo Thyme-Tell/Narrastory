@@ -27,12 +27,6 @@ const CoverEditor = ({
     handleFontSizeChange,
     handleLayoutChange
   } = useCoverEditor(profileId, initialCoverData, onSave, onClose);
-  
-  useEffect(() => {
-    if (initialCoverData) {
-      // This is handled in the hook now, but left for future potential needs
-    }
-  }, [initialCoverData]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
