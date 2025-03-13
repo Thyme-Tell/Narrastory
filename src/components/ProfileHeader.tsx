@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -95,7 +95,7 @@ const ProfileHeader = ({
             )}
             <span>{sortOrder === 'newest' ? 'Recent first' : 'Oldest first'}</span>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="bg-white">
             <DropdownMenuItem
               onClick={() => onSortChange('newest')}
               className={`${sortOrder === 'newest' ? 'bg-accent' : ''}`}
