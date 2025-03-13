@@ -17,7 +17,44 @@ serve(async (req) => {
 
   try {
     console.log('Received request to generate audio');
-    const { storyId } = await req.json()
+    const requestBody = await req.json();
+    
+    // Support both existing story-based requests and direct text-to-speech
+    if (requestBody.directGeneration && requestBody.textContent) {
+      // Direct text-to-speech generation mode
+      console.log('Processing direct TTS request');
+      const { textContent, voiceId, options } = requestBody;
+      
+      try {
+        // Generate audio directly from text
+        const audioBuffer = await generateAudio(
+          { content: textContent, title: null }, 
+          voiceId || STANDARD_VOICE_ID,
+          options
+        );
+        
+        // Upload to storage
+        const filename = `direct-${Date.now()}.mp3`;
+        const publicUrl = await uploadAudioFile(filename, audioBuffer);
+        
+        return new Response(
+          JSON.stringify({ audioUrl: publicUrl }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (directError) {
+        console.error('Error in direct TTS generation:', directError.message);
+        return new Response(
+          JSON.stringify({ error: directError.message }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    }
+    
+    // Original story-based flow
+    const { storyId } = requestBody;
 
     if (!storyId) {
       return new Response(

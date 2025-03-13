@@ -1,5 +1,4 @@
 
-import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CoverData } from "@/components/cover/CoverTypes";
 
@@ -16,23 +15,37 @@ const BookProgressInfo = ({
   profileLastName, 
   onOpenCoverEditor 
 }: BookProgressInfoProps) => {
+  // Use author from cover data if available, otherwise use profile name
+  const authorText = coverData.authorText || 
+    (profileFirstName || profileLastName ? 
+      `${profileFirstName || ''} ${profileLastName || ''}`.trim() : 
+      '');
+
   return (
     <>
-      <div className="flex items-center gap-2 mb-2">
-        <h1 className="text-2xl font-bold">{coverData.titleText || "My Stories"}</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
+      <div className="hidden md:block mb-8">
+        {/* Added space for desktop only */}
+      </div>
+      
+      <h2 className="text-lg font-medium text-muted-foreground mb-2">Your Book</h2>
+      
+      <div className="mb-2">
+        <h1 className="text-2xl md:text-[1.82rem] font-serif leading-[1.1]">
+          {coverData.titleText || "My Stories"}
+        </h1>
+        <Button 
+          variant="link" 
+          className="h-auto p-0 text-[#A33D29] flex justify-start"
           onClick={onOpenCoverEditor}
+          aria-label="Edit book title"
         >
-          <Pencil className="h-4 w-4" />
+          Edit
         </Button>
       </div>
       
       <div className="mb-4">
         <p className="text-base text-muted-foreground">
-          by {profileFirstName} {profileLastName}
+          by {authorText}
         </p>
       </div>
     </>

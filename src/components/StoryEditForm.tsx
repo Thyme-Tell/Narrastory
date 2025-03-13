@@ -61,8 +61,8 @@ const StoryEditForm = ({
   return (
     <div className="fixed inset-0 z-50 bg-white">
       <div className="fixed inset-x-0 top-0 z-50 bg-white p-6 shadow-lg h-screen overflow-y-auto">
-        <div className="flex flex-col h-full max-w-2xl mx-auto">
-          <div className="flex-grow space-y-4">
+        <div className="flex flex-col max-w-2xl mx-auto">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <Input
                 value={title}
@@ -83,8 +83,8 @@ const StoryEditForm = ({
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full flex-grow text-left"
-              style={{ height: isMobile ? "calc(100vh - 260px)" : "calc(100vh - 280px)" }}
+              className="w-full text-left"
+              style={{ height: isMobile ? "50vh" : "50vh" }}
             />
             <Popover>
               <PopoverTrigger asChild>
@@ -99,7 +99,7 @@ const StoryEditForm = ({
                   {date ? format(date, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 bg-white" align="start">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -108,11 +108,9 @@ const StoryEditForm = ({
                 />
               </PopoverContent>
             </Popover>
-          </div>
-          
-          {/* Fixed footer for action buttons */}
-          <div className="sticky bottom-0 left-0 right-0 py-4 bg-white border-t mt-4">
-            <div className="flex space-x-2">
+            
+            {/* Action buttons placed below the date picker */}
+            <div className="flex space-x-2 pt-4">
               <Button onClick={() => onSave(title, content, date)}>Save</Button>
               <Button variant="outline" onClick={onCancel}>
                 Cancel

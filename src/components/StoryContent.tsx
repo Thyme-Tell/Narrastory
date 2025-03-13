@@ -19,7 +19,13 @@ interface StoryContentProps {
 
 const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) => {
   const [showPlayer, setShowPlayer] = useState(false);
-  const { isLoading, audioUrl, error, generateAudio, updatePlaybackStats } = useStoryAudio(storyId);
+  const { 
+    isLoading, 
+    audioUrl, 
+    error, 
+    generateAudio, 
+    updatePlaybackStats,
+  } = useStoryAudio(storyId);
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -64,20 +70,22 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         {title && (
           <h3 className="font-semibold text-lg text-left">{title}</h3>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleListen}
-          disabled={isLoading || !content || content.trim() === ''}
-          className={isMobile ? 'self-start' : 'ml-auto'}
-        >
-          {isLoading ? (
-            <LoadingSpinner className="mr-2 h-4 w-4" />
-          ) : (
-            <Headphones className="mr-2 h-4 w-4" />
-          )}
-          Listen ({estimatedMinutes} min)
-        </Button>
+        
+        <div className={`${isMobile ? 'self-start' : 'ml-auto'}`}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleListen}
+            disabled={isLoading || !content || content.trim() === ''}
+          >
+            {isLoading ? (
+              <LoadingSpinner className="mr-2 h-4 w-4" />
+            ) : (
+              <Headphones className="mr-2 h-4 w-4" />
+            )}
+            Listen ({estimatedMinutes} min)
+          </Button>
+        </div>
       </div>
       
       {error && (
