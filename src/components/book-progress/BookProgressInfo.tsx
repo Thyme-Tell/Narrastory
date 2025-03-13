@@ -1,5 +1,4 @@
 
-import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CoverData } from "@/components/cover/CoverTypes";
 
@@ -29,14 +28,13 @@ const BookProgressInfo = ({
           <h1 className="text-2xl md:text-[1.82rem] font-serif leading-[1.1]">
             {coverData.titleText || "My Stories"}
           </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 p-0 ml-0.5"
+          <Button 
+            variant="link" 
+            className="h-auto p-0 ml-2 text-[#A33D29]"
             onClick={onOpenCoverEditor}
             aria-label="Edit book title"
           >
-            <Pencil className="h-5 w-5" />
+            Edit
           </Button>
         </div>
       </div>
