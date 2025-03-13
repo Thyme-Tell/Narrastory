@@ -24,19 +24,17 @@ const BookProgressInfo = ({
       <h2 className="text-lg font-medium text-muted-foreground mb-2">Your Book</h2>
       
       <div className="mb-2">
-        <div className="flex items-center">
-          <h1 className="text-2xl md:text-[1.82rem] font-serif leading-[1.1]">
-            {coverData.titleText || "My Stories"}
-          </h1>
-          <Button 
-            variant="link" 
-            className="h-auto p-0 ml-2 text-[#A33D29]"
-            onClick={onOpenCoverEditor}
-            aria-label="Edit book title"
-          >
-            Edit
-          </Button>
-        </div>
+        <h1 className="text-2xl md:text-[1.82rem] font-serif leading-[1.1]">
+          {coverData.titleText || "My Stories"}
+        </h1>
+        <Button 
+          variant="link" 
+          className="h-auto p-0 text-[#A33D29] flex justify-start"
+          onClick={onOpenCoverEditor}
+          aria-label="Edit book title"
+        >
+          Edit
+        </Button>
       </div>
       
       <div className="mb-4">
