@@ -110,8 +110,8 @@ const StoryEditForm = ({
             </Popover>
           </div>
           
-          {/* Fixed footer for action buttons - positioned 100px higher */}
-          <div className="sticky bottom-[100px] left-0 right-0 py-4 bg-white border-t mt-4">
+          {/* Fixed footer for action buttons - positioned 300px higher */}
+          <div className="sticky bottom-[300px] left-0 right-0 py-4 bg-white border-t mt-4">
             <div className="flex space-x-2">
               <Button onClick={() => onSave(title, content, date)}>Save</Button>
               <Button variant="outline" onClick={onCancel}>
