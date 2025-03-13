@@ -72,17 +72,22 @@ const CoverCanvas = ({
     }
     
     function drawTexts() {
+      // Define the base height constant once at the top so it can be reused
+      const baseHeight = 600; // default height representing 8"
+      
       if (coverData.titleText) {
-        // Calculate base font size as a percentage of canvas width
-        const baseTitleSize = Math.floor(canvas.width * 0.08); // 8% of canvas width
+        // Calculate title font size based on 5"x8" book cover standards
+        // For a 5"x8" book, title is typically 36-42pt
+        // Scale this based on the canvas height (8" = 600px in our default scale)
+        const baseTitleSize = Math.floor((canvas.height / baseHeight) * 38); // 38pt as base size
         
-        // Apply the user's size preference as a multiplier (default is 1.0)
-        // titleSize ranges from 18-24, so we map it to 0.85-1.15 multiplier
+        // Apply the user's size preference as a multiplier
+        // titleSize ranges from 18-24, so we map it to 0.9-1.1 multiplier
         const titleSizeMultiplier = coverData.titleSize ? 
-          (0.85 + ((coverData.titleSize - 18) / (24 - 18)) * 0.3) : 1.0;
+          (0.9 + ((coverData.titleSize - 18) / (24 - 18)) * 0.2) : 1.0;
         
         // Calculate final title size with user preferences applied
-        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier * scale);
+        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier);
 
         // Draw title
         ctx.font = `bold ${finalTitleSize}px 'Rosemartin', serif`;
@@ -109,8 +114,9 @@ const CoverCanvas = ({
       }
       
       if (coverData.authorText) {
-        // Calculate base author font size
-        const baseAuthorSize = Math.floor(canvas.width * 0.045); // 4.5% of canvas width
+        // Calculate author font size based on 5"x8" book cover standards
+        // For a 5"x8" book, author name is typically 18-24pt (around half the title size)
+        const baseAuthorSize = Math.floor((canvas.height / baseHeight) * 21); // 21pt as base size
         
         // Apply user's size preference (default is 1.0)
         // authorSize ranges from 12-16, so we map it to 0.9-1.1 multiplier
@@ -118,17 +124,17 @@ const CoverCanvas = ({
           (0.9 + ((coverData.authorSize - 12) / (16 - 12)) * 0.2) : 1.0;
         
         // Calculate final author size with user preferences applied
-        const finalAuthorSize = Math.floor(baseAuthorSize * authorSizeMultiplier * scale);
+        const finalAuthorSize = Math.floor(baseAuthorSize * authorSizeMultiplier);
         
         ctx.font = `${finalAuthorSize}px 'Rosemartin', serif`;
         ctx.fillStyle = coverData.authorColor || '#303441';
         ctx.textAlign = 'center';
         
-        // Calculate title height for proper spacing
-        const baseTitleSize = Math.floor(canvas.width * 0.08);
+        // Calculate title sizes for proper spacing
+        const baseTitleSize = Math.floor((canvas.height / baseHeight) * 38);
         const titleSizeMultiplier = coverData.titleSize ? 
-          (0.85 + ((coverData.titleSize - 18) / (24 - 18)) * 0.3) : 1.0;
-        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier * scale);
+          (0.9 + ((coverData.titleSize - 18) / (24 - 18)) * 0.2) : 1.0;
+        const finalTitleSize = Math.floor(baseTitleSize * titleSizeMultiplier);
         
         // Get number of title lines for calculating spacing
         let titleLines = 0;
