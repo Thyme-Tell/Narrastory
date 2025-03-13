@@ -15,6 +15,12 @@ const BookProgressInfo = ({
   profileLastName, 
   onOpenCoverEditor 
 }: BookProgressInfoProps) => {
+  // Use author from cover data if available, otherwise use profile name
+  const authorText = coverData.authorText || 
+    (profileFirstName || profileLastName ? 
+      `${profileFirstName || ''} ${profileLastName || ''}`.trim() : 
+      '');
+
   return (
     <>
       <div className="hidden md:block mb-8">
@@ -39,7 +45,7 @@ const BookProgressInfo = ({
       
       <div className="mb-4">
         <p className="text-base text-muted-foreground">
-          by {profileFirstName} {profileLastName}
+          by {authorText}
         </p>
       </div>
     </>
