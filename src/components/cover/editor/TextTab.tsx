@@ -5,6 +5,9 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { TextTabProps } from '../CoverTypes';
 
+const TITLE_MAX_LENGTH = 40;
+const AUTHOR_MAX_LENGTH = 20;
+
 const TextTab = ({ 
   coverData, 
   onTextChange, 
@@ -14,11 +17,21 @@ const TextTab = ({
     <div className="space-y-6">
       <div className="space-y-4">
         <div>
-          <Label htmlFor="title-text" className="mb-2">Title</Label>
+          <div className="flex justify-between items-center mb-2">
+            <Label htmlFor="title-text">Title</Label>
+            <span className="text-xs text-muted-foreground">
+              {(coverData.titleText?.length || 0)}/{TITLE_MAX_LENGTH}
+            </span>
+          </div>
           <Input
             id="title-text"
             value={coverData.titleText || ""}
-            onChange={(e) => onTextChange(e, 'title')}
+            onChange={(e) => {
+              if (e.target.value.length <= TITLE_MAX_LENGTH) {
+                onTextChange(e, 'title');
+              }
+            }}
+            maxLength={TITLE_MAX_LENGTH}
             placeholder="Enter book title"
           />
         </div>
@@ -40,11 +53,21 @@ const TextTab = ({
       
       <div className="space-y-4">
         <div>
-          <Label htmlFor="author-text" className="mb-2">Author</Label>
+          <div className="flex justify-between items-center mb-2">
+            <Label htmlFor="author-text">Author</Label>
+            <span className="text-xs text-muted-foreground">
+              {(coverData.authorText?.length || 0)}/{AUTHOR_MAX_LENGTH}
+            </span>
+          </div>
           <Input
             id="author-text"
             value={coverData.authorText || ""}
-            onChange={(e) => onTextChange(e, 'author')}
+            onChange={(e) => {
+              if (e.target.value.length <= AUTHOR_MAX_LENGTH) {
+                onTextChange(e, 'author');
+              }
+            }}
+            maxLength={AUTHOR_MAX_LENGTH}
             placeholder="Enter author name"
           />
         </div>

@@ -1,9 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CoverData } from "../CoverTypes";
+
+const TITLE_MAX_LENGTH = 40;
+const AUTHOR_MAX_LENGTH = 20;
 
 export function useCoverEditor(
   profileId: string, 
@@ -15,7 +17,10 @@ export function useCoverEditor(
   const [coverData, setCoverData] = useState<CoverData>(() => {
     if (initialCoverData) {
       return {
-        ...initialCoverData
+        ...initialCoverData,
+        // Ensure title and author text lengths are within limits
+        titleText: initialCoverData.titleText?.slice(0, TITLE_MAX_LENGTH) || "My Stories",
+        authorText: initialCoverData.authorText?.slice(0, AUTHOR_MAX_LENGTH) || ""
       };
     }
     
@@ -59,9 +64,12 @@ export function useCoverEditor(
   useEffect(() => {
     if (profile && (!coverData.authorText || coverData.authorText === "")) {
       const authorName = `${profile.first_name} ${profile.last_name}`.trim();
+      // Ensure author name doesn't exceed max length
+      const trimmedAuthorName = authorName.slice(0, AUTHOR_MAX_LENGTH);
+      
       setCoverData(prev => ({
         ...prev,
-        authorText: authorName
+        authorText: trimmedAuthorName
       }));
     }
   }, [profile, coverData.authorText]);
@@ -107,16 +115,22 @@ export function useCoverEditor(
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'title' | 'author'
   ) => {
+    const value = e.target.value;
+    
     if (type === 'title') {
-      setCoverData({
-        ...coverData,
-        titleText: e.target.value,
-      });
+      if (value.length <= TITLE_MAX_LENGTH) {
+        setCoverData({
+          ...coverData,
+          titleText: value,
+        });
+      }
     } else {
-      setCoverData({
-        ...coverData,
-        authorText: e.target.value,
-      });
+      if (value.length <= AUTHOR_MAX_LENGTH) {
+        setCoverData({
+          ...coverData,
+          authorText: value,
+        });
+      }
     }
   };
 
