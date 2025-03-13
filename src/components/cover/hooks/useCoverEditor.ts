@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -5,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CoverData } from "../CoverTypes";
 
 const TITLE_MAX_LENGTH = 40;
-const AUTHOR_MAX_LENGTH = 20;
+const AUTHOR_MAX_LENGTH = 30;
 
 export function useCoverEditor(
   profileId: string, 

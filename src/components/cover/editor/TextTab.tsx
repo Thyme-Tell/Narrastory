@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { TextTabProps } from '../CoverTypes';
 
 const TITLE_MAX_LENGTH = 40;
-const AUTHOR_MAX_LENGTH = 20;
+const AUTHOR_MAX_LENGTH = 30;
 
 const TextTab = ({ 
   coverData, 
