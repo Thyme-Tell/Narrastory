@@ -18,8 +18,14 @@ const BookProgressInfo = ({
 }: BookProgressInfoProps) => {
   return (
     <>
+      <div className="hidden md:block mb-8">
+        {/* Added space for desktop only */}
+      </div>
+      
+      <h2 className="text-lg font-medium text-muted-foreground mb-2">Your Book</h2>
+      
       <div className="flex items-center gap-2 mb-2">
-        <h1 className="text-2xl font-bold">{coverData.titleText || "My Stories"}</h1>
+        <h1 className="text-2xl md:text-[2.6rem] font-bold font-serif">{coverData.titleText || "My Stories"}</h1>
         <Button
           variant="ghost"
           size="icon"
