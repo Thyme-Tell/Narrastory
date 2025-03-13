@@ -32,11 +32,11 @@ const BookProgressInfo = ({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 p-1 ml-2"
+            className="h-8 w-8 p-0 ml-0.5"
             onClick={onOpenCoverEditor}
             aria-label="Edit book title"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-5 w-5" />
           </Button>
         </div>
       </div>
