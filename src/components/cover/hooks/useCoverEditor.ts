@@ -14,6 +14,8 @@ export function useCoverEditor(
   onSave: (coverData: CoverData) => void,
   onClose: () => void
 ) {
+  console.log("useCoverEditor initialized with initialCoverData:", initialCoverData);
+  
   // Initialize with the provided initialCoverData or fallback to defaults
   const [coverData, setCoverData] = useState<CoverData>(() => {
     if (initialCoverData) {
@@ -36,6 +38,18 @@ export function useCoverEditor(
       layout: 'centered',
     };
   });
+
+  // When initialCoverData changes (e.g., after a refresh), update the state
+  useEffect(() => {
+    if (initialCoverData) {
+      console.log("initialCoverData changed, updating editor state:", initialCoverData);
+      setCoverData({
+        ...initialCoverData,
+        titleText: initialCoverData.titleText?.slice(0, TITLE_MAX_LENGTH) || "My Stories",
+        authorText: initialCoverData.authorText?.slice(0, AUTHOR_MAX_LENGTH) || ""
+      });
+    }
+  }, [initialCoverData]);
   
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();

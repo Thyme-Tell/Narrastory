@@ -68,8 +68,12 @@ export function BookProgress({ profileId }: { profileId: string }) {
   }, [profileId, refreshCoverData]);
 
   const handleOpenCoverEditor = () => {
-    refreshCoverData();
-    setIsEditorOpen(true);
+    // Explicitly refresh the cover data immediately before opening the editor
+    // to ensure we have the latest data
+    refreshCoverData().then(() => {
+      console.log('Opening editor with latest cover data:', coverData);
+      setIsEditorOpen(true);
+    });
   };
 
   const handleCloseCoverEditor = () => {
