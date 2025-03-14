@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Book, MessageSquare, Mic, Robot, User, ArrowRight } from "lucide-react";
+import { Book, MessageSquare, Mic, Bot, User, ArrowRight } from "lucide-react";
 
 const GetStarted = () => {
   useEffect(() => {
@@ -100,7 +100,7 @@ const GetStarted = () => {
             <div className="flex gap-4">
               <div className="flex-shrink-0">
                 <div className="bg-[#A33D29]/10 w-12 h-12 rounded-full flex items-center justify-center">
-                  <Robot className="text-[#A33D29] w-6 h-6" />
+                  <Bot className="text-[#A33D29] w-6 h-6" />
                 </div>
               </div>
               <div>
