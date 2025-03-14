@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="{{ craft.app.language|slice(0, 2) }}">
+
+    {% include '_partials/head' %}
+    {% set subscriptionForm = freeform.form("subscription") %}
+
+    <body id="page--{{ entry.slug|default('') }}" class="{{entry.section is defined ? entry.section.handle : ""}}">
+
+            {% include '_partials/header' %}
+
+            <main role="main" class="main">
+                {% block content %}
+
+                {% endblock %}
+            </main>
+
+            {% block footer %}
+                {% include '_partials/footer' %}
+            {% endblock %}
+    
+        <script async
+            defer
+            src="//instant.page/5.1.0"
+            type="module"
+            integrity="sha384-by67kQnR+pyfy8yWP4kPO12fHKRLHZPfEsiSXR8u2IKcTdxD805MGUXBzVPnkLHw"></script>
+    </body>
+</html>
+

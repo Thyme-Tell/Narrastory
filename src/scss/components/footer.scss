@@ -1,0 +1,112 @@
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 45px;
+    color: #fff;
+    z-index: 3;
+
+    min-height: 615px;
+    background-color: #151B24;
+
+    .hero__signup {
+        max-width: 500px;
+
+        label {
+            display: none!important;
+        }
+
+        .freeform-row {
+            height: 100%;
+        }
+
+        .freeform-form-success {
+            position: absolute;
+            bottom: -30px;
+        }
+
+        .freeform-form-errors {
+            display: none;
+        }
+
+        .freeform-errors {
+            font-family: "uncut-sans-variable";
+            margin: 15px 0 0!important;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .hero__signup {
+            flex-direction: column;
+            height: auto;
+            background: transparent;
+            gap: 10px;
+            max-width: 100%;
+            padding: 0 30px;
+
+            border: none;
+
+            input {
+                height: 56px;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.67);
+                border-radius: 6px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+}
+
+.hero__signup {
+    label {
+        display: none!important;
+    }
+
+    .freeform-row {
+        height: 100%;
+        flex-grow: 1;
+    }
+
+    .freeform-form-success {
+        position: absolute;
+        bottom: -30px;
+    }
+
+    .freeform-form-errors {
+        display: none;
+    }
+
+    .freeform-errors {
+        font-family: "uncut-sans-variable";
+        margin: 15px 0 0!important;
+    }
+
+
+    @media screen and (max-width: 768px) {
+
+        .freeform-row {
+            width: 100%;
+
+            .freeform-column {
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        .freeform-button-container {
+            width: 100%;
+        }
+
+        .freeform-button-wrapper {
+            width: 100%;
+        }
+
+        .freeform-button-column:has(.freeform-button-wrapper) {
+            width: 100%;
+        }
+    }
+}

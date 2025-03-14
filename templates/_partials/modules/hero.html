@@ -1,0 +1,38 @@
+{% set hero = entry.hero[0] %}
+{% set background = hero.image[0].url() %}
+{% set logo = hero.logo[0].url() %}
+
+<section class="hero">
+    <div class="container" style="background-image: url('{{ background }}')">
+        <div class="hero__overlay"></div>
+        <div class="hero__content">
+            <img src="{{ logo }}" alt="{{ hero.logo[0].title }}">
+        </div>
+
+        <div class="hero__ctas">
+            
+            <div class="hero__cta frosted-bg">
+                <div class="hero__title">
+                    {{hero.heroTitle}}
+                </div>
+
+                <div class="hero__description">
+                   {{hero.heroDescription}}
+                </div>
+
+                
+                {{ subscriptionForm.render }}
+            </div>
+
+            {# <button class="hero__cta--secondary">
+                <div class="copy">
+                    <h4>Narra for Senior Living</h4>
+                    <p>Lear more about group plans</p>
+                </div>
+                <div class="icon">
+                    {% include './_partials/svgs/second-cta'%}
+                </div>
+            </button> #}
+        </div>
+    </div>
+</section>

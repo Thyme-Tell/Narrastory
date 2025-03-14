@@ -1,0 +1,4 @@
+isPublic: true
+name: 'Public Schema'
+scope:
+  - 'volumes.835ac7ab-b8ac-4456-b00d-bc8e22f016d8:read'

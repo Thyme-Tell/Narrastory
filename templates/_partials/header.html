@@ -1,0 +1,38 @@
+
+<section class="header">
+{# <section class="header frosted-bg"> #}
+    <nav>
+        <div class="container">
+            <div class="nav__menu">
+                {# <ul>
+                    <li>
+                        <a class="nav-link nav-link--home" href="/">
+                            <div><span>Home</span></div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link nav-link--features" href="/features">
+                            <div><span>Features</span></div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link nav-link--mission" href="{{ siteUrl }}">
+                            <div><span>Mission</span></div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link nav-link--blog" href="{{ siteUrl }}">
+                            <div><span>Blog</span></div>
+                        </a>
+                    </li>
+                </ul>
+
+                <button class="button button--primary">
+                    Join the Waitlist {% include './_partials/svgs/arrow-right'%}
+                </button> #}
+
+                {{ subscriptionForm.render }}
+            </div>
+        </div>
+    </nav>    
+</section>

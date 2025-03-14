@@ -1,0 +1,23 @@
+{% set banner = entry.banner[0] %}
+{% set background = banner.image[0].url() %}
+
+<section class="hero hero--banner">
+    <div class="container" style="background-image: url('{{ background }}')">
+        {# <div class="hero__overlay"></div> #}
+
+        <div class="hero__ctas">
+            
+            <div class="hero__cta frosted-bg--light">
+                <div class="hero__title">
+                    {{banner.heroTitle}}
+                </div>
+
+                <div class="hero__description">
+                    {{banner.heroDescription}}
+                </div>
+
+                {{ subscriptionForm.render }}
+            </div>
+        </div>
+    </div>
+</section>

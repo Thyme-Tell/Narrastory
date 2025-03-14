@@ -1,0 +1,11 @@
+.frosted-bg {
+    opacity: 0.96;
+    background: linear-gradient(0deg, rgba(36, 47, 63, 0.70) 0%, rgba(36, 47, 63, 0.70) 100%), linear-gradient(97deg, rgba(231, 231, 231, 0.50) -0.91%, rgba(255, 255, 255, 0.22) 99.77%);
+    box-shadow: -1.752px 1.34px 7.591px -1.168px rgba(23, 51, 43, 0.09);
+    backdrop-filter: blur(8.75885009765625px);
+
+    &--light {
+        background: linear-gradient(0deg, rgba(36, 47, 63, 0.50) 0%, rgba(36, 47, 63, 0.50) 100%), linear-gradient(97deg, rgba(231, 231, 231, 0.50) -0.91%, rgba(255, 255, 255, 0.22) 99.77%);
+    }
+}
+

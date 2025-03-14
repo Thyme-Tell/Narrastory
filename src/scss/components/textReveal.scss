@@ -1,0 +1,30 @@
+.textReveal {
+    min-height: 100vh;
+    margin-top: -100vh;
+
+    &__container {
+        position: relative;
+        width: 100%;
+        margin: 0 auto;
+
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .reveal {
+        text-align: center;
+    }
+
+    @media screen and (max-width: 768px) {
+        .reveal {
+            text-align: left;
+            padding: 0 30px;
+
+            br {
+                display: none;
+            }
+        }
+    }
+}
