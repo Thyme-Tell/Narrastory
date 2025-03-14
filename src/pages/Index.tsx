@@ -1,3 +1,4 @@
+
 import ProfileForm from "@/components/ProfileForm";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
@@ -29,9 +30,15 @@ const Index = () => {
               Sign in
             </Link>
           </p>
+          <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '800ms' }}>
+            Want to learn more?{" "}
+            <Link to="/get-started" className="hover:underline text-[#A33D29]">
+              Get Started
+            </Link>
+          </p>
         </div>
 
-        <div className="animate-fade-in" style={{ animationDelay: '800ms' }}>
+        <div className="animate-fade-in" style={{ animationDelay: '1000ms' }}>
           <ProfileForm />
         </div>
       </div>
