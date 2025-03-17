@@ -1,3 +1,4 @@
+
 .book-page {
   aspect-ratio: 5/8;
   max-width: 100%;
@@ -54,39 +55,45 @@
   margin: 1em auto;
 }
 
-/* Universal drop cap styles with improved kerning */
+/* Improved universal drop cap styling */
+.drop-cap {
+  position: relative;
+}
+
 .drop-cap:first-letter {
   initial-letter: 2;
   -webkit-initial-letter: 2;
-  margin-right: 0.05em;
-  font-weight: bold;
-  font-size: 3.5em;
   float: left;
+  font-size: 3.5em;
   line-height: 0.8;
-  margin-top: 0.1em;
+  font-weight: bold;
   color: #A33D29;
-  margin-left: 0;
+  margin-top: 0.1em;
+  margin-right: 0.05em;
+  padding-right: 0.03em;
   font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
-  padding-right: 0.1em;
 }
 
-.drop-cap::first-line {
-  letter-spacing: -0.01em;
-  word-spacing: 0.02em;
-}
-
-/* Add proper spacing for the first word after drop cap */
-.drop-cap span.first-word {
-  margin-left: -0.05em; /* Adjust spacing between drop cap and first word */
-  letter-spacing: -0.01em; /* Adjust letter spacing within the first word */
-}
-
-/* Fix for text flow after drop cap */
-.drop-cap::after {
-  content: "";
+/* Wrap the rest of the first line in a span to control spacing */
+.drop-cap-content {
   display: inline-block;
-  height: 0;
-  clear: left;
+  width: calc(100% - 2em); /* Adjust based on the size of the drop cap */
+}
+
+/* First line specific styling */
+.first-line {
+  display: inline-block;
+  margin-left: 0.05em;
+  padding-left: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Second line specific styling (pushes it away from drop cap) */
+.second-line {
+  margin-left: 0.05em;
+  padding-left: 0;
+  display: block;
+  clear: right;
 }
 
 .book-preview-container {
