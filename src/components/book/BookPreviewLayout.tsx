@@ -48,16 +48,17 @@ const BookPreviewLayout = ({
 
   return (
     <div 
-      className={`fixed inset-0 bg-[#1A1A1A]/95 z-[999] flex flex-col items-center justify-start overflow-hidden w-full h-full ios-book-preview-fix ${isRendered ? 'opacity-100' : 'opacity-0'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
+      className={`fixed inset-0 bg-[#1A1A1A]/95 z-[999] flex flex-col items-center justify-center overflow-hidden w-full h-full ios-book-preview-fix ${isRendered ? 'opacity-100' : 'opacity-0'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
       style={{ 
         touchAction: "none",
         transition: "opacity 0.25s ease-in-out",
+        padding: "10px"
       }}
       data-is-mobile={isMobile ? "true" : "false"}
       data-is-rendered={isRendered ? "true" : "false"}
       data-is-ios={isIOSDevice ? "true" : "false"}
     >
-      <div className="flex-1 w-full flex overflow-hidden">
+      <div className="w-full h-full flex overflow-hidden">
         {/* TOC Sidebar - Now with bookish styling */}
         {showToc && (
           <div className={`${isMobile ? "w-56 toc-mobile" : "w-72"} h-full bg-[#f8f7f1] p-4 overflow-y-auto animate-slide-in-right border-r border-[#3C2A21]/20 shadow-lg`}>
@@ -72,7 +73,7 @@ const BookPreviewLayout = ({
           </div>
         )}
 
-        {/* Book Content - now expanded to full height */}
+        {/* Book Content - now centered in available space */}
         <div className="w-full h-full flex-1 flex flex-col relative">
           {children}
           
