@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -11,13 +10,15 @@ interface TextPageViewProps {
   pageNumber: number;
   globalPageNumber: number;
   bookTitle: string;
+  totalPageCount?: number;
 }
 
 const TextPageView = ({ 
   story, 
   pageNumber, 
   globalPageNumber, 
-  bookTitle 
+  bookTitle,
+  totalPageCount = 100 // Default to 100 if not provided
 }: TextPageViewProps) => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -64,8 +65,8 @@ const TextPageView = ({
   const pageContent = getPageContent(story, pageNumber);
   const isFirstPage = pageNumber === 1;
   
-  // Calculate progress based on global page number
-  const progress = Math.round((globalPageNumber / 100) * 100);
+  // Calculate progress based on global page number and total pages
+  const progress = Math.round((globalPageNumber / totalPageCount) * 100);
 
   const renderParagraph = (text: string, index: number, isFirstParagraph: boolean) => {
     if (!text) return null;
@@ -96,7 +97,7 @@ const TextPageView = ({
           {bookTitle}
         </div>
         <div className="text-[#383838] text-[11pt] font-serif">
-          {globalPageNumber}/100
+          {globalPageNumber}/{totalPageCount}
         </div>
       </div>
       

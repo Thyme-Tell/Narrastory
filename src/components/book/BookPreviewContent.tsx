@@ -113,6 +113,7 @@ const BookPreviewContent = ({
                   isMobile={isMobile}
                   globalPageNumber={currentPage}
                   bookTitle={bookTitle}
+                  totalPageCount={totalPageCount}
                 />
               )
             )}

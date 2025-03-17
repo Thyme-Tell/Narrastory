@@ -14,6 +14,7 @@ interface PageViewProps {
   isMobile?: boolean;
   globalPageNumber?: number; // Added to display the page number at the bottom
   bookTitle?: string; // Add book title prop
+  totalPageCount?: number; // Add total page count prop
 }
 
 const PageView = ({ 
@@ -24,7 +25,8 @@ const PageView = ({
   mediaItem,
   isMobile = false,
   globalPageNumber = 1,
-  bookTitle = "My Book"
+  bookTitle = "My Book",
+  totalPageCount = 1
 }: PageViewProps) => {
   
   if (isMediaPage && mediaItem) {
@@ -34,6 +36,7 @@ const PageView = ({
         mediaItem={mediaItem}
         globalPageNumber={globalPageNumber}
         bookTitle={bookTitle}
+        totalPageCount={totalPageCount}
       />
     );
   }
@@ -44,6 +47,7 @@ const PageView = ({
       pageNumber={pageNumber}
       globalPageNumber={globalPageNumber}
       bookTitle={bookTitle}
+      totalPageCount={totalPageCount}
     />
   );
 };

@@ -11,13 +11,15 @@ interface MediaPageViewProps {
   mediaItem: StoryMediaItem;
   globalPageNumber: number;
   bookTitle: string;
+  totalPageCount?: number;
 }
 
 const MediaPageView = ({ 
   story, 
   mediaItem, 
   globalPageNumber, 
-  bookTitle 
+  bookTitle,
+  totalPageCount = 100 // Default to 100 if not provided
 }: MediaPageViewProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -39,8 +41,8 @@ const MediaPageView = ({
     setHasError(true);
   };
   
-  // Calculate progress based on global page number
-  const progress = Math.round((globalPageNumber / 100) * 100);
+  // Calculate progress based on global page number and total pages
+  const progress = Math.round((globalPageNumber / totalPageCount) * 100);
 
   return (
     <div 
@@ -57,7 +59,7 @@ const MediaPageView = ({
             {bookTitle}
           </div>
           <div className="text-[#383838] text-[11pt] font-serif">
-            {globalPageNumber}/100
+            {globalPageNumber}/{totalPageCount}
           </div>
         </div>
         
