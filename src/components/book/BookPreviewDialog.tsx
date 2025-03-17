@@ -35,7 +35,7 @@ const BookPreviewDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="book-preview-dialog p-0 max-w-[400px] min-w-[320px] max-h-[80vh] flex flex-col overflow-hidden"
+        className="book-preview-dialog p-0 flex flex-col overflow-hidden"
         hideCloseButton
       >
         <div className="flex flex-col h-full">

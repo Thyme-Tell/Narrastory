@@ -1,10 +1,12 @@
 
 /* Book Preview Dialog Styles */
 .book-preview-dialog {
-  max-width: 400px;
+  max-width: calc(100vw - 20px);
+  width: calc(100vw - 20px);
   min-width: 320px;
   max-height: 80vh;
   background-color: #FFFFFF;
+  margin: 10px;
 }
 
 .book-preview-title {
@@ -55,8 +57,9 @@
 /* Responsive adjustments */
 @media screen and (max-width: 480px) {
   .book-preview-dialog {
-    width: 100%;
+    width: calc(100vw - 20px);
     min-width: 300px;
+    margin: 10px;
   }
   
   .book-preview-navigation {
