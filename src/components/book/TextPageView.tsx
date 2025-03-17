@@ -72,31 +72,40 @@ const TextPageView = ({
     if (!text) return null;
     
     const shouldUseDropCap = isFirstParagraph && isFirstPage;
-    let dropCapClass = '';
     
     if (shouldUseDropCap) {
-      const firstChar = text.trim()[0]?.toLowerCase();
-      if (firstChar === 'a') {
-        dropCapClass = 'drop-cap a-dropcap';
-      } else if (firstChar === 'b') {
-        dropCapClass = 'drop-cap b-dropcap';
-      } else {
-        dropCapClass = 'drop-cap';
-      }
+      // For drop cap paragraphs, we'll handle the first word specially
+      const words = text.split(' ');
+      const firstWord = words[0];
+      const restOfText = words.slice(1).join(' ');
+      
+      return (
+        <p 
+          key={index} 
+          className="indent-6 text-[11pt] text-justify leading-relaxed tracking-normal drop-cap"
+          style={{ 
+            fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif',
+            color: '#383838'
+          }}
+        >
+          {firstWord}<span> </span>{restOfText}
+        </p>
+      );
+    } else {
+      // Regular paragraph without drop cap
+      return (
+        <p 
+          key={index} 
+          className="indent-6 text-[11pt] text-justify leading-relaxed tracking-normal"
+          style={{ 
+            fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif',
+            color: '#383838'
+          }}
+        >
+          {text}
+        </p>
+      );
     }
-    
-    return (
-      <p 
-        key={index} 
-        className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${dropCapClass}`}
-        style={{ 
-          fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif',
-          color: '#383838'
-        }}
-      >
-        {text}
-      </p>
-    );
   };
 
   return (
