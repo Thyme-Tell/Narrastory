@@ -84,7 +84,7 @@ const BookPreviewContent = ({
       backgroundColor: "#f8f7f1", // Updated cream paper color
       position: "relative",
       overflow: "hidden",
-      boxShadow: "0 4px 12px rgba(60, 42, 33, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1)", // Enhanced shadow for depth
+      boxShadow: "0 4px 12px rgba(60, 42, 33, 0.2)", // Softer shadow
       display: "flex",
       flexDirection: "column",
       opacity: 1, // Ensure visibility
