@@ -11,7 +11,6 @@ import PasswordResetRequest from "./components/PasswordResetRequest";
 import PasswordResetConfirm from "./components/PasswordResetConfirm";
 import { AuthProvider } from "./contexts/AuthContext";
 import BookPreviewPage from "./pages/BookPreviewPage";
-import GetStarted from "./pages/GetStarted";
 
 // Wrapper component to pass the storyBookId from URL params
 const StoryBookSettingsWrapper = () => {
@@ -25,7 +24,6 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/get-started" element={<GetStarted />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/signin" element={<Navigate to="/sign-in" replace />} />
           <Route path="/sign-in" element={<SignIn />} />

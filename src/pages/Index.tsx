@@ -1,4 +1,3 @@
-
 import ProfileForm from "@/components/ProfileForm";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
@@ -32,7 +31,7 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="animate-fade-in" style={{ animationDelay: '1000ms' }}>
+        <div className="animate-fade-in" style={{ animationDelay: '800ms' }}>
           <ProfileForm />
         </div>
       </div>

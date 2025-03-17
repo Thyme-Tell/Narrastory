@@ -39,12 +39,13 @@ const MediaPageView = ({
   };
 
   return (
-    <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-center">
-      <div className="text-center italic text-green-800 font-serif pt-6 w-full">
+    <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-between">
+      {/* Header with book title - positioned at the very top, just like TextPageView */}
+      <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6 w-full">
         {bookTitle}
       </div>
       
-      <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1 relative">
+      <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1 relative px-[15px]">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-70 rounded-lg">
             <LoadingSpinner className="h-8 w-8 text-green-800" />
@@ -111,8 +112,9 @@ const MediaPageView = ({
         )}
       </div>
       
-      <div className="absolute bottom-8 w-full text-center">
-        <span className="text-gray-700">{globalPageNumber}</span>
+      {/* Footer with page number - now positioned at the bottom with consistent styling */}
+      <div className="w-full text-center pb-6 pt-2">
+        <span className="text-[#3C2A21] text-sm">{globalPageNumber}</span>
       </div>
     </div>
   );
