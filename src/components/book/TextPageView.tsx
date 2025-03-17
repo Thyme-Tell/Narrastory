@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
 import { getPageContent } from "@/utils/bookPagination";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 interface TextPageViewProps {
@@ -57,11 +56,35 @@ const TextPageView = ({
     currentRef?.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', checkScrollable);
     
+    // Set a timeout to hide the indicator after 5 seconds (3s display + 2s fade)
+    let timeoutId: number | null = null;
+    
+    if (showScrollIndicator) {
+      timeoutId = window.setTimeout(() => {
+        setShowScrollIndicator(false);
+      }, 5000);
+    }
+    
     return () => {
       currentRef?.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', checkScrollable);
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [story, pageNumber, hasScrolled]);
+  }, [story, pageNumber, hasScrolled, showScrollIndicator]);
+
+  // Show the indicator after 3 seconds when page loads
+  useEffect(() => {
+    const indicatorDelay = window.setTimeout(() => {
+      if (contentRef.current) {
+        const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
+        if (isScrollable && !hasScrolled) {
+          setShowScrollIndicator(true);
+        }
+      }
+    }, 3000);
+    
+    return () => clearTimeout(indicatorDelay);
+  }, [pageNumber, story, hasScrolled]);
 
   const pageContent = getPageContent(story, pageNumber);
   const isFirstPage = pageNumber === 1;
@@ -149,14 +172,13 @@ const TextPageView = ({
       </div>
       
       {showScrollIndicator && (
-        <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-in pointer-events-none">
-          <Button
-            variant="outline"
-            className="rounded-full shadow-md bg-white hover:bg-gray-100 border-[#A33D29]/20 hover:border-[#A33D29]/50 transition-all duration-300 animate-fade-in gap-2 pointer-events-none font-sans"
-          >
-            <span className="text-[#A33D29]">Scroll down to read more</span>
-            <ChevronsDown className="h-5 w-5 text-[#A33D29]" />
-          </Button>
+        <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-out pointer-events-none">
+          <div className="flex flex-col items-center opacity-70">
+            <ChevronsDown 
+              className="text-[#A33D29] animate-bounce w-8 h-8" 
+              strokeWidth={1.5} 
+            />
+          </div>
         </div>
       )}
     </div>
