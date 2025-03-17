@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -85,12 +86,7 @@ const TextPageView = ({
 
   return (
     <div 
-      className="w-full h-full book-page flex flex-col relative"
-      style={{
-        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background-page.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}
+      className="w-full h-full book-page flex flex-col relative book-page-background"
     >
       <div className="flex justify-between items-center px-4 pt-4 pb-1 relative">
         <div className="text-[#383838] text-[11pt] font-serif">

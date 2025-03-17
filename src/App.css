@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -77,6 +78,17 @@
 /* Scroll indicator styling */
 .scroll-indicator {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Book page background - cached version */
+.book-page-background {
+  background-image: url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background-page.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform; /* Helps with performance */
+  backface-visibility: hidden; /* Reduces paints */
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 /* Improved mobile support */

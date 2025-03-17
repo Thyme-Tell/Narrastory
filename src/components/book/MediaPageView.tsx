@@ -46,12 +46,7 @@ const MediaPageView = ({
 
   return (
     <div 
-      className="w-full h-full overflow-auto book-page flex flex-col items-center justify-between"
-      style={{
-        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background-page.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}
+      className="w-full h-full overflow-auto book-page flex flex-col items-center justify-between book-page-background"
     >
       <div className="w-full">
         <div className="flex justify-between items-center px-4 pt-4 pb-1 w-full">
