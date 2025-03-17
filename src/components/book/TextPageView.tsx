@@ -81,9 +81,9 @@ const TextPageView = ({
   };
 
   return (
-    <div className="w-full h-full bg-[#f8f7f1] book-page flex flex-col relative">
+    <div className="w-full h-full paper-texture book-page flex flex-col relative">
       {/* Header with book title */}
-      <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6">
+      <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6 bg-white/70">
         {bookTitle}
       </div>
       
@@ -91,7 +91,7 @@ const TextPageView = ({
         ref={contentRef}
         className="flex-1 mx-auto book-content px-[15px] py-4 overflow-y-auto"
       >
-        <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
+        <div className="book-content-wrapper prose max-w-none font-serif text-[11pt] leading-relaxed">
           {isFirstPage && (
             <h1 className="text-center font-serif text-[16pt] mb-8 font-bold text-[#3C2A21] mt-4">
               {story.title || "Untitled Story"}
@@ -119,7 +119,7 @@ const TextPageView = ({
       )}
       
       {/* Footer with page number */}
-      <div className="w-full text-center pb-6 pt-2">
+      <div className="w-full text-center pb-6 pt-2 bg-white/70">
         <span className="text-[#3C2A21] text-sm">{globalPageNumber}</span>
       </div>
     </div>
