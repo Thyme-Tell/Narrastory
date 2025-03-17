@@ -25,11 +25,9 @@
   }
 }
 
-/* Import Playfair Display font for book typography */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
 
-/* Apply Apache red to all links for better accessibility */
 a {
   color: #A33D29;
   text-decoration: none;
@@ -40,32 +38,27 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Card styles */
 .bg-card {
   background-color: white !important;
 }
 
-/* Dropdown menu styles */
 .radix-dropdown-content {
   background-color: white !important;
   opacity: 1 !important;
 }
 
-/* Book preview styles */
 .book-page {
-  /* 5x8 inch book format with proper aspect ratio */
   aspect-ratio: 5/8;
   max-width: 100%;
   max-height: 100%;
-  background-color: #f8f7f1; /* Cream paper color */
-  overflow: hidden; /* Prevent content overflow */
-  position: relative; /* For absolute positioning of elements if needed */
+  background-color: #f8f7f1; 
+  overflow: hidden; 
+  position: relative; 
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
 }
 
 .book-content {
-  /* Standard book content width with reduced margins */
-  max-width: calc(100% - 30px); /* Adjusted for 15px margins on each side */
+  max-width: calc(100% - 30px); 
   margin: 0 auto;
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
 }
@@ -79,22 +72,19 @@ a:hover {
   color: #333333;
 }
 
-/* Text indentation for paragraphs to match book format */
 .book-page p {
   text-indent: 1.5em;
-  margin-bottom: 0; /* Remove space between paragraphs */
+  margin-bottom: 0; 
   font-size: 11pt;
-  text-align: justify; /* Justify text on both sides */
+  text-align: justify; 
   line-height: 1.5;
   letter-spacing: -0.01em;
 }
 
-/* First paragraph of chapters should not be indented */
 .book-page .chapter-start p:first-of-type {
   text-indent: 0;
 }
 
-/* Story title on first page */
 .book-page h1 {
   font-size: 16pt;
   text-align: center;
@@ -103,14 +93,12 @@ a:hover {
   color: #3C2A21;
 }
 
-/* Ensure media content stays within page bounds */
 .book-page img, .book-page video {
   max-width: 100%;
   height: auto;
   margin: 1em auto;
 }
 
-/* Add animation for page transitions */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -120,7 +108,6 @@ a:hover {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Book preview container with 5:8 aspect ratio */
 .book-preview-container {
   width: 100%;
   position: relative;
@@ -137,7 +124,6 @@ a:hover {
   object-fit: contain;
 }
 
-/* Book Cover Styles */
 .book-cover-container {
   position: relative;
   display: inline-block;
@@ -189,7 +175,6 @@ a:hover {
   z-index: 5;
 }
 
-/* Cover editor specific styles */
 .cover-editor-preview {
   height: 60vh;
   min-height: 300px;
@@ -203,7 +188,6 @@ a:hover {
   overflow-y: auto;
 }
 
-/* Mobile-specific styles */
 @media (max-width: 768px) {
   .book-preview-container {
     max-width: 100%;
@@ -215,17 +199,14 @@ a:hover {
     line-height: 1.3;
   }
   
-  /* Adjust controls for book preview on mobile */
   .mobile-book-controls {
     transform: scale(0.85);
   }
   
-  /* Add bottom padding for mobile cover editor to avoid button overlap */
   .cover-editor-mobile {
-    padding-bottom: 80px; /* Space for fixed bottom buttons */
+    padding-bottom: 80px; 
   }
   
-  /* Fixed controls styling */
   .cover-editor-fixed-controls {
     position: fixed;
     bottom: 0;
@@ -237,17 +218,15 @@ a:hover {
     padding: 10px 16px;
   }
   
-  /* Cover editor mobile adjustments */
   .cover-editor-preview {
     height: 40%;
   }
   
   .cover-editor-controls {
     height: 60%;
-    padding-bottom: 72px; /* Add padding to ensure content isn't hidden behind fixed footer */
+    padding-bottom: 72px; 
   }
   
-  /* Book preview modal mobile optimizations */
   .book-preview-modal-mobile {
     width: 100vw !important;
     height: 100dvh !important;
@@ -256,13 +235,11 @@ a:hover {
     overflow: hidden !important;
   }
   
-  /* Ensure tables of contents doesn't overflow */
   .toc-mobile {
     max-width: 80vw;
     overflow-x: hidden;
   }
   
-  /* Fix for iPhone 16 and similar devices - ensure fixed footers are always visible */
   .fixed-footer-ios {
     position: fixed;
     bottom: 0;
@@ -273,12 +250,10 @@ a:hover {
     padding-bottom: env(safe-area-inset-bottom, 16px);
   }
   
-  /* Add padding to content to prevent it from being hidden behind fixed footer */
   .ios-footer-padding {
     padding-bottom: 80px;
   }
   
-  /* Mobile book preview text size adjustments */
   .book-preview-mobile-text {
     font-size: 14px !important;
     line-height: 1.4 !important;
@@ -292,14 +267,12 @@ a:hover {
     padding: 12px !important;
   }
   
-  /* Ensure book preview is visible on mobile devices */
   [data-is-mobile="true"].book-format {
     max-width: 90vw !important;
     max-height: 70vh !important;
     margin: 0 auto;
   }
   
-  /* Ensure the preview container takes full height on mobile */
   .book-preview-mobile-container {
     height: calc(100vh - 120px) !important;
     display: flex;
@@ -308,7 +281,6 @@ a:hover {
   }
 }
 
-/* Animations for mobile transitions */
 @keyframes slide-in-right {
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
@@ -318,25 +290,20 @@ a:hover {
   animation: slide-in-right 0.3s ease-out;
 }
 
-/* Touch-friendly style improvements */
 @media (max-width: 768px) {
-  /* Make touch targets larger */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
   }
   
-  /* Prevent text from getting too small */
   .min-text-size {
     font-size: 16px !important;
   }
   
-  /* Ensure buttons have enough spacing */
   .mobile-button-spacing > * {
     margin: 0.25rem !important;
   }
   
-  /* Fix for book preview on iOS devices */
   .ios-book-preview-fix {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
