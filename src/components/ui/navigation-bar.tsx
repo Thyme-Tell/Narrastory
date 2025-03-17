@@ -35,7 +35,7 @@ const NavigationBar = ({
       <div className="w-full flex gap-2 justify-between">
         <Button
           onClick={onLeftButtonClick}
-          className="flex-1 min-w-[80px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
+          className="flex-1 min-w-[80px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-[11px] tracking-[-0.01em] rounded-lg px-[10px]"
           style={{
             fontFamily:
               'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -47,19 +47,19 @@ const NavigationBar = ({
 
         <Button
           onClick={onCenterButtonClick}
-          className="flex-1 min-w-[80px] h-11 bg-[rgb(31,41,55)] text-white border-none hover:bg-[rgb(17,24,39)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
+          className="flex-1 min-w-[80px] h-11 bg-[rgb(31,41,55)] text-white border-none hover:bg-[rgb(17,24,39)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-[11px] tracking-[-0.01em] rounded-lg px-[10px]"
           style={{
             fontFamily:
               'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           }}
         >
           {centerButtonText}
-          <ChevronRight className="ml-1 h-4 w-4" />
+          <ChevronRight className="ml-1 h-3 w-3" />
         </Button>
 
         <Button
           onClick={onRightButtonClick}
-          className="flex-1 min-w-[80px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
+          className="flex-1 min-w-[80px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-[11px] tracking-[-0.01em] rounded-lg px-[10px]"
           style={{
             fontFamily:
               'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -67,7 +67,7 @@ const NavigationBar = ({
           variant="outline"
         >
           {rightButtonText}
-          <ArrowRight className="ml-1 h-4 w-4" />
+          <ArrowRight className="ml-1 h-3 w-3" />
         </Button>
       </div>
     </div>
