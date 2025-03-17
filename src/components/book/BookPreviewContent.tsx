@@ -97,7 +97,6 @@ const BookPreviewContent = ({
         <BookCover
           coverData={coverData}
           authorName={authorName}
-          zoomLevel={zoomLevel}
         />
       );
     }
@@ -108,8 +107,7 @@ const BookPreviewContent = ({
         <TableOfContentsPage
           stories={stories}
           storyPages={storyPages}
-          jumpToPage={jumpToPage}
-          zoomLevel={zoomLevel}
+          onNavigate={jumpToPage}
         />
       );
     }
@@ -122,8 +120,11 @@ const BookPreviewContent = ({
       if (isMediaPage && mediaItem) {
         return (
           <MediaPageView
-            media={mediaItem}
-            zoomLevel={zoomLevel}
+            story={story}
+            mediaItem={mediaItem}
+            globalPageNumber={currentPage}
+            bookTitle={coverData.title || "My Book"}
+            totalPageCount={totalPageCount}
           />
         );
       }
@@ -134,8 +135,10 @@ const BookPreviewContent = ({
           <PageView
             story={story}
             pageNumber={pageWithinStory || 0}
-            totalPages={totalPagesInStory || 0}
-            zoomLevel={zoomLevel}
+            totalPagesInStory={totalPagesInStory || 0}
+            globalPageNumber={currentPage}
+            bookTitle={coverData.title || "My Book"}
+            totalPageCount={totalPageCount}
           />
         );
       }

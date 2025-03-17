@@ -162,13 +162,13 @@
   display: block;
   width: 120px;
   height: auto;
-  margin: 7px auto 1.5em;
+  margin: 5px auto 1.5em; /* Changed from 7px to 5px to move divider closer to title */
 }
 
 /* Updated scroll indicator styles with new position and size */
 .scroll-indicator-container {
   position: absolute;
-  bottom: 10%;
+  bottom: 8%; /* Changed from 10% to 8% */
   left: 0;
   right: 0;
   display: flex;
@@ -183,8 +183,8 @@
 }
 
 .scroll-down-icon {
-  width: 54.6px; /* 30% smaller than 78px */
-  height: 27.3px; /* 30% smaller than 39px */
+  width: 54.6px; /* Already 30% smaller than original 78px */
+  height: 27.3px; /* Already 30% smaller than original 39px */
   animation: bounce 1.5s infinite;
 }
 
