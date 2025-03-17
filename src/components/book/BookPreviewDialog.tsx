@@ -35,11 +35,11 @@ const BookPreviewDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="book-preview-dialog p-0 flex flex-col overflow-hidden"
+        className="book-preview-dialog p-0"
         hideCloseButton
       >
         <div className="book-preview-content-container">
-          <div className="book-preview-page flex flex-col">
+          <div className="book-preview-page">
             {/* Header Section */}
             <div className="px-6 pt-6">
               <div className="flex items-center justify-between text-gray-500 mb-3">
@@ -68,7 +68,7 @@ const BookPreviewDialog = ({
             </div>
             
             {/* Footer Navigation */}
-            <div className="p-6 pt-8 border-t border-gray-200 book-preview-navigation">
+            <div className="px-6 pb-6 pt-4 book-preview-navigation">
               <button 
                 onClick={onPreviousPage} 
                 disabled={currentPage <= 1}
