@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -63,11 +62,9 @@ const TextPageView = ({
   const pageContent = getPageContent(story, pageNumber);
   const isFirstPage = pageNumber === 1;
 
-  // Function to render paragraph with proper drop cap handling
   const renderParagraph = (text: string, index: number, isFirstParagraph: boolean) => {
     if (!text) return null;
     
-    // Only apply drop cap to the first paragraph on the first page
     const shouldUseDropCap = isFirstParagraph && isFirstPage;
     
     return (
@@ -84,12 +81,11 @@ const TextPageView = ({
     <div 
       className="w-full h-full book-page flex flex-col relative"
       style={{
-        backgroundImage: "url('/lovable-uploads/4fc12b10-f1ea-4e24-81c6-c34b331c0fcc.png')",
+        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background.png')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}
     >
-      {/* Header with book title */}
       <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6">
         {bookTitle}
       </div>
@@ -125,7 +121,6 @@ const TextPageView = ({
         </div>
       )}
       
-      {/* Footer with page number */}
       <div className="w-full text-center pb-6 pt-2">
         <span className="text-[#3C2A21] text-sm">{globalPageNumber}</span>
       </div>

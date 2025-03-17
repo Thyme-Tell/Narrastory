@@ -42,7 +42,7 @@ const MediaPageView = ({
     <div 
       className="w-full h-full overflow-auto p-3 sm:p-6 book-page flex flex-col items-center justify-between"
       style={{
-        backgroundImage: "url('/lovable-uploads/4fc12b10-f1ea-4e24-81c6-c34b331c0fcc.png')",
+        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background.png')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}
