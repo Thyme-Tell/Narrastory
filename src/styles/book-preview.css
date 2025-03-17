@@ -1,0 +1,69 @@
+
+/* Book Preview Dialog Styles */
+.book-preview-dialog {
+  max-width: 400px;
+  min-width: 320px;
+  max-height: 80vh;
+  background-color: #FFFFFF;
+}
+
+.book-preview-title {
+  font-family: 'Libre Baskerville', 'Playfair Display', 'Times New Roman', serif;
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.book-preview-content {
+  font-family: 'Libre Baskerville', 'Playfair Display', 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1A1A1A;
+}
+
+.book-preview-content p {
+  margin-bottom: 24px;
+}
+
+.book-preview-navigation {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.book-preview-button {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.book-preview-button-back,
+.book-preview-button-next {
+  background-color: #F1F1F1;
+  color: #333333;
+}
+
+.book-preview-button-page {
+  background-color: #333333;
+  color: #FFFFFF;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 480px) {
+  .book-preview-dialog {
+    width: 100%;
+    min-width: 300px;
+  }
+  
+  .book-preview-navigation {
+    gap: 4px;
+  }
+  
+  .book-preview-button {
+    padding: 8px 12px;
+  }
+}

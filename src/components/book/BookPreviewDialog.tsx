@@ -1,58 +1,65 @@
 
 import React from "react";
-import { Book, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Book } from "lucide-react";
 import { cn } from "@/lib/utils";
-import "../../styles/book.css";
 
 interface BookPreviewDialogProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   title: string;
-  author: string;
   content: string;
   currentPage: number;
   totalPages: number;
-  onNextPage: () => void;
-  onPreviousPage: () => void;
+  onNextPage?: () => void;
+  onPreviousPage?: () => void;
 }
 
 const BookPreviewDialog = ({
   open,
-  onClose,
+  onOpenChange,
   title,
-  author,
   content,
-  currentPage,
-  totalPages,
+  currentPage = 1,
+  totalPages = 1,
   onNextPage,
   onPreviousPage,
 }: BookPreviewDialogProps) => {
-  if (!open) return null;
+  // Format the date as MM.DD.YY
+  const formattedDate = new Date().toLocaleDateString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: '2-digit'
+  }).replace(/\//g, '.');
 
   return (
-    <div className="book-preview-backdrop">
-      <div className="book-preview-container">
-        <div className="book-frame">
-          {/* Header */}
-          <div className="book-header">
-            <div>{title}</div>
-            <div className="book-icon">
-              <Book size={16} />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className="book-preview-dialog p-0 max-w-[400px] min-w-[320px] max-h-[80vh] flex flex-col overflow-hidden"
+        hideCloseButton
+      >
+        <div className="flex flex-col h-full">
+          {/* Header Section */}
+          <div className="px-6 pt-6">
+            <div className="flex items-center justify-between text-gray-500 mb-3">
+              <span className="text-sm font-sans">My Stories</span>
+              <Book className="w-5 h-5" />
+              <span className="text-sm font-sans">{formattedDate}</span>
             </div>
-            <div>{author}</div>
+            <div className="border-b border-gray-200 w-full"></div>
           </div>
-          
-          <div className="book-header-divider"></div>
           
           {/* Title Section */}
-          <div className="book-title-section">
-            <h1 className="book-title">{title}</h1>
-            <div className="book-title-divider"></div>
+          <div className="px-6 pt-8 pb-6 text-center">
+            <h1 className="book-preview-title">{title}</h1>
+            <div className="flex justify-center">
+              <div className="w-16 border-t border-gray-300"></div>
+            </div>
           </div>
           
-          {/* Content Area */}
-          <div className="book-content-area">
-            <div className="book-text">
+          {/* Content Area - Scrollable */}
+          <div className="px-6 flex-1 overflow-y-auto">
+            <div className="book-preview-content">
               {content.split('\n\n').map((paragraph, idx) => (
                 <p key={idx}>{paragraph}</p>
               ))}
@@ -60,41 +67,36 @@ const BookPreviewDialog = ({
           </div>
           
           {/* Footer Navigation */}
-          <div className="book-navigation">
+          <div className="p-6 pt-8 border-t border-gray-200 book-preview-navigation">
             <button 
               onClick={onPreviousPage} 
               disabled={currentPage <= 1}
               className={cn(
-                "book-nav-button",
-                currentPage <= 1 ? "opacity-50 cursor-not-allowed" : ""
+                "book-preview-button book-preview-button-back",
+                currentPage <= 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
               )}
             >
               Back
             </button>
             
-            <div className="book-nav-page">
+            <button className="book-preview-button book-preview-button-page">
               Page {currentPage} / {totalPages}
-            </div>
+            </button>
             
             <button 
               onClick={onNextPage} 
               disabled={currentPage >= totalPages}
               className={cn(
-                "book-nav-button",
-                currentPage >= totalPages ? "opacity-50 cursor-not-allowed" : ""
+                "book-preview-button book-preview-button-next",
+                currentPage >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
               )}
             >
               Next
             </button>
           </div>
         </div>
-        
-        {/* Close button below the book */}
-        <div className="close-preview" onClick={onClose}>
-          Close Preview
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

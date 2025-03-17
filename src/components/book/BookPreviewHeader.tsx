@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Book, ZoomIn, ZoomOut, Bookmark, X, Download } from "lucide-react";
+import { X, ZoomIn, ZoomOut, Menu, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,6 @@ interface BookPreviewHeaderProps {
   onZoomOut: () => void;
   onToggleBookmark: () => void;
   onClose: () => void;
-  onDownloadPDF?: () => void;
   isMobile?: boolean;
 }
 
@@ -30,64 +29,74 @@ const BookPreviewHeader = ({
   onZoomOut,
   onToggleBookmark,
   onClose,
-  onDownloadPDF,
   isMobile = false,
 }: BookPreviewHeaderProps) => {
-  return (
-    <div className="w-full bg-white p-4 flex flex-wrap items-center justify-between gap-2">
-      <div className={`flex ${isMobile ? 'flex-wrap' : ''} items-center gap-2`}>
-        <Button 
-          variant={showToc ? "default" : "outline"}
-          size={isMobile ? "icon" : "sm"}
-          onClick={onToggleToc}
-          className={isMobile ? "p-2" : ""}
-        >
-          <Book className="h-4 w-4" />
-          {!isMobile && <span className="ml-2">Contents</span>}
-        </Button>
-        
-        <div className="flex items-center space-x-1">
-          <Button variant="outline" size="icon" onClick={onZoomOut} className={isMobile ? "h-8 w-8 p-1" : ""}>
-            <ZoomOut className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
-          </Button>
-          <span className="text-xs sm:text-sm">{Math.round(zoomLevel * 100)}%</span>
-          <Button variant="outline" size="icon" onClick={onZoomIn} className={isMobile ? "h-8 w-8 p-1" : ""}>
-            <ZoomIn className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
-          </Button>
-        </div>
-        
-        <Button 
-          variant="outline" 
-          size={isMobile ? "icon" : "sm"}
-          onClick={onToggleBookmark}
-          className={cn(
-            bookmarks.includes(currentPage) && "text-amber-500",
-            isMobile ? "p-2" : ""
-          )}
-        >
-          <Bookmark className="h-4 w-4" />
-          {!isMobile && <span className="ml-2">{bookmarks.includes(currentPage) ? "Bookmarked" : "Bookmark"}</span>}
-        </Button>
+  const buttonClass = cn(
+    "h-8 w-8 rounded-full",
+    isMobile ? "p-1.5" : "p-2"
+  );
+  
+  const isCurrentPageBookmarked = bookmarks.includes(currentPage);
 
-        {onDownloadPDF && (
-          <Button 
-            variant="outline" 
-            size={isMobile ? "icon" : "sm"}
-            onClick={onDownloadPDF}
-            className={isMobile ? "p-2" : ""}
-          >
-            <Download className="h-4 w-4" />
-            {!isMobile && <span className="ml-2">Download</span>}
-          </Button>
-        )}
+  return (
+    <div className="bg-black/10 backdrop-blur-md w-full py-2 px-3 flex items-center justify-between z-50">
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onToggleToc}
+          className={buttonClass}
+        >
+          <Menu className="h-4 w-4 text-white" />
+          <span className="sr-only">Toggle Table of Contents</span>
+        </Button>
+        
+        <div className="text-white text-sm">
+          Page {currentPage + 1} of {totalPageCount}
+        </div>
       </div>
       
       <div className="flex items-center gap-2">
-        <span className="text-xs sm:text-sm whitespace-nowrap">
-          {currentPage + 1}/{totalPageCount}
-        </span>
-        <Button variant="ghost" size="icon" onClick={onClose} className={isMobile ? "h-8 w-8 p-1" : ""}>
-          <X className={isMobile ? "h-4 w-4" : "h-5 w-5"} />
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onZoomOut}
+          className={buttonClass}
+          disabled={zoomLevel <= 0.5}
+        >
+          <ZoomOut className="h-4 w-4 text-white" />
+          <span className="sr-only">Zoom Out</span>
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onZoomIn}
+          className={buttonClass}
+          disabled={zoomLevel >= 2}
+        >
+          <ZoomIn className="h-4 w-4 text-white" />
+          <span className="sr-only">Zoom In</span>
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onToggleBookmark}
+          className={cn(buttonClass, isCurrentPageBookmarked && "text-amber-400")}
+        >
+          <Bookmark className={cn("h-4 w-4 text-white", isCurrentPageBookmarked && "fill-amber-400 text-amber-400")} />
+          <span className="sr-only">Bookmark Page</span>
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onClose}
+          className={buttonClass}
+        >
+          <X className="h-4 w-4 text-white" />
+          <span className="sr-only">Close</span>
         </Button>
       </div>
     </div>
