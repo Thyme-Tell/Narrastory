@@ -172,8 +172,11 @@ const TextPageView = ({
       
       {showScrollIndicator && (
         <div className="scroll-indicator-container">
-          <div className="chevron-vector vector-top"></div>
-          <div className="chevron-vector vector-bottom"></div>
+          <img 
+            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//down.svg" 
+            alt="Scroll down" 
+            className="scroll-down-icon"
+          />
         </div>
       )}
     </div>
