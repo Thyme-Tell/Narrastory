@@ -1,3 +1,4 @@
+
 .book-page {
   aspect-ratio: 5/8;
   max-width: 100%;
@@ -54,6 +55,7 @@
   margin: 1em auto;
 }
 
+/* Common drop cap styles */
 .drop-cap:first-letter {
   initial-letter: 2;
   -webkit-initial-letter: 2;
@@ -74,6 +76,7 @@
   word-spacing: 0.02em;
 }
 
+/* A-specific drop cap adjustments */
 .drop-cap.a-dropcap:first-letter {
   margin-right: 0.02em;
 }
@@ -82,6 +85,17 @@
   position: relative;
 }
 
+/* B-specific drop cap adjustments */
+.drop-cap.b-dropcap:first-letter {
+  margin-right: 0.03em;
+  padding-right: 0.08em;
+}
+
+.drop-cap.b-dropcap {
+  position: relative;
+}
+
+/* Fix for text flow after drop cap */
 .drop-cap::after {
   content: "";
   display: inline-block;

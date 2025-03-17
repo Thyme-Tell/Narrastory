@@ -72,10 +72,18 @@ const TextPageView = ({
     if (!text) return null;
     
     const shouldUseDropCap = isFirstParagraph && isFirstPage;
-    const startsWithA = text.trim().startsWith('A');
-    const dropCapClass = shouldUseDropCap 
-      ? `drop-cap${startsWithA ? ' a-dropcap' : ''}` 
-      : '';
+    let dropCapClass = '';
+    
+    if (shouldUseDropCap) {
+      const firstChar = text.trim()[0]?.toLowerCase();
+      if (firstChar === 'a') {
+        dropCapClass = 'drop-cap a-dropcap';
+      } else if (firstChar === 'b') {
+        dropCapClass = 'drop-cap b-dropcap';
+      } else {
+        dropCapClass = 'drop-cap';
+      }
+    }
     
     return (
       <p 
