@@ -1,35 +1,41 @@
 
+/* Book preview styling */
 .book-page {
   aspect-ratio: 5/8;
   max-width: 100%;
   max-height: 100%;
-  background-color: #f8f7f1; 
+  background-color: #f0f0f0; 
   overflow: hidden; 
   position: relative; 
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
+  box-shadow: -4px 6px 11px 1px rgba(0, 0, 0, 0.07), 
+              inset 0px 0px 11.2px -4px rgba(59, 71, 77, 0.12), 
+              inset 1px -2px 19.6px -7px rgba(59, 71, 77, 0.09);
+  border-radius: 3px;
 }
 
 .book-content {
-  max-width: calc(100% - 30px); 
+  max-width: calc(100% - 60px); 
   margin: 0 auto;
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
 }
 
 .book-text {
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
-  font-size: 11pt;
-  line-height: 1.5;
+  font-size: 18px;
+  line-height: 1.45;
   overflow-wrap: break-word;
   word-break: normal;
-  color: #333333;
+  color: #383838;
+  text-align: justify;
 }
 
 .book-page p {
   text-indent: 1.5em;
-  margin-bottom: 0; 
-  font-size: 11pt;
+  margin-bottom: 0.6em; 
+  font-size: 18px;
   text-align: justify; 
-  line-height: 1.5;
+  line-height: 1.45;
   letter-spacing: -0.01em;
 }
 
@@ -38,11 +44,11 @@
 }
 
 .book-page h1 {
-  font-size: 16pt;
+  font-size: 28px;
   text-align: center;
-  margin-bottom: 1.5em;
-  font-weight: bold;
-  color: #3C2A21;
+  margin-bottom: 0.8em;
+  font-weight: 600;
+  color: #262626;
 }
 
 .book-page img, .book-page video {
@@ -60,22 +66,172 @@
   float: left;
   line-height: 0.8;
   margin-top: 0.1em;
-  color: #A33D29;
-  margin-left: 0.41em;
+  color: #383838;
 }
 
 .book-preview-container {
   width: 100%;
+  max-width: 507px;
+  margin: 0 auto;
   position: relative;
   aspect-ratio: 5/8;
   overflow: hidden;
+  background-color: #181818;
 }
 
-.book-preview-image {
+.book-frame {
+  position: relative;
+  width: 393px;
+  max-width: 100%;
+  height: 600px;
+  margin: 52px auto;
+  background: #F0F0F0;
+  border-radius: 3px;
+  box-shadow: -4px 6px 11px 1px rgba(0, 0, 0, 0.07);
+}
+
+.book-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px 25px 15px;
+  font-size: 16px;
+  color: #383838;
+  font-family: 'Libre Baskerville', serif;
+}
+
+.book-header-divider {
+  height: 2px;
+  background: rgba(36, 38, 39, 0.19);
+  margin: 0 26px;
+  position: relative;
+}
+
+.book-header-divider::before {
+  content: "";
   position: absolute;
+  left: 0;
   top: 0;
+  width: 37px;
+  height: 2px;
+  background: rgba(36, 38, 39, 0.5);
+  border-radius: 20px;
+}
+
+.book-title-section {
+  text-align: center;
+  padding: 34px 0 20px;
+}
+
+.book-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 15px;
+  font-family: 'Libre Baskerville', serif;
+}
+
+.book-title-divider {
+  width: 56px;
+  height: 2px;
+  background: rgba(41, 42, 53, 0.7);
+  margin: 0 auto;
+  position: relative;
+}
+
+.book-content-area {
+  padding: 0 34px;
+  margin-bottom: 50px;
+}
+
+.book-navigation {
+  position: absolute;
+  bottom: 30px;
   left: 0;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 34px;
+  font-family: 'Inter', sans-serif;
+}
+
+.book-nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 79px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid rgba(36, 38, 39, 0.2);
+  border-radius: 5px;
+  color: #242E3E;
+  font-size: 14px;
+  font-weight: 350;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book-nav-button:hover {
+  background: rgba(36, 38, 39, 0.05);
+}
+
+.book-nav-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 102px;
+  height: 34px;
+  background: linear-gradient(76.88deg, #242F3F 65.85%, #394351 110.13%);
+  box-shadow: -1px 1px 4.8px -2px rgba(36, 38, 39, 0.4), 
+              -3px 4px 7.2px -1px rgba(40, 51, 65, 0.4), 
+              inset -4px -3px 14px rgba(36, 38, 39, 0.43);
+  border-radius: 5px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 350;
+  cursor: pointer;
+}
+
+.close-preview {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: #FFFFFF;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.book-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.book-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+}
+
+@media (max-width: 768px) {
+  .book-frame {
+    width: 320px;
+    height: 500px;
+    margin: 40px auto;
+  }
+  
+  .book-content-area {
+    padding: 0 20px;
+  }
+  
+  .book-navigation {
+    padding: 0 20px;
+  }
 }
