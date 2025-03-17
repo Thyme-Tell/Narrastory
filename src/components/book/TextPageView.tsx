@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -72,7 +71,7 @@ const TextPageView = ({
       
       <div 
         ref={contentRef}
-        className="flex-1 mx-auto book-content px-8 py-4 overflow-y-auto"
+        className="flex-1 mx-auto book-content px-[30px] py-4 overflow-y-auto"
       >
         <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
           {isFirstPage && (
