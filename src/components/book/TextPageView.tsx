@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -84,7 +85,7 @@ const TextPageView = ({
             pageContent.map((paragraph, index) => (
               <p 
                 key={index} 
-                className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${index === 0 && isFirstPage ? "drop-cap" : ""} ${index === 0 && isFirstPage ? "no-indent" : ""}`}
+                className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${index === 0 && isFirstPage ? "first-paragraph" : ""}`}
               >
                 {paragraph}
               </p>

@@ -11,16 +11,22 @@
     text-indent: 0 !important;
   }
   
-  .drop-cap:first-letter {
-    initial-letter: 2;
-    -webkit-initial-letter: 2;
-    margin-right: 0.1em;
-    font-weight: bold;
-    font-size: 3.5em;
+  .first-paragraph {
+    position: relative;
+    text-indent: 0;
+  }
+  
+  .first-paragraph::first-letter {
     float: left;
+    font-size: 3.5em;
     line-height: 0.8;
+    margin-right: 0.1em;
     margin-top: 0.1em;
     color: #A33D29;
+    font-weight: bold;
+    padding-left: 1.5em;
+    text-indent: 0;
+    margin-left: -1.5em;
   }
 }
 
