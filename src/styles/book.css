@@ -25,7 +25,7 @@
 }
 
 .book-page p {
-  text-indent: 1.5em;
+  text-indent: 1em; /* Standardized indentation to 1em for all paragraphs */
   margin-bottom: 0; 
   font-size: 11pt;
   text-align: justify; 
@@ -54,14 +54,15 @@
 .drop-cap:first-letter {
   initial-letter: 2;
   -webkit-initial-letter: 2;
-  margin-right: 0.1em;
+  margin-right: 0; /* Removed margin to eliminate gap between drop cap and adjacent text */
   font-weight: bold;
   font-size: 3.5em;
   float: left;
   line-height: 0.8;
   margin-top: 0.1em;
   color: #A33D29;
-  margin-left: 0.41em;
+  padding-right: 0.05em; /* Small padding to prevent too tight spacing */
+  margin-left: 0; /* Removed left margin */
 }
 
 .book-preview-container {

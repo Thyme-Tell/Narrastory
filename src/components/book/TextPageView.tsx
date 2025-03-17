@@ -73,7 +73,7 @@ const TextPageView = ({
     return (
       <p 
         key={index} 
-        className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${shouldUseDropCap ? "drop-cap" : ""}`}
+        className={`text-[11pt] text-justify leading-relaxed tracking-normal ${shouldUseDropCap ? "drop-cap" : ""}`}
       >
         {text}
       </p>
