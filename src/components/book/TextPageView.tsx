@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
-import { Progress } from "@/components/ui/progress";
+import { ChevronsDown } from "lucide-react";
 import { getPageContent } from "@/utils/bookPagination";
+import { Progress } from "@/components/ui/progress";
 
 interface TextPageViewProps {
   story: Story;
@@ -20,22 +22,17 @@ const TextPageView = ({
 }: TextPageViewProps) => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [pageShownIndicator, setPageShownIndicator] = useState<number | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     setHasScrolled(false);
-    setShowScrollIndicator(false);
-    if (pageShownIndicator !== pageNumber) {
-      setPageShownIndicator(null);
-    }
-  }, [globalPageNumber, story, pageNumber, pageShownIndicator]);
+  }, [globalPageNumber, story, pageNumber]);
   
   useEffect(() => {
     const checkScrollable = () => {
       if (contentRef.current) {
         const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
-        setShowScrollIndicator(isScrollable && !hasScrolled && pageShownIndicator !== pageNumber);
+        setShowScrollIndicator(isScrollable && !hasScrolled);
       }
     };
 
@@ -43,6 +40,11 @@ const TextPageView = ({
       if (contentRef.current) {
         if (contentRef.current.scrollTop > 20) {
           setHasScrolled(true);
+        }
+        
+        const isAtBottom = contentRef.current.scrollHeight - contentRef.current.scrollTop <= contentRef.current.clientHeight + 10;
+        
+        if (contentRef.current.scrollTop > 20 || isAtBottom) {
           setShowScrollIndicator(false);
         }
       }
@@ -54,33 +56,35 @@ const TextPageView = ({
     currentRef?.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', checkScrollable);
     
+    // Set a timeout to hide the indicator after 5 seconds (3s display + 2s fade)
+    let timeoutId: number | null = null;
+    
     if (showScrollIndicator) {
-      setPageShownIndicator(pageNumber);
-      const timeoutId = window.setTimeout(() => {
+      timeoutId = window.setTimeout(() => {
         setShowScrollIndicator(false);
-      }, 3000);
-      
-      return () => clearTimeout(timeoutId);
+      }, 5000);
     }
     
     return () => {
       currentRef?.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', checkScrollable);
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [story, pageNumber, hasScrolled, showScrollIndicator, pageShownIndicator]);
+  }, [story, pageNumber, hasScrolled, showScrollIndicator]);
 
+  // Show the indicator after 3 seconds when page loads
   useEffect(() => {
     const indicatorDelay = window.setTimeout(() => {
-      if (contentRef.current && pageShownIndicator !== pageNumber) {
+      if (contentRef.current) {
         const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
         if (isScrollable && !hasScrolled) {
           setShowScrollIndicator(true);
         }
       }
-    }, 500);
+    }, 3000);
     
     return () => clearTimeout(indicatorDelay);
-  }, [pageNumber, story, hasScrolled, pageShownIndicator]);
+  }, [pageNumber, story, hasScrolled]);
 
   const pageContent = getPageContent(story, pageNumber);
   const isFirstPage = pageNumber === 1;
@@ -93,6 +97,7 @@ const TextPageView = ({
     const shouldUseDropCap = isFirstParagraph && isFirstPage;
     
     if (shouldUseDropCap) {
+      // For drop cap paragraphs, we'll handle the first word specially
       const words = text.split(' ');
       const firstWord = words[0];
       const restOfText = words.slice(1).join(' ');
@@ -110,6 +115,7 @@ const TextPageView = ({
         </p>
       );
     } else {
+      // Regular paragraph without drop cap
       return (
         <p 
           key={index} 
