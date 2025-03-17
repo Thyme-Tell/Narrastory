@@ -79,3 +79,33 @@
   height: 100%;
   object-fit: contain;
 }
+
+/* New styles for the full-screen layout */
+.book-fullscreen-layout {
+  height: calc(100vh - 60px); /* Adjust for bottom bar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animation for TOC panel */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease forwards;
+}
+
+/* Bottom controls bar styling */
+.bottom-controls-bar {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(60, 42, 33, 0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}

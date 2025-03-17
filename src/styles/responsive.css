@@ -80,12 +80,12 @@
   
   [data-is-mobile="true"].book-format {
     max-width: 90vw !important;
-    max-height: 70vh !important;
+    height: calc(90vh - 60px) !important; /* Adjusted for bottom bar */
     margin: 0 auto;
   }
   
   .book-preview-mobile-container {
-    height: calc(100vh - 120px) !important;
+    height: calc(100vh - 60px) !important; /* Adjusted for bottom bar */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -110,22 +110,14 @@
   }
 }
 
-@media (max-width: 768px) {
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  .min-text-size {
-    font-size: 16px !important;
-  }
-  
-  .mobile-button-spacing > * {
-    margin: 0.25rem !important;
-  }
-  
-  .ios-book-preview-fix {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
+/* Updated bottom bar styles */
+.bottom-controls-bar {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: env(safe-area-inset-bottom, 12px); /* iOS safe area support */
+}
+
+@media (max-width: 640px) {
+  .bottom-controls-bar {
+    padding: 8px 12px;
   }
 }
