@@ -1,9 +1,0 @@
-@mixin property($variable: variable, $syntax: "<number>", $initial-value: 0, $inherits: true)
-{
-  @property --#{$variable} {
-    syntax: $syntax;
-    inherits: $inherits;
-    initial-value: $initial-value;
-  }
-}
-

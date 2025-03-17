@@ -20,7 +20,6 @@ const BookEditorModals = ({
   onCloseCoverEditor,
   onSaveCover
 }: BookEditorModalsProps) => {
-  // Pass the current coverData explicitly to ensure the editor has the latest data
   return (
     <CoverEditor
       profileId={profileId}
@@ -28,7 +27,6 @@ const BookEditorModals = ({
       onClose={onCloseCoverEditor}
       onSave={onSaveCover}
       initialCoverData={coverData}
-      key={`cover-editor-${JSON.stringify(coverData)}`} // Force re-render when coverData changes
     />
   );
 };

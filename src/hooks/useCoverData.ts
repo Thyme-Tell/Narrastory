@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -36,14 +35,20 @@ export function useCoverData(profileId: string) {
   const fetchCoverData = useCallback(async () => {
     if (!profileId) {
       setIsLoading(false);
-      return null;
+      return;
     }
 
     try {
       setIsLoading(true);
       console.log('Fetching cover data for profile:', profileId);
       
-      // Skip cache and ensure we get the most recent data from server
+      const cachedData = localStorage.getItem(`cover_data_${profileId}`);
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData) as CoverData;
+        console.log('Using cached cover data while fetching from server:', parsedData);
+        setCoverData(parsedData);
+      }
+      
       const { data, error } = await supabase
         .from('book_covers')
         .select('cover_data, updated_at')
@@ -65,18 +70,16 @@ export function useCoverData(profileId: string) {
         localStorage.setItem(`cover_data_${profileId}`, JSON.stringify(typedCoverData));
         localStorage.setItem(`cover_data_last_fetched_${profileId}`, new Date().toISOString());
         localStorage.setItem(`cover_data_updated_at_${profileId}`, data.updated_at);
-        
-        // Return the fetched data so we can use it immediately in components
-        return typedCoverData;
       } else {
         console.log('No cover data found, using defaults with profile name');
-        const defaultData = { ...DEFAULT_COVER_DATA };
-        if (profile) {
-          const authorName = `${profile.first_name} ${profile.last_name}`.trim();
-          defaultData.authorText = authorName;
+        if (!cachedData) {
+          const defaultData = { ...DEFAULT_COVER_DATA };
+          if (profile) {
+            const authorName = `${profile.first_name} ${profile.last_name}`.trim();
+            defaultData.authorText = authorName;
+          }
+          setCoverData(defaultData);
         }
-        setCoverData(defaultData);
-        return defaultData;
       }
     } catch (err) {
       console.error("Error in fetchCoverData:", err);
@@ -86,19 +89,13 @@ export function useCoverData(profileId: string) {
         title: "Error",
         description: "Failed to load cover data",
       });
-      const cachedData = localStorage.getItem(`cover_data_${profileId}`);
-      if (cachedData) {
-        const parsedData = JSON.parse(cachedData) as CoverData;
-        setCoverData(parsedData);
-        return parsedData;
-      } else {
+      if (!localStorage.getItem(`cover_data_${profileId}`)) {
         const defaultData = { ...DEFAULT_COVER_DATA };
         if (profile) {
           const authorName = `${profile.first_name} ${profile.last_name}`.trim();
           defaultData.authorText = authorName;
         }
         setCoverData(defaultData);
-        return defaultData;
       }
     } finally {
       setIsLoading(false);
