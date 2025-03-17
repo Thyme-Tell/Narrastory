@@ -80,12 +80,12 @@
   
   [data-is-mobile="true"].book-format {
     max-width: 90vw !important;
-    height: calc(90vh - 60px) !important; /* Adjusted for bottom bar */
+    height: calc(90vh - 120px) !important; /* Adjusted for pagination bar */
     margin: 0 auto;
   }
   
   .book-preview-mobile-container {
-    height: calc(100vh - 60px) !important; /* Adjusted for bottom bar */
+    height: calc(100vh - 120px) !important; /* Adjusted for pagination bar */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,6 +107,23 @@
   .ios-book-preview-fix {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
+  }
+  
+  /* Responsive pagination */
+  .bottom-controls-bar {
+    padding: 10px 8px;
+  }
+  
+  /* On very small screens, stack pagination buttons vertically */
+  @media (max-width: 380px) {
+    .bottom-controls-bar {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+    
+    .pagination-container {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
   }
 }
 

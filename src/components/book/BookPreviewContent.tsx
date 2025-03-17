@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
-import BookPreviewControls from "./BookPreviewControls";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
 import { StoryMediaItem } from "@/types/media";
@@ -78,7 +77,7 @@ const BookPreviewContent = ({
           transform: `scale(${zoomLevel})`,
           transformOrigin: 'center',
           aspectRatio: "5/8",
-          maxHeight: "calc(100vh - 80px)", // Adjust for the bottom bar
+          maxHeight: "calc(100vh - 140px)", // Adjusted for new bottom pagination
           backgroundColor: "#f8f7f1",
           boxShadow: "0 4px 12px rgba(60, 42, 33, 0.2)",
           willChange: "transform",
@@ -118,15 +117,8 @@ const BookPreviewContent = ({
             )}
           </>
         )}
-
-        {/* Page Turn Buttons */}
-        <BookPreviewControls
-          currentPage={currentPage}
-          totalPageCount={totalPageCount}
-          goToNextPage={goToNextPage}
-          goToPrevPage={goToPrevPage}
-          isMobile={isMobile}
-        />
+        
+        {/* Removed existing BookPreviewControls component */}
       </div>
     </div>
   );
