@@ -32,7 +32,7 @@ const NavigationBar = ({
       )}
       {...props}
     >
-      <div className="w-full flex gap-2 justify-between">
+      <div className="w-full flex gap-4 justify-between">
         <Button
           onClick={onLeftButtonClick}
           className="flex-1 min-w-[80px] h-11 bg-transparent text-[rgb(55,65,81)] border border-[#242F3F] hover:bg-[#242F3F]/5 transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-[11px] tracking-[-0.01em] rounded-[3px] px-[3px]"
