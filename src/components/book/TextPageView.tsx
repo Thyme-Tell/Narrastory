@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -76,7 +77,10 @@ const TextPageView = ({
       <p 
         key={index} 
         className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${shouldUseDropCap ? "drop-cap" : ""}`}
-        style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}
+        style={{ 
+          fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif',
+          color: '#383838'
+        }}
       >
         {text}
       </p>
@@ -110,7 +114,7 @@ const TextPageView = ({
       >
         <div className="prose max-w-none text-[11pt] leading-relaxed" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
           {isFirstPage && (
-            <h1 className="text-center font-normal font-[200] text-[24px] leading-[110%] text-[#262626] mt-4 mb-8" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
+            <h1 className="text-center font-normal font-[300] text-[24px] leading-[120%] text-[#262626] mt-4 mb-8" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
               {story.title || "Untitled Story"}
             </h1>
           )}

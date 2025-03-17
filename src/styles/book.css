@@ -1,3 +1,4 @@
+
 .book-page {
   aspect-ratio: 5/8;
   max-width: 100%;
@@ -19,7 +20,7 @@
   line-height: 1.5;
   overflow-wrap: break-word;
   word-break: normal;
-  color: #333333;
+  color: #383838;
 }
 
 .book-page p {
@@ -30,6 +31,7 @@
   line-height: 1.5;
   letter-spacing: -0.01em;
   font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
+  color: #383838;
 }
 
 .book-page .chapter-start p:first-of-type {
@@ -39,9 +41,9 @@
 .book-page h1 {
   font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
   font-style: normal;
-  font-weight: 200;
+  font-weight: 300;
   font-size: 24px;
-  line-height: 110%;
+  line-height: 120%;
   text-align: center;
   color: #262626;
   margin-bottom: 1.5em;
