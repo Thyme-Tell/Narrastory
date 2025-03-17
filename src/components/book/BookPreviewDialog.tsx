@@ -1,7 +1,7 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Book, ArrowRight, ArrowLeft } from "lucide-react";
+import { Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BookPreviewDialogProps {
@@ -35,7 +35,7 @@ const BookPreviewDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="p-0 bg-white max-w-[400px] min-w-[320px] max-h-[80vh] flex flex-col overflow-hidden"
+        className="book-preview-dialog p-0 max-w-[400px] min-w-[320px] max-h-[80vh] flex flex-col overflow-hidden"
         hideCloseButton
       >
         <div className="flex flex-col h-full">
@@ -51,7 +51,7 @@ const BookPreviewDialog = ({
           
           {/* Title Section */}
           <div className="px-6 pt-8 pb-6 text-center">
-            <h1 className="text-2xl font-serif mb-3">{title}</h1>
+            <h1 className="book-preview-title">{title}</h1>
             <div className="flex justify-center">
               <div className="w-16 border-t border-gray-300"></div>
             </div>
@@ -59,7 +59,7 @@ const BookPreviewDialog = ({
           
           {/* Content Area - Scrollable */}
           <div className="px-6 flex-1 overflow-y-auto">
-            <div className="font-serif text-base leading-relaxed text-[#1A1A1A] space-y-6">
+            <div className="book-preview-content">
               {content.split('\n\n').map((paragraph, idx) => (
                 <p key={idx}>{paragraph}</p>
               ))}
@@ -67,21 +67,19 @@ const BookPreviewDialog = ({
           </div>
           
           {/* Footer Navigation */}
-          <div className="p-6 pt-8 border-t border-gray-200 grid grid-cols-3 gap-3">
+          <div className="p-6 pt-8 border-t border-gray-200 book-preview-navigation">
             <button 
               onClick={onPreviousPage} 
               disabled={currentPage <= 1}
               className={cn(
-                "bg-gray-100 text-gray-700 py-2 px-4 rounded-lg text-sm font-sans transition-colors",
+                "book-preview-button book-preview-button-back",
                 currentPage <= 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
               )}
             >
               Back
             </button>
             
-            <button 
-              className="bg-gray-800 text-white py-2 px-4 rounded-lg text-sm font-sans flex items-center justify-center gap-1"
-            >
+            <button className="book-preview-button book-preview-button-page">
               Page {currentPage} / {totalPages}
             </button>
             
@@ -89,12 +87,11 @@ const BookPreviewDialog = ({
               onClick={onNextPage} 
               disabled={currentPage >= totalPages}
               className={cn(
-                "bg-gray-100 text-gray-700 py-2 px-4 rounded-lg text-sm font-sans flex items-center justify-center gap-1 transition-colors",
+                "book-preview-button book-preview-button-next",
                 currentPage >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
               )}
             >
               Next
-              <ArrowRight className="w-3 h-3" />
             </button>
           </div>
         </div>
