@@ -108,7 +108,7 @@ const TextPageView = ({
       >
         <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
           {isFirstPage && (
-            <h1 className="text-center font-['Times_New_Roman'] font-normal font-semibold text-[24px] leading-[110%] text-[#262626] mt-4 mb-8">
+            <h1 className="text-center font-['Times_New_Roman'] font-normal font-[200] text-[24px] leading-[110%] text-[#262626] mt-4 mb-8">
               {story.title || "Untitled Story"}
             </h1>
           )}
