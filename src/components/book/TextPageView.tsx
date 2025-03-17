@@ -4,6 +4,7 @@ import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
 import { getPageContent } from "@/utils/bookPagination";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 interface TextPageViewProps {
   story: Story;
@@ -62,6 +63,9 @@ const TextPageView = ({
 
   const pageContent = getPageContent(story, pageNumber);
   const isFirstPage = pageNumber === 1;
+  
+  // Calculate progress based on global page number
+  const progress = Math.round((globalPageNumber / 100) * 100);
 
   const renderParagraph = (text: string, index: number, isFirstParagraph: boolean) => {
     if (!text) return null;
@@ -87,8 +91,20 @@ const TextPageView = ({
         backgroundPosition: "center"
       }}
     >
-      <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6">
-        {bookTitle}
+      <div className="flex justify-between items-center px-4 pt-4 pb-1 relative">
+        <div className="text-[#383838] text-[11pt] font-serif">
+          {bookTitle}
+        </div>
+        <div className="text-[#383838] text-[11pt] font-serif">
+          {globalPageNumber}/100
+        </div>
+      </div>
+      
+      <div className="px-4 pb-2 relative">
+        <Progress 
+          value={progress} 
+          className="h-[2px] w-full bg-[#242627]/[0.19] rounded-full" 
+        />
       </div>
       
       <div 
@@ -121,10 +137,6 @@ const TextPageView = ({
           </Button>
         </div>
       )}
-      
-      <div className="w-full text-center pb-6 pt-2">
-        <span className="text-[#3C2A21] text-sm">{globalPageNumber}</span>
-      </div>
     </div>
   );
 };

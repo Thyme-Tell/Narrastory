@@ -4,6 +4,7 @@ import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Progress } from "@/components/ui/progress";
 
 interface MediaPageViewProps {
   story: Story;
@@ -37,18 +38,35 @@ const MediaPageView = ({
     setIsLoading(false);
     setHasError(true);
   };
+  
+  // Calculate progress based on global page number
+  const progress = Math.round((globalPageNumber / 100) * 100);
 
   return (
     <div 
-      className="w-full h-full overflow-auto p-3 sm:p-6 book-page flex flex-col items-center justify-between"
+      className="w-full h-full overflow-auto book-page flex flex-col items-center justify-between"
       style={{
         backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background-page.png')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}
     >
-      <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6 w-full">
-        {bookTitle}
+      <div className="w-full">
+        <div className="flex justify-between items-center px-4 pt-4 pb-1 w-full">
+          <div className="text-[#383838] text-[11pt] font-serif">
+            {bookTitle}
+          </div>
+          <div className="text-[#383838] text-[11pt] font-serif">
+            {globalPageNumber}/100
+          </div>
+        </div>
+        
+        <div className="px-4 pb-2 relative w-full">
+          <Progress 
+            value={progress} 
+            className="h-[2px] w-full bg-[#242627]/[0.19] rounded-full" 
+          />
+        </div>
       </div>
       
       <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1 relative px-[15px]">
@@ -116,10 +134,6 @@ const MediaPageView = ({
             Failed to load media
           </div>
         )}
-      </div>
-      
-      <div className="w-full text-center pb-6 pt-2">
-        <span className="text-[#3C2A21] text-sm">{globalPageNumber}</span>
       </div>
     </div>
   );
