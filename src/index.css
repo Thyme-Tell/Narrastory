@@ -21,11 +21,13 @@
     float: left;
     line-height: 0.8;
     margin-top: 0.1em;
+    color: #A33D29;
   }
 }
 
 /* Import Playfair Display font for book typography */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
 
 /* Apply Apache red to all links for better accessibility */
 a {
@@ -55,23 +57,23 @@ a:hover {
   aspect-ratio: 5/8;
   max-width: 100%;
   max-height: 100%;
-  background-color: #f5f5f0; /* Cream paper color */
+  background-color: #f8f7f1; /* Cream paper color */
   overflow: hidden; /* Prevent content overflow */
   position: relative; /* For absolute positioning of elements if needed */
-  font-family: 'Playfair Display', serif;
+  font-family: 'Libre Baskerville', 'Playfair Display', serif;
 }
 
 .book-content {
   /* Standard book content width with margins */
   max-width: 90%;
   margin: 0 auto;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Libre Baskerville', 'Playfair Display', serif;
 }
 
 .book-text {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Libre Baskerville', 'Playfair Display', serif;
   font-size: 11pt;
-  line-height: 1.6;
+  line-height: 1.5;
   overflow-wrap: break-word;
   word-break: normal;
   color: #333333;
@@ -79,10 +81,12 @@ a:hover {
 
 /* Text indentation for paragraphs to match book format */
 .book-page p {
-  text-indent: 2em;
+  text-indent: 1.5em;
   margin-bottom: 0; /* Remove space between paragraphs */
   font-size: 11pt;
   text-align: justify; /* Justify text on both sides */
+  line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
 /* First paragraph of chapters should not be indented */
@@ -96,12 +100,14 @@ a:hover {
   text-align: center;
   margin-bottom: 1.5em;
   font-weight: bold;
+  color: #3C2A21;
 }
 
 /* Ensure media content stays within page bounds */
 .book-page img, .book-page video {
   max-width: 100%;
   height: auto;
+  margin: 1em auto;
 }
 
 /* Add animation for page transitions */

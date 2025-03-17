@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -63,25 +64,29 @@ const TextPageView = ({
   const isFirstPage = pageNumber === 1;
 
   return (
-    <div className="w-full h-full bg-[#f5f5f0] book-page flex flex-col relative">
-      <div className="text-center italic text-green-800 font-serif pt-6">
+    <div className="w-full h-full bg-[#f8f7f1] book-page flex flex-col relative">
+      {/* Header with book title */}
+      <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6">
         {bookTitle}
       </div>
       
       <div 
         ref={contentRef}
-        className="flex-1 mx-auto book-content px-12 py-8 overflow-y-auto"
+        className="flex-1 mx-auto book-content px-8 py-4 overflow-y-auto"
       >
-        <div className="prose max-w-none font-serif text-[11pt]">
+        <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
           {isFirstPage && (
-            <h1 className="text-center font-serif text-[16pt] mb-6 font-bold">
+            <h1 className="text-center font-serif text-[16pt] mb-8 font-bold text-[#3C2A21] mt-4">
               {story.title || "Untitled Story"}
             </h1>
           )}
           
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => (
-              <p key={index} className="indent-8 text-[11pt] text-justify">
+              <p 
+                key={index} 
+                className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${index === 0 && isFirstPage ? "drop-cap" : ""} ${index === 0 && isFirstPage ? "no-indent" : ""}`}
+              >
                 {paragraph}
               </p>
             ))
@@ -103,8 +108,9 @@ const TextPageView = ({
         </div>
       )}
       
-      <div className="w-full text-center pb-8">
-        <span className="text-gray-700">{globalPageNumber}</span>
+      {/* Footer with page number */}
+      <div className="w-full text-center pb-6 pt-2">
+        <span className="text-[#3C2A21] text-sm">{globalPageNumber}</span>
       </div>
     </div>
   );

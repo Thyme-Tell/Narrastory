@@ -50,7 +50,7 @@ const BookPreviewLayout = ({
 
   return (
     <div 
-      className={`fixed inset-0 bg-black/90 z-[999] flex flex-col items-center justify-start overflow-hidden w-full h-full ios-book-preview-fix ${isRendered ? 'opacity-100' : 'opacity-0'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
+      className={`fixed inset-0 bg-[#1A1A1A]/95 z-[999] flex flex-col items-center justify-start overflow-hidden w-full h-full ios-book-preview-fix ${isRendered ? 'opacity-100' : 'opacity-0'} ${isIOSDevice ? 'ios-safari-render-fix' : ''}`}
       style={{ 
         touchAction: "none",
         transition: "opacity 0.25s ease-in-out",
@@ -76,9 +76,9 @@ const BookPreviewLayout = ({
       />
 
       <div className="flex-1 w-full flex overflow-hidden">
-        {/* TOC Sidebar - Now with solid white background */}
+        {/* TOC Sidebar - Now with bookish styling */}
         {showToc && (
-          <div className={`${isMobile ? "w-56 toc-mobile" : "w-72"} h-full bg-white p-4 overflow-y-auto animate-slide-in-right border-r border-gray-300`}>
+          <div className={`${isMobile ? "w-56 toc-mobile" : "w-72"} h-full bg-[#f8f7f1] p-4 overflow-y-auto animate-slide-in-right border-r border-[#3C2A21]/20 shadow-lg`}>
             <TableOfContents 
               stories={stories || []} 
               currentPage={currentPage}

@@ -70,8 +70,6 @@ const BookPreviewContent = ({
           }, 10);
         }
       }, 100);
-      
-      console.log("BookPreviewContent mounted for mobile:", { isMobile, currentPage });
     }
   }, [isMobile, currentPage]);
   
@@ -83,13 +81,14 @@ const BookPreviewContent = ({
       transformOrigin: 'center',
       aspectRatio: "5/8",
       willChange: "transform", // Performance optimization
-      backgroundColor: "#f5f5f0", // Ensure background is visible
+      backgroundColor: "#f8f7f1", // Updated cream paper color
       position: "relative",
       overflow: "hidden",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      boxShadow: "0 4px 12px rgba(60, 42, 33, 0.2)", // Softer shadow
       display: "flex",
       flexDirection: "column",
       opacity: 1, // Ensure visibility
+      borderRadius: "3px", // Slight rounding of corners
     };
 
     // Mobile specific adjustments
@@ -97,10 +96,10 @@ const BookPreviewContent = ({
       return {
         ...baseStyle,
         height: "70vh", // Fixed height to ensure visibility
-        width: "85vw",    // Set width to be proportional
+        width: "85vw",  // Set width to be proportional
         maxWidth: "85vw", // Ensure it's not too wide
         margin: "0 auto",
-        border: "1px solid rgba(0,0,0,0.1)", // Extra border to help with visibility
+        border: "1px solid rgba(60, 42, 33, 0.1)", // Softer border
       };
     }
 

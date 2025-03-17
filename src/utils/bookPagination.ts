@@ -1,13 +1,15 @@
 
 import { Story } from "@/types/supabase";
 
-// Constants for book dimensions and content
-const CHARS_PER_LINE = 50; // Approximate characters per line
-const LINES_PER_PAGE = 30; // Approximate lines per page
-const PAGE_MARGIN_LINES = 4; // Top and bottom margins in line count
+// Constants for book dimensions and content - refined for better reading experience
+const CHARS_PER_LINE = 60; // Approximate characters per line (increased for standard book width)
+const LINES_PER_PAGE = 36; // Approximate lines per page for standard book format
+const PAGE_MARGIN_LINES = 6; // Top and bottom margins in line count (increased for better spacing)
+const PARAGRAPH_SPACING = 1.2; // Spacing multiplier between paragraphs
 
 /**
  * Calculates how many pages a story will take based on its content
+ * using professional book formatting standards
  */
 export const calculateStoryPages = (story: Story): number => {
   if (!story.content || story.content.trim() === '') {
@@ -17,19 +19,20 @@ export const calculateStoryPages = (story: Story): number => {
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
   let totalLines = 0;
 
-  // Calculate lines needed for each paragraph
+  // Calculate lines needed for each paragraph with proper book formatting
   paragraphs.forEach(paragraph => {
     // Each paragraph starts on a new line
     const paragraphLines = Math.ceil(paragraph.length / CHARS_PER_LINE);
-    totalLines += paragraphLines + 1; // +1 for paragraph spacing
+    totalLines += paragraphLines + PARAGRAPH_SPACING; // Add proper paragraph spacing
   });
 
-  // Calculate pages needed, accounting for margins
+  // Calculate pages needed, accounting for proper book margins
   return Math.max(1, Math.ceil(totalLines / (LINES_PER_PAGE - PAGE_MARGIN_LINES)));
 };
 
 /**
  * Calculates which paragraphs should be displayed on a specific page of a story
+ * following professional book formatting guidelines
  */
 export const getPageContent = (story: Story, pageNumber: number): string[] => {
   if (!story.content || story.content.trim() === '') {
@@ -41,9 +44,9 @@ export const getPageContent = (story: Story, pageNumber: number): string[] => {
   let currentPage: string[] = [];
   let currentLineCount = 0;
 
-  // Group paragraphs into pages
+  // Group paragraphs into pages using professional book formatting standards
   paragraphs.forEach(paragraph => {
-    const paragraphLines = Math.ceil(paragraph.length / CHARS_PER_LINE) + 1; // +1 for spacing
+    const paragraphLines = Math.ceil(paragraph.length / CHARS_PER_LINE) + PARAGRAPH_SPACING;
 
     // If adding this paragraph would exceed page limit, start a new page
     if (currentLineCount + paragraphLines > LINES_PER_PAGE - PAGE_MARGIN_LINES) {

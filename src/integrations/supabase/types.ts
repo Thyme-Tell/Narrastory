@@ -89,6 +89,71 @@ export type Database = {
           },
         ]
       }
+      memoir_batches: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          name: string
+          open_slots: number
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          name: string
+          open_slots?: number
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          open_slots?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      memoir_signups: {
+        Row: {
+          batch_id: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memoir_signups_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "memoir_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       password_reset_tokens: {
         Row: {
           created_at: string
