@@ -1,3 +1,4 @@
+
 .book-page {
   aspect-ratio: 5/8;
   max-width: 100%;
@@ -167,7 +168,7 @@
 /* New scroll indicator styles with SVG icon */
 .scroll-indicator-container {
   position: absolute;
-  bottom: 12%;
+  bottom: 8%; /* Move 30px down from previous 12% position */
   left: 0;
   right: 0;
   display: flex;

@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
-import { ChevronsDown } from "lucide-react";
-import { getPageContent } from "@/utils/bookPagination";
 import { Progress } from "@/components/ui/progress";
+import { getPageContent } from "@/utils/bookPagination";
 
 interface TextPageViewProps {
   story: Story;
@@ -22,17 +20,20 @@ const TextPageView = ({
 }: TextPageViewProps) => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [indicatorShown, setIndicatorShown] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     setHasScrolled(false);
+    setIndicatorShown(false); // Reset indicator shown state when page changes
   }, [globalPageNumber, story, pageNumber]);
   
   useEffect(() => {
     const checkScrollable = () => {
       if (contentRef.current) {
         const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
-        setShowScrollIndicator(isScrollable && !hasScrolled);
+        // Only show the indicator if the content is scrollable, hasn't been scrolled, and hasn't been shown yet
+        setShowScrollIndicator(isScrollable && !hasScrolled && !indicatorShown);
       }
     };
 
@@ -40,11 +41,6 @@ const TextPageView = ({
       if (contentRef.current) {
         if (contentRef.current.scrollTop > 20) {
           setHasScrolled(true);
-        }
-        
-        const isAtBottom = contentRef.current.scrollHeight - contentRef.current.scrollTop <= contentRef.current.clientHeight + 10;
-        
-        if (contentRef.current.scrollTop > 20 || isAtBottom) {
           setShowScrollIndicator(false);
         }
       }
@@ -56,35 +52,35 @@ const TextPageView = ({
     currentRef?.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', checkScrollable);
     
-    // Set a timeout to hide the indicator after 5 seconds (3s display + 2s fade)
-    let timeoutId: number | null = null;
-    
+    // Set a timeout to hide the indicator after 3 seconds
     if (showScrollIndicator) {
-      timeoutId = window.setTimeout(() => {
+      setIndicatorShown(true); // Mark that the indicator has been shown
+      const timeoutId = window.setTimeout(() => {
         setShowScrollIndicator(false);
-      }, 5000);
+      }, 3000);
+      
+      return () => clearTimeout(timeoutId);
     }
     
     return () => {
       currentRef?.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', checkScrollable);
-      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [story, pageNumber, hasScrolled, showScrollIndicator]);
+  }, [story, pageNumber, hasScrolled, showScrollIndicator, indicatorShown]);
 
-  // Show the indicator after 3 seconds when page loads
+  // Show indicator on initial load if content is scrollable
   useEffect(() => {
     const indicatorDelay = window.setTimeout(() => {
-      if (contentRef.current) {
+      if (contentRef.current && !indicatorShown) {
         const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
         if (isScrollable && !hasScrolled) {
           setShowScrollIndicator(true);
         }
       }
-    }, 3000);
+    }, 500); // Shorter delay for initial check
     
     return () => clearTimeout(indicatorDelay);
-  }, [pageNumber, story, hasScrolled]);
+  }, [pageNumber, story, hasScrolled, indicatorShown]);
 
   const pageContent = getPageContent(story, pageNumber);
   const isFirstPage = pageNumber === 1;
