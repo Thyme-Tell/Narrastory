@@ -48,7 +48,10 @@ const BookPreviewContainer = ({
   isIOSDevice = false,
   onDownloadPDF,
   isGeneratingPDF = false,
-  // Removed unused props that were causing errors
+  bookmarks = [],
+  storyPages = [],
+  storyMediaMap = new Map(),
+  jumpToPage = () => {}
 }: BookPreviewContainerProps) => {
   const isMobile = window.innerWidth < 768;
 
@@ -68,7 +71,10 @@ const BookPreviewContainer = ({
         currentStoryInfo={currentStoryInfo}
         isMobile={isMobile}
         onDownloadPDF={onDownloadPDF}
-        isGeneratingPDF={isGeneratingPDF}
+        bookmarks={bookmarks}
+        storyPages={storyPages}
+        storyMediaMap={storyMediaMap}
+        jumpToPage={jumpToPage}
       />
     </div>
   );

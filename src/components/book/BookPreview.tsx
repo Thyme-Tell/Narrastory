@@ -6,12 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Story } from "@/types/supabase";
 import { useCoverData } from "@/hooks/useCoverData";
 import { useBookNavigation } from "@/hooks/useBookNavigation";
+import BookPreviewHeader from "./BookPreviewHeader";
 import BookPreviewContent from "./BookPreviewContent";
 import TableOfContents from "./TableOfContents";
-import BookPagination from "./BookPagination";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "../ui/button";
-import { Menu, X } from "lucide-react";
 
 interface BookPreviewProps {
   profileId: string;
@@ -25,8 +23,8 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
   const isMobile = useIsMobile();
   const [isRendered, setIsRendered] = useState(false);
-  const [showToc, setShowToc] = useState(false);
   
+  // Debug logging for mobile visibility issues
   useEffect(() => {
     if (open) {
       console.log("BookPreview opened, isMobile:", isMobile);
@@ -36,6 +34,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     }
   }, [open, isMobile]);
   
+  // Fetch stories for the book content
   const { data: stories, isLoading: isStoriesLoading } = useQuery({
     queryKey: ["stories", profileId],
     queryFn: async () => {
@@ -60,6 +59,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     enabled: open,
   });
 
+  // Get profile info
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
     queryFn: async () => {
@@ -79,9 +79,12 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     enabled: open,
   });
 
+  // Use our custom hook for book navigation
   const {
     currentPage,
     zoomLevel,
+    showToc,
+    setShowToc,
     bookmarks,
     storyPages,
     totalPageCount,
@@ -95,6 +98,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     storyMediaMap
   } = useBookNavigation(stories, open);
 
+  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!open) return;
@@ -118,6 +122,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, currentPage, totalPageCount, onClose, goToNextPage, goToPrevPage]);
 
+  // Fix for mobile devices - prevent body scrolling when preview is open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -131,6 +136,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
 
   if (!open) return null;
 
+  // Get the current story to display
   const currentStoryInfo = getCurrentStory();
   const authorName = profile ? `${profile.first_name} ${profile.last_name}` : "";
 
@@ -138,10 +144,26 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
     <div 
       className="fixed inset-0 bg-black/80 z-[999] flex flex-col items-center justify-start overflow-hidden w-full"
       style={{ touchAction: "none" }}
-      data-is-mobile={isMobile ? "true" : "false"}
-      data-is-rendered={isRendered ? "true" : "false"}
+      data-is-mobile={isMobile ? "true" : "false"} // For debugging
+      data-is-rendered={isRendered ? "true" : "false"} // For debugging
     >
+      {/* Header */}
+      <BookPreviewHeader
+        totalPageCount={totalPageCount}
+        currentPage={currentPage}
+        zoomLevel={zoomLevel}
+        showToc={showToc}
+        bookmarks={bookmarks}
+        onToggleToc={() => setShowToc(!showToc)}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onToggleBookmark={toggleBookmark}
+        onClose={onClose}
+        isMobile={isMobile}
+      />
+
       <div className="flex-1 w-full flex overflow-hidden">
+        {/* TOC Sidebar */}
         {showToc && (
           <div className={`${isMobile ? "w-48" : "w-64"} h-full bg-muted p-4 overflow-y-auto animate-slide-in-right`}>
             <TableOfContents 
@@ -154,6 +176,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
           </div>
         )}
 
+        {/* Book Content */}
         <div 
           className="flex-1 h-full flex flex-col items-center justify-center p-4 overflow-auto"
           ref={bookContainerRef}
@@ -171,43 +194,11 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             goToPrevPage={goToPrevPage}
             currentStoryInfo={currentStoryInfo}
             isMobile={isMobile}
-            onDownloadPDF={undefined}
-            isGeneratingPDF={false}
+            bookmarks={bookmarks}
+            storyPages={storyPages}
+            storyMediaMap={storyMediaMap}
+            jumpToPage={jumpToPage}
           />
-        </div>
-      </div>
-      
-      <div className="w-full bottom-controls-bar fixed bottom-0 left-0 right-0 bg-white z-50 py-3 px-2">
-        <BookPagination 
-          currentPage={currentPage}
-          totalPageCount={totalPageCount}
-          goToNextPage={goToNextPage}
-          goToPrevPage={goToPrevPage}
-          isMobile={isMobile}
-        />
-        
-        <div className="flex justify-between items-center px-4 pt-2">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setShowToc(!showToc)}
-            aria-label="Toggle table of contents"
-            className="text-xs"
-          >
-            <Menu className="h-4 w-4 mr-1" />
-            Contents
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={onClose}
-            aria-label="Close preview"
-            className="text-xs"
-          >
-            <X className="h-4 w-4 mr-1" />
-            Close
-          </Button>
         </div>
       </div>
     </div>
