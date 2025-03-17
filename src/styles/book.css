@@ -1,4 +1,3 @@
-
 .book-page {
   aspect-ratio: 5/8;
   max-width: 100%;
@@ -77,6 +76,16 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.book-page-background {
+  background-image: url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background-page.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform; /* Helps with performance */
+  backface-visibility: hidden; /* Reduces paints */
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 /* New styles for the full-screen layout */
