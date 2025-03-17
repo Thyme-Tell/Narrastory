@@ -30,6 +30,10 @@ interface BookPreviewContentProps {
   isMobile?: boolean;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
+  bookmarks?: number[];
+  storyPages?: number[];
+  storyMediaMap?: Map<string, StoryMediaItem[]>;
+  jumpToPage?: (pageIndex: number) => void;
 }
 
 const BookPreviewContent = ({
@@ -46,7 +50,11 @@ const BookPreviewContent = ({
   currentStoryInfo,
   isMobile = false,
   onDownloadPDF,
-  isGeneratingPDF
+  isGeneratingPDF,
+  bookmarks = [],
+  storyPages = [],
+  storyMediaMap = new Map(),
+  jumpToPage = () => {}
 }: BookPreviewContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 

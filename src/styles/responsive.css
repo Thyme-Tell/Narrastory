@@ -108,16 +108,35 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
   }
+  
+  /* Ensure navigation buttons are visible */
+  .book-preview-controls {
+    z-index: 100;
+  }
+  
+  .book-preview-controls button {
+    opacity: 1;
+    z-index: 50;
+  }
 }
 
 /* Updated bottom bar styles */
 .bottom-controls-bar {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-bottom: env(safe-area-inset-bottom, 12px); /* iOS safe area support */
+  z-index: 50;
 }
 
 @media (max-width: 640px) {
   .bottom-controls-bar {
     padding: 8px 12px;
+  }
+  
+  /* Fix for navigation buttons on small screens */
+  .book-preview-controls button {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible !important;
+    z-index: 100;
   }
 }
