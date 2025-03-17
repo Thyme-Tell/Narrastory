@@ -49,18 +49,18 @@ const BookPagination = ({
       </button>
       
       {/* Page Indicator */}
-      <button
+      <div
         className={cn(
           "flex items-center justify-center",
           buttonPadding,
           textSize,
-          "bg-[#1F2937] hover:bg-[#111827] text-white",
-          "rounded-lg transition-colors",
+          "bg-[#1F2937] text-white",
+          "rounded-lg",
           "font-medium"
         )}
       >
         Page {currentPage + 1} / {totalPageCount} <ChevronRight className={cn("ml-1", iconSize)} />
-      </button>
+      </div>
       
       {/* Next Button */}
       <button

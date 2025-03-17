@@ -112,6 +112,8 @@
   /* Responsive pagination */
   .bottom-controls-bar {
     padding: 10px 8px;
+    position: relative;
+    z-index: 10;
   }
   
   /* On very small screens, stack pagination buttons vertically */
@@ -131,6 +133,9 @@
 .bottom-controls-bar {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-bottom: env(safe-area-inset-bottom, 12px); /* iOS safe area support */
+  background-color: white;
+  position: relative;
+  z-index: 50;
 }
 
 @media (max-width: 640px) {
