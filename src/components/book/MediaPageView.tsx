@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
@@ -47,13 +46,14 @@ const MediaPageView = ({
   return (
     <div 
       className="w-full h-full overflow-auto book-page flex flex-col items-center justify-between book-page-background"
+      style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}
     >
       <div className="w-full">
         <div className="flex justify-between items-center px-4 pt-4 pb-1 w-full">
-          <div className="text-[#383838] text-[11pt] font-serif">
+          <div className="text-[#383838] text-[11pt]" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
             {bookTitle}
           </div>
-          <div className="text-[#383838] text-[11pt] font-serif">
+          <div className="text-[#383838] text-[11pt]" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
             {globalPageNumber}/{totalPageCount}
           </div>
         </div>
@@ -92,7 +92,8 @@ const MediaPageView = ({
               />
             </div>
             {mediaItem.caption && (
-              <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%] no-indent">
+              <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%] no-indent" 
+                 style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
                 {mediaItem.caption}
               </p>
             )}
@@ -115,7 +116,8 @@ const MediaPageView = ({
               Your browser does not support the video tag.
             </video>
             {mediaItem.caption && (
-              <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%] no-indent">
+              <p className="text-sm text-center italic mt-3 text-gray-500 text-[12pt] mx-auto max-w-[80%] no-indent" 
+                 style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
                 {mediaItem.caption}
               </p>
             )}

@@ -4,17 +4,17 @@
   max-height: 100%;
   overflow: hidden; 
   position: relative; 
-  font-family: 'Libre Baskerville', 'Playfair Display', serif;
+  font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
 }
 
 .book-content {
   max-width: calc(100% - 30px); 
   margin: 0 auto;
-  font-family: 'Libre Baskerville', 'Playfair Display', serif;
+  font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
 }
 
 .book-text {
-  font-family: 'Libre Baskerville', 'Playfair Display', serif;
+  font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
   font-size: 11pt;
   line-height: 1.5;
   overflow-wrap: break-word;
@@ -29,6 +29,7 @@
   text-align: justify; 
   line-height: 1.5;
   letter-spacing: -0.01em;
+  font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
 }
 
 .book-page .chapter-start p:first-of-type {
@@ -36,7 +37,7 @@
 }
 
 .book-page h1 {
-  font-family: 'Times New Roman', serif;
+  font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
   font-style: normal;
   font-weight: 200;
   font-size: 24px;
@@ -63,6 +64,7 @@
   margin-top: 0.1em;
   color: #A33D29;
   margin-left: 0.41em;
+  font-family: "Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif;
 }
 
 .book-preview-container {

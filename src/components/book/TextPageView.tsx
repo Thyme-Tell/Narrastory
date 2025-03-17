@@ -76,6 +76,7 @@ const TextPageView = ({
       <p 
         key={index} 
         className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${shouldUseDropCap ? "drop-cap" : ""}`}
+        style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}
       >
         {text}
       </p>
@@ -85,12 +86,13 @@ const TextPageView = ({
   return (
     <div 
       className="w-full h-full book-page flex flex-col relative book-page-background"
+      style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}
     >
       <div className="flex justify-between items-center px-4 pt-4 pb-1 relative">
-        <div className="text-[#383838] text-[11pt] font-serif">
+        <div className="text-[#383838] text-[11pt]" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
           {bookTitle}
         </div>
-        <div className="text-[#383838] text-[11pt] font-serif">
+        <div className="text-[#383838] text-[11pt]" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
           {globalPageNumber}/{totalPageCount}
         </div>
       </div>
@@ -106,9 +108,9 @@ const TextPageView = ({
         ref={contentRef}
         className="flex-1 mx-auto book-content px-[15px] py-4 overflow-y-auto"
       >
-        <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
+        <div className="prose max-w-none text-[11pt] leading-relaxed" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
           {isFirstPage && (
-            <h1 className="text-center font-['Times_New_Roman'] font-normal font-[200] text-[24px] leading-[110%] text-[#262626] mt-4 mb-8">
+            <h1 className="text-center font-normal font-[200] text-[24px] leading-[110%] text-[#262626] mt-4 mb-8" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>
               {story.title || "Untitled Story"}
             </h1>
           )}
@@ -116,7 +118,7 @@ const TextPageView = ({
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => renderParagraph(paragraph, index, index === 0))
           ) : (
-            <p className="text-gray-400 italic text-[11pt]">No content on this page</p>
+            <p className="text-gray-400 italic text-[11pt]" style={{ fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif' }}>No content on this page</p>
           )}
         </div>
       </div>
@@ -127,7 +129,7 @@ const TextPageView = ({
             variant="outline"
             className="rounded-full shadow-md bg-white hover:bg-gray-100 border-[#A33D29]/20 hover:border-[#A33D29]/50 transition-all duration-300 animate-fade-in gap-2 pointer-events-none font-sans"
           >
-            <span className="text-[#A33D29] font-sans">Scroll down to read more</span>
+            <span className="text-[#A33D29]">Scroll down to read more</span>
             <ChevronsDown className="h-5 w-5 text-[#A33D29]" />
           </Button>
         </div>
