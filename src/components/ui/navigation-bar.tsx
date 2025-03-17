@@ -27,7 +27,7 @@ const NavigationBar = ({
   return (
     <div
       className={cn(
-        "w-full max-w-full flex justify-center rounded-lg bg-white",
+        "w-[90vw] max-w-full flex justify-center rounded-lg bg-white p-[5px]",
         className
       )}
       {...props}
