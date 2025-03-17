@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -12,7 +13,11 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' &&
-    componentTagger(),
+    componentTagger({
+      // Using the latest configuration options
+      enableSelection: true,
+      enableControls: true,
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
