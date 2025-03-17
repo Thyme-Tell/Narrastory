@@ -75,7 +75,7 @@ const TextPageView = ({
     return (
       <p 
         key={index} 
-        className={`text-[11pt] font-['Times_New_Roman'] font-[100] leading-[110%] text-center text-[#262626] ${shouldUseDropCap ? "drop-cap" : ""}`}
+        className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${shouldUseDropCap ? "drop-cap" : ""}`}
       >
         {text}
       </p>
@@ -106,7 +106,7 @@ const TextPageView = ({
         ref={contentRef}
         className="flex-1 mx-auto book-content px-[15px] py-4 overflow-y-auto"
       >
-        <div className="prose max-w-none font-['Times_New_Roman'] text-[11pt] leading-[110%] text-center text-[#262626] font-[100]">
+        <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
           {isFirstPage && (
             <h1 className="text-center font-['Times_New_Roman'] font-normal font-[200] text-[24px] leading-[110%] text-[#262626] mt-4 mb-8">
               {story.title || "Untitled Story"}
@@ -116,7 +116,7 @@ const TextPageView = ({
           {pageContent.length > 0 ? (
             pageContent.map((paragraph, index) => renderParagraph(paragraph, index, index === 0))
           ) : (
-            <p className="text-gray-400 italic text-[11pt] font-['Times_New_Roman'] font-[100] text-center">No content on this page</p>
+            <p className="text-gray-400 italic text-[11pt]">No content on this page</p>
           )}
         </div>
       </div>

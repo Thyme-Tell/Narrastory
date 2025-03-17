@@ -14,26 +14,20 @@
 }
 
 .book-text {
-  font-family: 'Times New Roman', serif;
-  font-style: normal;
-  font-weight: 100;
+  font-family: 'Libre Baskerville', 'Playfair Display', serif;
   font-size: 11pt;
-  line-height: 110%;
-  text-align: center;
+  line-height: 1.5;
   overflow-wrap: break-word;
   word-break: normal;
-  color: #262626;
+  color: #333333;
 }
 
 .book-page p {
-  font-family: 'Times New Roman', serif;
-  font-style: normal;
-  font-weight: 100;
-  font-size: 11pt;
-  line-height: 110%;
-  text-align: center;
-  color: #262626;
+  text-indent: 1.5em;
   margin-bottom: 0; 
+  font-size: 11pt;
+  text-align: justify; 
+  line-height: 1.5;
   letter-spacing: -0.01em;
 }
 
@@ -97,6 +91,7 @@
   transform: translateZ(0); /* Force GPU acceleration */
 }
 
+/* New styles for the full-screen layout */
 .book-fullscreen-layout {
   height: calc(100vh - 60px); /* Adjust for bottom bar */
   display: flex;
@@ -104,6 +99,7 @@
   justify-content: center;
 }
 
+/* Animation for TOC panel */
 @keyframes slide-in-right {
   from {
     transform: translateX(-100%);
@@ -117,6 +113,7 @@
   animation: slide-in-right 0.3s ease forwards;
 }
 
+/* Page navigation controls styling */
 .page-navigation-controls {
   position: absolute;
   bottom: 0;
