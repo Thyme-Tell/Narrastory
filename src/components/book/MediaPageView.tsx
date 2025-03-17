@@ -42,12 +42,11 @@ const MediaPageView = ({
     <div 
       className="w-full h-full overflow-auto p-3 sm:p-6 book-page flex flex-col items-center justify-between"
       style={{
-        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background.png')",
+        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background-page.png')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}
     >
-      {/* Header with book title - positioned at the very top, just like TextPageView */}
       <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6 w-full">
         {bookTitle}
       </div>
@@ -119,7 +118,6 @@ const MediaPageView = ({
         )}
       </div>
       
-      {/* Footer with page number - now positioned at the bottom with consistent styling */}
       <div className="w-full text-center pb-6 pt-2">
         <span className="text-[#3C2A21] text-sm">{globalPageNumber}</span>
       </div>

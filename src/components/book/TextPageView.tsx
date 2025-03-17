@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -81,7 +82,7 @@ const TextPageView = ({
     <div 
       className="w-full h-full book-page flex flex-col relative"
       style={{
-        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background.png')",
+        backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//background-page.png')",
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}

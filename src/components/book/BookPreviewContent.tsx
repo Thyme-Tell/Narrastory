@@ -3,12 +3,9 @@ import React, { useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BookCover from "./BookCover";
 import PageView from "./PageView";
-import BookPreviewControls from "./BookPreviewControls";
 import { Story } from "@/types/supabase";
 import { CoverData } from "@/components/cover/CoverTypes";
 import { StoryMediaItem } from "@/types/media";
-import { Book, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface BookPreviewContentProps {
   currentPage: number;
@@ -50,19 +47,8 @@ const BookPreviewContent = ({
   isCoverLoading,
   coverData,
   authorName,
-  goToNextPage,
-  goToPrevPage,
   currentStoryInfo,
   isMobile = false,
-  onDownloadPDF,
-  isGeneratingPDF,
-  bookmarks = [],
-  storyPages = [],
-  storyMediaMap = new Map(),
-  jumpToPage = () => {},
-  onClose,
-  setShowToc,
-  showToc
 }: BookPreviewContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -132,49 +118,6 @@ const BookPreviewContent = ({
             )}
           </>
         )}
-
-        {/* Page Turn Buttons */}
-        <BookPreviewControls
-          currentPage={currentPage}
-          totalPageCount={totalPageCount}
-          goToNextPage={goToNextPage}
-          goToPrevPage={goToPrevPage}
-          isMobile={isMobile}
-        />
-        
-        {/* Overlay controls for Table of Contents and Page Counter */}
-        <div className="absolute top-3 left-3 z-20 flex items-center space-x-2">
-          {setShowToc && (
-            <Button 
-              variant={showToc ? "default" : "secondary"}
-              size="sm"
-              onClick={() => setShowToc(!showToc)}
-              className="flex items-center gap-1 opacity-70 hover:opacity-100 bg-black/30 hover:bg-black/40 text-white backdrop-blur-sm"
-            >
-              <Book className="h-3.5 w-3.5" />
-              <span className={isMobile ? "sr-only" : "text-xs"}>Contents</span>
-            </Button>
-          )}
-        </div>
-        
-        {/* Page counter and close button */}
-        <div className="absolute top-3 right-3 z-20 flex items-center space-x-2">
-          <span className="text-xs bg-black/30 text-white py-1 px-2 rounded-md backdrop-blur-sm">
-            {currentPage + 1}/{totalPageCount}
-          </span>
-          
-          {onClose && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onClose}
-              className="h-7 w-7 p-0 rounded-full opacity-70 hover:opacity-100 bg-black/30 hover:bg-black/40 text-white backdrop-blur-sm"
-            >
-              <X className="h-3.5 w-3.5" />
-              <span className="sr-only">Close</span>
-            </Button>
-          )}
-        </div>
       </div>
     </div>
   );
