@@ -64,7 +64,7 @@ a:hover {
 
 .book-content {
   /* Standard book content width with reduced margins */
-  max-width: calc(100% - 60px); /* Decreased side margins to 30px on each side */
+  max-width: calc(100% - 20px); /* Decreased side margins to 10px on each side */
   margin: 0 auto;
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
 }
