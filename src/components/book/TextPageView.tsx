@@ -72,11 +72,15 @@ const TextPageView = ({
     if (!text) return null;
     
     const shouldUseDropCap = isFirstParagraph && isFirstPage;
+    const startsWithA = text.trim().startsWith('A');
+    const dropCapClass = shouldUseDropCap 
+      ? `drop-cap${startsWithA ? ' a-dropcap' : ''}` 
+      : '';
     
     return (
       <p 
         key={index} 
-        className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${shouldUseDropCap ? "drop-cap" : ""}`}
+        className={`indent-6 text-[11pt] text-justify leading-relaxed tracking-normal ${dropCapClass}`}
         style={{ 
           fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif',
           color: '#383838'
