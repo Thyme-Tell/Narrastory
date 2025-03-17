@@ -27,15 +27,15 @@ const NavigationBar = ({
   return (
     <div
       className={cn(
-        "w-full max-w-full px-6 flex justify-center",
+        "w-[90%] max-w-[90%] px-4 flex justify-center book-page-background rounded-lg",
         className
       )}
       {...props}
     >
-      <div className="w-full flex gap-3 justify-between">
+      <div className="w-full flex gap-2 justify-between">
         <Button
           onClick={onLeftButtonClick}
-          className="flex-1 min-w-[120px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
+          className="flex-1 min-w-[80px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
           style={{
             fontFamily:
               'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -47,7 +47,7 @@ const NavigationBar = ({
 
         <Button
           onClick={onCenterButtonClick}
-          className="flex-1 min-w-[120px] h-11 bg-[rgb(31,41,55)] text-white border-none hover:bg-[rgb(17,24,39)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
+          className="flex-1 min-w-[80px] h-11 bg-[rgb(31,41,55)] text-white border-none hover:bg-[rgb(17,24,39)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
           style={{
             fontFamily:
               'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -59,7 +59,7 @@ const NavigationBar = ({
 
         <Button
           onClick={onRightButtonClick}
-          className="flex-1 min-w-[120px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
+          className="flex-1 min-w-[80px] h-11 bg-[rgb(249,250,251)] text-[rgb(55,65,81)] border border-[rgb(229,231,235)] hover:bg-[rgb(243,244,246)] transition-all duration-200 ease-in-out hover:scale-[1.02] font-normal text-base tracking-[-0.01em] rounded-lg"
           style={{
             fontFamily:
               'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',

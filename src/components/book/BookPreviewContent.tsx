@@ -107,7 +107,7 @@ const BookPreviewContent = ({
         <TableOfContentsPage
           stories={stories}
           storyPages={storyPages}
-          onNavigate={jumpToPage}
+          jumpToPage={jumpToPage}
         />
       );
     }
@@ -123,7 +123,7 @@ const BookPreviewContent = ({
             story={story}
             mediaItem={mediaItem}
             globalPageNumber={currentPage}
-            bookTitle={coverData.title || "My Book"}
+            bookTitle={coverData.title || ""}
             totalPageCount={totalPageCount}
           />
         );
@@ -137,7 +137,7 @@ const BookPreviewContent = ({
             pageNumber={pageWithinStory || 0}
             totalPagesInStory={totalPagesInStory || 0}
             globalPageNumber={currentPage}
-            bookTitle={coverData.title || "My Book"}
+            bookTitle={coverData.title || ""}
             totalPageCount={totalPageCount}
           />
         );
@@ -186,7 +186,7 @@ const BookPreviewContent = ({
       </div>
       
       {/* Navigation Bar at the bottom */}
-      <div className="w-full mt-6">
+      <div className="w-full flex justify-center mt-6">
         <NavigationBar
           leftButtonText="Previous"
           centerButtonText={`Page ${currentPage} of ${totalPageCount}`}
