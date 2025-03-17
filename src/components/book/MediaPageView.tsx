@@ -43,7 +43,7 @@ const MediaPageView = ({
         {bookTitle}
       </div>
       
-      <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1 relative px-[10px]">
+      <div className="max-w-full max-h-[75%] flex justify-center items-center flex-1 relative px-[15px]">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-70 rounded-lg">
             <LoadingSpinner className="h-8 w-8 text-green-800" />

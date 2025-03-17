@@ -14,7 +14,7 @@
   .drop-cap:first-letter {
     initial-letter: 2;
     -webkit-initial-letter: 2;
-    margin-right: 0.2em;
+    margin-right: 0.1em;
     font-weight: bold;
     font-size: 3.5em;
     float: left;
@@ -64,7 +64,7 @@ a:hover {
 
 .book-content {
   /* Standard book content width with reduced margins */
-  max-width: calc(100% - 20px); /* Decreased side margins to 10px on each side */
+  max-width: calc(100% - 30px); /* Adjusted for 15px margins on each side */
   margin: 0 auto;
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
 }

@@ -71,7 +71,7 @@ const TextPageView = ({
       
       <div 
         ref={contentRef}
-        className="flex-1 mx-auto book-content px-[10px] py-4 overflow-y-auto"
+        className="flex-1 mx-auto book-content px-[15px] py-4 overflow-y-auto"
       >
         <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
           {isFirstPage && (
