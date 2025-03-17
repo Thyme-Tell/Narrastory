@@ -215,6 +215,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 60px;
 }
 
 /* Make sure the book content leaves room for the navigation bar */

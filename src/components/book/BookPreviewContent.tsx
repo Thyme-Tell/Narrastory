@@ -173,8 +173,8 @@ const BookPreviewContent = ({
         </div>
       </div>
       
-      {/* Navigation Bar at the bottom */}
-      <div className="w-full flex justify-center mt-6">
+      {/* Navigation Bar Container */}
+      <div className="navigation-bar-container h-[60px] flex items-center justify-center">
         <NavigationBar
           leftButtonText="Previous"
           centerButtonText={`Page ${currentPage + 1} of ${totalPageCount}`}
