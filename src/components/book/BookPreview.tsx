@@ -177,7 +177,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
         </div>
       </div>
       
-      <div className="w-full bottom-controls-bar py-3 px-2">
+      <div className="w-full bottom-controls-bar fixed bottom-0 left-0 right-0 bg-white z-50 py-3 px-2">
         <BookPagination 
           currentPage={currentPage}
           totalPageCount={totalPageCount}
