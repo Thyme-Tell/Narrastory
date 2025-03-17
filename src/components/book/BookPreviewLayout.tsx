@@ -3,7 +3,7 @@ import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import TableOfContents from "./TableOfContents";
 import BookPreviewContainer from "./BookPreviewContainer";
-import { Book, X } from "lucide-react";
+import { Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -77,45 +77,7 @@ const BookPreviewLayout = ({
         <div className="w-full h-full flex-1 flex flex-col relative">
           {children}
           
-          {/* Bottom controls bar */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm py-3 px-4 shadow-lg flex justify-between items-center z-10">
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant={showToc ? "default" : "outline"}
-                size={isMobile ? "sm" : "default"}
-                onClick={() => setShowToc(!showToc)}
-                className="flex items-center gap-2"
-              >
-                <Book className="h-4 w-4" />
-                <span className={isMobile ? "sr-only" : ""}>Contents</span>
-              </Button>
-              
-              {onDownloadPDF && !isMobile && (
-                <Button 
-                  variant="outline" 
-                  size="default"
-                  onClick={onDownloadPDF}
-                  className="hidden sm:flex items-center gap-2"
-                >
-                  <span>Download PDF</span>
-                </Button>
-              )}
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <span className="text-xs sm:text-sm whitespace-nowrap">
-                {currentPage + 1}/{totalPageCount}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onClose}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
+          {/* Remove the bottom controls bar completely */}
         </div>
       </div>
     </div>

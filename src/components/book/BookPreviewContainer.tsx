@@ -31,6 +31,9 @@ interface BookPreviewContainerProps {
   storyPages?: number[];
   storyMediaMap?: Map<string, StoryMediaItem[]>;
   jumpToPage?: (page: number) => void;
+  setShowToc?: (show: boolean) => void;
+  showToc?: boolean;
+  onClose?: () => void;
 }
 
 const BookPreviewContainer = ({
@@ -51,7 +54,10 @@ const BookPreviewContainer = ({
   bookmarks = [],
   storyPages = [],
   storyMediaMap = new Map(),
-  jumpToPage = () => {}
+  jumpToPage = () => {},
+  setShowToc,
+  showToc,
+  onClose
 }: BookPreviewContainerProps) => {
   const isMobile = window.innerWidth < 768;
 
@@ -75,6 +81,9 @@ const BookPreviewContainer = ({
         storyPages={storyPages}
         storyMediaMap={storyMediaMap}
         jumpToPage={jumpToPage}
+        setShowToc={setShowToc}
+        showToc={showToc}
+        onClose={onClose}
       />
     </div>
   );

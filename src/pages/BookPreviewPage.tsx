@@ -100,6 +100,9 @@ const BookPreviewPage = () => {
         isIOSDevice={isIOSDevice}
         onDownloadPDF={handleDownloadPDF}
         isGeneratingPDF={isGeneratingPDF}
+        setShowToc={bookNavigation.setShowToc}
+        showToc={bookNavigation.showToc}
+        onClose={handleClose}
       />
     </BookPreviewLayout>
   );
