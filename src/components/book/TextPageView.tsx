@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Story } from "@/types/supabase";
 import { ChevronsDown } from "lucide-react";
@@ -172,13 +171,9 @@ const TextPageView = ({
       </div>
       
       {showScrollIndicator && (
-        <div className="absolute bottom-16 left-0 right-0 flex justify-center fade-out pointer-events-none">
-          <div className="flex flex-col items-center opacity-70">
-            <ChevronsDown 
-              className="text-[#A33D29] animate-bounce w-8 h-8" 
-              strokeWidth={1.5} 
-            />
-          </div>
+        <div className="scroll-indicator-container">
+          <div className="chevron-vector vector-top"></div>
+          <div className="chevron-vector vector-bottom"></div>
         </div>
       )}
     </div>
