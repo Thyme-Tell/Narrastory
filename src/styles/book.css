@@ -1,3 +1,4 @@
+
 .book-page {
   aspect-ratio: 5/8;
   max-width: 100%;
@@ -36,11 +37,14 @@
 }
 
 .book-page h1 {
-  font-size: 16pt;
+  font-family: 'Times New Roman', serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 110%;
   text-align: center;
+  color: #262626;
   margin-bottom: 1.5em;
-  font-weight: bold;
-  color: #3C2A21;
 }
 
 .book-page img, .book-page video {

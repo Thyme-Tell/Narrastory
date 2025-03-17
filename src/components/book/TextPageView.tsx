@@ -65,7 +65,6 @@ const TextPageView = ({
   const pageContent = getPageContent(story, pageNumber);
   const isFirstPage = pageNumber === 1;
   
-  // Calculate progress based on global page number and total pages
   const progress = Math.round((globalPageNumber / totalPageCount) * 100);
 
   const renderParagraph = (text: string, index: number, isFirstParagraph: boolean) => {
@@ -109,7 +108,7 @@ const TextPageView = ({
       >
         <div className="prose max-w-none font-serif text-[11pt] leading-relaxed">
           {isFirstPage && (
-            <h1 className="text-center font-serif text-[16pt] mb-8 font-bold text-[#3C2A21] mt-4">
+            <h1 className="text-center font-['Times_New_Roman'] font-normal font-semibold text-[24px] leading-[110%] text-[#262626] mt-4 mb-8">
               {story.title || "Untitled Story"}
             </h1>
           )}
