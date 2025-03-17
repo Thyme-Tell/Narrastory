@@ -6,10 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Story } from "@/types/supabase";
 import { useCoverData } from "@/hooks/useCoverData";
 import { useBookNavigation } from "@/hooks/useBookNavigation";
-import BookPreviewHeader from "./BookPreviewHeader";
 import BookPreviewContent from "./BookPreviewContent";
 import TableOfContents from "./TableOfContents";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "../ui/button";
+import { Menu, X } from "lucide-react";
 
 interface BookPreviewProps {
   profileId: string;
@@ -23,6 +24,7 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const { coverData, isLoading: isCoverLoading } = useCoverData(profileId);
   const isMobile = useIsMobile();
   const [isRendered, setIsRendered] = useState(false);
+  const [showToc, setShowToc] = useState(false);
   
   // Debug logging for mobile visibility issues
   useEffect(() => {
@@ -83,8 +85,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
   const {
     currentPage,
     zoomLevel,
-    showToc,
-    setShowToc,
     bookmarks,
     storyPages,
     totalPageCount,
@@ -147,21 +147,6 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
       data-is-mobile={isMobile ? "true" : "false"} // For debugging
       data-is-rendered={isRendered ? "true" : "false"} // For debugging
     >
-      {/* Header */}
-      <BookPreviewHeader
-        totalPageCount={totalPageCount}
-        currentPage={currentPage}
-        zoomLevel={zoomLevel}
-        showToc={showToc}
-        bookmarks={bookmarks}
-        onToggleToc={() => setShowToc(!showToc)}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onToggleBookmark={toggleBookmark}
-        onClose={onClose}
-        isMobile={isMobile}
-      />
-
       <div className="flex-1 w-full flex overflow-hidden">
         {/* TOC Sidebar */}
         {showToc && (
@@ -194,12 +179,37 @@ const BookPreview = ({ profileId, open, onClose }: BookPreviewProps) => {
             goToPrevPage={goToPrevPage}
             currentStoryInfo={currentStoryInfo}
             isMobile={isMobile}
-            bookmarks={bookmarks}
-            storyPages={storyPages}
-            storyMediaMap={storyMediaMap}
-            jumpToPage={jumpToPage}
+            onDownloadPDF={undefined}
+            isGeneratingPDF={false}
           />
         </div>
+      </div>
+      
+      {/* Bottom controls bar */}
+      <div className="w-full bottom-controls-bar flex items-center justify-between px-4 py-2">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setShowToc(!showToc)}
+          aria-label="Toggle table of contents"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-muted-foreground">
+            {currentPage} / {totalPageCount}
+          </span>
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onClose}
+          aria-label="Close preview"
+        >
+          <X className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );

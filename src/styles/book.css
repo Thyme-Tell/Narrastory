@@ -51,18 +51,19 @@
   margin: 1em auto;
 }
 
+/* Fixed drop cap styling with no horizontal space */
 .drop-cap:first-letter {
   initial-letter: 2;
   -webkit-initial-letter: 2;
-  margin-right: 0; /* Removed margin to eliminate gap between drop cap and adjacent text */
+  margin-right: 0;
+  padding-right: 0;
   font-weight: bold;
   font-size: 3.5em;
   float: left;
   line-height: 0.8;
   margin-top: 0.1em;
   color: #A33D29;
-  padding-right: 0.05em; /* Small padding to prevent too tight spacing */
-  margin-left: 0; /* Removed left margin */
+  margin-left: 0;
 }
 
 .book-preview-container {
