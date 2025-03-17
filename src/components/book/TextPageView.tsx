@@ -71,42 +71,28 @@ const TextPageView = ({
   const renderParagraph = (text: string, index: number, isFirstParagraph: boolean) => {
     if (!text) return null;
     
-    // Special handling for drop caps (first paragraph on the first page)
-    if (isFirstParagraph && isFirstPage) {
-      // Split the paragraph into two lines for better drop cap formatting
-      const lines = text.split(/(?<=\.\s|\?\s|\!\s)/);
-      const firstChar = text.charAt(0);
+    const shouldUseDropCap = isFirstParagraph && isFirstPage;
+    
+    if (shouldUseDropCap) {
+      // For drop cap paragraphs, we'll handle the first word specially
+      const words = text.split(' ');
+      const firstWord = words[0];
+      const restOfText = words.slice(1).join(' ');
       
-      // If we have multiple sentences, use them for line splitting
-      if (lines.length > 1) {
-        const firstLine = lines[0].substring(1); // Remove first character which will be the drop cap
-        const remainingLines = lines.slice(1).join(" ");
-        
-        return (
-          <p key={index} className="indent-6 text-justify leading-relaxed tracking-normal drop-cap">
-            {firstChar}
-            <span className="first-line">{firstLine}</span>
-            <span className="second-line">{remainingLines}</span>
-          </p>
-        );
-      } 
-      // If there's just one sentence, split by space for the first word
-      else {
-        const words = text.split(" ");
-        const firstWord = words[0].substring(1); // Remove first character
-        const remainingWords = words.slice(1).join(" ");
-        
-        return (
-          <p key={index} className="indent-6 text-justify leading-relaxed tracking-normal drop-cap">
-            {firstChar}
-            <span className="first-line">{firstWord}</span>
-            <span className="second-line">{remainingWords}</span>
-          </p>
-        );
-      }
-    } 
-    // Regular paragraphs
-    else {
+      return (
+        <p 
+          key={index} 
+          className="indent-6 text-[11pt] text-justify leading-relaxed tracking-normal drop-cap"
+          style={{ 
+            fontFamily: '"Libre Caslon Text", Georgia, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", Times, serif',
+            color: '#383838'
+          }}
+        >
+          {firstWord}<span> </span>{restOfText}
+        </p>
+      );
+    } else {
+      // Regular paragraph without drop cap
       return (
         <p 
           key={index} 
