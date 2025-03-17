@@ -4,9 +4,28 @@
   max-width: calc(100vw - 20px);
   width: calc(100vw - 20px);
   min-width: 320px;
-  max-height: 80vh;
+  max-height: calc(100vh - 20px);
+  height: calc(100vh - 20px);
   background-color: #FFFFFF;
   margin: 10px;
+  overflow: hidden;
+}
+
+.book-preview-content-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.book-preview-page {
+  aspect-ratio: 5/8;
+  height: auto;
+  max-height: calc(100vh - 40px);
+  width: auto;
 }
 
 .book-preview-title {

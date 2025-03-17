@@ -1,4 +1,5 @@
 
+
 @media (max-width: 768px) {
   .book-preview-container {
     max-width: 100%;
@@ -143,6 +144,11 @@
   
   .book-preview-navigation {
     padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  
+  .book-preview-page {
+    max-height: calc(100vh - 80px);
+    width: auto;
   }
 }
 

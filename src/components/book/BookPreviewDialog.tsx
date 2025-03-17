@@ -38,61 +38,63 @@ const BookPreviewDialog = ({
         className="book-preview-dialog p-0 flex flex-col overflow-hidden"
         hideCloseButton
       >
-        <div className="flex flex-col h-full">
-          {/* Header Section */}
-          <div className="px-6 pt-6">
-            <div className="flex items-center justify-between text-gray-500 mb-3">
-              <span className="text-sm font-sans">My Stories</span>
-              <Book className="w-5 h-5" />
-              <span className="text-sm font-sans">{formattedDate}</span>
+        <div className="book-preview-content-container">
+          <div className="book-preview-page flex flex-col">
+            {/* Header Section */}
+            <div className="px-6 pt-6">
+              <div className="flex items-center justify-between text-gray-500 mb-3">
+                <span className="text-sm font-sans">My Stories</span>
+                <Book className="w-5 h-5" />
+                <span className="text-sm font-sans">{formattedDate}</span>
+              </div>
+              <div className="border-b border-gray-200 w-full"></div>
             </div>
-            <div className="border-b border-gray-200 w-full"></div>
-          </div>
-          
-          {/* Title Section */}
-          <div className="px-6 pt-8 pb-6 text-center">
-            <h1 className="book-preview-title">{title}</h1>
-            <div className="flex justify-center">
-              <div className="w-16 border-t border-gray-300"></div>
-            </div>
-          </div>
-          
-          {/* Content Area - Scrollable */}
-          <div className="px-6 flex-1 overflow-y-auto">
-            <div className="book-preview-content">
-              {content.split('\n\n').map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
-            </div>
-          </div>
-          
-          {/* Footer Navigation */}
-          <div className="p-6 pt-8 border-t border-gray-200 book-preview-navigation">
-            <button 
-              onClick={onPreviousPage} 
-              disabled={currentPage <= 1}
-              className={cn(
-                "book-preview-button book-preview-button-back",
-                currentPage <= 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
-              )}
-            >
-              Back
-            </button>
             
-            <button className="book-preview-button book-preview-button-page">
-              Page {currentPage} / {totalPages}
-            </button>
+            {/* Title Section */}
+            <div className="px-6 pt-8 pb-6 text-center">
+              <h1 className="book-preview-title">{title}</h1>
+              <div className="flex justify-center">
+                <div className="w-16 border-t border-gray-300"></div>
+              </div>
+            </div>
             
-            <button 
-              onClick={onNextPage} 
-              disabled={currentPage >= totalPages}
-              className={cn(
-                "book-preview-button book-preview-button-next",
-                currentPage >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
-              )}
-            >
-              Next
-            </button>
+            {/* Content Area - Scrollable */}
+            <div className="px-6 flex-1 overflow-y-auto">
+              <div className="book-preview-content">
+                {content.split('\n\n').map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
+              </div>
+            </div>
+            
+            {/* Footer Navigation */}
+            <div className="p-6 pt-8 border-t border-gray-200 book-preview-navigation">
+              <button 
+                onClick={onPreviousPage} 
+                disabled={currentPage <= 1}
+                className={cn(
+                  "book-preview-button book-preview-button-back",
+                  currentPage <= 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
+                )}
+              >
+                Back
+              </button>
+              
+              <button className="book-preview-button book-preview-button-page">
+                Page {currentPage} / {totalPages}
+              </button>
+              
+              <button 
+                onClick={onNextPage} 
+                disabled={currentPage >= totalPages}
+                className={cn(
+                  "book-preview-button book-preview-button-next",
+                  currentPage >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
+                )}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </DialogContent>
