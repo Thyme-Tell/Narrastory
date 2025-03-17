@@ -3,7 +3,6 @@
   aspect-ratio: 5/8;
   max-width: 100%;
   max-height: 100%;
-  background-color: #f8f7f1; 
   overflow: hidden; 
   position: relative; 
   font-family: 'Libre Baskerville', 'Playfair Display', serif;
@@ -102,16 +101,7 @@
   animation: slide-in-right 0.3s ease forwards;
 }
 
-/* Bottom controls bar styling */
-.bottom-controls-bar {
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid rgba(60, 42, 33, 0.1);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  z-index: 50;
-}
-
-/* Add styles for the navigation controls to ensure visibility */
+/* Page navigation controls styling */
 .page-navigation-controls {
   position: absolute;
   bottom: 0;

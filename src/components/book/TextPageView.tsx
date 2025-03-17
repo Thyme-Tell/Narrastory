@@ -81,7 +81,14 @@ const TextPageView = ({
   };
 
   return (
-    <div className="w-full h-full bg-[#f8f7f1] book-page flex flex-col relative">
+    <div 
+      className="w-full h-full book-page flex flex-col relative"
+      style={{
+        backgroundImage: "url('/lovable-uploads/4fc12b10-f1ea-4e24-81c6-c34b331c0fcc.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}
+    >
       {/* Header with book title */}
       <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6">
         {bookTitle}

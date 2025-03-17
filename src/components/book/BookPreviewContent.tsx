@@ -89,13 +89,12 @@ const BookPreviewContent = ({
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div 
-        className="relative bg-white shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format page-transition"
+        className="relative shadow-xl rounded-md transition-transform mx-auto overflow-hidden book-format page-transition"
         style={{ 
           transform: `scale(${zoomLevel})`,
           transformOrigin: 'center',
           aspectRatio: "5/8",
           maxHeight: "calc(100vh - 20px)", // Adjusted to maintain exact 10px margins
-          backgroundColor: "#f8f7f1",
           boxShadow: "0 4px 12px rgba(60, 42, 33, 0.2)",
           willChange: "transform",
           position: "relative",

@@ -39,7 +39,14 @@ const MediaPageView = ({
   };
 
   return (
-    <div className="w-full h-full overflow-auto p-3 sm:p-6 bg-white book-page flex flex-col items-center justify-between">
+    <div 
+      className="w-full h-full overflow-auto p-3 sm:p-6 book-page flex flex-col items-center justify-between"
+      style={{
+        backgroundImage: "url('/lovable-uploads/4fc12b10-f1ea-4e24-81c6-c34b331c0fcc.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}
+    >
       {/* Header with book title - positioned at the very top, just like TextPageView */}
       <div className="text-center italic text-[#3C2A21] text-xs font-serif pt-4 pb-2 px-6 w-full">
         {bookTitle}
