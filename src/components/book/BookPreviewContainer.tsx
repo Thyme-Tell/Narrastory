@@ -62,7 +62,7 @@ const BookPreviewContainer = ({
   const isMobile = window.innerWidth < 768;
 
   return (
-    <div className="flex-1 overflow-hidden flex items-center justify-center p-4">
+    <div className="flex-1 overflow-auto flex flex-col items-center justify-center p-4 pb-8">
       <BookPreviewContent
         currentPage={currentPage}
         totalPageCount={totalPageCount}

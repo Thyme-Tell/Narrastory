@@ -59,7 +59,7 @@ const BookPreviewLayout = ({
       data-is-ios={isIOSDevice ? "true" : "false"}
     >
       <div className="w-full h-full flex overflow-hidden">
-        {/* TOC Sidebar - Now with bookish styling */}
+        {/* TOC Sidebar */}
         {showToc && (
           <div className={`${isMobile ? "w-56 toc-mobile" : "w-72"} h-full bg-[#f8f7f1] p-4 overflow-y-auto animate-slide-in-right border-r border-[#3C2A21]/20 shadow-lg`}>
             <TableOfContents 
@@ -73,11 +73,9 @@ const BookPreviewLayout = ({
           </div>
         )}
 
-        {/* Book Content - now centered in available space */}
+        {/* Book Content */}
         <div className="w-full h-full flex-1 flex flex-col relative">
           {children}
-          
-          {/* Remove the bottom controls bar completely */}
         </div>
       </div>
     </div>
