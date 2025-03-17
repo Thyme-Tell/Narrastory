@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Story } from "@/types/supabase";
 import { calculateStoryPages } from "@/utils/bookPagination";
@@ -73,7 +72,7 @@ export const useBookNavigation = (stories: Story[] | undefined, open: boolean) =
     let pageCount = 1; // Start with cover page only
     const pageStartIndices: number[] = [];
 
-    // Calculate starting page for each story
+    // Calculate starting page for each story - skip the TOC page
     stories.forEach((story) => {
       pageStartIndices.push(pageCount);
       pageCount += calculateStoryPages(story);

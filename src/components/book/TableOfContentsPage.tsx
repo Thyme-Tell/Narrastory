@@ -5,18 +5,29 @@ import { StoryMediaItem } from "@/types/media";
 
 interface TableOfContentsPageProps {
   stories: Story[];
-  bookTitle: string;
   storyPages: number[];
-  storyMediaMap: Map<string, StoryMediaItem[]>;
-  onSelectPage: (pageIndex: number) => void;
+  jumpToPage?: (pageIndex: number) => void;
+  bookTitle?: string;
+  storyMediaMap?: Map<string, StoryMediaItem[]>;
+  onSelectPage?: (pageIndex: number) => void;
 }
 
 const TableOfContentsPage: React.FC<TableOfContentsPageProps> = ({
   stories,
-  bookTitle,
   storyPages,
-  onSelectPage
+  jumpToPage,
+  onSelectPage,
+  bookTitle = "My Book"
 }) => {
+  // Use either jumpToPage or onSelectPage (for backward compatibility)
+  const handlePageSelect = (pageIndex: number) => {
+    if (jumpToPage) {
+      jumpToPage(pageIndex);
+    } else if (onSelectPage) {
+      onSelectPage(pageIndex);
+    }
+  };
+
   return (
     <div className="book-page w-full h-full overflow-y-auto">
       <div className="book-content p-6">
@@ -33,7 +44,7 @@ const TableOfContentsPage: React.FC<TableOfContentsPageProps> = ({
             <div key={story.id} className="mb-4">
               <div 
                 className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-1 rounded"
-                onClick={() => onSelectPage(startPage)}
+                onClick={() => handlePageSelect(startPage)}
               >
                 <span className="font-medium">{story.title || "Untitled Story"}</span>
                 <span className="text-right">{startPage + 1}</span>

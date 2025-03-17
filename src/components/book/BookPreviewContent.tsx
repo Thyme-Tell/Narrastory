@@ -6,7 +6,6 @@ import { StoryMediaItem } from "@/types/media";
 import { Skeleton } from "@/components/ui/skeleton";
 import PageView from "./PageView";
 import MediaPageView from "./MediaPageView";
-import TableOfContentsPage from "./TableOfContentsPage";
 import BookCover from "./BookCover";
 import NavigationBar from "@/components/ui/navigation-bar";
 import { useToast } from "@/hooks/use-toast";
@@ -92,22 +91,11 @@ const BookPreviewContent = ({
 
   const renderPageContent = () => {
     // Cover page (page 1)
-    if (currentPage === 1) {
+    if (currentPage === 0) {
       return (
         <BookCover
           coverData={coverData}
           authorName={authorName}
-        />
-      );
-    }
-    
-    // Table of Contents (page 2)
-    if (currentPage === 2) {
-      return (
-        <TableOfContentsPage
-          stories={stories}
-          storyPages={storyPages}
-          jumpToPage={jumpToPage}
         />
       );
     }
@@ -123,7 +111,7 @@ const BookPreviewContent = ({
             story={story}
             mediaItem={mediaItem}
             globalPageNumber={currentPage}
-            bookTitle={coverData.title || ""}
+            bookTitle={coverData.titleText || ""}
             totalPageCount={totalPageCount}
           />
         );
@@ -137,7 +125,7 @@ const BookPreviewContent = ({
             pageNumber={pageWithinStory || 0}
             totalPagesInStory={totalPagesInStory || 0}
             globalPageNumber={currentPage}
-            bookTitle={coverData.title || ""}
+            bookTitle={coverData.titleText || ""}
             totalPageCount={totalPageCount}
           />
         );
@@ -189,7 +177,7 @@ const BookPreviewContent = ({
       <div className="w-full flex justify-center mt-6">
         <NavigationBar
           leftButtonText="Previous"
-          centerButtonText={`Page ${currentPage} of ${totalPageCount}`}
+          centerButtonText={`Page ${currentPage + 1} of ${totalPageCount}`}
           rightButtonText="Next"
           onLeftButtonClick={goToPrevPage}
           onCenterButtonClick={() => {
