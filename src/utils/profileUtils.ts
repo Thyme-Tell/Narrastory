@@ -11,6 +11,7 @@ interface UserProfile {
     email: string;
     synthflow_voice_id?: string;
     elevenlabs_voice_id?: string;
+    phone_number?: string; // Added phone_number
   };
   stories?: {
     count: number;
@@ -29,6 +30,7 @@ interface UserProfile {
     user_first_name: string;
     user_last_name: string;
     user_email: string;
+    user_phone?: string; // Added phone number
     has_stories: boolean;
     story_count: number;
     recent_story_titles: string;
@@ -115,6 +117,38 @@ export const getRecentStoryTitles = async (profileId: string): Promise<string> =
       
   } catch (err) {
     console.error('Error getting story titles:', err);
+    return 'none';
+  }
+};
+
+/**
+ * Get a formatted list of recent story titles for a user by phone number
+ * @param phoneNumber The phone number to lookup
+ * @returns A comma-separated list of story titles, or 'none' if no stories
+ */
+export const getRecentStoryTitlesByPhone = async (phoneNumber: string): Promise<string> => {
+  try {
+    if (!phoneNumber) {
+      console.error('Empty phoneNumber provided to getRecentStoryTitlesByPhone');
+      return 'none';
+    }
+
+    // First get the profile ID by phone number
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('phone_number', phoneNumber)
+      .maybeSingle();
+      
+    if (profileError || !profile) {
+      console.error('Error finding profile by phone:', profileError || 'No profile found');
+      return 'none';
+    }
+    
+    return getRecentStoryTitles(profile.id);
+      
+  } catch (err) {
+    console.error('Error getting story titles by phone:', err);
     return 'none';
   }
 };

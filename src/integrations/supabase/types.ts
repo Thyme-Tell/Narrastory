@@ -206,10 +206,10 @@ export type Database = {
           created_at?: string
           elevenlabs_voice_id?: string | null
           email?: string | null
-          first_name: string
+          first_name?: string
           id?: string
-          last_name: string
-          password: string
+          last_name?: string
+          password?: string
           phone_number: string
           synthflow_voice_id?: string | null
           updated_at?: string

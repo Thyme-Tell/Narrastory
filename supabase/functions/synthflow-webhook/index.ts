@@ -11,6 +11,167 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 // Create a Supabase client with the service role key
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+/**
+ * Get profile by phone number, create if not exists
+ * @param phoneNumber The phone number to lookup
+ * @returns The profile object or null if error
+ */
+async function getOrCreateProfile(phoneNumber: string) {
+  if (!phoneNumber) {
+    console.error('No phone number provided');
+    return null;
+  }
+  
+  // Normalize the phone number for matching
+  const normalizedPhone = normalizePhoneNumber(phoneNumber);
+  console.log('Looking up profile with normalized phone:', normalizedPhone);
+  
+  // Find the user profile by phone number
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, email, synthflow_voice_id, elevenlabs_voice_id, phone_number')
+    .eq('phone_number', normalizedPhone)
+    .maybeSingle();
+    
+  if (profileError) {
+    console.error('Error querying profile:', profileError);
+    return null;
+  }
+  
+  // If profile exists, return it
+  if (profile) {
+    console.log('Found existing profile:', profile);
+    return profile;
+  }
+  
+  // Create a new profile if one doesn't exist
+  console.log('Creating new profile for phone:', normalizedPhone);
+  const { data: newProfile, error: createProfileError } = await supabase
+    .from('profiles')
+    .insert([
+      {
+        first_name: 'Guest',
+        last_name: 'User', // Default last_name
+        phone_number: normalizedPhone,
+        password: Math.random().toString(36).substring(2, 10) // Simple random password
+      }
+    ])
+    .select()
+    .single();
+    
+  if (createProfileError) {
+    console.error('Error creating profile:', createProfileError);
+    return null;
+  }
+  
+  console.log('Created new profile:', newProfile);
+  return newProfile;
+}
+
+/**
+ * Get recent stories for a profile
+ * @param profileId The profile ID
+ * @returns Array of stories or empty array if none/error
+ */
+async function getRecentStories(profileId: string) {
+  if (!profileId) {
+    return [];
+  }
+  
+  const { data: stories, error: storiesError } = await supabase
+    .from('stories')
+    .select('id, title, summary, content, created_at')
+    .eq('profile_id', profileId)
+    .order('created_at', { ascending: false })
+    .limit(5);
+    
+  if (storiesError) {
+    console.error('Error fetching stories:', storiesError);
+    return [];
+  }
+  
+  return stories || [];
+}
+
+/**
+ * Generate Synthflow context object from profile and stories
+ * @param profile Profile object
+ * @param stories Array of stories
+ * @returns Formatted context object for Synthflow
+ */
+function generateSynthflowContext(profile, stories) {
+  const hasStories = stories && stories.length > 0;
+  
+  return {
+    user_id: profile.id,
+    user_name: `${profile.first_name} ${profile.last_name || "User"}`,
+    user_first_name: profile.first_name,
+    user_last_name: profile.last_name || "User",
+    user_email: profile.email || "",
+    user_phone: profile.phone_number || "",
+    has_stories: hasStories,
+    story_count: hasStories ? stories.length : 0,
+    recent_story_titles: hasStories 
+      ? stories.map(s => s.title || 'Untitled story').join(', ')
+      : 'none',
+    recent_story_summaries: hasStories 
+      ? stories.map(s => s.summary || 'No summary available').join(', ')
+      : 'none'
+  };
+}
+
+/**
+ * Save a story to the database
+ * @param profileId Profile ID to associate with the story
+ * @param storyContent Story content text
+ * @param summary Optional summary text
+ * @returns Saved story or null if error
+ */
+async function saveStory(profileId: string, storyContent: string, summary: string = '') {
+  if (!profileId || !storyContent) {
+    console.error('Missing required parameters for saveStory:', { hasProfileId: !!profileId, hasContent: !!storyContent });
+    return null;
+  }
+  
+  // Process the story content
+  const lines = storyContent.split('\n').filter((line: string) => line.trim() !== '');
+  // Use the first line as the title if it exists
+  const title = lines.length > 0 ? lines[0].trim() : 'Phone Call Story';
+  // Use the rest as the content
+  const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : storyContent;
+  
+  // Use the provided summary or "" if none
+  const storySummary = summary.trim();
+  
+  console.log('Processed story:', { 
+    title, 
+    content_preview: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+    summary: storySummary ? storySummary.substring(0, 100) + (storySummary.length > 100 ? '...' : '') : 'None provided'
+  });
+  
+  // Insert the story into the database
+  const { data: story, error: storyError } = await supabase
+    .from('stories')
+    .insert([
+      {
+        profile_id: profileId,
+        title: title,
+        content: content,
+        summary: storySummary || null
+      },
+    ])
+    .select()
+    .single();
+    
+  if (storyError) {
+    console.error('Error inserting story:', storyError);
+    return null;
+  }
+  
+  console.log('Successfully stored story:', story.id);
+  return story;
+}
+
 // Main server function
 Deno.serve(async (req) => {
   console.log('Synthflow webhook received a request');
@@ -133,18 +294,6 @@ Deno.serve(async (req) => {
             }
           }
           
-          // Extract profile_id or user_id
-          const profileMatch = bodyText.match(/"(?:profile_id|user_id)"\s*:\s*"([^"]*)"/);
-          if (profileMatch && profileMatch[1]) {
-            payload.profile_id = profileMatch[1];
-          } else {
-            // Try URL-encoded form data format
-            const profileFormMatch = bodyText.match(/(?:profile_id|user_id)=([^&]*)/);
-            if (profileFormMatch && profileFormMatch[1]) {
-              payload.profile_id = decodeURIComponent(profileFormMatch[1]);
-            }
-          }
-          
           console.log('Extracted data from non-JSON body:', payload);
         }
       }
@@ -188,117 +337,16 @@ Deno.serve(async (req) => {
         );
       }
       
-      // Get the profile ID from payload or lookup by phone
-      let profileId = payload.profile_id || payload.user_id;
+      // Get or create profile by phone number
+      const profile = await getOrCreateProfile(phoneNumber);
       
-      // If no profile ID but we have a phone number, look up by phone
-      if (!profileId && phoneNumber) {
-        console.log('Looking up profile by phone number:', phoneNumber);
-        const normalizedPhoneNumber = normalizePhoneNumber(phoneNumber);
-        console.log('Normalized phone number:', normalizedPhoneNumber);
-        
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('phone_number', normalizedPhoneNumber)
-          .maybeSingle();
-          
-        if (profileError) {
-          console.error('Error looking up profile:', profileError);
-        } else if (profile) {
-          console.log('Found profile by phone number:', profile);
-          profileId = profile.id;
-        } else {
-          console.log('No profile found for phone number:', normalizedPhoneNumber);
-          
-          // Create a new profile if one doesn't exist
-          // Critical fix: Ensure last_name is NEVER null
-          console.log('Creating new profile for:', normalizedPhoneNumber);
-          const { data: newProfile, error: createProfileError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                first_name: 'Guest',
-                last_name: 'User', // Ensure last_name is NEVER empty
-                phone_number: normalizedPhoneNumber,
-                password: Math.random().toString(36).substring(2, 10) // Simple random password
-              }
-            ])
-            .select()
-            .single();
-            
-          if (createProfileError) {
-            console.error('Error creating profile:', createProfileError);
-            return new Response(
-              JSON.stringify({ 
-                error: 'Error creating profile', 
-                details: createProfileError 
-              }),
-              { 
-                status: 500, 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-              }
-            );
-          }
-          
-          console.log('Created new profile:', newProfile);
-          profileId = newProfile.id;
-        }
-      }
-      
-      // Check if we have a profile ID and story content
-      if (!profileId) {
-        console.error('Could not determine profile ID', { 
-          phoneNumber,
-          hasProfileId: !!profileId
-        });
+      if (!profile) {
+        console.error('Could not get or create profile for phone number:', phoneNumber);
         return new Response(
           JSON.stringify({ 
-            error: 'Could not determine profile ID',
-            phone_number_received: phoneNumber,
-            payload_keys: Object.keys(payload)
+            error: 'Error processing profile', 
+            phone_number: phoneNumber 
           }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-      
-      // Process the story content
-      const lines = storyContent.split('\n').filter((line: string) => line.trim() !== '');
-      // Use the first line as the title if it exists
-      const title = lines.length > 0 ? lines[0].trim() : 'Phone Call Story';
-      // Use the rest as the content
-      const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : storyContent;
-      
-      // Use the provided summary or "" if none
-      const storySummary = summary.trim();
-      
-      console.log('Processed story:', { 
-        title, 
-        content_preview: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
-        summary: storySummary ? storySummary.substring(0, 100) + (storySummary.length > 100 ? '...' : '') : 'None provided'
-      });
-      
-      // Insert the story into the database
-      const { data: story, error: storyError } = await supabase
-        .from('stories')
-        .insert([
-          {
-            profile_id: profileId,
-            title: title,
-            content: content,
-            summary: storySummary || null
-          },
-        ])
-        .select()
-        .single();
-        
-      if (storyError) {
-        console.error('Error inserting story:', storyError);
-        return new Response(
-          JSON.stringify({ error: 'Error saving story', details: storyError }),
           { 
             status: 500, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -306,7 +354,18 @@ Deno.serve(async (req) => {
         );
       }
       
-      console.log('Successfully stored story:', story.id);
+      // Save the story
+      const story = await saveStory(profile.id, storyContent, summary);
+      
+      if (!story) {
+        return new Response(
+          JSON.stringify({ error: 'Error saving story' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
       
       return new Response(
         JSON.stringify({ 
@@ -320,11 +379,11 @@ Deno.serve(async (req) => {
         }
       );
     } else {
-      // HANDLE WEBHOOK INFO FLOW - LEVERAGE THE GET-USER-PROFILE FUNCTION
+      // HANDLE WEBHOOK INFO FLOW - Get caller information
       console.log('Processing webhook info request for caller information');
       
-      // Extract the caller's phone number from various possible fields in Synthflow format
-      const callerPhoneNumber = phoneNumber || payload?.caller_number || payload?.from || '';
+      // Extract the caller's phone number from various possible fields
+      const callerPhoneNumber = phoneNumber;
                                 
       if (!callerPhoneNumber) {
         console.error('No phone number provided in the webhook payload');
@@ -347,100 +406,13 @@ Deno.serve(async (req) => {
         );
       }
       
-      console.log('Calling get-user-profile function with phone number:', callerPhoneNumber);
+      // Get or create profile by phone number
+      const profile = await getOrCreateProfile(callerPhoneNumber);
       
-      try {
-        // Call our get-user-profile function to get the profile data
-        const profileResponse = await supabase.functions.invoke('get-user-profile', {
-          method: 'POST',
-          body: JSON.stringify({
-            phone_number: callerPhoneNumber
-          }),
-        });
-        
-        if (profileResponse.error) {
-          console.error('Error from get-user-profile:', profileResponse.error);
-          
-          // Return default guest user in case of error
-          return new Response(
-            JSON.stringify({
-              user_name: "Guest User",
-              user_email: "",
-              user_id: "",
-              user_first_name: "Guest",
-              user_last_name: "User",
-              has_stories: false,
-              story_count: 0,
-              recent_story_titles: "none",
-              recent_story_summaries: "none"
-            }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          );
-        }
-        
-        const profileData = profileResponse.data;
-        console.log('Profile data received:', profileData);
-        
-        // If profile was found, return the synthflow_context directly
-        if (profileData && profileData.found && profileData.synthflow_context) {
-          console.log('Returning user context from get-user-profile function');
-          return new Response(
-            JSON.stringify(profileData.synthflow_context),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200 
-            }
-          );
-        }
-        
-        // If profile not found, create a new profile with default values
-        if (profileData && !profileData.found && callerPhoneNumber) {
-          console.log('No profile found, creating new profile for:', callerPhoneNumber);
-          const normalizedNumber = normalizePhoneNumber(callerPhoneNumber);
-          
-          // Critical fix: Ensure last_name is NEVER null
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert([{
-              first_name: 'Guest',
-              last_name: 'User', // Always provide "User" as default last_name
-              phone_number: normalizedNumber,
-              password: Math.random().toString(36).substring(2, 10) // Simple random password
-            }])
-            .select()
-            .single();
-            
-          if (createError) {
-            console.error('Error creating profile:', createError);
-          } else {
-            console.log('Created new profile:', newProfile.id);
-            // Return the newly created profile info
-            return new Response(
-              JSON.stringify({
-                user_name: "Guest User",
-                user_email: "",
-                user_id: newProfile.id,
-                user_first_name: "Guest",
-                user_last_name: "User",
-                has_stories: false,
-                story_count: 0,
-                recent_story_titles: "none",
-                recent_story_summaries: "none"
-              }),
-              { 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
-              }
-            );
-          }
-        }
-        
-        // If profile not found, return the default guest user
+      if (!profile) {
+        console.error('Could not get or create profile for caller:', callerPhoneNumber);
         return new Response(
-          JSON.stringify({
+          JSON.stringify({ 
             user_name: "Guest User",
             user_email: "",
             user_id: "",
@@ -453,148 +425,27 @@ Deno.serve(async (req) => {
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200
-          }
-        );
-      } catch (error) {
-        console.error('Error calling get-user-profile function:', error);
-        
-        // Fallback to the existing code path as backup
-        console.log('Falling back to direct database lookup');
-        
-        // Normalize the phone number for matching
-        const normalizedCallerNumber = normalizePhoneNumber(callerPhoneNumber);
-        console.log('Normalized caller number:', normalizedCallerNumber);
-        
-        // Find the user profile by phone number
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, email, synthflow_voice_id, elevenlabs_voice_id')
-          .eq('phone_number', normalizedCallerNumber)
-          .maybeSingle();
-          
-        if (profileError) {
-          console.error('Error querying profile:', profileError);
-          return new Response(
-            JSON.stringify({
-              user_name: "Guest User",
-              user_email: "",
-              user_id: "",
-              user_first_name: "Guest",
-              user_last_name: "User",
-              has_stories: false,
-              story_count: 0,
-              recent_story_titles: "none"
-            }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          );
-        }
-        
-        // If no profile found, create a new one
-        if (!profile) {
-          console.log('No profile found for phone number, creating new profile:', normalizedCallerNumber);
-          
-          // Critical fix: Ensure last_name is NEVER null
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert([{
-              first_name: 'Guest',
-              last_name: 'User', // Always provide "User" as default last_name
-              phone_number: normalizedCallerNumber,
-              password: Math.random().toString(36).substring(2, 10) // Simple random password
-            }])
-            .select()
-            .single();
-            
-          if (createError) {
-            console.error('Error creating profile:', createError);
-            return new Response(
-              JSON.stringify({
-                user_name: "Guest User",
-                user_email: "",
-                user_id: "",
-                user_first_name: "Guest",
-                user_last_name: "User",
-                has_stories: false,
-                story_count: 0,
-                recent_story_titles: "none"
-              }),
-              { 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
-              }
-            );
-          }
-          
-          console.log('Created new profile:', newProfile);
-          
-          // Return the newly created profile info
-          return new Response(
-            JSON.stringify({
-              user_name: "Guest User",
-              user_email: "",
-              user_id: newProfile.id,
-              user_first_name: "Guest",
-              user_last_name: "User",
-              has_stories: false,
-              story_count: 0,
-              recent_story_titles: "none",
-              recent_story_summaries: "none"
-            }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          );
-        }
-        
-        console.log('Found profile:', profile);
-        
-        // Get user's recent stories
-        const { data: recentStories, error: storiesError } = await supabase
-          .from('stories')
-          .select('id, title, summary')
-          .eq('profile_id', profile.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
-          
-        if (storiesError) {
-          console.error('Error fetching stories:', storiesError);
-        }
-        
-        console.log('Recent stories:', recentStories);
-        
-        // Format response for Synthflow with user info
-        const userContext = {
-          user_id: profile.id,
-          user_name: `${profile.first_name} ${profile.last_name || "User"}`, // Ensure last_name is never empty
-          user_email: profile.email || "",
-          user_first_name: profile.first_name,
-          user_last_name: profile.last_name || "User", // Ensure last_name is never empty
-          has_stories: recentStories && recentStories.length > 0,
-          story_count: recentStories ? recentStories.length : 0,
-          recent_story_titles: recentStories && recentStories.length > 0 
-            ? recentStories.map((s: any) => s.title || 'Untitled story').join(', ')
-            : 'none',
-          recent_story_summaries: recentStories && recentStories.length > 0 
-            ? recentStories.map((s: any) => s.summary || 'No summary available').join(', ')
-            : 'none'
-        };
-        
-        console.log('Returning user context:', userContext);
-        
-        // Return the user context in the format expected by Synthflow
-        return new Response(
-          JSON.stringify(userContext),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200 
           }
         );
       }
+      
+      // Get user's recent stories
+      const recentStories = await getRecentStories(profile.id);
+      
+      // Generate Synthflow context
+      const userContext = generateSynthflowContext(profile, recentStories);
+      
+      console.log('Returning user context:', userContext);
+      
+      // Return the user context in the format expected by Synthflow
+      return new Response(
+        JSON.stringify(userContext),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      );
     }
     
   } catch (error) {
