@@ -29,18 +29,63 @@ Deno.serve(async (req) => {
     const contentType = req.headers.get('content-type') || '';
     console.log('Content-Type header:', contentType);
     
+    // Clone the request to be able to debug it
+    const clonedReq = req.clone();
+    const bodyText = await clonedReq.text();
+    console.log('Raw request body:', bodyText);
+    
+    if (!bodyText || bodyText.trim() === '') {
+      console.log('Empty request body received');
+      return new Response(
+        JSON.stringify({ 
+          error: "Empty request body",
+          content_type: contentType
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
     try {
-      // Clone the request to be able to debug it
-      const clonedReq = req.clone();
-      const bodyText = await clonedReq.text();
-      console.log('Raw request body:', bodyText);
+      // Try to parse as JSON
+      payload = JSON.parse(bodyText);
+      console.log('Parsed payload:', JSON.stringify(payload));
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError.message);
       
-      if (!bodyText || bodyText.trim() === '') {
-        console.log('Empty request body received');
+      // If it's not valid JSON but has content, try to extract data using regex
+      // This can help with malformed or non-standard JSON
+      if (bodyText.includes('phone_number') || bodyText.includes('generated_story')) {
+        console.log('Attempting to extract data from non-JSON body');
+        payload = {};
+        
+        // Extract phone number
+        const phoneMatch = bodyText.match(/"phone_number"\s*:\s*"([^"]*)"/);
+        if (phoneMatch && phoneMatch[1]) {
+          payload.phone_number = phoneMatch[1];
+        }
+        
+        // Extract generated story
+        const storyMatch = bodyText.match(/"generated_story"\s*:\s*"([^"]*)"/);
+        if (storyMatch && storyMatch[1]) {
+          payload.generated_story = storyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        }
+        
+        // Extract summary
+        const summaryMatch = bodyText.match(/"summary"\s*:\s*"([^"]*)"/);
+        if (summaryMatch && summaryMatch[1]) {
+          payload.summary = summaryMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        }
+        
+        console.log('Extracted payload:', payload);
+      } else {
         return new Response(
           JSON.stringify({ 
-            error: "Empty request body",
-            content_type: contentType
+            error: "Invalid JSON in request body", 
+            message: parseError.message,
+            received_content: bodyText.substring(0, 200) + (bodyText.length > 200 ? '...' : '')
           }),
           { 
             status: 400, 
@@ -48,65 +93,6 @@ Deno.serve(async (req) => {
           }
         );
       }
-      
-      try {
-        // Try to parse as JSON
-        payload = JSON.parse(bodyText);
-        console.log('Parsed payload:', JSON.stringify(payload));
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError.message);
-        
-        // If it's not valid JSON but has content, try to extract data using regex
-        // This can help with malformed or non-standard JSON
-        if (bodyText.includes('phone_number') || bodyText.includes('generated_story')) {
-          console.log('Attempting to extract data from non-JSON body');
-          payload = {};
-          
-          // Extract phone number
-          const phoneMatch = bodyText.match(/"phone_number"\s*:\s*"([^"]*)"/);
-          if (phoneMatch && phoneMatch[1]) {
-            payload.phone_number = phoneMatch[1];
-          }
-          
-          // Extract generated story
-          const storyMatch = bodyText.match(/"generated_story"\s*:\s*"([^"]*)"/);
-          if (storyMatch && storyMatch[1]) {
-            payload.generated_story = storyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
-          }
-          
-          // Extract summary
-          const summaryMatch = bodyText.match(/"summary"\s*:\s*"([^"]*)"/);
-          if (summaryMatch && summaryMatch[1]) {
-            payload.summary = summaryMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
-          }
-          
-          console.log('Extracted payload:', payload);
-        } else {
-          return new Response(
-            JSON.stringify({ 
-              error: "Invalid JSON in request body", 
-              message: parseError.message,
-              received_content: bodyText.substring(0, 200) + (bodyText.length > 200 ? '...' : '')
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            }
-          );
-        }
-      }
-    } catch (bodyError) {
-      console.error('Error reading request body:', bodyError);
-      return new Response(
-        JSON.stringify({ 
-          error: "Error reading request body", 
-          message: bodyError.message 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
     }
     
     console.log('Final processed payload:', JSON.stringify(payload));
