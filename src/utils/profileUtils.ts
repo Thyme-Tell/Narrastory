@@ -45,6 +45,14 @@ interface UserProfile {
  */
 export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<UserProfile> => {
   try {
+    if (!phoneNumber || phoneNumber.trim() === '') {
+      console.error('Empty phone number provided to lookupUserProfileByPhone');
+      return {
+        found: false,
+        error: 'Phone number is required'
+      };
+    }
+
     const { data, error } = await supabase.functions.invoke('get-user-profile', {
       method: 'POST',
       body: JSON.stringify({
@@ -80,6 +88,11 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
  */
 export const getRecentStoryTitles = async (profileId: string): Promise<string> => {
   try {
+    if (!profileId) {
+      console.error('Empty profileId provided to getRecentStoryTitles');
+      return 'none';
+    }
+
     const { data: stories, error } = await supabase
       .from('stories')
       .select('title')

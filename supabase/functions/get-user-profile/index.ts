@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       );
     }
     
-    // If no profile found, return a not found response
+    // If no profile found, return a not found response with a guest user
     if (!profile) {
       console.log('No profile found for phone number:', normalizedPhoneNumber);
       
@@ -119,17 +119,21 @@ Deno.serve(async (req) => {
     
     console.log('Recent stories:', recentStories);
     
+    // Make sure we have valid values for first_name and last_name
+    const firstName = profile.first_name || "Guest";
+    const lastName = profile.last_name || "";
+    
     // Format the response with user context and stories
     const userProfile = {
       found: true,
       profile: {
         id: profile.id,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        full_name: `${profile.first_name} ${profile.last_name}`,
-        email: profile.email,
-        synthflow_voice_id: profile.synthflow_voice_id,
-        elevenlabs_voice_id: profile.elevenlabs_voice_id
+        first_name: firstName,
+        last_name: lastName,
+        full_name: `${firstName} ${lastName}`.trim(),
+        email: profile.email || "",
+        synthflow_voice_id: profile.synthflow_voice_id || "",
+        elevenlabs_voice_id: profile.elevenlabs_voice_id || ""
       },
       stories: {
         count: recentStories ? recentStories.length : 0,
@@ -139,9 +143,9 @@ Deno.serve(async (req) => {
       // For Synthflow compatibility
       synthflow_context: {
         user_id: profile.id,
-        user_name: `${profile.first_name} ${profile.last_name}`,
-        user_first_name: profile.first_name,
-        user_last_name: profile.last_name,
+        user_name: `${firstName} ${lastName}`.trim(),
+        user_first_name: firstName,
+        user_last_name: lastName,
         user_email: profile.email || "",
         has_stories: recentStories && recentStories.length > 0,
         story_count: recentStories ? recentStories.length : 0,
