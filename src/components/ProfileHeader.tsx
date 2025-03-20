@@ -52,7 +52,7 @@ const ProfileHeader = ({
     try {
       setIsSubmitting(true);
 
-      // Try to directly save to Supabase first
+      // Save to Supabase
       const { data, error } = await supabase
         .from("stories")
         .insert([
@@ -75,14 +75,7 @@ const ProfileHeader = ({
         return;
       }
 
-      // Now also save to Synthflow
-      const synthflowSuccess = await saveStoryToSynthflow(title, content);
-      
-      if (synthflowSuccess) {
-        console.log("Story successfully saved to both Supabase and Synthflow");
-      } else {
-        console.warn("Story saved to Supabase but failed to save to Synthflow");
-      }
+      console.log("Story successfully saved to Supabase:", data);
 
       toast({
         title: "Success",
@@ -102,52 +95,6 @@ const ProfileHeader = ({
       });
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  // Function to call the synthflow-story-save edge function
-  const saveStoryToSynthflow = async (storyTitle: string, storyContent: string) => {
-    try {
-      // Format the story content for Synthflow
-      const formattedContent = storyTitle ? `${storyTitle}\n${storyContent}` : storyContent;
-      
-      console.log("Saving to Synthflow with payload:", {
-        profile_id: profileId,
-        story_content: formattedContent,
-        metadata: {
-          user_id: profileId,
-          first_name: firstName,
-          last_name: lastName
-        }
-      });
-      
-      // Call the Synthflow story save edge function with proper request body
-      const { data, error } = await supabase.functions.invoke('synthflow-story-save', {
-        method: 'POST',
-        body: JSON.stringify({
-          profile_id: profileId,
-          story_content: formattedContent,
-          metadata: {
-            user_id: profileId,
-            first_name: firstName,
-            last_name: lastName
-          }
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (error) {
-        console.error('Error saving story to Synthflow:', error);
-        return false;
-      }
-
-      console.log('Synthflow story save response:', data);
-      return true;
-    } catch (err) {
-      console.error('Exception saving story to Synthflow:', err);
-      return false;
     }
   };
 
