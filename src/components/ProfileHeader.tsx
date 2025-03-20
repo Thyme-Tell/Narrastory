@@ -46,38 +46,90 @@ const ProfileHeader = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateStory = async () => {
-    const { data, error } = await supabase
-      .from("stories")
-      .insert([
-        {
-          content: content,
-          title: title,
-          profile_id: profileId
-        }
-      ])
-      .select()
-      .single();
+    try {
+      setIsSubmitting(true);
 
-    if (error) {
+      // Try to directly save to Supabase first
+      const { data, error } = await supabase
+        .from("stories")
+        .insert([
+          {
+            content: content,
+            title: title,
+            profile_id: profileId
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Could not create a new story",
+          variant: "destructive",
+        });
+        console.error("Supabase error:", error);
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "New story created",
+      });
+      
+      setIsDialogOpen(false);
+      setTitle("");
+      setContent("");
+      onUpdate();
+    } catch (err) {
+      console.error("Error creating story:", err);
       toast({
         title: "Error",
-        description: "Could not create a new story",
+        description: "Failed to create story",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    toast({
-      title: "Success",
-      description: "New story created",
-    });
-    
-    setIsDialogOpen(false);
-    setTitle("");
-    setContent("");
-    onUpdate();
+  // Function to call the synthflow-story-save edge function
+  const saveStoryToSynthflow = async (storyContent: string) => {
+    try {
+      // Format the story content for Synthflow
+      const formattedContent = title ? `${title}\n${content}` : content;
+      
+      // Call the Synthflow story save edge function with proper request body
+      const { data, error } = await supabase.functions.invoke('synthflow-story-save', {
+        method: 'POST',
+        body: JSON.stringify({
+          profile_id: profileId,
+          story_content: formattedContent,
+          metadata: {
+            user_id: profileId,
+            first_name: firstName,
+            last_name: lastName
+          }
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (error) {
+        console.error('Error saving story to Synthflow:', error);
+        return false;
+      }
+
+      console.log('Synthflow story save response:', data);
+      return true;
+    } catch (err) {
+      console.error('Exception saving story to Synthflow:', err);
+      return false;
+    }
   };
 
   return (
@@ -166,8 +218,9 @@ const ProfileHeader = ({
             <Button 
               className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
               onClick={handleCreateStory}
+              disabled={isSubmitting || !content.trim()}
             >
-              Save Story
+              {isSubmitting ? 'Saving...' : 'Save Story'}
             </Button>
           </div>
         </DialogContent>
