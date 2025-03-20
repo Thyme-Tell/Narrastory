@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     console.log('Request payload:', JSON.stringify(payload));
     
     // Extract the phone number from the request
-    const phoneNumber = payload.phone_number || '';
+    const phoneNumber = payload.phone_number || payload.phone || payload.caller_number || '';
                               
     if (!phoneNumber) {
       console.error('No phone number provided in the request payload');
@@ -76,14 +76,29 @@ Deno.serve(async (req) => {
     // If no profile found, return a not found response
     if (!profile) {
       console.log('No profile found for phone number:', normalizedPhoneNumber);
+      
+      // For Synthflow compatibility, return a guest user object instead of 404
+      const guestUser = {
+        user_name: "Guest",
+        user_email: "",
+        user_id: "",
+        user_first_name: "Guest",
+        user_last_name: "",
+        has_stories: false,
+        story_count: 0,
+        recent_story_titles: "none",
+        recent_story_summaries: "none"
+      };
+      
       return new Response(
         JSON.stringify({
           found: false,
-          message: "No profile found for this phone number"
+          message: "No profile found for this phone number",
+          synthflow_context: guestUser
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 404
+          status: 200
         }
       );
     }
@@ -127,7 +142,7 @@ Deno.serve(async (req) => {
         user_name: `${profile.first_name} ${profile.last_name}`,
         user_first_name: profile.first_name,
         user_last_name: profile.last_name,
-        user_email: profile.email,
+        user_email: profile.email || "",
         has_stories: recentStories && recentStories.length > 0,
         story_count: recentStories ? recentStories.length : 0,
         recent_story_titles: recentStories && recentStories.length > 0 
