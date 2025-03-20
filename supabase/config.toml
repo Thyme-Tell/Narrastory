@@ -36,3 +36,9 @@ enabled = true
 
 [functions.story-tts]
 verify_jwt = false
+
+[functions.retell-webhook]
+verify_jwt = false
+
+[functions.retell-story-save]
+verify_jwt = false
