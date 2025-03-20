@@ -84,6 +84,17 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
     }
 
     console.log('Profile lookup response:', data);
+    
+    // Check if the response indicates a "found" profile
+    if (data.found === false) {
+      console.log('Profile not found for phone number:', phoneNumber);
+      return {
+        found: false,
+        message: data.message || 'Profile not found',
+        synthflow_context: data.synthflow_context
+      };
+    }
+    
     return data as UserProfile;
   } catch (err) {
     console.error('Exception in profile lookup:', err);

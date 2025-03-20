@@ -38,11 +38,13 @@ Deno.serve(async (req) => {
       console.error('Error parsing request payload:', parseError);
       return new Response(
         JSON.stringify({ 
+          found: false,
           error: "Error parsing request payload", 
-          details: parseError.message 
+          details: parseError.message,
+          message: "Error parsing request payload"
         }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -55,12 +57,11 @@ Deno.serve(async (req) => {
       console.error('No phone number provided in the request payload');
       return new Response(
         JSON.stringify({ 
-          error: "No phone number provided",
           found: false,
           message: "No phone number provided in the request"
         }),
         { 
-          status: 200, // Changed to 200 to avoid 400 error
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -81,12 +82,13 @@ Deno.serve(async (req) => {
       console.error('Error querying profile:', profileError);
       return new Response(
         JSON.stringify({ 
+          found: false,
           error: 'Error querying profile', 
           details: profileError.message,
-          found: false 
+          message: "Database error when looking up profile"
         }),
         { 
-          status: 200, // Changed to 200 to avoid 500 error
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -136,10 +138,10 @@ Deno.serve(async (req) => {
     if (storiesError) {
       console.error('Error fetching stories:', storiesError);
       // Continue with empty stories instead of failing
-      recentStories = [];
     }
     
-    console.log('Recent stories count:', recentStories?.length || 0);
+    const storiesArray = recentStories || [];
+    console.log('Recent stories count:', storiesArray.length);
     
     // Make sure we have valid values for first_name and last_name
     const firstName = profile.first_name || "Guest";
@@ -159,9 +161,9 @@ Deno.serve(async (req) => {
         phone_number: profile.phone_number || ""
       },
       stories: {
-        count: recentStories?.length || 0,
-        has_stories: recentStories && recentStories.length > 0,
-        recent: recentStories || []
+        count: storiesArray.length,
+        has_stories: storiesArray.length > 0,
+        recent: storiesArray
       },
       // For Synthflow compatibility
       synthflow_context: {
@@ -171,13 +173,13 @@ Deno.serve(async (req) => {
         user_last_name: lastName,
         user_email: profile.email || "",
         user_phone: profile.phone_number || "",
-        has_stories: recentStories && recentStories.length > 0,
-        story_count: recentStories?.length || 0,
-        recent_story_titles: recentStories && recentStories.length > 0 
-          ? recentStories.map((s) => s.title || 'Untitled story').join(', ')
+        has_stories: storiesArray.length > 0,
+        story_count: storiesArray.length,
+        recent_story_titles: storiesArray.length > 0 
+          ? storiesArray.map((s) => s.title || 'Untitled story').join(', ')
           : 'none',
-        recent_story_summaries: recentStories && recentStories.length > 0 
-          ? recentStories.map((s) => s.summary || 'No summary available').join(', ')
+        recent_story_summaries: storiesArray.length > 0 
+          ? storiesArray.map((s) => s.summary || 'No summary available').join(', ')
           : 'none'
       }
     };
@@ -197,12 +199,13 @@ Deno.serve(async (req) => {
     console.error('Error processing user profile lookup:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
         found: false,
-        stack: error.stack
+        error: error.message,
+        stack: error.stack,
+        message: "Server error processing request"
       }),
       { 
-        status: 200, // Changed to 200 to avoid 500 error
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
