@@ -27,37 +27,66 @@ Deno.serve(async (req) => {
     // Parse request body with better error handling
     let payload;
     const contentType = req.headers.get('content-type') || '';
+    console.log('Content-Type header:', contentType);
     
     try {
-      if (contentType.includes('application/json')) {
-        const requestBodyPromise = req.text();
-        const text = await requestBodyPromise;
-        console.log('Request body raw:', text);
+      // Clone the request to be able to debug it
+      const clonedReq = req.clone();
+      const bodyText = await clonedReq.text();
+      console.log('Raw request body:', bodyText);
+      
+      if (!bodyText || bodyText.trim() === '') {
+        console.log('Empty request body received');
+        return new Response(
+          JSON.stringify({ 
+            error: "Empty request body",
+            content_type: contentType
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      
+      try {
+        // Try to parse as JSON
+        payload = JSON.parse(bodyText);
+        console.log('Parsed payload:', JSON.stringify(payload));
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError.message);
         
-        if (!text || text.trim() === '') {
-          console.log('Empty request body received');
-          return new Response(
-            JSON.stringify({ 
-              error: "Empty request body",
-              content_type: contentType
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            }
-          );
-        }
-        
-        try {
-          payload = JSON.parse(text);
-          console.log('Parsed payload:', JSON.stringify(payload));
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError.message);
+        // If it's not valid JSON but has content, try to extract data using regex
+        // This can help with malformed or non-standard JSON
+        if (bodyText.includes('phone_number') || bodyText.includes('generated_story')) {
+          console.log('Attempting to extract data from non-JSON body');
+          payload = {};
+          
+          // Extract phone number
+          const phoneMatch = bodyText.match(/"phone_number"\s*:\s*"([^"]*)"/);
+          if (phoneMatch && phoneMatch[1]) {
+            payload.phone_number = phoneMatch[1];
+          }
+          
+          // Extract generated story
+          const storyMatch = bodyText.match(/"generated_story"\s*:\s*"([^"]*)"/);
+          if (storyMatch && storyMatch[1]) {
+            payload.generated_story = storyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+          }
+          
+          // Extract summary
+          const summaryMatch = bodyText.match(/"summary"\s*:\s*"([^"]*)"/);
+          if (summaryMatch && summaryMatch[1]) {
+            payload.summary = summaryMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+          }
+          
+          console.log('Extracted payload:', payload);
+        } else {
           return new Response(
             JSON.stringify({ 
               error: "Invalid JSON in request body", 
               message: parseError.message,
-              received_content: text.substring(0, 200) + (text.length > 200 ? '...' : '')
+              received_content: bodyText.substring(0, 200) + (bodyText.length > 200 ? '...' : '')
             }),
             { 
               status: 400, 
@@ -65,18 +94,6 @@ Deno.serve(async (req) => {
             }
           );
         }
-      } else {
-        console.error('Unsupported content type:', contentType);
-        return new Response(
-          JSON.stringify({ 
-            error: "Unsupported content type", 
-            content_type: contentType 
-          }),
-          { 
-            status: 415, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
       }
     } catch (bodyError) {
       console.error('Error reading request body:', bodyError);
@@ -92,21 +109,36 @@ Deno.serve(async (req) => {
       );
     }
     
-    console.log('Request payload:', JSON.stringify(payload));
+    console.log('Final processed payload:', JSON.stringify(payload));
     
-    // Extract necessary data from payload
-    const { profile_id, phone_number, story_content, metadata } = payload;
+    // Extract story content from Synthflow's format
+    // Synthflow may send story in different fields
+    const storyContent = payload.generated_story || payload.story_content || '';
+    const phoneNumber = payload.phone_number || '';
     
-    // Get the profile ID from phone number if provided
-    let finalProfileId = profile_id;
+    if (!storyContent) {
+      console.error('No story content found in the payload', payload);
+      return new Response(
+        JSON.stringify({ 
+          error: 'No story content found in the payload', 
+          payload_received: payload 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
     
-    if (!finalProfileId && phone_number) {
-      console.log('Looking up profile by phone number:', phone_number);
-      // Normalize the phone number for matching
-      const normalizedPhoneNumber = normalizePhoneNumber(phone_number);
+    // Get the profile ID
+    let profileId = payload.profile_id || payload.user_id;
+    
+    // If no profile ID but we have a phone number, look up by phone
+    if (!profileId && phoneNumber) {
+      console.log('Looking up profile by phone number:', phoneNumber);
+      const normalizedPhoneNumber = normalizePhoneNumber(phoneNumber);
       console.log('Normalized phone number:', normalizedPhoneNumber);
       
-      // Look up profile by phone number
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
@@ -117,30 +149,23 @@ Deno.serve(async (req) => {
         console.error('Error looking up profile:', profileError);
       } else if (profile) {
         console.log('Found profile by phone number:', profile);
-        finalProfileId = profile.id;
+        profileId = profile.id;
       } else {
         console.log('No profile found for phone number:', normalizedPhoneNumber);
       }
     }
     
-    // Try to get profile ID from metadata if still not found
-    if (!finalProfileId && metadata && metadata.user_id) {
-      console.log('Using user_id from metadata:', metadata.user_id);
-      finalProfileId = metadata.user_id;
-    }
-    
-    if (!finalProfileId || !story_content) {
-      console.error('Missing required fields in request', { 
-        finalProfileId, 
-        hasContent: !!story_content,
-        content_length: story_content ? story_content.length : 0
+    // Check if we have a profile ID and story content
+    if (!profileId) {
+      console.error('Could not determine profile ID', { 
+        phoneNumber,
+        hasProfileId: !!profileId
       });
       return new Response(
         JSON.stringify({ 
-          error: 'Missing required fields',
-          fields_received: Object.keys(payload),
-          profile_id_found: finalProfileId,
-          content_length: story_content ? story_content.length : 0
+          error: 'Could not determine profile ID',
+          phone_number_received: phoneNumber,
+          payload_keys: Object.keys(payload)
         }),
         { 
           status: 400, 
@@ -150,11 +175,11 @@ Deno.serve(async (req) => {
     }
     
     // Process the story content
-    const lines = story_content.split('\n').filter((line: string) => line.trim() !== '');
+    const lines = storyContent.split('\n').filter((line: string) => line.trim() !== '');
     // Use the first line as the title if it exists
     const title = lines.length > 0 ? lines[0].trim() : 'Phone Call Story';
     // Use the rest as the content
-    const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : story_content;
+    const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : storyContent;
     
     console.log('Processed story:', { 
       title, 
@@ -166,7 +191,7 @@ Deno.serve(async (req) => {
       .from('stories')
       .insert([
         {
-          profile_id: finalProfileId,
+          profile_id: profileId,
           title: title,
           content: content,
         },
