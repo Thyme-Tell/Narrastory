@@ -26,9 +26,31 @@ Deno.serve(async (req) => {
     console.log('Request payload:', JSON.stringify(payload));
     
     // Extract necessary data from payload
-    const { profile_id, story_content, call_id } = payload;
+    const { profile_id, story_content, call_id, user_id, metadata } = payload;
     
-    if (!profile_id || !story_content) {
+    // Get the profile ID either directly or from metadata/dynamic variables
+    let finalProfileId = profile_id;
+    
+    // If no profile_id, try to get it from metadata
+    if (!finalProfileId && metadata && metadata.user_id) {
+      finalProfileId = metadata.user_id;
+    }
+    
+    // If still no profile_id, try to get it from call data via Retell API
+    if (!finalProfileId && call_id) {
+      try {
+        const callData = await fetchCallDetails(call_id);
+        if (callData && callData.retell_llm_dynamic_variables && callData.retell_llm_dynamic_variables.user_id) {
+          finalProfileId = callData.retell_llm_dynamic_variables.user_id;
+        } else if (callData && callData.metadata && callData.metadata.user_id) {
+          finalProfileId = callData.metadata.user_id;
+        }
+      } catch (error) {
+        console.error('Error fetching call details:', error);
+      }
+    }
+    
+    if (!finalProfileId || !story_content) {
       console.error('Missing required fields in request');
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
@@ -53,7 +75,7 @@ Deno.serve(async (req) => {
       .from('stories')
       .insert([
         {
-          profile_id: profile_id,
+          profile_id: finalProfileId,
           title: title,
           content: content,
         },
@@ -97,3 +119,25 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+// Function to fetch call details from Retell API
+async function fetchCallDetails(callId: string) {
+  try {
+    const response = await fetch(`https://api.retellai.com/v1/calls/${callId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${RETELL_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch call details: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching call details:', error);
+    throw error;
+  }
+}

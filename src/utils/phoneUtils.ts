@@ -1,3 +1,4 @@
+
 export const normalizePhoneNumber = (phoneNumber: string): string => {
   // Remove all non-digit characters
   const digitsOnly = phoneNumber.replace(/\D/g, '');

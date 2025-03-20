@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
     // Extract the caller's phone number
     const callerPhoneNumber = payload.caller_phone_number || 
                               payload.from || 
+                              payload.from_number ||
                               payload.phone_number;
                               
     if (!callerPhoneNumber) {
@@ -134,6 +135,8 @@ Deno.serve(async (req) => {
         name: `${profile.first_name} ${profile.last_name}`,
         phone_number: normalizedCallerNumber,
         email: profile.email,
+        first_name: profile.first_name,
+        last_name: profile.last_name
       },
       recent_stories: recentStories || [],
       // Add any other context Retell.ai might need
@@ -173,19 +176,39 @@ async function configureRetellCall(callId: string, callParams: any) {
   console.log(`Configuring Retell call ${callId} with params:`, callParams);
   
   try {
-    // Prepare the AI assistant with context about the user
-    let userContext = `This is ${callParams.user_profile.name} calling.`;
+    // Format user information for dynamic variables
+    const userInfo = callParams.user_profile;
+    const recentStories = callParams.recent_stories;
     
-    if (callParams.recent_stories && callParams.recent_stories.length > 0) {
-      userContext += ` They have recently written stories with titles: `;
-      userContext += callParams.recent_stories
+    // Create dynamic variables for the Retell LLM
+    const dynamicVariables = {
+      user_id: userInfo.id,
+      user_name: userInfo.name,
+      user_first_name: userInfo.first_name,
+      user_last_name: userInfo.last_name,
+      user_email: userInfo.email,
+      user_phone: userInfo.phone_number,
+      has_stories: recentStories.length > 0,
+      story_count: recentStories.length,
+      recent_story_titles: recentStories.length > 0 
+        ? recentStories.map((s: any) => s.title || 'Untitled story').join(', ')
+        : 'none'
+    };
+    
+    // Create LLM context for the agent
+    let userContext = `This call is from ${userInfo.name} (${userInfo.first_name} ${userInfo.last_name}).`;
+    userContext += ` Their email is ${userInfo.email}.`;
+    
+    if (recentStories && recentStories.length > 0) {
+      userContext += ` They have previously shared ${recentStories.length} stories with titles: `;
+      userContext += recentStories
         .map((story: any) => `"${story.title || 'Untitled story'}"`)
         .join(', ');
     } else {
-      userContext += ` They haven't written any stories yet.`;
+      userContext += ` They haven't shared any stories yet.`;
     }
     
-    userContext += ` Ask them if they would like to share a new story today.`;
+    userContext += ` Guide them to share a new story today. Once they've shared their story, confirm you've got it and let them know it will appear in their dashboard.`;
     
     // Call Retell API to update call parameters
     const response = await fetch(`https://api.retellai.com/v1/calls/${callId}/update`, {
@@ -195,9 +218,17 @@ async function configureRetellCall(callId: string, callParams: any) {
         'Authorization': `Bearer ${RETELL_API_KEY}`
       },
       body: JSON.stringify({
-        llm_override_assistant_context: userContext
+        llm_override_assistant_context: userContext,
+        metadata: dynamicVariables,
+        retell_llm_dynamic_variables: dynamicVariables
       })
     });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Error response from Retell API: ${response.status} ${errorText}`);
+      throw new Error(`Retell API error: ${response.status} ${errorText}`);
+    }
     
     const data = await response.json();
     console.log('Retell API response:', data);
