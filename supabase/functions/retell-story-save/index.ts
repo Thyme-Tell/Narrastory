@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     console.log('Request payload:', JSON.stringify(payload));
     
     // Extract necessary data from payload
-    const { profile_id, story_content, call_id, user_id, metadata, retell_llm_dynamic_variables } = payload;
+    const { profile_id, story_content, call_id, user_id, metadata, retell_llm_dynamic_variables, summary } = payload;
     
     // Get the profile ID from all possible sources
     let finalProfileId = profile_id || user_id;
@@ -80,7 +80,14 @@ Deno.serve(async (req) => {
     // Use the rest as the content
     const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : story_content;
     
-    console.log('Processed story:', { title, content: content.substring(0, 100) + '...' });
+    // Use the provided summary or null
+    const storySummary = summary ? summary.trim() : null;
+    
+    console.log('Processed story:', { 
+      title, 
+      content: content.substring(0, 100) + '...',
+      summary: storySummary ? storySummary.substring(0, 100) + '...' : 'None provided'
+    });
     
     // Insert the story into the database
     const { data: story, error: storyError } = await supabase
@@ -90,6 +97,7 @@ Deno.serve(async (req) => {
           profile_id: finalProfileId,
           title: title,
           content: content,
+          summary: storySummary
         },
       ])
       .select()

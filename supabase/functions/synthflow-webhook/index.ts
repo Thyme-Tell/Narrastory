@@ -121,6 +121,18 @@ Deno.serve(async (req) => {
             }
           }
           
+          // Extract summary
+          const summaryMatch = bodyText.match(/"summary"\s*:\s*"([^"]*)"/);
+          if (summaryMatch && summaryMatch[1]) {
+            payload.summary = summaryMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+          } else {
+            // Try URL-encoded form data format
+            const summaryFormMatch = bodyText.match(/summary=([^&]*)/);
+            if (summaryFormMatch && summaryFormMatch[1]) {
+              payload.summary = decodeURIComponent(summaryFormMatch[1]);
+            }
+          }
+          
           // Extract profile_id or user_id
           const profileMatch = bodyText.match(/"(?:profile_id|user_id)"\s*:\s*"([^"]*)"/);
           if (profileMatch && profileMatch[1]) {
@@ -156,6 +168,7 @@ Deno.serve(async (req) => {
     // Determine if this is a story-save request based on having story content
     const storyContent = payload.generated_story || payload.story_content || '';
     const phoneNumber = payload.phone_number || '';
+    const summary = payload.summary || '';
     
     if (storyContent) {
       // HANDLE STORY SAVE FLOW
@@ -226,9 +239,13 @@ Deno.serve(async (req) => {
       // Use the rest as the content
       const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : storyContent;
       
+      // Use the provided summary or "" if none
+      const storySummary = summary.trim();
+      
       console.log('Processed story:', { 
         title, 
-        content_preview: content.substring(0, 100) + (content.length > 100 ? '...' : '')
+        content_preview: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+        summary: storySummary ? storySummary.substring(0, 100) + (storySummary.length > 100 ? '...' : '') : 'None provided'
       });
       
       // Insert the story into the database
@@ -239,6 +256,7 @@ Deno.serve(async (req) => {
             profile_id: profileId,
             title: title,
             content: content,
+            summary: storySummary || null
           },
         ])
         .select()
@@ -337,7 +355,7 @@ Deno.serve(async (req) => {
       // Get user's recent stories to reference in the call
       const { data: recentStories, error: storiesError } = await supabase
         .from('stories')
-        .select('id, title')
+        .select('id, title, summary')
         .eq('profile_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -359,6 +377,9 @@ Deno.serve(async (req) => {
         story_count: recentStories ? recentStories.length : 0,
         recent_story_titles: recentStories && recentStories.length > 0 
           ? recentStories.map((s: any) => s.title || 'Untitled story').join(', ')
+          : 'none',
+        recent_story_summaries: recentStories && recentStories.length > 0 
+          ? recentStories.map((s: any) => s.summary || 'No summary available').join(', ')
           : 'none'
       };
       
