@@ -12,10 +12,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Helper function to normalize phone number for comparison
 const normalizePhoneNumber = (phoneNumber: string): string => {
+  // If phone number is null or undefined, return empty string
+  if (!phoneNumber) {
+    return '';
+  }
+  
   // Remove all non-digit characters
   const digitsOnly = phoneNumber.replace(/\D/g, '');
   
-  // If the number starts with '1' and has 11 digits, remove the '1'
+  // If the number starts with '1' and has 11 digits, format with +1
   if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
     return `+1${digitsOnly.slice(1)}`;
   }
@@ -25,12 +30,12 @@ const normalizePhoneNumber = (phoneNumber: string): string => {
     return `+1${digitsOnly}`;
   }
   
-  // Return the original format if it's already correct
-  if (digitsOnly.length === 10 || (digitsOnly.length === 11 && digitsOnly.startsWith('1'))) {
-    return `+${digitsOnly}`;
+  // If it already has a plus sign, return it as is
+  if (phoneNumber.startsWith('+')) {
+    return phoneNumber;
   }
   
-  // Return the original input if we can't normalize it
+  // Return the original format if it's already correct or we can't normalize it
   return phoneNumber;
 };
 
@@ -58,16 +63,17 @@ Deno.serve(async (req) => {
     
     console.log('Request payload:', JSON.stringify(payload));
     
-    // Extract the caller's phone number
-    const callerPhoneNumber = payload.caller_phone_number || 
-                              payload.from || 
-                              payload.from_number ||
-                              payload.phone_number;
+    // Extract the caller's phone number from the Retell-specific format
+    // According to the documentation, it's in the from_number field
+    const callerPhoneNumber = payload.from_number;
                               
     if (!callerPhoneNumber) {
-      console.error('No phone number provided in the webhook');
+      console.error('No phone number provided in the webhook payload');
       return new Response(
-        JSON.stringify({ error: 'No phone number provided' }),
+        JSON.stringify({ 
+          error: "No phone number provided",
+          payload: payload 
+        }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -97,13 +103,19 @@ Deno.serve(async (req) => {
       );
     }
     
+    // If no profile found, return a default response
     if (!profile) {
       console.log('No profile found for phone number:', normalizedCallerNumber);
-      // Continue call with default parameters
       return new Response(
-        JSON.stringify({ 
-          status: 'continue',
-          message: 'No profile found, continuing with default parameters'
+        JSON.stringify({
+          user_name: "Guest",
+          user_email: "",
+          user_id: "",
+          user_first_name: "Guest",
+          user_last_name: "",
+          has_stories: false,
+          story_count: 0,
+          recent_story_titles: "none"
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -128,31 +140,25 @@ Deno.serve(async (req) => {
     
     console.log('Recent stories:', recentStories);
     
-    // Prepare customized parameters for Retell
-    const callParams = {
-      user_profile: {
-        id: profile.id,
-        name: `${profile.first_name} ${profile.last_name}`,
-        phone_number: normalizedCallerNumber,
-        email: profile.email,
-        first_name: profile.first_name,
-        last_name: profile.last_name
-      },
-      recent_stories: recentStories || [],
-      // Add any other context Retell.ai might need
+    // Format dynamic variables for Retell as per documentation
+    const dynamicVariables = {
+      user_id: profile.id,
+      user_name: `${profile.first_name} ${profile.last_name}`,
+      user_email: profile.email,
+      user_first_name: profile.first_name,
+      user_last_name: profile.last_name,
+      has_stories: recentStories && recentStories.length > 0,
+      story_count: recentStories ? recentStories.length : 0,
+      recent_story_titles: recentStories && recentStories.length > 0 
+        ? recentStories.map((s: any) => s.title || 'Untitled story').join(', ')
+        : 'none'
     };
     
-    // Configure the Retell call
-    if (payload.call_id) {
-      await configureRetellCall(payload.call_id, callParams);
-    }
+    console.log('Returning dynamic variables:', dynamicVariables);
     
+    // Return the dynamic variables in the format expected by Retell
     return new Response(
-      JSON.stringify({ 
-        status: 'success', 
-        profile_id: profile.id,
-        message: 'Profile found and call configured' 
-      }),
+      JSON.stringify(dynamicVariables),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
@@ -170,72 +176,3 @@ Deno.serve(async (req) => {
     );
   }
 });
-
-// Function to configure the Retell call with custom parameters
-async function configureRetellCall(callId: string, callParams: any) {
-  console.log(`Configuring Retell call ${callId} with params:`, callParams);
-  
-  try {
-    // Format user information for dynamic variables
-    const userInfo = callParams.user_profile;
-    const recentStories = callParams.recent_stories;
-    
-    // Create dynamic variables for the Retell LLM
-    const dynamicVariables = {
-      user_id: userInfo.id,
-      user_name: userInfo.name,
-      user_first_name: userInfo.first_name,
-      user_last_name: userInfo.last_name,
-      user_email: userInfo.email,
-      user_phone: userInfo.phone_number,
-      has_stories: recentStories.length > 0,
-      story_count: recentStories.length,
-      recent_story_titles: recentStories.length > 0 
-        ? recentStories.map((s: any) => s.title || 'Untitled story').join(', ')
-        : 'none'
-    };
-    
-    // Create LLM context for the agent
-    let userContext = `This call is from ${userInfo.name} (${userInfo.first_name} ${userInfo.last_name}).`;
-    userContext += ` Their email is ${userInfo.email}.`;
-    
-    if (recentStories && recentStories.length > 0) {
-      userContext += ` They have previously shared ${recentStories.length} stories with titles: `;
-      userContext += recentStories
-        .map((story: any) => `"${story.title || 'Untitled story'}"`)
-        .join(', ');
-    } else {
-      userContext += ` They haven't shared any stories yet.`;
-    }
-    
-    userContext += ` Guide them to share a new story today. Once they've shared their story, confirm you've got it and let them know it will appear in their dashboard.`;
-    
-    // Call Retell API to update call parameters
-    const response = await fetch(`https://api.retellai.com/v1/calls/${callId}/update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RETELL_API_KEY}`
-      },
-      body: JSON.stringify({
-        llm_override_assistant_context: userContext,
-        metadata: dynamicVariables,
-        retell_llm_dynamic_variables: dynamicVariables
-      })
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error response from Retell API: ${response.status} ${errorText}`);
-      throw new Error(`Retell API error: ${response.status} ${errorText}`);
-    }
-    
-    const data = await response.json();
-    console.log('Retell API response:', data);
-    
-    return data;
-  } catch (error) {
-    console.error('Error configuring Retell call:', error);
-    throw error;
-  }
-}

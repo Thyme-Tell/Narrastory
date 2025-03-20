@@ -26,34 +26,46 @@ Deno.serve(async (req) => {
     console.log('Request payload:', JSON.stringify(payload));
     
     // Extract necessary data from payload
-    const { profile_id, story_content, call_id, user_id, metadata } = payload;
+    const { profile_id, story_content, call_id, user_id, metadata, retell_llm_dynamic_variables } = payload;
     
-    // Get the profile ID either directly or from metadata/dynamic variables
-    let finalProfileId = profile_id;
+    // Get the profile ID from all possible sources
+    let finalProfileId = profile_id || user_id;
     
-    // If no profile_id, try to get it from metadata
-    if (!finalProfileId && metadata && metadata.user_id) {
-      finalProfileId = metadata.user_id;
-    }
-    
-    // If still no profile_id, try to get it from call data via Retell API
-    if (!finalProfileId && call_id) {
-      try {
-        const callData = await fetchCallDetails(call_id);
-        if (callData && callData.retell_llm_dynamic_variables && callData.retell_llm_dynamic_variables.user_id) {
-          finalProfileId = callData.retell_llm_dynamic_variables.user_id;
-        } else if (callData && callData.metadata && callData.metadata.user_id) {
-          finalProfileId = callData.metadata.user_id;
+    // Try to get profile ID from different places based on Retell's structure
+    if (!finalProfileId) {
+      // Check retell_llm_dynamic_variables first (most likely place based on docs)
+      if (retell_llm_dynamic_variables && retell_llm_dynamic_variables.user_id) {
+        finalProfileId = retell_llm_dynamic_variables.user_id;
+      }
+      // Then check metadata
+      else if (metadata && metadata.user_id) {
+        finalProfileId = metadata.user_id;
+      }
+      // Try to get from call data if we have call_id
+      else if (call_id) {
+        try {
+          const callData = await fetchCallDetails(call_id);
+          if (callData.retell_llm_dynamic_variables && callData.retell_llm_dynamic_variables.user_id) {
+            finalProfileId = callData.retell_llm_dynamic_variables.user_id;
+          } 
+          else if (callData.metadata && callData.metadata.user_id) {
+            finalProfileId = callData.metadata.user_id;
+          }
+        } catch (error) {
+          console.error('Error fetching call details:', error);
         }
-      } catch (error) {
-        console.error('Error fetching call details:', error);
       }
     }
     
     if (!finalProfileId || !story_content) {
-      console.error('Missing required fields in request');
+      console.error('Missing required fields in request', { finalProfileId, hasContent: !!story_content });
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ 
+          error: 'Missing required fields',
+          fields_received: Object.keys(payload),
+          profile_id_found: finalProfileId,
+          content_length: story_content ? story_content.length : 0
+        }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
