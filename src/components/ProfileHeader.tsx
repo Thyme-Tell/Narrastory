@@ -75,6 +75,15 @@ const ProfileHeader = ({
         return;
       }
 
+      // Now also save to Synthflow
+      const synthflowSuccess = await saveStoryToSynthflow(content);
+      
+      if (synthflowSuccess) {
+        console.log("Story successfully saved to both Supabase and Synthflow");
+      } else {
+        console.warn("Story saved to Supabase but failed to save to Synthflow");
+      }
+
       toast({
         title: "Success",
         description: "New story created",
