@@ -42,3 +42,6 @@ verify_jwt = false
 
 [functions.synthflow-story-save]
 verify_jwt = false
+
+[functions.get-user-profile]
+verify_jwt = false
