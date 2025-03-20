@@ -25,27 +25,42 @@ Deno.serve(async (req) => {
     let payload;
     const contentType = req.headers.get('content-type') || '';
     
-    if (contentType.includes('application/json')) {
-      payload = await req.json();
-    } else {
-      const formData = await req.formData();
-      payload = Object.fromEntries(formData.entries());
+    try {
+      if (contentType.includes('application/json')) {
+        payload = await req.json();
+      } else {
+        const formData = await req.formData();
+        payload = Object.fromEntries(formData.entries());
+      }
+      
+      console.log('Request payload:', JSON.stringify(payload));
+    } catch (parseError) {
+      console.error('Error parsing request payload:', parseError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Error parsing request payload", 
+          details: parseError.message 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
     
-    console.log('Request payload:', JSON.stringify(payload));
-    
     // Extract the phone number from the request
-    const phoneNumber = payload.phone_number || payload.phone || payload.caller_number || '';
+    const phoneNumber = payload?.phone_number || payload?.phone || payload?.caller_number || '';
                               
     if (!phoneNumber) {
       console.error('No phone number provided in the request payload');
       return new Response(
         JSON.stringify({ 
           error: "No phone number provided",
-          payload: payload 
+          found: false,
+          message: "No phone number provided in the request"
         }),
         { 
-          status: 400, 
+          status: 200, // Changed to 200 to avoid 400 error
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -58,16 +73,20 @@ Deno.serve(async (req) => {
     // Find the user profile by phone number
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, synthflow_voice_id, elevenlabs_voice_id')
+      .select('id, first_name, last_name, email, synthflow_voice_id, elevenlabs_voice_id, phone_number')
       .eq('phone_number', normalizedPhoneNumber)
       .maybeSingle();
       
     if (profileError) {
       console.error('Error querying profile:', profileError);
       return new Response(
-        JSON.stringify({ error: 'Error querying profile', details: profileError }),
+        JSON.stringify({ 
+          error: 'Error querying profile', 
+          details: profileError.message,
+          found: false 
+        }),
         { 
-          status: 500, 
+          status: 200, // Changed to 200 to avoid 500 error
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -79,11 +98,12 @@ Deno.serve(async (req) => {
       
       // For Synthflow compatibility, return a guest user object instead of 404
       const guestUser = {
-        user_name: "Guest",
+        user_name: "Guest User",
         user_email: "",
         user_id: "",
         user_first_name: "Guest",
         user_last_name: "User",
+        user_phone: normalizedPhoneNumber,
         has_stories: false,
         story_count: 0,
         recent_story_titles: "none",
@@ -115,13 +135,15 @@ Deno.serve(async (req) => {
       
     if (storiesError) {
       console.error('Error fetching stories:', storiesError);
+      // Continue with empty stories instead of failing
+      recentStories = [];
     }
     
-    console.log('Recent stories:', recentStories);
+    console.log('Recent stories count:', recentStories?.length || 0);
     
     // Make sure we have valid values for first_name and last_name
     const firstName = profile.first_name || "Guest";
-    const lastName = profile.last_name || "User"; // Changed from empty string to "User"
+    const lastName = profile.last_name || "User";
     
     // Format the response with user context and stories
     const userProfile = {
@@ -133,10 +155,11 @@ Deno.serve(async (req) => {
         full_name: `${firstName} ${lastName}`.trim(),
         email: profile.email || "",
         synthflow_voice_id: profile.synthflow_voice_id || "",
-        elevenlabs_voice_id: profile.elevenlabs_voice_id || ""
+        elevenlabs_voice_id: profile.elevenlabs_voice_id || "",
+        phone_number: profile.phone_number || ""
       },
       stories: {
-        count: recentStories ? recentStories.length : 0,
+        count: recentStories?.length || 0,
         has_stories: recentStories && recentStories.length > 0,
         recent: recentStories || []
       },
@@ -147,8 +170,9 @@ Deno.serve(async (req) => {
         user_first_name: firstName,
         user_last_name: lastName,
         user_email: profile.email || "",
+        user_phone: profile.phone_number || "",
         has_stories: recentStories && recentStories.length > 0,
-        story_count: recentStories ? recentStories.length : 0,
+        story_count: recentStories?.length || 0,
         recent_story_titles: recentStories && recentStories.length > 0 
           ? recentStories.map((s) => s.title || 'Untitled story').join(', ')
           : 'none',
@@ -172,9 +196,13 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error processing user profile lookup:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        found: false,
+        stack: error.stack
+      }),
       { 
-        status: 500, 
+        status: 200, // Changed to 200 to avoid 500 error
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );

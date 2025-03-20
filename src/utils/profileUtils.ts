@@ -11,7 +11,7 @@ interface UserProfile {
     email: string;
     synthflow_voice_id?: string;
     elevenlabs_voice_id?: string;
-    phone_number?: string; // Added phone_number
+    phone_number?: string;
   };
   stories?: {
     count: number;
@@ -30,7 +30,7 @@ interface UserProfile {
     user_first_name: string;
     user_last_name: string;
     user_email: string;
-    user_phone?: string; // Added phone number
+    user_phone?: string;
     has_stories: boolean;
     story_count: number;
     recent_story_titles: string;
@@ -55,6 +55,8 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
       };
     }
 
+    console.log('Looking up profile for phone number:', phoneNumber);
+    
     const { data, error } = await supabase.functions.invoke('get-user-profile', {
       method: 'POST',
       body: JSON.stringify({
@@ -73,6 +75,15 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
       };
     }
 
+    if (!data) {
+      console.error('No data returned from profile lookup');
+      return {
+        found: false,
+        error: 'No data returned from profile lookup'
+      };
+    }
+
+    console.log('Profile lookup response:', data);
     return data as UserProfile;
   } catch (err) {
     console.error('Exception in profile lookup:', err);
