@@ -14,6 +14,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 // Main server function
 Deno.serve(async (req) => {
   console.log('Synthflow story save endpoint received a request');
+  console.log('Request method:', req.method);
+  console.log('Request headers:', Object.fromEntries(req.headers.entries()));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -28,8 +30,9 @@ Deno.serve(async (req) => {
     
     try {
       if (contentType.includes('application/json')) {
-        const text = await req.text();
-        console.log('Request body:', text);
+        const requestBodyPromise = req.text();
+        const text = await requestBodyPromise;
+        console.log('Request body raw:', text);
         
         if (!text || text.trim() === '') {
           console.log('Empty request body received');
@@ -47,6 +50,7 @@ Deno.serve(async (req) => {
         
         try {
           payload = JSON.parse(text);
+          console.log('Parsed payload:', JSON.stringify(payload));
         } catch (parseError) {
           console.error('JSON parse error:', parseError.message);
           return new Response(

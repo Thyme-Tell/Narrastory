@@ -47,6 +47,7 @@ const ProfileHeader = ({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
 
   const handleCreateStory = async () => {
     try {
@@ -95,6 +96,69 @@ const ProfileHeader = ({
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Test function to verify the Synthflow endpoint is working
+  const testSynthflowEndpoint = async () => {
+    try {
+      setIsTesting(true);
+      
+      const testContent = "Test Story Title\nThis is a test story content to verify the Synthflow endpoint is working correctly.";
+      
+      console.log("Testing Synthflow endpoint with payload:", {
+        profile_id: profileId,
+        story_content: testContent,
+        metadata: {
+          user_id: profileId,
+          first_name: firstName,
+          last_name: lastName
+        }
+      });
+      
+      const { data, error } = await supabase.functions.invoke('synthflow-story-save', {
+        method: 'POST',
+        body: JSON.stringify({
+          profile_id: profileId,
+          story_content: testContent,
+          metadata: {
+            user_id: profileId,
+            first_name: firstName,
+            last_name: lastName
+          }
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (error) {
+        console.error('Error in test call to Synthflow endpoint:', error);
+        toast({
+          title: "Test Failed",
+          description: "Error calling Synthflow endpoint: " + error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Synthflow test response:', data);
+      toast({
+        title: "Test Success",
+        description: "Synthflow endpoint working correctly",
+      });
+      
+      // Refresh the stories list
+      onUpdate();
+    } catch (err) {
+      console.error('Exception in Synthflow test:', err);
+      toast({
+        title: "Test Failed",
+        description: "Exception: " + (err instanceof Error ? err.message : String(err)),
+        variant: "destructive",
+      });
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -155,6 +219,19 @@ const ProfileHeader = ({
           Write a Story
         </Button>
       </div>
+
+      {/* Hidden test button in development - enable if needed for testing */}
+      {process.env.NODE_ENV === 'development' && (
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={testSynthflowEndpoint}
+          disabled={isTesting}
+          className="mt-2 text-xs"
+        >
+          {isTesting ? 'Testing...' : 'Test Synthflow Endpoint'}
+        </Button>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-white">
