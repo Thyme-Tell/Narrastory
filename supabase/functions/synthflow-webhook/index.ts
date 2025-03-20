@@ -24,23 +24,44 @@ Deno.serve(async (req) => {
   }
   
   try {
-    // Parse request body with better error handling
-    let payload;
-    const contentType = req.headers.get('content-type') || '';
-    console.log('Content-Type header:', contentType);
+    // Clone the request to be able to read the body multiple times
+    const clonedReq = req.clone();
     
+    // Try to read the body as text first
+    let bodyText = '';
     try {
-      // Clone the request to be able to debug it
-      const clonedReq = req.clone();
-      const bodyText = await clonedReq.text();
+      bodyText = await clonedReq.text();
       console.log('Raw request body:', bodyText);
+    } catch (e) {
+      console.error('Error reading request body as text:', e);
+    }
+    
+    // If the body is empty, check if data is in the URL (querystring)
+    if (!bodyText || bodyText.trim() === '') {
+      console.log('Request body is empty, checking URL parameters');
+      const url = new URL(req.url);
+      const params = url.searchParams;
       
-      if (!bodyText || bodyText.trim() === '') {
-        console.log('Empty request body received');
+      // Check if we have parameters in the URL
+      if (params.has('generated_story') || params.has('phone_number') || params.has('story_content')) {
+        console.log('Found data in URL parameters');
+        const urlData = {};
+        
+        // Extract parameters we care about
+        for (const [key, value] of params.entries()) {
+          if (['generated_story', 'story_content', 'phone_number', 'summary', 'user_id', 'profile_id'].includes(key)) {
+            urlData[key] = value;
+          }
+        }
+        
+        bodyText = JSON.stringify(urlData);
+        console.log('Constructed body from URL parameters:', bodyText);
+      } else {
+        console.log('No relevant data in URL parameters');
         return new Response(
           JSON.stringify({ 
-            error: "Empty request body",
-            content_type: contentType
+            error: "Empty request body and no URL parameters found",
+            content_type: req.headers.get('content-type') || 'none'
           }),
           { 
             status: 400, 
@@ -48,59 +69,80 @@ Deno.serve(async (req) => {
           }
         );
       }
-      
-      try {
-        // Try to parse as JSON
-        payload = JSON.parse(bodyText);
-        console.log('Parsed payload:', JSON.stringify(payload));
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError.message);
-        
-        // If it's not valid JSON but has content, try to extract data using regex
-        // This can help with malformed or non-standard JSON
-        if (bodyText.includes('phone_number') || bodyText.includes('generated_story')) {
-          console.log('Attempting to extract data from non-JSON body');
+    }
+    
+    // Parse the body text into an object
+    let payload = {};
+    try {
+      if (bodyText) {
+        // Try parsing as JSON first
+        try {
+          payload = JSON.parse(bodyText);
+          console.log('Successfully parsed body as JSON:', JSON.stringify(payload));
+        } catch (jsonError) {
+          console.log('Failed to parse body as JSON, trying to extract data manually');
+          
+          // Fallback: Try to extract data using regex
           payload = {};
           
           // Extract phone number
           const phoneMatch = bodyText.match(/"phone_number"\s*:\s*"([^"]*)"/);
           if (phoneMatch && phoneMatch[1]) {
             payload.phone_number = phoneMatch[1];
+          } else {
+            // Try URL-encoded form data format
+            const phoneFormMatch = bodyText.match(/phone_number=([^&]*)/);
+            if (phoneFormMatch && phoneFormMatch[1]) {
+              payload.phone_number = decodeURIComponent(phoneFormMatch[1]);
+            }
           }
           
           // Extract generated story
           const storyMatch = bodyText.match(/"generated_story"\s*:\s*"([^"]*)"/);
           if (storyMatch && storyMatch[1]) {
             payload.generated_story = storyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
-          }
-          
-          // Extract summary
-          const summaryMatch = bodyText.match(/"summary"\s*:\s*"([^"]*)"/);
-          if (summaryMatch && summaryMatch[1]) {
-            payload.summary = summaryMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
-          }
-          
-          console.log('Extracted payload:', payload);
-        } else {
-          return new Response(
-            JSON.stringify({ 
-              error: "Invalid JSON in request body", 
-              message: parseError.message,
-              received_content: bodyText.substring(0, 200) + (bodyText.length > 200 ? '...' : '')
-            }),
-            { 
-              status: 400, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          } else {
+            // Try URL-encoded form data format
+            const storyFormMatch = bodyText.match(/generated_story=([^&]*)/);
+            if (storyFormMatch && storyFormMatch[1]) {
+              payload.generated_story = decodeURIComponent(storyFormMatch[1]);
             }
-          );
+          }
+          
+          // Extract story_content as an alternative to generated_story
+          const contentMatch = bodyText.match(/"story_content"\s*:\s*"([^"]*)"/);
+          if (contentMatch && contentMatch[1]) {
+            payload.story_content = contentMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+          } else {
+            // Try URL-encoded form data format
+            const contentFormMatch = bodyText.match(/story_content=([^&]*)/);
+            if (contentFormMatch && contentFormMatch[1]) {
+              payload.story_content = decodeURIComponent(contentFormMatch[1]);
+            }
+          }
+          
+          // Extract profile_id or user_id
+          const profileMatch = bodyText.match(/"(?:profile_id|user_id)"\s*:\s*"([^"]*)"/);
+          if (profileMatch && profileMatch[1]) {
+            payload.profile_id = profileMatch[1];
+          } else {
+            // Try URL-encoded form data format
+            const profileFormMatch = bodyText.match(/(?:profile_id|user_id)=([^&]*)/);
+            if (profileFormMatch && profileFormMatch[1]) {
+              payload.profile_id = decodeURIComponent(profileFormMatch[1]);
+            }
+          }
+          
+          console.log('Extracted data from non-JSON body:', payload);
         }
       }
-    } catch (bodyError) {
-      console.error('Error reading request body:', bodyError);
+    } catch (error) {
+      console.error('Error processing request body:', error);
       return new Response(
         JSON.stringify({ 
-          error: "Error reading request body", 
-          message: bodyError.message 
+          error: "Error processing request body", 
+          details: error.message,
+          body_received: bodyText.substring(0, 200) + (bodyText.length > 200 ? '...' : '')
         }),
         { 
           status: 400, 
@@ -110,17 +152,14 @@ Deno.serve(async (req) => {
     }
     
     console.log('Final processed payload:', JSON.stringify(payload));
-
-    // Determine if this is a story-save request or a webhook info request
-    const isStorySaveRequest = payload.generated_story || payload.story_content;
     
-    if (isStorySaveRequest) {
+    // Determine if this is a story-save request based on having story content
+    const storyContent = payload.generated_story || payload.story_content || '';
+    const phoneNumber = payload.phone_number || '';
+    
+    if (storyContent) {
       // HANDLE STORY SAVE FLOW
       console.log('Processing story save request');
-      
-      // Extract story content from Synthflow's format
-      const storyContent = payload.generated_story || payload.story_content || '';
-      const phoneNumber = payload.phone_number || '';
       
       if (!storyContent) {
         console.error('No story content found in the payload', payload);
@@ -136,7 +175,7 @@ Deno.serve(async (req) => {
         );
       }
       
-      // Get the profile ID
+      // Get the profile ID from payload or lookup by phone
       let profileId = payload.profile_id || payload.user_id;
       
       // If no profile ID but we have a phone number, look up by phone
