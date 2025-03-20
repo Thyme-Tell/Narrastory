@@ -156,18 +156,22 @@ export const getRecentStoryTitlesByPhone = async (phoneNumber: string): Promise<
     }
 
     // First get the profile ID by phone number
-    const { data: profile, error: profileError } = await supabase
+    const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('id')
-      .eq('phone_number', phoneNumber)
-      .maybeSingle();
+      .eq('phone_number', phoneNumber);
       
-    if (profileError || !profile) {
+    if (profileError || !profiles || profiles.length === 0) {
       console.error('Error finding profile by phone:', profileError || 'No profile found');
       return 'none';
     }
     
-    return getRecentStoryTitles(profile.id);
+    // Use the first profile if multiple are found
+    if (profiles.length > 1) {
+      console.warn(`Multiple profiles (${profiles.length}) found for phone: ${phoneNumber}. Using the first one.`);
+    }
+    
+    return getRecentStoryTitles(profiles[0].id);
       
   } catch (err) {
     console.error('Error getting story titles by phone:', err);

@@ -71,12 +71,12 @@ Deno.serve(async (req) => {
     const normalizedPhoneNumber = normalizePhoneNumber(phoneNumber);
     console.log('Normalized phone number:', normalizedPhoneNumber);
     
-    // Find the user profile by phone number
-    const { data: profile, error: profileError } = await supabase
+    // Find the user profile by phone number - using select() rather than maybeSingle()
+    // to better handle potential multiple matches
+    const { data: profilesData, error: profileError } = await supabase
       .from('profiles')
       .select('id, first_name, last_name, email, synthflow_voice_id, elevenlabs_voice_id, phone_number')
-      .eq('phone_number', normalizedPhoneNumber)
-      .maybeSingle();
+      .eq('phone_number', normalizedPhoneNumber);
       
     if (profileError) {
       console.error('Error querying profile:', profileError);
@@ -94,8 +94,8 @@ Deno.serve(async (req) => {
       );
     }
     
-    // If no profile found, return a not found response with a guest user
-    if (!profile) {
+    // If no profile found or multiple profiles found (we'll take the first one in that case)
+    if (!profilesData || profilesData.length === 0) {
       console.log('No profile found for phone number:', normalizedPhoneNumber);
       
       // For Synthflow compatibility, return a guest user object instead of 404
@@ -125,6 +125,13 @@ Deno.serve(async (req) => {
       );
     }
     
+    // If multiple profiles found, log a warning and use the first one
+    if (profilesData.length > 1) {
+      console.warn(`Multiple profiles (${profilesData.length}) found for phone number: ${normalizedPhoneNumber}. Using the first one.`);
+    }
+    
+    // Get the profile from the results (first one if multiple)
+    const profile = profilesData[0];
     console.log('Found profile:', profile);
     
     // Get user's recent stories
