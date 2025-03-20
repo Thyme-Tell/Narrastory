@@ -1,136 +1,149 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { corsHeaders } from '../_shared/cors.ts';
+import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
+
+// Get environment variables
+const SYNTHFLOW_API_KEY = Deno.env.get('SYNTHFLOW_API_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 // Create a Supabase client with the service role key
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const synthflowApiKey = Deno.env.get('SYNTHFLOW_API_KEY')!;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-
+// Main server function
 Deno.serve(async (req) => {
-  console.log('=== START OF REQUEST ===');
-  console.log('Request method:', req.method);
-  console.log('Request URL:', req.url);
+  console.log('Synthflow webhook received a request');
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
-
+  
   try {
-    console.log('Starting webhook request processing');
+    // Parse request body
+    let payload;
+    const contentType = req.headers.get('content-type') || '';
     
-    // Parse URL and get parameters
-    const url = new URL(req.url);
-    console.log('Raw URL:', url.toString());
+    if (contentType.includes('application/json')) {
+      payload = await req.json();
+    } else {
+      const formData = await req.formData();
+      payload = Object.fromEntries(formData.entries());
+    }
     
-    // Get parameters directly from URL search params
-    const phone_number = url.searchParams.get('phone_number');
-    const generated_story = url.searchParams.get('generated_story');
+    console.log('Request payload:', JSON.stringify(payload));
     
-    console.log('Received parameters:', { phone_number, generated_story });
-
-    if (!phone_number || !generated_story) {
-      console.error('Missing required parameters');
+    // Extract the caller's phone number from the Synthflow format
+    // Assuming Synthflow sends the phone number in a field called 'phone' or 'caller_number'
+    const callerPhoneNumber = payload.phone || payload.caller_number || payload.from || '';
+                              
+    if (!callerPhoneNumber) {
+      console.error('No phone number provided in the webhook payload');
       return new Response(
         JSON.stringify({ 
-          error: 'Missing required parameters', 
-          received: { phone_number, generated_story } 
+          error: "No phone number provided",
+          payload: payload 
         }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
     }
-
-    // Find the profile with the matching phone number
+    
+    // Normalize the phone number for matching
+    const normalizedCallerNumber = normalizePhoneNumber(callerPhoneNumber);
+    console.log('Normalized caller number:', normalizedCallerNumber);
+    
+    // Find the user profile by phone number
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id')
-      .eq('phone_number', phone_number)
-      .single();
-
+      .select('id, first_name, last_name, email, synthflow_voice_id, elevenlabs_voice_id')
+      .eq('phone_number', normalizedCallerNumber)
+      .maybeSingle();
+      
     if (profileError) {
-      console.error('Error finding profile:', profileError);
+      console.error('Error querying profile:', profileError);
       return new Response(
-        JSON.stringify({ error: 'Error finding profile', details: profileError }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
+        JSON.stringify({ error: 'Error querying profile', details: profileError }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
     }
-
+    
+    // If no profile found, return a default response
     if (!profile) {
-      console.error('No profile found for phone number:', phone_number);
+      console.log('No profile found for phone number:', normalizedCallerNumber);
       return new Response(
-        JSON.stringify({ error: 'Profile not found' }),
-        {
+        JSON.stringify({
+          user_name: "Guest",
+          user_email: "",
+          user_id: "",
+          user_first_name: "Guest",
+          user_last_name: "",
+          has_stories: false,
+          story_count: 0,
+          recent_story_titles: "none"
+        }),
+        { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 404,
+          status: 200
         }
       );
     }
-
+    
     console.log('Found profile:', profile);
-
-    // Split the generated story into title and content
-    const lines = generated_story.split('\n').filter(line => line.trim() !== '');
-    const title = lines[0].trim();
-    const content = lines.slice(1).join('\n').trim();
-
-    console.log('Extracted title:', title);
-    console.log('Extracted content:', content);
-
-    // Insert the story into the database with title and content
-    const { data: story, error: storyError } = await supabase
+    
+    // Get user's recent stories to reference in the call
+    const { data: recentStories, error: storiesError } = await supabase
       .from('stories')
-      .insert([
-        {
-          profile_id: profile.id,
-          title: title,
-          content: content,
-        },
-      ])
-      .select()
-      .single();
-
-    if (storyError) {
-      console.error('Error inserting story:', storyError);
-      return new Response(
-        JSON.stringify({ error: 'Error inserting story', details: storyError }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
-        }
-      );
+      .select('id, title')
+      .eq('profile_id', profile.id)
+      .order('created_at', { ascending: false })
+      .limit(5);
+      
+    if (storiesError) {
+      console.error('Error fetching stories:', storiesError);
     }
-
-    console.log('Successfully stored story:', story);
-
+    
+    console.log('Recent stories:', recentStories);
+    
+    // Format response for Synthflow with user info
+    const userContext = {
+      user_id: profile.id,
+      user_name: `${profile.first_name} ${profile.last_name}`,
+      user_email: profile.email,
+      user_first_name: profile.first_name,
+      user_last_name: profile.last_name,
+      has_stories: recentStories && recentStories.length > 0,
+      story_count: recentStories ? recentStories.length : 0,
+      recent_story_titles: recentStories && recentStories.length > 0 
+        ? recentStories.map((s: any) => s.title || 'Untitled story').join(', ')
+        : 'none'
+    };
+    
+    console.log('Returning user context:', userContext);
+    
+    // Return the user context in the format expected by Synthflow
     return new Response(
-      JSON.stringify({ success: true, story }),
-      {
+      JSON.stringify(userContext),
+      { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+        status: 200 
       }
     );
-
-  } catch (error) {
-    console.error('Error processing webhook:', error);
     
+  } catch (error) {
+    console.error('Error processing Synthflow webhook:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
   }

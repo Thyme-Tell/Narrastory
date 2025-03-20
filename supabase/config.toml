@@ -42,3 +42,9 @@ verify_jwt = false
 
 [functions.retell-story-save]
 verify_jwt = false
+
+[functions.synthflow-webhook]
+verify_jwt = false
+
+[functions.synthflow-story-save]
+verify_jwt = false
