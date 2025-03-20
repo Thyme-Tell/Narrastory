@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -102,14 +103,49 @@ Deno.serve(async (req) => {
       );
     }
     
-    // If no profile found, return a default response
+    // If no profile found, create a new one and return its info
     if (!profile) {
-      console.log('No profile found for phone number:', normalizedCallerNumber);
+      console.log('No profile found for phone number, creating new profile:', normalizedCallerNumber);
+      
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert([{
+          first_name: 'Guest',
+          last_name: 'User', // Ensure last_name is NEVER null
+          phone_number: normalizedCallerNumber,
+          password: Math.random().toString(36).substring(2, 10) // Simple random password
+        }])
+        .select()
+        .single();
+        
+      if (createError) {
+        console.error('Error creating profile:', createError);
+        return new Response(
+          JSON.stringify({
+            user_name: "Guest User",
+            user_email: "",
+            user_id: "",
+            user_first_name: "Guest",
+            user_last_name: "User",
+            has_stories: false,
+            story_count: 0,
+            recent_story_titles: "none"
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200
+          }
+        );
+      }
+      
+      console.log('Created new profile:', newProfile);
+      
+      // Return the default response with the new profile ID
       return new Response(
         JSON.stringify({
           user_name: "Guest User",
           user_email: "",
-          user_id: "",
+          user_id: newProfile.id,
           user_first_name: "Guest",
           user_last_name: "User",
           has_stories: false,
@@ -142,10 +178,10 @@ Deno.serve(async (req) => {
     // Format dynamic variables for Retell as per documentation
     const dynamicVariables = {
       user_id: profile.id,
-      user_name: `${profile.first_name} ${profile.last_name}`,
-      user_email: profile.email,
+      user_name: `${profile.first_name} ${profile.last_name || "User"}`, // Ensure last_name is never empty
+      user_email: profile.email || "",
       user_first_name: profile.first_name,
-      user_last_name: profile.last_name,
+      user_last_name: profile.last_name || "User", // Ensure last_name is never empty
       has_stories: recentStories && recentStories.length > 0,
       story_count: recentStories ? recentStories.length : 0,
       recent_story_titles: recentStories && recentStories.length > 0 

@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { corsHeaders } from '../_shared/cors.ts';
 import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
@@ -209,6 +210,39 @@ Deno.serve(async (req) => {
           profileId = profile.id;
         } else {
           console.log('No profile found for phone number:', normalizedPhoneNumber);
+          
+          // Create a new profile if one doesn't exist
+          // This is a critical fix to ensure we always have a valid profile with a last_name
+          console.log('Creating new profile for:', normalizedPhoneNumber);
+          const { data: newProfile, error: createProfileError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                first_name: 'Guest',
+                last_name: 'User', // Ensure last_name is NEVER empty
+                phone_number: normalizedPhoneNumber,
+                password: Math.random().toString(36).substring(2, 10) // Simple random password
+              }
+            ])
+            .select()
+            .single();
+            
+          if (createProfileError) {
+            console.error('Error creating profile:', createProfileError);
+            return new Response(
+              JSON.stringify({ 
+                error: 'Error creating profile', 
+                details: createProfileError 
+              }),
+              { 
+                status: 500, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+              }
+            );
+          }
+          
+          console.log('Created new profile:', newProfile);
+          profileId = newProfile.id;
         }
       }
       
@@ -362,6 +396,48 @@ Deno.serve(async (req) => {
           );
         }
         
+        // If profile not found, create a new profile with default values
+        if (profileData && !profileData.found && callerPhoneNumber) {
+          console.log('No profile found, creating new profile for:', callerPhoneNumber);
+          const normalizedNumber = normalizePhoneNumber(callerPhoneNumber);
+          
+          // Create a new profile with required fields
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([{
+              first_name: 'Guest',
+              last_name: 'User', // Ensure last_name is NEVER null
+              phone_number: normalizedNumber,
+              password: Math.random().toString(36).substring(2, 10) // Simple random password
+            }])
+            .select()
+            .single();
+            
+          if (createError) {
+            console.error('Error creating profile:', createError);
+          } else {
+            console.log('Created new profile:', newProfile.id);
+            // Return the newly created profile info
+            return new Response(
+              JSON.stringify({
+                user_name: "Guest User",
+                user_email: "",
+                user_id: newProfile.id,
+                user_first_name: "Guest",
+                user_last_name: "User",
+                has_stories: false,
+                story_count: 0,
+                recent_story_titles: "none",
+                recent_story_summaries: "none"
+              }),
+              { 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+              }
+            );
+          }
+        }
+        
         // If profile not found, return the default guest user
         return new Response(
           JSON.stringify({
@@ -417,19 +493,55 @@ Deno.serve(async (req) => {
           );
         }
         
-        // If no profile found, return a default response
+        // If no profile found, create a new one
         if (!profile) {
-          console.log('No profile found for phone number:', normalizedCallerNumber);
+          console.log('No profile found for phone number, creating new profile:', normalizedCallerNumber);
+          
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([{
+              first_name: 'Guest',
+              last_name: 'User', // Ensure last_name is NEVER null
+              phone_number: normalizedCallerNumber,
+              password: Math.random().toString(36).substring(2, 10) // Simple random password
+            }])
+            .select()
+            .single();
+            
+          if (createError) {
+            console.error('Error creating profile:', createError);
+            return new Response(
+              JSON.stringify({
+                user_name: "Guest User",
+                user_email: "",
+                user_id: "",
+                user_first_name: "Guest",
+                user_last_name: "User",
+                has_stories: false,
+                story_count: 0,
+                recent_story_titles: "none"
+              }),
+              { 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+              }
+            );
+          }
+          
+          console.log('Created new profile:', newProfile);
+          
+          // Return the newly created profile info
           return new Response(
             JSON.stringify({
               user_name: "Guest User",
               user_email: "",
-              user_id: "",
+              user_id: newProfile.id,
               user_first_name: "Guest",
               user_last_name: "User",
               has_stories: false,
               story_count: 0,
-              recent_story_titles: "none"
+              recent_story_titles: "none",
+              recent_story_summaries: "none"
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -457,10 +569,10 @@ Deno.serve(async (req) => {
         // Format response for Synthflow with user info
         const userContext = {
           user_id: profile.id,
-          user_name: `${profile.first_name} ${profile.last_name}`,
+          user_name: `${profile.first_name} ${profile.last_name || "User"}`, // Ensure last_name is never empty
           user_email: profile.email || "",
           user_first_name: profile.first_name,
-          user_last_name: profile.last_name,
+          user_last_name: profile.last_name || "User", // Ensure last_name is never empty
           has_stories: recentStories && recentStories.length > 0,
           story_count: recentStories ? recentStories.length : 0,
           recent_story_titles: recentStories && recentStories.length > 0 
