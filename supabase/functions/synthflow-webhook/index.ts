@@ -212,7 +212,7 @@ Deno.serve(async (req) => {
           console.log('No profile found for phone number:', normalizedPhoneNumber);
           
           // Create a new profile if one doesn't exist
-          // This is a critical fix to ensure we always have a valid profile with a last_name
+          // Critical fix: Ensure last_name is NEVER null
           console.log('Creating new profile for:', normalizedPhoneNumber);
           const { data: newProfile, error: createProfileError } = await supabase
             .from('profiles')
@@ -401,12 +401,12 @@ Deno.serve(async (req) => {
           console.log('No profile found, creating new profile for:', callerPhoneNumber);
           const normalizedNumber = normalizePhoneNumber(callerPhoneNumber);
           
-          // Create a new profile with required fields
+          // Critical fix: Ensure last_name is NEVER null
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
             .insert([{
               first_name: 'Guest',
-              last_name: 'User', // Ensure last_name is NEVER null
+              last_name: 'User', // Always provide "User" as default last_name
               phone_number: normalizedNumber,
               password: Math.random().toString(36).substring(2, 10) // Simple random password
             }])
@@ -497,11 +497,12 @@ Deno.serve(async (req) => {
         if (!profile) {
           console.log('No profile found for phone number, creating new profile:', normalizedCallerNumber);
           
+          // Critical fix: Ensure last_name is NEVER null
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
             .insert([{
               first_name: 'Guest',
-              last_name: 'User', // Ensure last_name is NEVER null
+              last_name: 'User', // Always provide "User" as default last_name
               phone_number: normalizedCallerNumber,
               password: Math.random().toString(36).substring(2, 10) // Simple random password
             }])
