@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { corsHeaders } from '../_shared/cors.ts';
 import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
@@ -297,11 +296,11 @@ Deno.serve(async (req) => {
         console.error('No phone number provided in the webhook payload');
         return new Response(
           JSON.stringify({ 
-            user_name: "Guest",
+            user_name: "Guest User",
             user_email: "",
             user_id: "",
             user_first_name: "Guest",
-            user_last_name: "",
+            user_last_name: "User",
             has_stories: false,
             story_count: 0,
             recent_story_titles: "none",
@@ -331,11 +330,11 @@ Deno.serve(async (req) => {
           // Return default guest user in case of error
           return new Response(
             JSON.stringify({
-              user_name: "Guest",
+              user_name: "Guest User",
               user_email: "",
               user_id: "",
               user_first_name: "Guest",
-              user_last_name: "",
+              user_last_name: "User",
               has_stories: false,
               story_count: 0,
               recent_story_titles: "none",
@@ -366,11 +365,11 @@ Deno.serve(async (req) => {
         // If profile not found, return the default guest user
         return new Response(
           JSON.stringify({
-            user_name: "Guest",
+            user_name: "Guest User",
             user_email: "",
             user_id: "",
             user_first_name: "Guest",
-            user_last_name: "",
+            user_last_name: "User",
             has_stories: false,
             story_count: 0,
             recent_story_titles: "none",
@@ -402,11 +401,11 @@ Deno.serve(async (req) => {
           console.error('Error querying profile:', profileError);
           return new Response(
             JSON.stringify({
-              user_name: "Guest",
+              user_name: "Guest User",
               user_email: "",
               user_id: "",
               user_first_name: "Guest",
-              user_last_name: "",
+              user_last_name: "User",
               has_stories: false,
               story_count: 0,
               recent_story_titles: "none"
@@ -423,11 +422,11 @@ Deno.serve(async (req) => {
           console.log('No profile found for phone number:', normalizedCallerNumber);
           return new Response(
             JSON.stringify({
-              user_name: "Guest",
+              user_name: "Guest User",
               user_email: "",
               user_id: "",
               user_first_name: "Guest",
-              user_last_name: "",
+              user_last_name: "User",
               has_stories: false,
               story_count: 0,
               recent_story_titles: "none"

@@ -19,9 +19,48 @@ const ProfileForm = () => {
     email: "",
     password: "",
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof ProfileFormData, string>>>({});
+
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof ProfileFormData, string>> = {};
+    let isValid = true;
+
+    if (!formData.firstName || formData.firstName.trim() === "") {
+      newErrors.firstName = "First name is required";
+      isValid = false;
+    }
+
+    if (!formData.lastName || formData.lastName.trim() === "") {
+      newErrors.lastName = "Last name is required";
+      isValid = false;
+    }
+
+    if (!formData.phoneNumber || formData.phoneNumber.trim() === "") {
+      newErrors.phoneNumber = "Phone number is required";
+      isValid = false;
+    }
+
+    if (!formData.password || formData.password.trim() === "") {
+      newErrors.password = "Password is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please fill in all required fields.",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
@@ -44,14 +83,18 @@ const ProfileForm = () => {
         return;
       }
 
+      // Ensure firstName and lastName are never empty
+      const firstName = formData.firstName.trim() || "Guest";
+      const lastName = formData.lastName.trim() || "User";
+
       const { data, error } = await supabase
         .from("profiles")
         .insert([
           {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
+            first_name: firstName,
+            last_name: lastName,
             phone_number: normalizedPhoneNumber,
-            email: formData.email,
+            email: formData.email || null,
             password: formData.password,
           },
         ])
@@ -79,10 +122,19 @@ const ProfileForm = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
+    
+    // Clear error for this field when user types
+    if (errors[name as keyof ProfileFormData]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   return (
@@ -95,6 +147,7 @@ const ProfileForm = () => {
           onChange={handleChange}
           required
           placeholder="Jane"
+          error={errors.firstName}
         />
 
         <FormField
@@ -104,6 +157,7 @@ const ProfileForm = () => {
           onChange={handleChange}
           required
           placeholder="Brown"
+          error={errors.lastName}
         />
 
         <FormField
@@ -114,6 +168,7 @@ const ProfileForm = () => {
           onChange={handleChange}
           required
           placeholder="(555) 000-0000"
+          error={errors.phoneNumber}
         />
 
         <FormField
@@ -122,7 +177,6 @@ const ProfileForm = () => {
           type="email"
           value={formData.email}
           onChange={handleChange}
-          required
           placeholder="jane@example.com"
         />
 
@@ -134,6 +188,7 @@ const ProfileForm = () => {
           onChange={handleChange}
           required
           placeholder="Enter a secure password"
+          error={errors.password}
         />
       </div>
 

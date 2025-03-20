@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
         user_email: "",
         user_id: "",
         user_first_name: "Guest",
-        user_last_name: "",
+        user_last_name: "User",
         has_stories: false,
         story_count: 0,
         recent_story_titles: "none",
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
     
     // Make sure we have valid values for first_name and last_name
     const firstName = profile.first_name || "Guest";
-    const lastName = profile.last_name || "";
+    const lastName = profile.last_name || "User"; // Changed from empty string to "User"
     
     // Format the response with user context and stories
     const userProfile = {
