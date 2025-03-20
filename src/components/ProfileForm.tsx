@@ -83,16 +83,24 @@ const ProfileForm = () => {
         return;
       }
 
-      // Ensure firstName and lastName are never empty
-      const firstName = formData.firstName.trim() || "Guest";
-      const lastName = formData.lastName.trim() || "User";
+      // Ensure lastName is never empty - this is the key fix
+      if (!formData.lastName.trim()) {
+        setErrors(prev => ({...prev, lastName: "Last name is required"}));
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Last name is required.",
+        });
+        setLoading(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from("profiles")
         .insert([
           {
-            first_name: firstName,
-            last_name: lastName,
+            first_name: formData.firstName.trim() || "Guest",
+            last_name: formData.lastName.trim() || "User", // Always provide a fallback
             phone_number: normalizedPhoneNumber,
             email: formData.email || null,
             password: formData.password,
