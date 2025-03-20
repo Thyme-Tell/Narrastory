@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { 
   ArrowDown, 
   ArrowUp,
+  Phone,
   Pencil 
 } from "lucide-react";
 import {
@@ -195,7 +196,20 @@ const ProfileHeader = ({
         </DropdownMenu>
       </div>
       
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Button 
+            className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+            onClick={() => window.location.href = "tel:+15072003303"}
+          >
+            <Phone className="mr-2 h-4 w-4" />
+            Share Your Story by Phone
+          </Button>
+          <p className="text-sm text-muted-foreground text-center">
+            <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a>
+          </p>
+        </div>
+        
         <Button 
           variant="outline"
           onClick={() => setIsDialogOpen(true)}
