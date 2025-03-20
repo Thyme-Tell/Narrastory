@@ -76,7 +76,7 @@ const ProfileHeader = ({
       }
 
       // Now also save to Synthflow
-      const synthflowSuccess = await saveStoryToSynthflow(content);
+      const synthflowSuccess = await saveStoryToSynthflow(title, content);
       
       if (synthflowSuccess) {
         console.log("Story successfully saved to both Supabase and Synthflow");
@@ -106,10 +106,20 @@ const ProfileHeader = ({
   };
 
   // Function to call the synthflow-story-save edge function
-  const saveStoryToSynthflow = async (storyContent: string) => {
+  const saveStoryToSynthflow = async (storyTitle: string, storyContent: string) => {
     try {
       // Format the story content for Synthflow
-      const formattedContent = title ? `${title}\n${content}` : content;
+      const formattedContent = storyTitle ? `${storyTitle}\n${storyContent}` : storyContent;
+      
+      console.log("Saving to Synthflow with payload:", {
+        profile_id: profileId,
+        story_content: formattedContent,
+        metadata: {
+          user_id: profileId,
+          first_name: firstName,
+          last_name: lastName
+        }
+      });
       
       // Call the Synthflow story save edge function with proper request body
       const { data, error } = await supabase.functions.invoke('synthflow-story-save', {
