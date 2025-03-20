@@ -22,29 +22,104 @@ Deno.serve(async (req) => {
   }
   
   try {
-    // Parse request body
+    console.log('Starting webhook request processing');
+    
+    // Parse request body with better error handling
     let payload;
     const contentType = req.headers.get('content-type') || '';
     
-    if (contentType.includes('application/json')) {
-      payload = await req.json();
-    } else {
-      const formData = await req.formData();
-      payload = Object.fromEntries(formData.entries());
+    try {
+      if (contentType.includes('application/json')) {
+        const text = await req.text();
+        console.log('Request body:', text);
+        
+        if (!text || text.trim() === '') {
+          console.log('Empty request body received');
+          return new Response(
+            JSON.stringify({ 
+              error: "Empty request body",
+              content_type: contentType
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+        
+        try {
+          payload = JSON.parse(text);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError.message);
+          return new Response(
+            JSON.stringify({ 
+              error: "Invalid JSON in request body", 
+              message: parseError.message,
+              received_content: text.substring(0, 200) + (text.length > 200 ? '...' : '')
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+      } else if (contentType.includes('application/x-www-form-urlencoded') || 
+                contentType.includes('multipart/form-data')) {
+        try {
+          const formData = await req.formData();
+          payload = Object.fromEntries(formData.entries());
+        } catch (formError) {
+          console.error('Form data parse error:', formError.message);
+          return new Response(
+            JSON.stringify({ 
+              error: "Error parsing form data", 
+              message: formError.message 
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+      } else {
+        console.error('Unsupported content type:', contentType);
+        return new Response(
+          JSON.stringify({ 
+            error: "Unsupported content type", 
+            content_type: contentType 
+          }),
+          { 
+            status: 415, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    } catch (bodyError) {
+      console.error('Error reading request body:', bodyError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Error reading request body", 
+          message: bodyError.message 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
     
     console.log('Request payload:', JSON.stringify(payload));
     
     // Extract the caller's phone number from the Synthflow format
-    // Assuming Synthflow sends the phone number in a field called 'phone' or 'caller_number'
-    const callerPhoneNumber = payload.phone || payload.caller_number || payload.from || '';
+    // Synthflow may send the phone number in different fields
+    const callerPhoneNumber = payload?.phone || payload?.caller_number || payload?.from || '';
                               
     if (!callerPhoneNumber) {
       console.error('No phone number provided in the webhook payload');
       return new Response(
         JSON.stringify({ 
           error: "No phone number provided",
-          payload: payload 
+          payload_fields: Object.keys(payload || {}).join(', ')
         }),
         { 
           status: 400, 
@@ -140,7 +215,10 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error processing Synthflow webhook:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: error.stack
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

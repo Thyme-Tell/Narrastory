@@ -22,8 +22,72 @@ Deno.serve(async (req) => {
   }
   
   try {
-    // Parse request body
-    const payload = await req.json();
+    // Parse request body with better error handling
+    let payload;
+    const contentType = req.headers.get('content-type') || '';
+    
+    try {
+      if (contentType.includes('application/json')) {
+        const text = await req.text();
+        console.log('Request body:', text);
+        
+        if (!text || text.trim() === '') {
+          console.log('Empty request body received');
+          return new Response(
+            JSON.stringify({ 
+              error: "Empty request body",
+              content_type: contentType
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+        
+        try {
+          payload = JSON.parse(text);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError.message);
+          return new Response(
+            JSON.stringify({ 
+              error: "Invalid JSON in request body", 
+              message: parseError.message,
+              received_content: text.substring(0, 200) + (text.length > 200 ? '...' : '')
+            }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+      } else {
+        console.error('Unsupported content type:', contentType);
+        return new Response(
+          JSON.stringify({ 
+            error: "Unsupported content type", 
+            content_type: contentType 
+          }),
+          { 
+            status: 415, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    } catch (bodyError) {
+      console.error('Error reading request body:', bodyError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Error reading request body", 
+          message: bodyError.message 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
     console.log('Request payload:', JSON.stringify(payload));
     
     // Extract necessary data from payload
@@ -33,8 +97,10 @@ Deno.serve(async (req) => {
     let finalProfileId = profile_id;
     
     if (!finalProfileId && phone_number) {
+      console.log('Looking up profile by phone number:', phone_number);
       // Normalize the phone number for matching
       const normalizedPhoneNumber = normalizePhoneNumber(phone_number);
+      console.log('Normalized phone number:', normalizedPhoneNumber);
       
       // Look up profile by phone number
       const { data: profile, error: profileError } = await supabase
@@ -43,18 +109,28 @@ Deno.serve(async (req) => {
         .eq('phone_number', normalizedPhoneNumber)
         .maybeSingle();
         
-      if (!profileError && profile) {
+      if (profileError) {
+        console.error('Error looking up profile:', profileError);
+      } else if (profile) {
+        console.log('Found profile by phone number:', profile);
         finalProfileId = profile.id;
+      } else {
+        console.log('No profile found for phone number:', normalizedPhoneNumber);
       }
     }
     
     // Try to get profile ID from metadata if still not found
     if (!finalProfileId && metadata && metadata.user_id) {
+      console.log('Using user_id from metadata:', metadata.user_id);
       finalProfileId = metadata.user_id;
     }
     
     if (!finalProfileId || !story_content) {
-      console.error('Missing required fields in request', { finalProfileId, hasContent: !!story_content });
+      console.error('Missing required fields in request', { 
+        finalProfileId, 
+        hasContent: !!story_content,
+        content_length: story_content ? story_content.length : 0
+      });
       return new Response(
         JSON.stringify({ 
           error: 'Missing required fields',
@@ -76,7 +152,10 @@ Deno.serve(async (req) => {
     // Use the rest as the content
     const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : story_content;
     
-    console.log('Processed story:', { title, content: content.substring(0, 100) + '...' });
+    console.log('Processed story:', { 
+      title, 
+      content_preview: content.substring(0, 100) + (content.length > 100 ? '...' : '')
+    });
     
     // Insert the story into the database
     const { data: story, error: storyError } = await supabase
@@ -119,7 +198,10 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error processing story save:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: error.stack
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
