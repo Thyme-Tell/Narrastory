@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import FormField from "@/components/FormField";
@@ -14,6 +14,7 @@ const PasswordResetConfirm = () => {
   }, []);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     token: "",
@@ -23,6 +24,9 @@ const PasswordResetConfirm = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Get the phone number from state if available (passed from reset request)
+  const phoneNumber = location.state?.phoneNumber || "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +67,7 @@ const PasswordResetConfirm = () => {
 
       if (error) {
         console.error("Reset error:", error);
-        throw new Error(error.message || "Invalid or expired reset code. Please try again.");
+        throw new Error(error.message || "Invalid or expired reset code. Please try again or request a new code.");
       }
 
       console.log("Password reset successful:", data);
@@ -81,7 +85,7 @@ const PasswordResetConfirm = () => {
       }, 2000);
     } catch (error: any) {
       console.error("Error in password reset:", error);
-      setError(error.message || "There was a problem resetting your password. Please try again.");
+      setError(error.message || "There was a problem resetting your password. Please try again or request a new code.");
     } finally {
       setLoading(false);
     }
@@ -95,6 +99,10 @@ const PasswordResetConfirm = () => {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  const handleRequestNewCode = () => {
+    navigate("/reset-password");
   };
 
   return (
@@ -160,7 +168,16 @@ const PasswordResetConfirm = () => {
               {loading ? "Resetting..." : "Reset Password"}
             </Button>
             
-            <div className="text-center mt-4">
+            <div className="flex justify-between items-center mt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleRequestNewCode}
+                className="text-sm"
+              >
+                Request new code
+              </Button>
+              
               <Link to="/sign-in" className="text-primary hover:underline text-sm">
                 Return to sign in
               </Link>

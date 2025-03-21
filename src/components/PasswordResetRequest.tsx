@@ -36,58 +36,23 @@ const PasswordResetRequest = () => {
       const normalizedPhone = normalizePhoneNumber(phoneNumber);
       console.log("Requesting password reset for:", normalizedPhone);
       
-      // First, try to get the user's profile
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("first_name, phone_number")
-        .eq("phone_number", normalizedPhone)
-        .single();
-
-      if (profileError) {
-        console.log("Profile lookup error:", profileError.message);
-        
-        // Don't expose whether a profile exists or not for security
-        // But still check if it's because no profile was found vs a server error
-        if (profileError.code === "PGRST116") {
-          // This is the "no rows returned" error code
-          toast({
-            title: "Check your phone",
-            description: "If an account exists with this phone number, you will receive a reset code.",
-          });
-          
-          // We don't want to make the API call if we know there's no account
-          // But we navigate to confirm page to avoid revealing account existence
-          setSubmitted(true);
-          setTimeout(() => {
-            navigate("/reset-password/confirm");
-          }, 1500);
-          return;
-        } else {
-          // This is some other server error
-          throw new Error("Could not verify account. Please try again later.");
-        }
-      }
-
-      console.log("Profile found, sending reset code");
-
-      // Call the password reset edge function
+      // Call the password reset edge function directly
       const { error: resetError, data } = await supabase.functions.invoke("password-reset", {
         body: { action: "request", phoneNumber: normalizedPhone },
       });
 
       if (resetError) {
         console.error("Reset error:", resetError);
-        throw new Error("Could not send reset code. Please try again later.");
+        throw new Error(resetError.message || "Could not send reset code. Please try again later.");
       }
 
-      console.log("Reset code successfully sent", data);
+      console.log("Reset code response:", data);
 
-      // Get last 4 digits of phone number
-      const lastFourDigits = normalizedPhone.slice(-4);
-
+      // Show success message regardless of whether we found a profile
+      // This is for security reasons - we don't want to reveal if an account exists
       toast({
         title: "Reset code sent",
-        description: `We've sent a reset code to ${profile.first_name}'s phone (ending in ${lastFourDigits}) via text message.`,
+        description: data?.message || "If an account exists with this phone number, you will receive a reset code.",
       });
 
       // Set submitted state to show success message
@@ -95,7 +60,9 @@ const PasswordResetRequest = () => {
       
       // Redirect to the password reset confirmation page after a short delay
       setTimeout(() => {
-        navigate("/reset-password/confirm");
+        navigate("/reset-password/confirm", { 
+          state: { phoneNumber: normalizedPhone } 
+        });
       }, 1500);
     } catch (error: any) {
       console.error("Error in password reset request:", error);

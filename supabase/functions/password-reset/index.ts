@@ -44,10 +44,10 @@ Deno.serve(async (req) => {
       console.log('Normalized phone number:', normalizedPhone)
 
       console.log('Finding profile for phone number...')
-      // Find the profile
+      // Find the profile(s)
       const { data: profiles, error: profileError } = await supabaseClient
         .from('profiles')
-        .select('id, first_name')
+        .select('id, first_name, phone_number')
         .eq('phone_number', normalizedPhone)
 
       if (profileError) {
@@ -57,12 +57,26 @@ Deno.serve(async (req) => {
 
       if (!profiles || profiles.length === 0) {
         console.log('No profile found for phone number')
-        throw new Error('No account found with this phone number')
+        // Don't reveal whether a profile exists for security reasons
+        return new Response(
+          JSON.stringify({ 
+            message: 'If an account exists with this phone number, you will receive a reset code.'
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
+        )
       }
 
+      // If multiple profiles exist, log this situation but proceed with the first one
+      if (profiles.length > 1) {
+        console.log(`Multiple profiles (${profiles.length}) found for phone number ${normalizedPhone}. Using the first one.`)
+      }
+      
       // Use the first profile if multiple are found
       const profile = profiles[0]
-      console.log('Found profile:', profile)
+      console.log('Using profile:', profile)
 
       // Generate a 6-digit token
       const resetToken = Math.floor(100000 + Math.random() * 900000).toString()
