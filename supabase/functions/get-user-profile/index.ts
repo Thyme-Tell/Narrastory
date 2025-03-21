@@ -109,7 +109,8 @@ Deno.serve(async (req) => {
         has_stories: false,
         story_count: 0,
         recent_story_titles: "none",
-        recent_story_summaries: "none"
+        recent_story_summaries: "none",
+        all_story_titles: "none"
       };
       
       return new Response(
@@ -147,6 +148,18 @@ Deno.serve(async (req) => {
       // Continue with empty stories instead of failing
     }
     
+    // Get all user's story titles for the expanded context
+    const { data: allStories, error: allStoriesError } = await supabase
+      .from('stories')
+      .select('title')
+      .eq('profile_id', profile.id)
+      .order('created_at', { ascending: false });
+      
+    if (allStoriesError) {
+      console.error('Error fetching all story titles:', allStoriesError);
+      // Continue with empty stories instead of failing
+    }
+    
     // Get total story count
     const { count: totalStoryCount, error: countError } = await supabase
       .from('stories')
@@ -159,12 +172,19 @@ Deno.serve(async (req) => {
     }
     
     const storiesArray = recentStories || [];
+    const allStoriesArray = allStories || [];
     console.log('Recent stories count:', storiesArray.length);
     console.log('Total stories count:', totalStoryCount);
+    console.log('All stories titles count:', allStoriesArray.length);
     
     // Make sure we have valid values for first_name and last_name
     const firstName = profile.first_name || "Guest";
     const lastName = profile.last_name || "User";
+    
+    // Format all story titles into a single string
+    const allStoryTitles = allStoriesArray.length > 0
+      ? allStoriesArray.map((s) => s.title || 'Untitled story').join(', ')
+      : 'none';
     
     // Format the response with user context and stories
     const userProfile = {
@@ -183,7 +203,8 @@ Deno.serve(async (req) => {
         count: storiesArray.length,
         "total-count": totalStoryCount || 0,
         has_stories: storiesArray.length > 0,
-        recent: storiesArray
+        recent: storiesArray,
+        all_titles: allStoryTitles
       },
       // For Synthflow compatibility
       synthflow_context: {
@@ -200,7 +221,8 @@ Deno.serve(async (req) => {
           : 'none',
         recent_story_summaries: storiesArray.length > 0 
           ? storiesArray.map((s) => s.summary || 'No summary available').join(', ')
-          : 'none'
+          : 'none',
+        all_story_titles: allStoryTitles
       }
     };
     

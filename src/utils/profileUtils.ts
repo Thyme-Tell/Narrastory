@@ -74,9 +74,28 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
           .eq('profile_id', profiles[0].id)
           .order('created_at', { ascending: false })
           .limit(5);
+        
+        // Get all story titles for context
+        const { data: allStories } = await supabase
+          .from('stories')
+          .select('title')
+          .eq('profile_id', profiles[0].id)
+          .order('created_at', { ascending: false });
+          
+        // Get story count
+        const { count: totalStoryCount } = await supabase
+          .from('stories')
+          .select('id', { count: 'exact', head: true })
+          .eq('profile_id', profiles[0].id);
           
         const storiesArray = recentStories || [];
+        const allStoriesArray = allStories || [];
         const profile = profiles[0];
+        
+        // Format all story titles into a single string
+        const allStoryTitles = allStoriesArray.length > 0
+          ? allStoriesArray.map((s) => s.title || 'Untitled story').join(', ')
+          : 'none';
         
         return {
           found: true,
@@ -92,8 +111,10 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
           },
           stories: {
             count: storiesArray.length,
+            "total-count": totalStoryCount || 0,
             has_stories: storiesArray.length > 0,
-            recent: storiesArray
+            recent: storiesArray,
+            all_titles: allStoryTitles
           },
           synthflow_context: {
             user_id: profile.id,
@@ -103,13 +124,14 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
             user_email: profile.email || "",
             user_phone: profile.phone_number || "",
             has_stories: storiesArray.length > 0,
-            story_count: storiesArray.length,
+            story_count: totalStoryCount || 0,
             recent_story_titles: storiesArray.length > 0 
               ? storiesArray.map((s) => s.title || 'Untitled story').join(', ')
               : 'none',
             recent_story_summaries: storiesArray.length > 0 
               ? storiesArray.map((s) => s.summary || 'No summary available').join(', ')
-              : 'none'
+              : 'none',
+            all_story_titles: allStoryTitles
           }
         };
       }
