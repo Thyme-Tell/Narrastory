@@ -17,6 +17,7 @@ const PasswordResetRequest = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,8 +34,9 @@ const PasswordResetRequest = () => {
 
     try {
       const normalizedPhone = normalizePhoneNumber(phoneNumber);
+      console.log("Requesting password reset for:", normalizedPhone);
       
-      // First, get the user's profile
+      // First, try to get the user's profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("first_name, phone_number")
@@ -42,16 +44,34 @@ const PasswordResetRequest = () => {
         .single();
 
       if (profileError) {
+        console.log("Profile lookup error:", profileError.message);
+        
         // Don't expose whether a profile exists or not for security
-        toast({
-          title: "Check your phone",
-          description: "If an account exists with this phone number, you will receive a reset code.",
-        });
-        navigate("/reset-password/confirm");
-        return;
+        // But still check if it's because no profile was found vs a server error
+        if (profileError.code === "PGRST116") {
+          // This is the "no rows returned" error code
+          toast({
+            title: "Check your phone",
+            description: "If an account exists with this phone number, you will receive a reset code.",
+          });
+          
+          // We don't want to make the API call if we know there's no account
+          // But we navigate to confirm page to avoid revealing account existence
+          setSubmitted(true);
+          setTimeout(() => {
+            navigate("/reset-password/confirm");
+          }, 1500);
+          return;
+        } else {
+          // This is some other server error
+          throw new Error("Could not verify account. Please try again later.");
+        }
       }
 
-      const { error: resetError } = await supabase.functions.invoke("password-reset", {
+      console.log("Profile found, sending reset code");
+
+      // Call the password reset edge function
+      const { error: resetError, data } = await supabase.functions.invoke("password-reset", {
         body: { action: "request", phoneNumber: normalizedPhone },
       });
 
@@ -59,6 +79,8 @@ const PasswordResetRequest = () => {
         console.error("Reset error:", resetError);
         throw new Error("Could not send reset code. Please try again later.");
       }
+
+      console.log("Reset code successfully sent", data);
 
       // Get last 4 digits of phone number
       const lastFourDigits = normalizedPhone.slice(-4);
@@ -68,10 +90,15 @@ const PasswordResetRequest = () => {
         description: `We've sent a reset code to ${profile.first_name}'s phone (ending in ${lastFourDigits}) via text message.`,
       });
 
-      // Redirect to the password reset confirmation page
-      navigate("/reset-password/confirm");
+      // Set submitted state to show success message
+      setSubmitted(true);
+      
+      // Redirect to the password reset confirmation page after a short delay
+      setTimeout(() => {
+        navigate("/reset-password/confirm");
+      }, 1500);
     } catch (error: any) {
-      console.error("Error:", error);
+      console.error("Error in password reset request:", error);
       setError(error.message || "There was a problem with the password reset request. Please try again later.");
     } finally {
       setLoading(false);
@@ -100,30 +127,38 @@ const PasswordResetRequest = () => {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <FormField
-            label="Phone Number"
-            name="phoneNumber"
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => {
-              setError(null);
-              setPhoneNumber(e.target.value);
-            }}
-            required
-            placeholder="+1 (555) 000-0000"
-          />
+        {submitted ? (
+          <Alert className="border-green-300 bg-green-50 text-green-800">
+            <AlertDescription>
+              Reset code sent! Redirecting you to enter the code...
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <FormField
+              label="Phone Number"
+              name="phoneNumber"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => {
+                setError(null);
+                setPhoneNumber(e.target.value);
+              }}
+              required
+              placeholder="+1 (555) 000-0000"
+            />
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Sending..." : "Send Reset Code"}
-          </Button>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Sending..." : "Send Reset Code"}
+            </Button>
 
-          <div className="text-center mt-4">
-            <Link to="/sign-in" className="text-primary hover:underline text-sm">
-              Return to sign in
-            </Link>
-          </div>
-        </form>
+            <div className="text-center mt-4">
+              <Link to="/sign-in" className="text-primary hover:underline text-sm">
+                Return to sign in
+              </Link>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

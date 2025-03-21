@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,6 +9,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 const PasswordResetConfirm = () => {
+  useEffect(() => {
+    document.title = "Narra Story | Enter Reset Code";
+  }, []);
+
   const navigate = useNavigate();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -18,6 +22,7 @@ const PasswordResetConfirm = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +51,9 @@ const PasswordResetConfirm = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.functions.invoke("password-reset", {
+      console.log("Attempting to reset password with token:", formData.token);
+      
+      const { error, data } = await supabase.functions.invoke("password-reset", {
         body: {
           action: "reset",
           token: formData.token,
@@ -59,15 +66,21 @@ const PasswordResetConfirm = () => {
         throw new Error(error.message || "Invalid or expired reset code. Please try again.");
       }
 
+      console.log("Password reset successful:", data);
+      
+      setSuccess(true);
+      
       toast({
         title: "Password reset successful",
         description: "Your password has been changed. You can now sign in with your new password.",
       });
 
-      // Redirect to sign-in page
-      navigate("/sign-in");
+      // Redirect to sign-in page after a short delay
+      setTimeout(() => {
+        navigate("/sign-in");
+      }, 2000);
     } catch (error: any) {
-      console.error("Error:", error);
+      console.error("Error in password reset:", error);
       setError(error.message || "There was a problem resetting your password. Please try again.");
     } finally {
       setLoading(false);
@@ -106,46 +119,54 @@ const PasswordResetConfirm = () => {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <FormField
-            label="Reset Code"
-            name="token"
-            value={formData.token}
-            onChange={handleChange}
-            required
-            placeholder="Enter the 6-digit code"
-          />
+        {success ? (
+          <Alert className="border-green-300 bg-green-50 text-green-800">
+            <AlertDescription>
+              Password reset successful! Redirecting to sign in page...
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <FormField
+              label="Reset Code"
+              name="token"
+              value={formData.token}
+              onChange={handleChange}
+              required
+              placeholder="Enter the 6-digit code"
+            />
 
-          <FormField
-            label="New Password"
-            name="newPassword"
-            type="password"
-            value={formData.newPassword}
-            onChange={handleChange}
-            required
-            placeholder="Enter your new password"
-          />
+            <FormField
+              label="New Password"
+              name="newPassword"
+              type="password"
+              value={formData.newPassword}
+              onChange={handleChange}
+              required
+              placeholder="Enter your new password"
+            />
 
-          <FormField
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            placeholder="Confirm your new password"
-          />
+            <FormField
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              placeholder="Confirm your new password"
+            />
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Resetting..." : "Reset Password"}
-          </Button>
-          
-          <div className="text-center mt-4">
-            <Link to="/sign-in" className="text-primary hover:underline text-sm">
-              Return to sign in
-            </Link>
-          </div>
-        </form>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Resetting..." : "Reset Password"}
+            </Button>
+            
+            <div className="text-center mt-4">
+              <Link to="/sign-in" className="text-primary hover:underline text-sm">
+                Return to sign in
+              </Link>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders } from '../_shared/cors.ts'
 import twilio from 'npm:twilio@4.19.3'
+import { normalizePhoneNumber } from '../_shared/phoneUtils.ts'
 
 interface RequestBody {
   action: 'request' | 'reset'
@@ -9,7 +11,7 @@ interface RequestBody {
   newPassword?: string
 }
 
-console.log('Edge function starting...')
+console.log('Password reset edge function starting...')
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -38,18 +40,29 @@ Deno.serve(async (req) => {
         throw new Error('Phone number is required')
       }
 
+      const normalizedPhone = normalizePhoneNumber(phoneNumber)
+      console.log('Normalized phone number:', normalizedPhone)
+
       console.log('Finding profile for phone number...')
       // Find the profile
-      const { data: profile, error: profileError } = await supabaseClient
+      const { data: profiles, error: profileError } = await supabaseClient
         .from('profiles')
         .select('id, first_name')
-        .eq('phone_number', phoneNumber)
-        .single()
+        .eq('phone_number', normalizedPhone)
 
-      if (profileError || !profile) {
+      if (profileError) {
         console.error('Profile error:', profileError)
-        throw new Error('Profile not found')
+        throw new Error('Error looking up profile: ' + profileError.message)
       }
+
+      if (!profiles || profiles.length === 0) {
+        console.log('No profile found for phone number')
+        throw new Error('No account found with this phone number')
+      }
+
+      // Use the first profile if multiple are found
+      const profile = profiles[0]
+      console.log('Found profile:', profile)
 
       // Generate a 6-digit token
       const resetToken = Math.floor(100000 + Math.random() * 900000).toString()
@@ -70,7 +83,7 @@ Deno.serve(async (req) => {
 
       if (tokenError) {
         console.error('Token insertion error:', tokenError)
-        throw new Error('Failed to create reset token')
+        throw new Error('Failed to create reset token: ' + tokenError.message)
       }
 
       console.log('Initializing Twilio client...')
@@ -80,13 +93,20 @@ Deno.serve(async (req) => {
         Deno.env.get('TWILIO_AUTH_TOKEN') ?? ''
       )
 
+      const twilioPhone = Deno.env.get('TWILIO_PHONE_NUMBER') ?? ''
+      
+      if (!twilioPhone) {
+        console.error('Twilio phone number not configured')
+        throw new Error('SMS service is not properly configured')
+      }
+
       // Send SMS with reset token
       try {
-        console.log('Sending SMS...')
+        console.log('Sending SMS to', normalizedPhone, 'from', twilioPhone)
         await twilioClient.messages.create({
-          body: `Your password reset code is: ${resetToken}. This code will expire in 1 hour.`,
-          to: phoneNumber,
-          from: Deno.env.get('TWILIO_PHONE_NUMBER') ?? '',
+          body: `Your Narra password reset code is: ${resetToken}. This code will expire in 1 hour.`,
+          to: normalizedPhone,
+          from: twilioPhone,
         })
 
         console.log('SMS sent successfully')
@@ -100,7 +120,7 @@ Deno.serve(async (req) => {
           message: 'Reset code sent successfully',
           profile: {
             firstName: profile.first_name,
-            phoneLastFour: phoneNumber.slice(-4)
+            phoneLastFour: normalizedPhone.slice(-4)
           }
         }),
         {
@@ -122,14 +142,19 @@ Deno.serve(async (req) => {
         .select('id, profile_id, expires_at, used_at')
         .eq('token', token)
         .is('used_at', null)
-        .single()
 
-      if (tokenError || !tokenData) {
+      if (tokenError) {
         console.error('Token validation error:', tokenError)
+        throw new Error('Error validating token: ' + tokenError.message)
+      }
+
+      if (!tokenData || tokenData.length === 0) {
         throw new Error('Invalid or expired token')
       }
 
-      if (new Date(tokenData.expires_at) < new Date()) {
+      const resetToken = tokenData[0]
+      
+      if (new Date(resetToken.expires_at) < new Date()) {
         throw new Error('Token has expired')
       }
 
@@ -138,11 +163,11 @@ Deno.serve(async (req) => {
       const { error: updateError } = await supabaseClient
         .from('profiles')
         .update({ password: newPassword })
-        .eq('id', tokenData.profile_id)
+        .eq('id', resetToken.profile_id)
 
       if (updateError) {
         console.error('Password update error:', updateError)
-        throw new Error('Failed to update password')
+        throw new Error('Failed to update password: ' + updateError.message)
       }
 
       console.log('Marking token as used...')
@@ -150,7 +175,7 @@ Deno.serve(async (req) => {
       await supabaseClient
         .from('password_reset_tokens')
         .update({ used_at: new Date().toISOString() })
-        .eq('id', tokenData.id)
+        .eq('id', resetToken.id)
 
       return new Response(
         JSON.stringify({ message: 'Password updated successfully' }),
