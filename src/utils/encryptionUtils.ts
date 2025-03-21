@@ -20,7 +20,7 @@ export const encryptText = async (text: string | null): Promise<string | null> =
       throw new Error("Failed to encrypt data");
     }
 
-    return data;
+    return data as string;
   } catch (error) {
     console.error("Encryption utility error:", error);
     // Return original text if encryption fails to prevent data loss
@@ -48,7 +48,7 @@ export const decryptText = async (encryptedText: string | null): Promise<string 
       return "[Encrypted content]";
     }
 
-    return data;
+    return data as string;
   } catch (error) {
     console.error("Decryption utility error:", error);
     return "[Encrypted content]";

@@ -89,6 +89,33 @@ export type Database = {
           },
         ]
       }
+      encryption_keys: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: number
+          key_type: string
+          key_value: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: number
+          key_type?: string
+          key_value: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: number
+          key_type?: string
+          key_value?: string
+        }
+        Relationships: []
+      }
       memoir_batches: {
         Row: {
           created_at: string
@@ -511,7 +538,14 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      encrypted_fields_status: {
+        Row: {
+          column_name: unknown | null
+          status: string | null
+          table_name: unknown | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_storybook_member: {
@@ -550,6 +584,28 @@ export type Database = {
         }
         Returns: Json
       }
+      decrypt_text: {
+        Args: {
+          encrypted_text: string
+        }
+        Returns: string
+      }
+      encrypt_text: {
+        Args: {
+          text_to_encrypt: string
+        }
+        Returns: string
+      }
+      generate_encryption_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_active_key: {
+        Args: {
+          key_type?: string
+        }
+        Returns: string
+      }
       get_storybook_member_role: {
         Args: {
           _storybook_id: string
@@ -585,6 +641,12 @@ export type Database = {
         Args: {
           _storybook_id: string
           _profile_id: string
+        }
+        Returns: boolean
+      }
+      rotate_encryption_key: {
+        Args: {
+          key_type?: string
         }
         Returns: boolean
       }
