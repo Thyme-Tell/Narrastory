@@ -135,10 +135,10 @@ Deno.serve(async (req) => {
     const profile = profilesData[0];
     console.log('Found profile:', profile);
     
-    // Get user's recent stories
+    // Get user's recent stories - IMPORTANT: REMOVED content field to save tokens
     const { data: recentStories, error: storiesError } = await supabase
       .from('stories')
-      .select('id, title, summary, content, created_at')
+      .select('id, title, summary, created_at')
       .eq('profile_id', profile.id)
       .order('created_at', { ascending: false })
       .limit(5);

@@ -15,14 +15,15 @@ interface UserProfile {
   };
   stories?: {
     count: number;
+    "total-count"?: number;
     has_stories: boolean;
     recent: Array<{
       id: string;
       title: string | null;
       summary: string | null;
-      content: string;
       created_at: string;
     }>;
+    all_titles?: string;
   };
   synthflow_context?: {
     user_id: string;
@@ -35,6 +36,7 @@ interface UserProfile {
     story_count: number;
     recent_story_titles: string;
     recent_story_summaries: string;
+    all_story_titles?: string;
   };
   message?: string;
   error?: string;
@@ -67,10 +69,10 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
       if (!directError && profiles && profiles.length > 0) {
         console.log('Retrieved profile directly from database:', profiles[0]);
         
-        // Get user's recent stories
+        // Get user's recent stories - IMPORTANT: REMOVED content field to save tokens
         const { data: recentStories } = await supabase
           .from('stories')
-          .select('id, title, summary, content, created_at')
+          .select('id, title, summary, created_at')
           .eq('profile_id', profiles[0].id)
           .order('created_at', { ascending: false })
           .limit(5);
