@@ -9,6 +9,7 @@ import { ProfileFormData } from "@/types/profile";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { encryptText } from "@/utils/encryptionUtils";
 
 const ProfileForm = () => {
   const navigate = useNavigate();
@@ -108,6 +109,10 @@ const ProfileForm = () => {
         return;
       }
 
+      // Encrypt sensitive data before storing
+      const encryptedPassword = await encryptText(formData.password);
+      const encryptedEmail = formData.email ? await encryptText(formData.email) : null;
+      
       const { data, error } = await supabase
         .from("profiles")
         .insert([
@@ -115,8 +120,8 @@ const ProfileForm = () => {
             first_name: formData.firstName.trim(),
             last_name: formData.lastName.trim(),
             phone_number: normalizedPhoneNumber,
-            email: formData.email || null,
-            password: formData.password,
+            email: encryptedEmail,
+            password: encryptedPassword,
           },
         ])
         .select()

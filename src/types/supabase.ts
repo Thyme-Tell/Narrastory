@@ -34,3 +34,11 @@ export type Member = {
     email: string;
   };
 };
+
+export interface EncryptionKeyInfo {
+  id: number;
+  created_at: string;
+  active: boolean;
+  key_type: string;
+  description: string | null;
+}

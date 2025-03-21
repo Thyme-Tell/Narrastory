@@ -89,15 +89,51 @@ Deno.serve(async (req) => {
       summary: storySummary ? storySummary.substring(0, 100) + '...' : 'None provided'
     });
     
+    // Encrypt sensitive content before storing
+    const { data: encryptedTitle, error: titleEncryptError } = await supabase.rpc(
+      'encrypt_text',
+      { text_to_encrypt: title }
+    );
+    
+    if (titleEncryptError) {
+      console.error('Error encrypting title:', titleEncryptError);
+      // Continue with original title as fallback
+    }
+    
+    const { data: encryptedContent, error: contentEncryptError } = await supabase.rpc(
+      'encrypt_text',
+      { text_to_encrypt: content }
+    );
+    
+    if (contentEncryptError) {
+      console.error('Error encrypting content:', contentEncryptError);
+      // Continue with original content as fallback
+    }
+    
+    let encryptedSummary = null;
+    if (storySummary) {
+      const { data: encSummary, error: summaryEncryptError } = await supabase.rpc(
+        'encrypt_text',
+        { text_to_encrypt: storySummary }
+      );
+      
+      if (summaryEncryptError) {
+        console.error('Error encrypting summary:', summaryEncryptError);
+        // Continue with original summary as fallback
+      } else {
+        encryptedSummary = encSummary;
+      }
+    }
+    
     // Insert the story into the database
     const { data: story, error: storyError } = await supabase
       .from('stories')
       .insert([
         {
           profile_id: finalProfileId,
-          title: title,
-          content: content,
-          summary: storySummary
+          title: encryptedTitle || title,
+          content: encryptedContent || content,
+          summary: encryptedSummary || storySummary
         },
       ])
       .select()

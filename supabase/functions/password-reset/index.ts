@@ -86,12 +86,24 @@ Deno.serve(async (req) => {
       expiresAt.setHours(expiresAt.getHours() + 1)
 
       console.log('Inserting reset token...')
-      // Insert the token
+      
+      // Encrypt the token before storing
+      const { data: encryptedToken, error: encryptError } = await supabaseClient.rpc(
+        'encrypt_text',
+        { text_to_encrypt: resetToken }
+      )
+      
+      if (encryptError) {
+        console.error('Token encryption error:', encryptError)
+        throw new Error('Failed to secure reset token: ' + encryptError.message)
+      }
+      
+      // Insert the encrypted token
       const { error: tokenError } = await supabaseClient
         .from('password_reset_tokens')
         .insert({
           profile_id: profile.id,
-          token: resetToken,
+          token: encryptedToken,
           expires_at: expiresAt.toISOString(),
         })
 
@@ -114,7 +126,7 @@ Deno.serve(async (req) => {
         throw new Error('SMS service is not properly configured')
       }
 
-      // Send SMS with reset token
+      // Send SMS with reset token (the original, unencrypted token)
       try {
         console.log('Sending SMS to', normalizedPhone, 'from', twilioPhone)
         await twilioClient.messages.create({
@@ -150,34 +162,71 @@ Deno.serve(async (req) => {
       }
 
       console.log('Validating reset token...')
-      // Find and validate token
-      const { data: tokenData, error: tokenError } = await supabaseClient
+      
+      // Find all unexpired and unused tokens
+      const { data: tokensData, error: tokensError } = await supabaseClient
         .from('password_reset_tokens')
-        .select('id, profile_id, expires_at, used_at')
-        .eq('token', token)
+        .select('id, profile_id, token, expires_at, used_at')
         .is('used_at', null)
-
-      if (tokenError) {
-        console.error('Token validation error:', tokenError)
-        throw new Error('Error validating token: ' + tokenError.message)
+      
+      if (tokensError) {
+        console.error('Token fetch error:', tokensError)
+        throw new Error('Error retrieving tokens: ' + tokensError.message)
       }
-
-      if (!tokenData || tokenData.length === 0) {
+      
+      if (!tokensData || tokensData.length === 0) {
+        throw new Error('No valid reset tokens found')
+      }
+      
+      // Check each token by decrypting and comparing
+      let validTokenData = null;
+      
+      for (const tokenRecord of tokensData) {
+        // Skip expired tokens
+        if (new Date(tokenRecord.expires_at) < new Date()) {
+          continue;
+        }
+        
+        // Decrypt the token
+        const { data: decryptedToken, error: decryptError } = await supabaseClient.rpc(
+          'decrypt_text',
+          { encrypted_text: tokenRecord.token }
+        )
+        
+        if (decryptError) {
+          console.error('Token decryption error:', decryptError)
+          continue;
+        }
+        
+        // Compare with user-provided token
+        if (decryptedToken === token) {
+          validTokenData = tokenRecord;
+          break;
+        }
+      }
+      
+      if (!validTokenData) {
         throw new Error('Invalid or expired token')
       }
 
-      const resetToken = tokenData[0]
+      console.log('Encrypting and updating password...')
       
-      if (new Date(resetToken.expires_at) < new Date()) {
-        throw new Error('Token has expired')
+      // Encrypt the new password
+      const { data: encryptedPassword, error: passwordEncryptError } = await supabaseClient.rpc(
+        'encrypt_text',
+        { text_to_encrypt: newPassword }
+      )
+      
+      if (passwordEncryptError) {
+        console.error('Password encryption error:', passwordEncryptError)
+        throw new Error('Failed to secure password: ' + passwordEncryptError.message)
       }
-
-      console.log('Updating password...')
+      
       // Update the profile's password
       const { error: updateError } = await supabaseClient
         .from('profiles')
-        .update({ password: newPassword })
-        .eq('id', resetToken.profile_id)
+        .update({ password: encryptedPassword })
+        .eq('id', validTokenData.profile_id)
 
       if (updateError) {
         console.error('Password update error:', updateError)
@@ -189,7 +238,7 @@ Deno.serve(async (req) => {
       await supabaseClient
         .from('password_reset_tokens')
         .update({ used_at: new Date().toISOString() })
-        .eq('id', resetToken.id)
+        .eq('id', validTokenData.id)
 
       return new Response(
         JSON.stringify({ message: 'Password updated successfully' }),
