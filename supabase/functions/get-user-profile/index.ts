@@ -147,8 +147,20 @@ Deno.serve(async (req) => {
       // Continue with empty stories instead of failing
     }
     
+    // Get total story count
+    const { count: totalStoryCount, error: countError } = await supabase
+      .from('stories')
+      .select('id', { count: 'exact', head: true })
+      .eq('profile_id', profile.id);
+      
+    if (countError) {
+      console.error('Error fetching total story count:', countError);
+      // Continue with 0 as default
+    }
+    
     const storiesArray = recentStories || [];
     console.log('Recent stories count:', storiesArray.length);
+    console.log('Total stories count:', totalStoryCount);
     
     // Make sure we have valid values for first_name and last_name
     const firstName = profile.first_name || "Guest";
@@ -169,6 +181,7 @@ Deno.serve(async (req) => {
       },
       stories: {
         count: storiesArray.length,
+        "total-count": totalStoryCount || 0,
         has_stories: storiesArray.length > 0,
         recent: storiesArray
       },
@@ -181,7 +194,7 @@ Deno.serve(async (req) => {
         user_email: profile.email || "",
         user_phone: profile.phone_number || "",
         has_stories: storiesArray.length > 0,
-        story_count: storiesArray.length,
+        story_count: totalStoryCount || 0,
         recent_story_titles: storiesArray.length > 0 
           ? storiesArray.map((s) => s.title || 'Untitled story').join(', ')
           : 'none',
