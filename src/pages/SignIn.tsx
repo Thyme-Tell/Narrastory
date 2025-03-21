@@ -7,6 +7,8 @@ import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import Cookies from "js-cookie";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const SignIn = () => {
   useEffect(() => {
@@ -18,6 +20,7 @@ const SignIn = () => {
   const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     phoneNumber: "",
     password: "",
@@ -26,6 +29,19 @@ const SignIn = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+
+    if (!formData.phoneNumber.trim()) {
+      setError("Please enter your phone number");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.password.trim()) {
+      setError("Please enter your password");
+      setLoading(false);
+      return;
+    }
 
     const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
     console.log("Attempting login with phone:", normalizedPhoneNumber);
@@ -39,25 +55,13 @@ const SignIn = () => {
 
       if (searchError) {
         console.error("Profile search error:", searchError);
-        throw searchError;
+        setError("We couldn't verify your account. Please try again.");
+        setLoading(false);
+        return;
       }
 
       if (!profiles || profiles.length === 0) {
-        toast({
-          variant: "destructive",
-          title: "Account Not Found",
-          description: (
-            <div className="space-y-2">
-              <p>No account found with this phone number.</p>
-              <p>
-                Please check your phone number or{" "}
-                <Link to="/" className="text-primary hover:underline">
-                  sign up for a new account
-                </Link>
-              </p>
-            </div>
-          ),
-        });
+        setError("No account found with this phone number. Please check your number or sign up for a new account.");
         setLoading(false);
         return;
       }
@@ -68,21 +72,7 @@ const SignIn = () => {
       
       if (profile.password !== formData.password) {
         console.log("Password mismatch for profile:", profile.id);
-        toast({
-          variant: "destructive",
-          title: "Incorrect Password",
-          description: (
-            <div className="space-y-2">
-              <p>The password you entered is incorrect.</p>
-              <p>
-                <Link to="/reset-password" className="text-primary hover:underline">
-                  Reset your password
-                </Link>{" "}
-                if you've forgotten it.
-              </p>
-            </div>
-          ),
-        });
+        setError("The password you entered is incorrect. Please try again or reset your password.");
         setLoading(false);
         return;
       }
@@ -99,20 +89,25 @@ const SignIn = () => {
                         `/profile/${profile.id}`;
       
       console.log("Login successful, redirecting to:", redirectTo);
+      
+      toast({
+        title: "Welcome back!",
+        description: `You've successfully signed in as ${profile.first_name}`,
+      });
+      
       navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error("Error during sign in:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem signing in. Please try again.",
-      });
+      setError("Something went wrong while signing in. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Clear error when user starts typing
+    if (error) setError(null);
+    
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -133,6 +128,13 @@ const SignIn = () => {
             Please enter your credentials below
           </p>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
@@ -159,7 +161,7 @@ const SignIn = () => {
 
           <div className="space-y-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Processing..." : "Sign In"}
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
 
             <div className="text-center space-y-2">

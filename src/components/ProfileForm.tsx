@@ -7,11 +7,14 @@ import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormData } from "@/types/profile";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const ProfileForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProfileFormData>({
     firstName: "",
     lastName: "",
@@ -38,10 +41,24 @@ const ProfileForm = () => {
     if (!formData.phoneNumber || formData.phoneNumber.trim() === "") {
       newErrors.phoneNumber = "Phone number is required";
       isValid = false;
+    } else {
+      const normalizedPhone = normalizePhoneNumber(formData.phoneNumber);
+      if (normalizedPhone.length < 8) {
+        newErrors.phoneNumber = "Please enter a valid phone number";
+        isValid = false;
+      }
     }
 
     if (!formData.password || formData.password.trim() === "") {
       newErrors.password = "Password is required";
+      isValid = false;
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
+    }
+
+    if (formData.email && !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      newErrors.email = "Please enter a valid email address";
       isValid = false;
     }
 
@@ -51,13 +68,10 @@ const ProfileForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     
     if (!validateForm()) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please fill in all required fields.",
-      });
+      setFormError("Please fix the errors in the form");
       return;
     }
     
@@ -72,25 +86,24 @@ const ProfileForm = () => {
         .eq("phone_number", normalizedPhoneNumber)
         .maybeSingle();
 
-      if (searchError) throw searchError;
+      if (searchError) {
+        console.error("Error searching for existing profile:", searchError);
+        throw new Error("We couldn't verify if your phone number is already registered");
+      }
 
       if (existingProfile) {
         toast({
-          title: "Profile Found!",
-          description: "Redirecting you to your existing profile.",
+          title: "Welcome back!",
+          description: "You already have an account with us. Redirecting you to sign in.",
         });
-        navigate(`/profile/${existingProfile.id}`);
+        navigate(`/sign-in`);
         return;
       }
 
-      // Ensure lastName is never empty - this is the key fix
+      // Ensure lastName is never empty
       if (!formData.lastName.trim()) {
         setErrors(prev => ({...prev, lastName: "Last name is required"}));
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Last name is required.",
-        });
+        setFormError("Last name is required");
         setLoading(false);
         return;
       }
@@ -99,8 +112,8 @@ const ProfileForm = () => {
         .from("profiles")
         .insert([
           {
-            first_name: formData.firstName.trim() || "Guest",
-            last_name: formData.lastName.trim() || "User", // Always provide a fallback
+            first_name: formData.firstName.trim(),
+            last_name: formData.lastName.trim(),
             phone_number: normalizedPhoneNumber,
             email: formData.email || null,
             password: formData.password,
@@ -109,21 +122,23 @@ const ProfileForm = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating profile:", error);
+        if (error.code === "23505") { // Unique constraint violation
+          throw new Error("This phone number is already registered. Please sign in instead.");
+        }
+        throw error;
+      }
 
       toast({
-        title: "Success!",
-        description: "Your profile has been created.",
+        title: "Account created!",
+        description: `Welcome to Narra, ${data.first_name}! Your profile has been created.`,
       });
 
       navigate(`/profile/${data.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem with your request.",
-      });
+      setFormError(error.message || "There was a problem creating your account. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -131,6 +146,10 @@ const ProfileForm = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Clear form-level error when user types
+    if (formError) setFormError(null);
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -147,6 +166,13 @@ const ProfileForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {formError && (
+        <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertDescription>{formError}</AlertDescription>
+        </Alert>
+      )}
+    
       <div className="space-y-4">
         <FormField
           label="First Name"
@@ -186,6 +212,7 @@ const ProfileForm = () => {
           value={formData.email}
           onChange={handleChange}
           placeholder="jane@example.com"
+          error={errors.email}
         />
 
         <FormField
@@ -201,7 +228,7 @@ const ProfileForm = () => {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Processing..." : "Continue"}
+        {loading ? "Creating Account..." : "Continue"}
       </Button>
     </form>
   );

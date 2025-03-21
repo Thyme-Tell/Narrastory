@@ -1,10 +1,13 @@
+
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const PasswordResetRequest = () => {
   useEffect(() => {
@@ -13,12 +16,20 @@ const PasswordResetRequest = () => {
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+
+    if (!phoneNumber.trim()) {
+      setError("Please enter your phone number");
+      setLoading(false);
+      return;
+    }
 
     try {
       const normalizedPhone = normalizePhoneNumber(phoneNumber);
@@ -33,9 +44,10 @@ const PasswordResetRequest = () => {
       if (profileError) {
         // Don't expose whether a profile exists or not for security
         toast({
-          title: "Notice",
+          title: "Check your phone",
           description: "If an account exists with this phone number, you will receive a reset code.",
         });
+        navigate("/reset-password/confirm");
         return;
       }
 
@@ -43,25 +55,24 @@ const PasswordResetRequest = () => {
         body: { action: "request", phoneNumber: normalizedPhone },
       });
 
-      if (resetError) throw resetError;
+      if (resetError) {
+        console.error("Reset error:", resetError);
+        throw new Error("Could not send reset code. Please try again later.");
+      }
 
       // Get last 4 digits of phone number
       const lastFourDigits = normalizedPhone.slice(-4);
 
       toast({
-        title: "Success",
-        description: `A reset code has been sent to ${profile.first_name}'s phone (ending in ${lastFourDigits}) via text message.`,
+        title: "Reset code sent",
+        description: `We've sent a reset code to ${profile.first_name}'s phone (ending in ${lastFourDigits}) via text message.`,
       });
 
       // Redirect to the password reset confirmation page
       navigate("/reset-password/confirm");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem with the password reset request. Please try again later.",
-      });
+      setError(error.message || "There was a problem with the password reset request. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -82,13 +93,23 @@ const PasswordResetRequest = () => {
           </p>
         </div>
 
+        {error && (
+          <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField
             label="Phone Number"
             name="phoneNumber"
             type="tel"
             value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            onChange={(e) => {
+              setError(null);
+              setPhoneNumber(e.target.value);
+            }}
             required
             placeholder="+1 (555) 000-0000"
           />
@@ -96,6 +117,12 @@ const PasswordResetRequest = () => {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Sending..." : "Send Reset Code"}
           </Button>
+
+          <div className="text-center mt-4">
+            <Link to="/sign-in" className="text-primary hover:underline text-sm">
+              Return to sign in
+            </Link>
+          </div>
         </form>
       </div>
     </div>

@@ -1,9 +1,12 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const PasswordResetConfirm = () => {
   const navigate = useNavigate();
@@ -13,17 +16,30 @@ const PasswordResetConfirm = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
+    if (!formData.token) {
+      setError("Please enter the reset code from your text message");
+      return;
+    }
+    
+    if (!formData.newPassword) {
+      setError("Please enter a new password");
+      return;
+    }
+    
+    if (formData.newPassword.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
     
     if (formData.newPassword !== formData.confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Passwords do not match.",
-      });
+      setError("Passwords don't match. Please make sure both passwords are identical.");
       return;
     }
 
@@ -38,28 +54,30 @@ const PasswordResetConfirm = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Reset error:", error);
+        throw new Error(error.message || "Invalid or expired reset code. Please try again.");
+      }
 
       toast({
-        title: "Success",
-        description: "Your password has been reset successfully.",
+        title: "Password reset successful",
+        description: "Your password has been changed. You can now sign in with your new password.",
       });
 
       // Redirect to sign-in page
       navigate("/sign-in");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem resetting your password.",
-      });
+      setError(error.message || "There was a problem resetting your password. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Clear error when user starts typing
+    if (error) setError(null);
+    
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -80,6 +98,13 @@ const PasswordResetConfirm = () => {
             Enter your reset code and new password
           </p>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField
@@ -114,6 +139,12 @@ const PasswordResetConfirm = () => {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Resetting..." : "Reset Password"}
           </Button>
+          
+          <div className="text-center mt-4">
+            <Link to="/sign-in" className="text-primary hover:underline text-sm">
+              Return to sign in
+            </Link>
+          </div>
         </form>
       </div>
     </div>
