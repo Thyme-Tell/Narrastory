@@ -28,17 +28,21 @@ const SignIn = () => {
     setLoading(true);
 
     const normalizedPhoneNumber = normalizePhoneNumber(formData.phoneNumber);
+    console.log("Attempting login with phone:", normalizedPhoneNumber);
 
     try {
-      const { data: profile, error: searchError } = await supabase
+      // Directly query the profiles table
+      const { data: profiles, error: searchError } = await supabase
         .from("profiles")
-        .select("id, password")
-        .eq("phone_number", normalizedPhoneNumber)
-        .maybeSingle();
+        .select("id, password, first_name, last_name, phone_number")
+        .eq("phone_number", normalizedPhoneNumber);
 
-      if (searchError) throw searchError;
+      if (searchError) {
+        console.error("Profile search error:", searchError);
+        throw searchError;
+      }
 
-      if (!profile) {
+      if (!profiles || profiles.length === 0) {
         toast({
           variant: "destructive",
           title: "Account Not Found",
@@ -58,7 +62,12 @@ const SignIn = () => {
         return;
       }
 
+      // Use the first profile if multiple are found
+      const profile = profiles[0];
+      console.log("Found profile:", profile.id);
+      
       if (profile.password !== formData.password) {
+        console.log("Password mismatch for profile:", profile.id);
         toast({
           variant: "destructive",
           title: "Incorrect Password",
@@ -79,6 +88,7 @@ const SignIn = () => {
       }
 
       // Set cookies to expire in 365 days
+      console.log("Setting auth cookies for profile:", profile.id);
       Cookies.set('profile_authorized', 'true', { expires: 365 });
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
       Cookies.set('profile_id', profile.id, { expires: 365 });
@@ -88,9 +98,10 @@ const SignIn = () => {
                         (location.state as { redirectTo?: string })?.redirectTo || 
                         `/profile/${profile.id}`;
       
+      console.log("Login successful, redirecting to:", redirectTo);
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error during sign in:", error);
       toast({
         variant: "destructive",
         title: "Error",

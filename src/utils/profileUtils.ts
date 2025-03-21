@@ -57,6 +57,68 @@ export const lookupUserProfileByPhone = async (phoneNumber: string): Promise<Use
 
     console.log('Looking up profile for phone number:', phoneNumber);
     
+    // First try to get profile directly from database as a fallback
+    try {
+      const { data: profiles, error: directError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email, synthflow_voice_id, elevenlabs_voice_id, phone_number')
+        .eq('phone_number', phoneNumber);
+      
+      if (!directError && profiles && profiles.length > 0) {
+        console.log('Retrieved profile directly from database:', profiles[0]);
+        
+        // Get user's recent stories
+        const { data: recentStories } = await supabase
+          .from('stories')
+          .select('id, title, summary, content, created_at')
+          .eq('profile_id', profiles[0].id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+          
+        const storiesArray = recentStories || [];
+        const profile = profiles[0];
+        
+        return {
+          found: true,
+          profile: {
+            id: profile.id,
+            first_name: profile.first_name || "Guest",
+            last_name: profile.last_name || "User",
+            full_name: `${profile.first_name || "Guest"} ${profile.last_name || "User"}`.trim(),
+            email: profile.email || "",
+            synthflow_voice_id: profile.synthflow_voice_id || "",
+            elevenlabs_voice_id: profile.elevenlabs_voice_id || "",
+            phone_number: profile.phone_number || ""
+          },
+          stories: {
+            count: storiesArray.length,
+            has_stories: storiesArray.length > 0,
+            recent: storiesArray
+          },
+          synthflow_context: {
+            user_id: profile.id,
+            user_name: `${profile.first_name || "Guest"} ${profile.last_name || "User"}`.trim(),
+            user_first_name: profile.first_name || "Guest",
+            user_last_name: profile.last_name || "User",
+            user_email: profile.email || "",
+            user_phone: profile.phone_number || "",
+            has_stories: storiesArray.length > 0,
+            story_count: storiesArray.length,
+            recent_story_titles: storiesArray.length > 0 
+              ? storiesArray.map((s) => s.title || 'Untitled story').join(', ')
+              : 'none',
+            recent_story_summaries: storiesArray.length > 0 
+              ? storiesArray.map((s) => s.summary || 'No summary available').join(', ')
+              : 'none'
+          }
+        };
+      }
+    } catch (directLookupError) {
+      console.error('Error in direct database lookup:', directLookupError);
+      // Continue with edge function call as fallback
+    }
+    
+    // Then try the edge function
     const { data, error } = await supabase.functions.invoke('get-user-profile', {
       method: 'POST',
       body: JSON.stringify({

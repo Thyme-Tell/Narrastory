@@ -8,6 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   profileId: string | null;
   checkAuth: () => Promise<boolean>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,7 +22,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedProfileId = Cookies.get('profile_id');
     const isAuthorized = Cookies.get('profile_authorized');
 
+    console.log('Checking auth with profile ID:', storedProfileId);
+    console.log('Is authorized from cookie:', isAuthorized);
+
     if (!storedProfileId || !isAuthorized) {
+      console.log('Missing cookies, user not authenticated');
       setIsAuthenticated(false);
       setProfileId(null);
       return false;
@@ -30,12 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, first_name, last_name')
         .eq('id', storedProfileId)
         .maybeSingle();
 
-      if (error || !profile) {
+      if (error) {
         console.error('Error validating auth:', error);
+        return false;
+      }
+
+      if (!profile) {
+        console.log('Profile not found for ID:', storedProfileId);
+        // Clear cookies if profile not found
         Cookies.remove('profile_id');
         Cookies.remove('profile_authorized');
         Cookies.remove('phone_number');
@@ -44,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
+      console.log('Auth successful for:', profile.first_name, profile.last_name);
       setIsAuthenticated(true);
       setProfileId(profile.id);
       return true;
@@ -55,11 +67,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const logout = () => {
+    console.log('Logging out user');
+    Cookies.remove('profile_id');
+    Cookies.remove('profile_authorized');
+    Cookies.remove('phone_number');
+    setIsAuthenticated(false);
+    setProfileId(null);
+    navigate('/sign-in', { replace: true });
+  };
+
   useEffect(() => {
+    console.log('AuthProvider mounted, checking auth');
     checkAuth();
     
     // Recheck auth when cookies change
     const handleCookieChange = () => {
+      console.log('Cookie change detected, rechecking auth');
       checkAuth();
     };
 
@@ -68,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, profileId, checkAuth }}>
+    <AuthContext.Provider value={{ isAuthenticated, profileId, checkAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );
