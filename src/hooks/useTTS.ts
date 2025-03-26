@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TTSOptions, TTSResult } from '@/services/tts/TTSProvider';
@@ -61,7 +62,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
     initializeProvider();
   }, [options.defaultProvider, options.defaultVoiceId]);
 
-  // Generate audio from text
+  // Generate audio from text - only called when user explicitly requests it
   const generateAudio = useCallback(async (
     text: string, 
     ttsOptions?: Partial<TTSOptions>,
@@ -73,15 +74,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
     }
     
     if (!currentVoiceId) {
-      // Set default voice if none is selected
-      if (currentProvider === 'elevenlabs') {
-        setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM");
-      } else if (currentProvider === 'amazon-polly') {
-        setCurrentVoiceId("Joanna");
-      } else {
-        setError('No voice selected');
-        return null;
-      }
+      setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM");
     }
     
     setIsLoading(true);
@@ -97,6 +90,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
       let result: TTSResult;
       
       if (storyId) {
+        console.log('Generating audio for story with explicit user request');
         // Include provider type in the request to the edge function
         const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
           body: { 

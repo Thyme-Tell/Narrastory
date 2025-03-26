@@ -56,7 +56,10 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
       return;
     }
     
-    if (!audioUrl) {
+    if (audioUrl) {
+      console.log('Using existing audio URL:', audioUrl);
+      setShowPlayer(true);
+    } else {
       console.log('No existing audio URL, requesting audio...');
       try {
         const generatedUrl = await generateAudio();
@@ -67,8 +70,6 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         console.error('Error in handleListen:', err);
         // Error already handled in useStoryAudio hook
       }
-    } else {
-      setShowPlayer(true);
     }
   };
 

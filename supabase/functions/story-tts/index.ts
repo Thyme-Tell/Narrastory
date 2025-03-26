@@ -95,7 +95,7 @@ serve(async (req) => {
     }
 
     // No existing audio found, generate new audio
-    console.log(`Generating new audio with ElevenLabs`)
+    console.log(`Generating new audio with ElevenLabs - TOKENS WILL BE USED NOW`)
     
     try {
       // Fetch story content from database

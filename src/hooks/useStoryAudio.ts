@@ -18,6 +18,7 @@ export const useStoryAudio = (storyId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hasCheckedExisting, setHasCheckedExisting] = useState(false);
   const { toast } = useToast();
   
   // Use our TTS hook with fixed voice selection
@@ -60,6 +61,8 @@ export const useStoryAudio = (storyId: string) => {
 
   useEffect(() => {
     const fetchExistingAudio = async () => {
+      if (hasCheckedExisting) return; // Only check once
+      
       try {
         // Check for existing audio but don't generate anything new
         setIsLoading(true);
@@ -73,6 +76,8 @@ export const useStoryAudio = (storyId: string) => {
           console.log('Found existing audio:', existingAudio.audio_url);
           setAudioUrl(existingAudio.audio_url);
         }
+        
+        setHasCheckedExisting(true);
       } catch (err) {
         console.error('Error checking for existing audio:', err);
         // Don't display errors during initial check
@@ -82,7 +87,7 @@ export const useStoryAudio = (storyId: string) => {
     };
 
     fetchExistingAudio();
-  }, [storyId]);
+  }, [storyId, hasCheckedExisting]);
 
   const updatePlaybackStats = useCallback(async () => {
     try {
