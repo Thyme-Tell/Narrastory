@@ -35,11 +35,10 @@ export async function saveAudioMetadata(
   let result;
   
   if (existing) {
-    // Update existing record
+    // Update existing record - simplified to avoid using updated_at
     const updateData: any = {
       audio_url: audioUrl,
-      voice_id: voiceId,
-      updated_at: new Date().toISOString()
+      voice_id: voiceId
     };
     
     // Only add provider if it's supported by the schema
@@ -66,13 +65,12 @@ export async function saveAudioMetadata(
       .update(updateData)
       .eq('story_id', storyId);
   } else {
-    // Insert new record
+    // Insert new record - simplified to avoid using updated_at
     const insertData: any = {
       story_id: storyId,
       audio_url: audioUrl,
       voice_id: voiceId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: new Date().toISOString()
     };
     
     // Only add provider if it's supported by the schema

@@ -19,6 +19,7 @@ export const useStoryAudio = (storyId: string) => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasCheckedExisting, setHasCheckedExisting] = useState(false);
+  const [retries, setRetries] = useState(0);
   const { toast } = useToast();
   
   // Use our TTS hook with fixed voice selection
@@ -55,6 +56,13 @@ export const useStoryAudio = (storyId: string) => {
       if (generatedUrl) {
         setAudioUrl(generatedUrl);
         return generatedUrl;
+      } else if (retries < 2) {
+        // If generation failed but we haven't retried enough, increment retries
+        setRetries(prev => prev + 1);
+        console.log(`Audio generation failed, retrying (attempt ${retries + 1})...`);
+        // Wait a moment before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return generateAudio();
       }
       
       return null;
@@ -71,7 +79,7 @@ export const useStoryAudio = (storyId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [storyId, toast, tts]);
+  }, [storyId, toast, tts, retries]);
 
   useEffect(() => {
     const fetchExistingAudio = async () => {
@@ -124,6 +132,7 @@ export const useStoryAudio = (storyId: string) => {
         const newCount = (currentStats.playback_count || 0) + 1;
         console.log('Incrementing playback count to:', newCount);
         
+        // Simplified update that avoids updated_at
         const { error: updateError } = await supabase
           .from('story_audio')
           .update({
@@ -139,6 +148,11 @@ export const useStoryAudio = (storyId: string) => {
     } catch (err) {
       console.error('Error updating playback stats:', err);
     }
+  }, [storyId]);
+
+  // Reset retries when storyId changes
+  useEffect(() => {
+    setRetries(0);
   }, [storyId]);
 
   return {
