@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import { LogIn, Home, User, Settings } from "lucide-react";
+import { LogIn, Home, User } from "lucide-react";
 import {
   Sidebar as ShadcnSidebar,
   SidebarGroup as ShadcnSidebarGroup,
@@ -20,16 +20,9 @@ export function AppSidebar() {
     },
     {
       title: isAuthenticated ? "Profile" : "Sign In",
-      icon: User,
+      icon: isAuthenticated ? User : LogIn,
       to: isAuthenticated ? `/profile/${profileId}` : "/sign-in",
     },
-    ...(isAuthenticated ? [
-      {
-        title: "Settings",
-        icon: Settings,
-        to: "/settings",
-      }
-    ] : []),
   ];
 
   return (
