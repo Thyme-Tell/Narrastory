@@ -3,12 +3,16 @@ import { useState } from "react";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
 import { Button } from "@/components/ui/button";
-import { Headphones } from "lucide-react";
+import { Headphones, Settings } from "lucide-react";
 import AudioPlayer from "./AudioPlayer";
 import { useStoryAudio } from "@/hooks/useStoryAudio";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import TTSVoiceSelector from "./TTSVoiceSelector";
+import { useTTS } from "@/hooks/useTTS";
+import { TTSFactory } from "@/services/tts/TTSFactory";
 
 interface StoryContentProps {
   title: string | null;
@@ -19,6 +23,7 @@ interface StoryContentProps {
 
 const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) => {
   const [showPlayer, setShowPlayer] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const { 
     isLoading, 
     audioUrl, 
@@ -26,6 +31,12 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     generateAudio, 
     updatePlaybackStats,
   } = useStoryAudio(storyId);
+  
+  const tts = useTTS({
+    defaultProvider: 'amazon-polly',
+    defaultVoiceId: 'Joanna',
+  });
+  
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -63,6 +74,36 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     }
   };
 
+  const handlePreviewVoice = async (text: string, voiceId: string) => {
+    await tts.generateAudio(text, { voiceId });
+  };
+  
+  const handleSaveVoicePreference = async () => {
+    // Save voice preference to user settings
+    if (tts.currentVoiceId && tts.currentProvider) {
+      try {
+        const { error } = await supabase
+          .from('user_settings')
+          .upsert({
+            user_id: supabase.auth.user()?.id,
+            tts_provider: tts.currentProvider,
+            tts_voice_id: tts.currentVoiceId,
+            updated_at: new Date().toISOString()
+          });
+          
+        if (error) throw error;
+        
+        // Update the factory settings
+        TTSFactory.setActiveProvider(tts.currentProvider);
+        
+        return true;
+      } catch (err) {
+        console.error('Error saving voice preference:', err);
+        throw err;
+      }
+    }
+  };
+
   return (
     <>
       {/* Responsive title and listen button layout */}
@@ -71,7 +112,17 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
           <h3 className="font-semibold text-lg text-left">{title}</h3>
         )}
         
-        <div className={`${isMobile ? 'self-start' : 'ml-auto'}`}>
+        <div className={`${isMobile ? 'self-start' : 'ml-auto'} flex space-x-2`}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowVoiceSettings(true)}
+            disabled={isLoading}
+          >
+            <Settings className="h-4 w-4" />
+            <span className="sr-only">Voice Settings</span>
+          </Button>
+          
           <Button
             variant="outline"
             size="sm"
@@ -118,6 +169,27 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         <StoryMediaUpload storyId={storyId} onUploadComplete={onUpdate} />
       </div>
       <StoryMedia storyId={storyId} />
+      
+      {/* Voice settings dialog */}
+      <Dialog open={showVoiceSettings} onOpenChange={setShowVoiceSettings}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Voice Settings</DialogTitle>
+          </DialogHeader>
+          <div>
+            <TTSVoiceSelector
+              currentProvider={tts.currentProvider || 'amazon-polly'}
+              currentVoiceId={tts.currentVoiceId}
+              providers={TTSFactory.getRegisteredProviderTypes()}
+              isLoading={tts.isLoading}
+              onProviderChange={tts.changeProvider}
+              onVoiceChange={(voiceId) => tts.setCurrentVoiceId(voiceId)}
+              onPreviewVoice={handlePreviewVoice}
+              onSavePreference={handleSaveVoicePreference}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -23,8 +23,8 @@ export const useTTS = (options: UseTTSOptions = {}) => {
   useEffect(() => {
     const initializeProvider = async () => {
       try {
-        // Default to ElevenLabs if no provider specified
-        const providerType = options.defaultProvider || 'elevenlabs';
+        // Default to Amazon Polly if no provider specified
+        const providerType = options.defaultProvider || 'amazon-polly';
         
         // Check if provider already registered
         let provider = TTSFactory.getProvider(providerType);
@@ -34,7 +34,6 @@ export const useTTS = (options: UseTTSOptions = {}) => {
           provider = TTSFactory.createProvider(providerType);
           
           // For ElevenLabs, we need to fetch the API key from environment
-          // In a real app, you would get this from user input or environment
           if (providerType === 'elevenlabs') {
             provider.initialize({ apiKey: 'configured-at-runtime' });
           }
@@ -104,12 +103,14 @@ export const useTTS = (options: UseTTSOptions = {}) => {
       let result: TTSResult;
       
       if (storyId) {
-        // Use the existing story-tts function for backwards compatibility
-        const { data, error: invokeError } = await fetch('/api/story-tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ storyId })
-        }).then(res => res.json());
+        // Include provider type in the request to the edge function
+        const { data, error: invokeError } = await supabase.functions.invoke('story-tts', {
+          body: { 
+            storyId,
+            providerType: currentProvider,
+            voiceId: currentVoiceId
+          }
+        });
         
         if (invokeError) {
           throw new Error(`Function invocation error: ${invokeError}`);
