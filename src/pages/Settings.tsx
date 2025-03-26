@@ -16,11 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import { AppSidebar } from "@/components/ui/sidebar";
-import { Navigate } from "react-router-dom";
 
 export default function Settings() {
-  const { profileId, isAuthenticated } = useAuth();
+  const { profileId } = useAuth();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,11 +27,6 @@ export default function Settings() {
     phoneNumber: "",
     email: "",
   });
-
-  // Redirect to sign-in if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/sign-in" replace />;
-  }
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile-settings", profileId],
@@ -118,9 +111,18 @@ export default function Settings() {
     );
   }
 
+  if (!profile) {
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="mt-4">You need to be logged in to view this page.</p>
+      </div>
+    );
+  }
+
   return (
     <div 
-      className="min-h-screen bg-background flex"
+      className="min-h-screen bg-background"
       style={{
         backgroundImage: `url('/lovable-uploads/e730ede5-8b2e-436e-a398-0c62ea70f30c.png')`,
         backgroundSize: 'cover',
@@ -128,87 +130,84 @@ export default function Settings() {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <AppSidebar />
-      <div className="flex-1">
-        <div className="w-full bg-white/80 py-4 px-4">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl font-bold">Settings</h1>
-          </div>
+      <div className="w-full bg-white/80 py-4 px-4">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold">Settings</h1>
         </div>
-        
-        <div className="container max-w-2xl mx-auto py-8 px-4">
-          <Card className="border-none shadow-md">
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>
-                Update your personal information. This information will be used for your stories.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <Separator />
-                
+      </div>
+      
+      <div className="container max-w-2xl mx-auto py-8 px-4">
+        <Card className="border-none shadow-md">
+          <CardHeader>
+            <CardTitle>Profile Information</CardTitle>
+            <CardDescription>
+              Update your personal information. This information will be used for your stories.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Label htmlFor="firstName">First Name</Label>
                   <Input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    type="tel"
-                    value={formData.phoneNumber}
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="(555) 000-0000"
+                    required
                   />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="lastName">Last Name</Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
                     onChange={handleChange}
-                    placeholder="your@email.com"
+                    required
                   />
                 </div>
-                
-                <Button type="submit" className="w-full" disabled={isUpdating}>
-                  {isUpdating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="(555) 000-0000"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your@email.com"
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={isUpdating}>
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
