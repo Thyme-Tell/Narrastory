@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
 import { Button } from "@/components/ui/button";
@@ -78,14 +79,14 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
     await tts.generateAudio(text, { voiceId });
   };
   
-  const handleSaveVoicePreference = async () => {
+  const handleSaveVoicePreference = async (): Promise<void> => {
     // Save voice preference to user settings
     if (tts.currentVoiceId && tts.currentProvider) {
       try {
         const { error } = await supabase
           .from('user_settings')
           .upsert({
-            user_id: supabase.auth.user()?.id,
+            user_id: (await supabase.auth.getUser()).data.user?.id,
             tts_provider: tts.currentProvider,
             tts_voice_id: tts.currentVoiceId,
             updated_at: new Date().toISOString()
@@ -96,10 +97,17 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         // Update the factory settings
         TTSFactory.setActiveProvider(tts.currentProvider);
         
-        return true;
+        toast({
+          title: "Voice Preference Saved",
+          description: "Your voice preference has been saved successfully.",
+        });
       } catch (err) {
         console.error('Error saving voice preference:', err);
-        throw err;
+        toast({
+          title: "Error",
+          description: "Failed to save voice preference.",
+          variant: "destructive",
+        });
       }
     }
   };

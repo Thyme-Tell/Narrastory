@@ -61,27 +61,17 @@ export const useStoryAudio = (storyId: string) => {
   useEffect(() => {
     const fetchExistingAudio = async () => {
       try {
-        // Simply call the same function that handles both generating and checking
-        // But don't display toast messages for initial loading
+        // Check for existing audio but don't generate anything new
         setIsLoading(true);
-        const response = await supabase.functions.invoke('story-tts', {
-          body: { storyId }
-        });
-        
-        const { data, error } = response;
-        
-        if (error) {
-          console.error('Error checking for existing audio:', error);
-          return;
-        }
-
-        if (data?.error) {
-          console.error('Function returned error:', data.error);
-          return;
-        }
-        
-        if (data?.audioUrl) {
-          setAudioUrl(data.audioUrl);
+        const { data: existingAudio } = await supabase
+          .from('story_audio')
+          .select('audio_url')
+          .eq('story_id', storyId)
+          .maybeSingle();
+          
+        if (existingAudio?.audio_url) {
+          console.log('Found existing audio:', existingAudio.audio_url);
+          setAudioUrl(existingAudio.audio_url);
         }
       } catch (err) {
         console.error('Error checking for existing audio:', err);
