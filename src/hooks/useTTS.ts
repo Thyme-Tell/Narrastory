@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TTSOptions, TTSResult } from '@/services/tts/TTSProvider';
@@ -24,8 +23,8 @@ export const useTTS = (options: UseTTSOptions = {}) => {
   useEffect(() => {
     const initializeProvider = async () => {
       try {
-        // Default to Amazon Polly if no provider specified
-        const providerType = options.defaultProvider || 'amazon-polly';
+        // Force ElevenLabs as the only provider
+        const providerType = 'elevenlabs';
         
         // Check if provider already registered
         let provider = TTSFactory.getProvider(providerType);
@@ -35,9 +34,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
           provider = TTSFactory.createProvider(providerType);
           
           // For ElevenLabs, we need to fetch the API key from environment
-          if (providerType === 'elevenlabs') {
-            provider.initialize({ apiKey: 'configured-at-runtime' });
-          }
+          provider.initialize({ apiKey: 'configured-at-runtime' });
         }
         
         TTSFactory.setActiveProvider(providerType);
@@ -48,11 +45,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
           setCurrentVoiceId(options.defaultVoiceId);
         } else {
           // Set default voices based on provider
-          if (providerType === 'elevenlabs') {
-            setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM"); // Default ElevenLabs voice
-          } else if (providerType === 'amazon-polly') {
-            setCurrentVoiceId("Joanna"); // Default Amazon Polly voice
-          }
+          setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM"); // Default ElevenLabs voice
         }
         
         setIsInitialized(true);
@@ -166,24 +159,25 @@ export const useTTS = (options: UseTTSOptions = {}) => {
     }
   }, [isInitialized, currentProvider, currentVoiceId, toast, options.onError]);
 
-  // Change the TTS provider and set default voice for that provider
+  // Change the TTS provider - now a no-op since we only support ElevenLabs
   const changeProvider = useCallback(async (providerType: TTSProviderType) => {
+    if (providerType !== 'elevenlabs') {
+      console.warn('Only ElevenLabs provider is supported');
+      return false;
+    }
+    
     try {
-      let provider = TTSFactory.getProvider(providerType);
+      let provider = TTSFactory.getProvider('elevenlabs');
       
       if (!provider) {
-        provider = TTSFactory.createProvider(providerType);
+        provider = TTSFactory.createProvider('elevenlabs');
       }
       
-      TTSFactory.setActiveProvider(providerType);
-      setCurrentProvider(providerType);
+      TTSFactory.setActiveProvider('elevenlabs');
+      setCurrentProvider('elevenlabs');
       
       // Set default voice based on provider
-      if (providerType === 'elevenlabs') {
-        setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM");
-      } else if (providerType === 'amazon-polly') {
-        setCurrentVoiceId("Joanna");
-      }
+      setCurrentVoiceId("21m00Tcm4TlvDq8ikWAM");
       
       return true;
     } catch (err: any) {

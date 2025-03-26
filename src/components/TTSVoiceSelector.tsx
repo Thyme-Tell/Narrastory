@@ -2,14 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import TTSProviderSelector from "@/components/TTSProviderSelector";
-import { TTSProviderType } from "@/services/tts/TTSFactory";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, Save } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { TTSVoice } from "@/services/tts/TTSProvider";
+import { TTSProviderType } from "@/services/tts/TTSFactory";
 
 interface TTSVoiceSelectorProps {
   currentProvider: TTSProviderType;
@@ -25,11 +23,8 @@ interface TTSVoiceSelectorProps {
 const PREVIEW_TEXT = "Hello, this is a preview of how my voice sounds. I hope you like it!";
 
 const TTSVoiceSelector: React.FC<TTSVoiceSelectorProps> = ({
-  currentProvider,
   currentVoiceId,
-  providers,
   isLoading,
-  onProviderChange,
   onVoiceChange,
   onPreviewVoice,
   onSavePreference
@@ -45,27 +40,13 @@ const TTSVoiceSelector: React.FC<TTSVoiceSelectorProps> = ({
       try {
         setLoadingVoices(true);
         
-        let providerVoices: TTSVoice[] = [];
-        
-        if (currentProvider === 'amazon-polly') {
-          providerVoices = [
-            { id: "Joanna", name: "Joanna", language: "en-US", gender: "female", provider: "amazon-polly" },
-            { id: "Matthew", name: "Matthew", language: "en-US", gender: "male", provider: "amazon-polly" },
-            { id: "Amy", name: "Amy", language: "en-GB", gender: "female", provider: "amazon-polly" },
-            { id: "Brian", name: "Brian", language: "en-GB", gender: "male", provider: "amazon-polly" },
-            { id: "Kimberly", name: "Kimberly", language: "en-US", gender: "female", provider: "amazon-polly" },
-            { id: "Justin", name: "Justin", language: "en-US", gender: "male", provider: "amazon-polly" },
-            { id: "Ruth", name: "Ruth", language: "en-US", gender: "female", provider: "amazon-polly" },
-            { id: "Kevin", name: "Kevin", language: "en-US", gender: "male", provider: "amazon-polly" }
-          ];
-        } else if (currentProvider === 'elevenlabs') {
-          providerVoices = [
-            { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", language: "en-US", gender: "female", provider: "elevenlabs" },
-            { id: "AZnzlk1XvdvUeBnXmlld", name: "Domi", language: "en-US", gender: "female", provider: "elevenlabs" },
-            { id: "EXAVITQu4vr4xnSDxMaL", name: "Bella", language: "en-US", gender: "female", provider: "elevenlabs" },
-            { id: "ErXwobaYiN019PkySvjV", name: "Antoni", language: "en-US", gender: "male", provider: "elevenlabs" }
-          ];
-        }
+        // Only provide ElevenLabs voices
+        const providerVoices: TTSVoice[] = [
+          { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", language: "en-US", gender: "female", provider: "elevenlabs" },
+          { id: "AZnzlk1XvdvUeBnXmlld", name: "Domi", language: "en-US", gender: "female", provider: "elevenlabs" },
+          { id: "EXAVITQu4vr4xnSDxMaL", name: "Bella", language: "en-US", gender: "female", provider: "elevenlabs" },
+          { id: "ErXwobaYiN019PkySvjV", name: "Antoni", language: "en-US", gender: "male", provider: "elevenlabs" }
+        ];
         
         setVoices(providerVoices);
         
@@ -86,7 +67,7 @@ const TTSVoiceSelector: React.FC<TTSVoiceSelectorProps> = ({
     };
 
     fetchVoices();
-  }, [currentProvider, currentVoiceId, onVoiceChange, toast]);
+  }, [currentVoiceId, onVoiceChange, toast]);
 
   const handleVoiceChange = (voiceId: string) => {
     onVoiceChange(voiceId);
@@ -134,13 +115,6 @@ const TTSVoiceSelector: React.FC<TTSVoiceSelectorProps> = ({
 
   return (
     <div className="space-y-6">
-      <TTSProviderSelector
-        currentProvider={currentProvider}
-        providers={providers}
-        isLoading={isLoading || loadingVoices}
-        onProviderChange={onProviderChange}
-      />
-      
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-medium mb-2">Select Voice</h3>

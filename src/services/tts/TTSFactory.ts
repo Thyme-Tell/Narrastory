@@ -1,10 +1,8 @@
-
 import { TTSProvider, TTSProviderConfig } from './TTSProvider';
 import { ElevenLabsProvider, ElevenLabsConfig } from './providers/ElevenLabsProvider';
-import { AmazonPollyProvider, AmazonPollyConfig } from './providers/AmazonPollyProvider';
 
-// Add more providers as needed
-export type TTSProviderType = 'elevenlabs' | 'amazon-polly';
+// Only support ElevenLabs provider
+export type TTSProviderType = 'elevenlabs';
 
 /**
  * TTS Factory to create provider instances
@@ -17,41 +15,31 @@ export class TTSFactory {
    * Register a provider instance
    */
   static registerProvider(type: TTSProviderType, provider: TTSProvider): void {
-    this.providers.set(type, provider);
-    
-    // If this is the first provider, make it active
-    if (this.activeProvider === null) {
-      this.activeProvider = type;
+    if (type !== 'elevenlabs') {
+      console.warn('Only ElevenLabs provider is supported');
+      return;
     }
+    
+    this.providers.set(type, provider);
+    this.activeProvider = type;
   }
 
   /**
    * Create a provider of the specified type
    */
   static createProvider(type: TTSProviderType, config?: TTSProviderConfig): TTSProvider {
-    let provider: TTSProvider;
-
-    switch (type) {
-      case 'elevenlabs':
-        // Create a properly typed config for ElevenLabs
-        const elevenLabsConfig: ElevenLabsConfig = {
-          apiKey: config?.apiKey || '',
-          ...config
-        };
-        provider = new ElevenLabsProvider(elevenLabsConfig);
-        break;
-      case 'amazon-polly':
-        // Create a properly typed config for Amazon Polly
-        const amazonPollyConfig: AmazonPollyConfig = {
-          region: config?.region || 'us-east-1',
-          ...config
-        };
-        provider = new AmazonPollyProvider(amazonPollyConfig);
-        break;
-      default:
-        throw new Error(`Unsupported TTS provider type: ${type}`);
+    if (type !== 'elevenlabs') {
+      console.warn('Only ElevenLabs provider is supported');
+      type = 'elevenlabs';
     }
-
+    
+    // Create a properly typed config for ElevenLabs
+    const elevenLabsConfig: ElevenLabsConfig = {
+      apiKey: config?.apiKey || '',
+      ...config
+    };
+    const provider = new ElevenLabsProvider(elevenLabsConfig);
+    
     this.registerProvider(type, provider);
     return provider;
   }

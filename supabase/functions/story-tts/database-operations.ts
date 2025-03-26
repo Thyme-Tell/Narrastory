@@ -8,7 +8,7 @@ export async function saveAudioMetadata(
   storyId: string, 
   audioUrl: string, 
   voiceId: string,
-  provider: string = 'amazon-polly'
+  provider: string = 'elevenlabs'
 ): Promise<void> {
   console.log('Saving audio metadata to database...');
   

@@ -5,13 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useTTS } from '@/hooks/useTTS';
 import { TTSFactory } from '@/services/tts/TTSFactory';
 
-// Initialize the TTS Factory with Amazon Polly as the default provider
-const defaultVoiceId = "Joanna"; // Amazon Polly premium voice
+// Initialize the TTS Factory with ElevenLabs as the only provider
+const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; // ElevenLabs premium voice
 
-// Ensure Amazon Polly provider is registered
-if (!TTSFactory.getProvider('amazon-polly')) {
-  TTSFactory.createProvider('amazon-polly');
-  TTSFactory.setActiveProvider('amazon-polly');
+// Ensure ElevenLabs provider is registered
+if (!TTSFactory.getProvider('elevenlabs')) {
+  TTSFactory.createProvider('elevenlabs');
+  TTSFactory.setActiveProvider('elevenlabs');
 }
 
 export const useStoryAudio = (storyId: string) => {
@@ -22,7 +22,7 @@ export const useStoryAudio = (storyId: string) => {
   
   // Use our TTS hook with fixed voice selection
   const tts = useTTS({
-    defaultProvider: 'amazon-polly',
+    defaultProvider: 'elevenlabs',
     defaultVoiceId,
     onError: (err) => console.error('TTS error:', err)
   });

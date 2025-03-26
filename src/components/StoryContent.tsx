@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
@@ -34,16 +33,14 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
   } = useStoryAudio(storyId);
   
   const tts = useTTS({
-    defaultProvider: 'amazon-polly',
-    defaultVoiceId: 'Joanna',
+    defaultProvider: 'elevenlabs',
+    defaultVoiceId: 'EXAVITQu4vr4xnSDxMaL',
   });
   
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Calculate estimated audio duration based on word count
-  // Average reading speed is about 150 words per minute
   const wordCount = content.trim().split(/\s+/).length;
   const estimatedMinutes = Math.max(1, Math.ceil(wordCount / 150));
 
@@ -80,27 +77,27 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
   };
   
   const handleSaveVoicePreference = async (): Promise<void> => {
-    // Save voice preference to user settings
-    if (tts.currentVoiceId && tts.currentProvider) {
+    if (tts.currentVoiceId) {
       try {
-        const { error } = await supabase
-          .from('user_settings')
-          .upsert({
-            user_id: (await supabase.auth.getUser()).data.user?.id,
-            tts_provider: tts.currentProvider,
-            tts_voice_id: tts.currentVoiceId,
-            updated_at: new Date().toISOString()
-          });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) {
+          const { error } = await supabase
+            .from('profiles')
+            .update({
+              elevenlabs_voice_id: tts.currentVoiceId,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', user.id);
+            
+          if (error) throw error;
           
-        if (error) throw error;
-        
-        // Update the factory settings
-        TTSFactory.setActiveProvider(tts.currentProvider);
-        
-        toast({
-          title: "Voice Preference Saved",
-          description: "Your voice preference has been saved successfully.",
-        });
+          TTSFactory.setActiveProvider('elevenlabs');
+          
+          toast({
+            title: "Voice Preference Saved",
+            description: "Your voice preference has been saved successfully.",
+          });
+        }
       } catch (err) {
         console.error('Error saving voice preference:', err);
         toast({
@@ -114,7 +111,6 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
 
   return (
     <>
-      {/* Responsive title and listen button layout */}
       <div className={`${isMobile ? 'flex flex-col space-y-3' : 'flex justify-between items-center'} mb-4`}>
         {title && (
           <h3 className="font-semibold text-lg text-left">{title}</h3>
@@ -178,7 +174,6 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
       </div>
       <StoryMedia storyId={storyId} />
       
-      {/* Voice settings dialog */}
       <Dialog open={showVoiceSettings} onOpenChange={setShowVoiceSettings}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -186,11 +181,11 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
           </DialogHeader>
           <div>
             <TTSVoiceSelector
-              currentProvider={tts.currentProvider || 'amazon-polly'}
+              currentProvider="elevenlabs"
               currentVoiceId={tts.currentVoiceId}
-              providers={TTSFactory.getRegisteredProviderTypes()}
+              providers={['elevenlabs']}
               isLoading={tts.isLoading}
-              onProviderChange={tts.changeProvider}
+              onProviderChange={() => {}} // No-op since we only support ElevenLabs
               onVoiceChange={(voiceId) => tts.setCurrentVoiceId(voiceId)}
               onPreviewVoice={handlePreviewVoice}
               onSavePreference={handleSaveVoicePreference}
