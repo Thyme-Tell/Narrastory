@@ -8,7 +8,7 @@ export async function saveAudioMetadata(
   storyId: string, 
   audioUrl: string, 
   voiceId: string,
-  provider: string = 'elevenlabs'
+  provider?: string
 ): Promise<void> {
   console.log('Saving audio metadata to database...');
   
@@ -36,27 +36,67 @@ export async function saveAudioMetadata(
   
   if (existing) {
     // Update existing record
+    const updateData: any = {
+      audio_url: audioUrl,
+      voice_id: voiceId,
+      updated_at: new Date().toISOString()
+    };
+    
+    // Only add provider if it's supported by the schema
+    if (provider) {
+      try {
+        // Try to check if the provider column exists
+        const { error: schemaError } = await supabase
+          .from('story_audio')
+          .select('provider')
+          .limit(1);
+          
+        if (!schemaError) {
+          updateData.provider = provider;
+        } else {
+          console.log('Provider column does not exist in schema, skipping...');
+        }
+      } catch (e) {
+        console.log('Error checking provider column, skipping:', e);
+      }
+    }
+    
     result = await supabase
       .from('story_audio')
-      .update({
-        audio_url: audioUrl,
-        voice_id: voiceId,
-        provider: provider,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('story_id', storyId);
   } else {
     // Insert new record
+    const insertData: any = {
+      story_id: storyId,
+      audio_url: audioUrl,
+      voice_id: voiceId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    // Only add provider if it's supported by the schema
+    if (provider) {
+      try {
+        // Try to check if the provider column exists
+        const { error: schemaError } = await supabase
+          .from('story_audio')
+          .select('provider')
+          .limit(1);
+          
+        if (!schemaError) {
+          insertData.provider = provider;
+        } else {
+          console.log('Provider column does not exist in schema, skipping...');
+        }
+      } catch (e) {
+        console.log('Error checking provider column, skipping:', e);
+      }
+    }
+    
     result = await supabase
       .from('story_audio')
-      .insert({
-        story_id: storyId,
-        audio_url: audioUrl,
-        voice_id: voiceId,
-        provider: provider,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+      .insert(insertData);
   }
   
   if (result.error) {

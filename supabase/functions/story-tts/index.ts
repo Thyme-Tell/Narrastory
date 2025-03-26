@@ -80,11 +80,15 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey)
     
-    const { data: existingAudio } = await supabase
+    const { data: existingAudio, error: audioCheckError } = await supabase
       .from('story_audio')
-      .select('audio_url, provider')
+      .select('audio_url')
       .eq('story_id', storyId)
       .maybeSingle()
+      
+    if (audioCheckError) {
+      console.error('Error checking for existing audio:', audioCheckError.message);
+    }
 
     if (existingAudio?.audio_url) {
       console.log(`Found existing audio: ${existingAudio.audio_url}`)
@@ -110,8 +114,14 @@ serve(async (req) => {
       const filename = `${storyId}-${Date.now()}.mp3`
       const publicUrl = await uploadAudioFile(filename, audioBuffer)
       
-      // Save audio metadata
-      await saveAudioMetadata(storyId, publicUrl, selectedVoiceId, 'elevenlabs')
+      // Save audio metadata - may or may not include provider field depending on schema
+      try {
+        await saveAudioMetadata(storyId, publicUrl, selectedVoiceId, 'elevenlabs')
+      } catch (metadataError) {
+        console.error('Error saving metadata, trying without provider:', metadataError.message);
+        // Try again without provider field
+        await saveAudioMetadata(storyId, publicUrl, selectedVoiceId)
+      }
   
       return new Response(
         JSON.stringify({ audioUrl: publicUrl }),

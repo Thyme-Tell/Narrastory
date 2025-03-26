@@ -35,7 +35,21 @@ export const useStoryAudio = (storyId: string) => {
     try {
       console.log('Requesting audio for story:', storyId);
       
-      // Use the TTS abstraction layer to generate audio
+      // First check if audio already exists in the database
+      const { data: existingAudio } = await supabase
+        .from('story_audio')
+        .select('audio_url')
+        .eq('story_id', storyId)
+        .maybeSingle();
+        
+      if (existingAudio?.audio_url) {
+        console.log('Found existing audio in database:', existingAudio.audio_url);
+        setAudioUrl(existingAudio.audio_url);
+        return existingAudio.audio_url;
+      }
+      
+      // If not found in database, use the TTS abstraction layer to generate audio
+      console.log('No existing audio found, generating new audio...');
       const generatedUrl = await tts.generateAudio('', {}, storyId);
       
       if (generatedUrl) {
