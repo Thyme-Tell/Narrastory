@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useParams, Navigate } from "react-router-
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import SignIn from "./pages/SignIn";
+import Settings from "./pages/Settings";
 import SharedStory from "./components/SharedStory";
 import StoryBooks from "./pages/storybooks";
 import StoryBook from "./pages/storybooks/[id]";
@@ -25,6 +26,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/profile/:id" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/signin" element={<Navigate to="/sign-in" replace />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/stories/:shareToken" element={<SharedStory />} />
