@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const GetStarted = () => {
   const location = useLocation();
@@ -81,21 +81,55 @@ const GetStarted = () => {
         </div>
       </nav>
 
-      {/* Page Content */}
+      {/* Hero Section */}
+      <div 
+        className="w-full py-16 md:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-prev.png')",
+          minHeight: "70vh"
+        }}
+      >
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 leading-tight">
+            Narrate as only <em className="italic font-serif">you</em> can.
+          </h1>
+          
+          <h2 className="text-xl md:text-2xl font-serif mb-4">
+            Share your life stories through simple conversation.
+          </h2>
+          
+          <p className="text-lg md:text-xl text-gray-700 mb-12 max-w-2xl mx-auto">
+            Narra transforms your everyday chats into meaningful and lasting stories that capture your essence.
+          </p>
+          
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 p-2 bg-white/90 rounded-full max-w-xl mx-auto">
+            <input
+              type="text"
+              placeholder="What's your phone number?"
+              className="px-6 py-3 w-full md:w-auto rounded-full bg-transparent outline-none"
+            />
+            <Button className="w-full md:w-auto rounded-full bg-[#242F3F] hover:bg-[#242F3F]/90 px-6">
+              Try a call with <span className="font-bold">Narra</span> <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Section */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-atlantic mb-6">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-atlantic mb-6">
             Welcome to Narra
-          </h1>
+          </h2>
           <p className="text-lg md:text-xl text-gray-700 mb-8">
             Your place to create, share, and preserve your most important stories.
           </p>
           
           {/* Content Placeholder - to be filled with actual content */}
           <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-            <h2 className="text-2xl font-serif font-bold text-atlantic mb-4">
+            <h3 className="text-2xl font-serif font-bold text-atlantic mb-4">
               Get Started with Narra
-            </h2>
+            </h3>
             <p className="text-gray-700 mb-4">
               Narra helps you create beautiful storybooks from your personal memories and experiences.
               Our intuitive tools make it easy to write, illustrate, and share your stories with loved ones.
