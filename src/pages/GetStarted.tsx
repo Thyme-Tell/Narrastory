@@ -87,9 +87,11 @@ const GetStarted = () => {
         className="w-full py-16 md:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
-          minHeight: "50vh", // Changed from 90vh to 50vh
-          maxHeight: "50vh", // Changed from 90vh to 50vh
-          height: "50vh"     // Changed from 90vh to 50vh
+          backgroundSize: "contain", // This makes the background image fit within the container
+          backgroundPosition: "center",
+          minHeight: "80vh", // Changed from 50vh to 80vh for the container
+          maxHeight: "80vh", // Changed from 50vh to 80vh for the container
+          height: "80vh"     // Changed from 50vh to 80vh for the container
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
