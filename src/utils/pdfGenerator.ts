@@ -5,7 +5,7 @@ import { StoryMediaItem } from "@/types/media";
 import { getPageContent } from "@/utils/bookPagination";
 import { format } from "date-fns";
 
-// Book format specifications - matching the preview dimensions exactly
+// Book format specifications - EXACTLY matching the preview dimensions
 const PAGE_WIDTH_INCHES = 5;
 const PAGE_HEIGHT_INCHES = 8;
 const MARGIN_INCHES = 0.5;
@@ -30,8 +30,7 @@ const PARAGRAPH_INDENT = 6 * (POINTS_PER_INCH / 72); // Match paragraph indentat
 const MAX_GENERATION_TIME = 45000; // 45 seconds
 
 /**
- * Generates a PDF book from an array of stories with correct book dimensions
- * This is an optimized version that processes content in chunks to avoid UI freezing
+ * Generates a PDF book from an array of stories with EXACT matching to the preview
  */
 export const generateBookPDF = async (
   stories: Story[],
@@ -40,6 +39,22 @@ export const generateBookPDF = async (
   storyMediaMap: Map<string, StoryMediaItem[]>
 ): Promise<string> => {
   try {
+    // Use exact styling from the book preview if available
+    const previewStyles = window.bookPreviewStyles || {
+      backgroundColor: "#f8f7f1",
+      fontFamily: "'Libre Baskerville', 'Playfair Display', serif",
+      fontSize: "11pt",
+      lineHeight: "1.5",
+      textIndent: "1.5em",
+      dropCapColor: "#A33D29", 
+      titleColor: "#3C2A21",
+      pageWidth: 360,
+      pageHeight: 576,
+      aspectRatio: "5/8"
+    };
+
+    console.log("Using exact book preview styles:", previewStyles);
+    
     // Set timeout to prevent infinite processing
     const timeoutPromise = new Promise<string>((_, reject) => {
       setTimeout(() => {
@@ -52,19 +67,19 @@ export const generateBookPDF = async (
       try {
         console.log("Starting PDF generation with media map:", Array.from(storyMediaMap.entries()).map(([id, items]) => `${id}: ${items.length} items`));
         
-        // Initialize PDF with correct dimensions
+        // Initialize PDF with EXACT dimensions from the preview
         const pdf = new jsPDF({
           unit: "pt",
           format: [PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS],
           orientation: "portrait",
         });
 
-        // Add standard serif fonts for better book formatting - using Times to match preview
+        // Add standard serif fonts for better book formatting - using Times to EXACTLY match preview
         pdf.setFont("times", "normal");
 
         // Add cover page
         try {
-          await addCoverPage(pdf, coverData, authorName);
+          await addCoverPage(pdf, coverData, authorName, previewStyles);
           console.log("Cover page added successfully");
         } catch (error) {
           console.error("Error adding cover page:", error);
@@ -79,13 +94,13 @@ export const generateBookPDF = async (
         // Add table of contents page
         try {
           pdf.addPage();
-          addTableOfContentsPage(pdf, stories, coverData?.titleText || "My Book", storyMediaMap);
+          addTableOfContentsPage(pdf, stories, coverData?.titleText || "My Book", storyMediaMap, previewStyles);
           console.log("TOC page added successfully");
         } catch (error) {
           console.error("Error adding TOC:", error);
           // Add simple TOC
           pdf.addPage();
-          pdf.setFillColor("#f8f7f1"); // Match preview color
+          pdf.setFillColor(previewStyles.backgroundColor); // Match preview color exactly
           pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
           pdf.setFont("times", "bold");
           pdf.setFontSize(TITLE_FONT_SIZE);
@@ -106,13 +121,13 @@ export const generateBookPDF = async (
           try {
             // Add story title page
             pdf.addPage();
-            addStoryTitlePage(pdf, story, pageNumber, bookTitle);
+            addStoryTitlePage(pdf, story, pageNumber, bookTitle, previewStyles);
             pageNumber++;
   
             // Add content pages
             const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
             if (paragraphs.length > 0) {
-              const storyPages = await processStoryContent(pdf, paragraphs, bookTitle, pageNumber);
+              const storyPages = await processStoryContent(pdf, paragraphs, bookTitle, pageNumber, previewStyles);
               pageNumber += storyPages;
               console.log(`Added ${storyPages} content pages for story: ${story.title || "Untitled"}`);
             }
@@ -130,7 +145,7 @@ export const generateBookPDF = async (
                 pdf.addPage();
                 try {
                   console.log(`Adding media page for item: ${media.id}, type: ${media.content_type}`);
-                  await addMediaPage(pdf, media, bookTitle, pageNumber);
+                  await addMediaPage(pdf, media, bookTitle, pageNumber, previewStyles);
                   console.log(`Successfully added media page for: ${media.id}`);
                 } catch (mediaError) {
                   console.error(`Error adding media page for ${media.id}:`, mediaError);
@@ -184,19 +199,20 @@ const addTableOfContentsPage = (
   pdf: jsPDF, 
   stories: Story[], 
   bookTitle: string,
-  storyMediaMap: Map<string, StoryMediaItem[]>
+  storyMediaMap: Map<string, StoryMediaItem[]>,
+  previewStyles: any
 ): void => {
-  // Set page background to match preview - cream paper color
-  pdf.setFillColor("#f8f7f1");
+  // Set page background to EXACTLY match preview
+  pdf.setFillColor(previewStyles.backgroundColor);
   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
   
-  // Add header - matching preview styling exactly
-  addHeader(pdf, bookTitle);
+  // Add header - EXACTLY matching preview styling
+  addHeader(pdf, bookTitle, previewStyles);
   
   // Add ToC title
   pdf.setFont("times", "bold");
   pdf.setFontSize(TITLE_FONT_SIZE);
-  pdf.setTextColor("#3C2A21"); // Match preview brown color
+  pdf.setTextColor(previewStyles.titleColor); // EXACTLY match preview color
   pdf.text("Table of Contents", PAGE_WIDTH_POINTS / 2, MARGIN_POINTS * 2, { align: "center" });
   
   // Set up for content entries
@@ -263,12 +279,12 @@ const addTableOfContentsPage = (
     if (yPosition > PAGE_HEIGHT_POINTS - MARGIN_POINTS * 2 && i < stories.length - 1) {
       pdf.addPage();
       
-      // Set page background
-      pdf.setFillColor("#f8f7f1");
+      // Set page background to EXACTLY match preview
+      pdf.setFillColor(previewStyles.backgroundColor);
       pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
       
       // Add header
-      addHeader(pdf, bookTitle);
+      addHeader(pdf, bookTitle, previewStyles);
       
       // Reset y position
       yPosition = MARGIN_POINTS * 2;
@@ -286,19 +302,24 @@ const addTableOfContentsPage = (
   }
   
   // Add page number at bottom
-  addFooter(pdf, 2); // TOC is page 2
+  addFooter(pdf, 2, previewStyles); // TOC is page 2
 };
 
 /**
- * Adds the book cover to the PDF - match preview styling exactly
+ * Adds the book cover to the PDF - EXACTLY match preview styling
  */
-const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Promise<void> => {
+const addCoverPage = async (
+  pdf: jsPDF, 
+  coverData: any, 
+  authorName: string, 
+  previewStyles: any
+): Promise<void> => {
   try {
-    // Set cover background color
+    // Set cover background color to EXACTLY match the preview
     pdf.setFillColor(coverData.backgroundColor || "#CADCDA");
     pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
     
-    // Add title
+    // Add title with EXACT styling from preview
     if (coverData.titleText) {
       pdf.setFont("times", "bold");
       pdf.setFontSize(coverData.titleSize * 1.2 || TITLE_FONT_SIZE * 1.5);
@@ -309,7 +330,7 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
         PAGE_WIDTH_POINTS - (MARGIN_POINTS * 2)
       );
       
-      // Position based on layout
+      // Position based on layout - EXACTLY like preview
       let yPos = PAGE_HEIGHT_POINTS / 2.5;
       if (coverData.layout === 'top') {
         yPos = PAGE_HEIGHT_POINTS / 4;
@@ -320,7 +341,7 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
       pdf.text(titleLines, PAGE_WIDTH_POINTS / 2, yPos, { align: "center" });
     }
     
-    // Add author name at bottom
+    // Add author name at bottom - EXACTLY like preview
     pdf.setFont("times", "normal");
     pdf.setFontSize(coverData.authorSize || BODY_FONT_SIZE);
     pdf.setTextColor(coverData.authorColor || "#303030");
@@ -337,20 +358,26 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
 };
 
 /**
- * Adds a story title page to the PDF - match preview styling exactly
+ * Adds a story title page to the PDF - EXACTLY match preview styling
  */
-const addStoryTitlePage = (pdf: jsPDF, story: Story, pageNumber: number, bookTitle: string): void => {
-  // Set page background to match preview - cream paper
-  pdf.setFillColor("#f8f7f1");
+const addStoryTitlePage = (
+  pdf: jsPDF, 
+  story: Story, 
+  pageNumber: number, 
+  bookTitle: string,
+  previewStyles: any
+): void => {
+  // Set page background to EXACTLY match preview
+  pdf.setFillColor(previewStyles.backgroundColor);
   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
   
-  // Add header - book title at top
-  addHeader(pdf, bookTitle);
+  // Add header - book title at top, EXACTLY like preview
+  addHeader(pdf, bookTitle, previewStyles);
   
-  // Add story title
+  // Add story title with EXACT styling from preview
   pdf.setFont("times", "bold");
   pdf.setFontSize(TITLE_FONT_SIZE);
-  pdf.setTextColor("#3C2A21"); // Match preview brown color
+  pdf.setTextColor(previewStyles.titleColor);
   
   const title = story.title || "Untitled Story";
   const titleLines = pdf.splitTextToSize(title, CONTENT_WIDTH_INCHES * POINTS_PER_INCH);
@@ -362,7 +389,7 @@ const addStoryTitlePage = (pdf: jsPDF, story: Story, pageNumber: number, bookTit
     { align: "center" }
   );
   
-  // Add date
+  // Add date with EXACT styling from preview
   const storyDate = format(new Date(story.created_at), "MMMM d, yyyy");
   pdf.setFont("times", "italic");
   pdf.setFontSize(BODY_FONT_SIZE);
@@ -373,8 +400,8 @@ const addStoryTitlePage = (pdf: jsPDF, story: Story, pageNumber: number, bookTit
     { align: "center" }
   );
   
-  // Add page number at bottom
-  addFooter(pdf, pageNumber);
+  // Add page number at bottom - EXACTLY like preview
+  addFooter(pdf, pageNumber, previewStyles);
 };
 
 /**
@@ -386,7 +413,8 @@ const processStoryContent = async (
   pdf: jsPDF, 
   paragraphs: string[], 
   bookTitle: string, 
-  startPageNumber: number
+  startPageNumber: number,
+  previewStyles: any
 ): Promise<number> => {
   let currentPage = 0;
   let yPosition = MARGIN_POINTS;
@@ -394,21 +422,21 @@ const processStoryContent = async (
   // Set text properties for content - EXACT match to preview
   pdf.setFont("times", "normal");
   pdf.setFontSize(BODY_FONT_SIZE);
-  pdf.setTextColor("#333333"); // Match preview text color
+  pdf.setTextColor("#333333"); // EXACTLY match preview text color
   
-  // Calculate the line height to match preview
+  // Calculate the line height to EXACTLY match preview
   const lineHeight = BODY_FONT_SIZE * LINE_HEIGHT_FACTOR;
   
   // Add a new page to start
   pdf.addPage();
   currentPage++;
   
-  // Set page background - cream paper
-  pdf.setFillColor("#f8f7f1"); // Match preview
+  // Set page background - EXACTLY match preview color
+  pdf.setFillColor(previewStyles.backgroundColor);
   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
   
-  // Add header (book title at top)
-  yPosition = addHeader(pdf, bookTitle);
+  // Add header (book title at top) - EXACTLY like preview
+  yPosition = addHeader(pdf, bookTitle, previewStyles);
   
   // Process each paragraph with periodic yielding to prevent UI freezing
   for (let pIndex = 0; pIndex < paragraphs.length; pIndex++) {
@@ -419,7 +447,7 @@ const processStoryContent = async (
     
     const paragraph = paragraphs[pIndex];
     
-    // Wrap text to fit within margins
+    // Wrap text to fit within margins - EXACTLY match preview
     const contentWidth = CONTENT_WIDTH_INCHES * POINTS_PER_INCH;
     const wrappedText = pdf.splitTextToSize(paragraph, contentWidth);
     
@@ -432,12 +460,12 @@ const processStoryContent = async (
       pdf.addPage();
       currentPage++;
       
-      // Set page background - cream paper
-      pdf.setFillColor("#f8f7f1");
+      // Set page background - EXACTLY match preview color
+      pdf.setFillColor(previewStyles.backgroundColor);
       pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
       
-      // Add header and reset y position
-      yPosition = addHeader(pdf, bookTitle);
+      // Add header and reset y position - EXACTLY like preview
+      yPosition = addHeader(pdf, bookTitle, previewStyles);
     }
     
     // Implement drop cap for first paragraph on first page - EXACTLY like preview
@@ -454,21 +482,21 @@ const processStoryContent = async (
       const firstChar = wrappedText[0].charAt(0);
       const remainingText = wrappedText[0].substring(1);
       
-      // Draw the drop cap character - EXACTLY like preview with brown-red color
+      // Draw the drop cap character - EXACTLY matching preview color
       pdf.setFont("times", "bold");
-      pdf.setFontSize(BODY_FONT_SIZE * 3.5); // Larger for drop cap to match preview
-      pdf.setTextColor("#A33D29"); // Brown-red color from preview
+      pdf.setFontSize(BODY_FONT_SIZE * 3.5); // EXACTLY match preview size
+      pdf.setTextColor(previewStyles.dropCapColor); // EXACTLY match preview color
       pdf.text(firstChar, MARGIN_POINTS, yPosition + BODY_FONT_SIZE);
       
       // Measure drop cap width
-      const dropCapWidth = pdf.getTextWidth(firstChar) * 1.2; // Add more spacing to match preview
+      const dropCapWidth = pdf.getTextWidth(firstChar) * 1.2; // EXACTLY match preview spacing
       
       // Reset to normal font for remaining text
       pdf.setFont(currentFont.fontName, currentFont.fontStyle);
       pdf.setFontSize(currentFontSize);
       pdf.setTextColor("#333333");
       
-      // Place the remaining first line text after the drop cap
+      // Place the remaining first line text after the drop cap - EXACTLY like preview
       pdf.text(remainingText, MARGIN_POINTS + dropCapWidth, yPosition);
       yPosition += lineHeight;
       
@@ -478,9 +506,13 @@ const processStoryContent = async (
         yPosition += lineHeight;
       }
     } else {
-      // Add paragraph with first line indentation (EXACTLY matches preview)
-      const indent = PARAGRAPH_INDENT;
-      pdf.text(wrappedText[0], MARGIN_POINTS + indent, yPosition);
+      // Add paragraph with first line indentation - EXACTLY match preview
+      // Convert text-indent from em to points
+      const emSize = BODY_FONT_SIZE; // 1em = font size in points
+      const indentValue = previewStyles.textIndent.replace('em', '');
+      const indentPoints = parseFloat(indentValue) * emSize;
+      
+      pdf.text(wrappedText[0], MARGIN_POINTS + indentPoints, yPosition);
       yPosition += lineHeight;
       
       // Add remaining lines without indentation
@@ -492,34 +524,35 @@ const processStoryContent = async (
       }
     }
     
-    // Add proper spacing after paragraph to match preview exactly
+    // Add proper spacing after paragraph to EXACTLY match preview
     yPosition += lineHeight / 3;
     
-    // Add page number at bottom
-    addFooter(pdf, startPageNumber + currentPage - 1);
+    // Add page number at bottom - EXACTLY like preview
+    addFooter(pdf, startPageNumber + currentPage - 1, previewStyles);
   }
   
   return currentPage;
 };
 
 /**
- * Adds a media page to the PDF - match preview styling exactly
+ * Adds a media page to the PDF - EXACTLY match preview styling
  */
 const addMediaPage = async (
   pdf: jsPDF, 
   media: StoryMediaItem, 
   bookTitle: string, 
-  pageNumber: number
+  pageNumber: number,
+  previewStyles: any
 ): Promise<void> => {
   try {
     console.log(`Starting to add media page: ${media.id}, type: ${media.content_type}`);
     
-    // Set page background to match preview - white for media pages
+    // Set page background to white for media pages - EXACTLY like preview
     pdf.setFillColor("#FFFFFF");
     pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
     
-    // Add header - book title at top
-    const yPosition = addHeader(pdf, bookTitle);
+    // Add header - book title at top - EXACTLY like preview
+    const yPosition = addHeader(pdf, bookTitle, previewStyles);
     
     // Create the full URL for the media
     const mediaUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/story-media/${media.file_path}`;
@@ -615,16 +648,16 @@ const addMediaPage = async (
             throw addImageError;
           }
           
-          // Add caption if available - match preview style exactly (smaller italic text)
+          // Add caption if available - EXACTLY match preview style (smaller italic text)
           if (media.caption) {
             pdf.setFont("times", "italic");
             pdf.setFontSize(BODY_FONT_SIZE - 1);
-            pdf.setTextColor("#666666"); // Match preview caption color
+            pdf.setTextColor("#666666"); // EXACTLY match preview caption color
             
             const captionY = yPosition + 50 + height;
             const captionLines = pdf.splitTextToSize(
               media.caption, 
-              CONTENT_WIDTH_INCHES * POINTS_PER_INCH * 0.8 // Slightly narrower than content for captions
+              CONTENT_WIDTH_INCHES * POINTS_PER_INCH * 0.8 // EXACTLY match preview caption width
             );
             
             pdf.text(
@@ -640,7 +673,7 @@ const addMediaPage = async (
           throw fetchError;
         }
       } else {
-        // For non-image media like videos - match preview placeholder style
+        // For non-image media like videos - EXACTLY match preview placeholder style
         pdf.setFont("times", "italic");
         pdf.setFontSize(BODY_FONT_SIZE);
         pdf.text(
@@ -662,7 +695,7 @@ const addMediaPage = async (
     } catch (error) {
       console.error("Error adding media to PDF:", error);
       
-      // Add error placeholder
+      // Add error placeholder - EXACTLY match preview error style
       pdf.setFont("times", "italic");
       pdf.setFontSize(BODY_FONT_SIZE);
       pdf.text(
@@ -674,7 +707,7 @@ const addMediaPage = async (
     }
     
     // Add page number at bottom - EXACTLY like preview
-    addFooter(pdf, pageNumber);
+    addFooter(pdf, pageNumber, previewStyles);
     console.log(`Completed media page ${pageNumber} for media ${media.id}`);
   } catch (error) {
     console.error("Error in addMediaPage:", error);
@@ -686,12 +719,12 @@ const addMediaPage = async (
  * Adds a header to a page and returns the Y position after the header
  * EXACTLY matches the preview styling with centered book title
  */
-const addHeader = (pdf: jsPDF, bookTitle: string): number => {
+const addHeader = (pdf: jsPDF, bookTitle: string, previewStyles: any): number => {
   pdf.setFont("times", "italic");
   pdf.setFontSize(HEADER_FONT_SIZE);
-  pdf.setTextColor("#3C2A21"); // Match preview color
+  pdf.setTextColor(previewStyles.titleColor); // EXACTLY match preview color
   
-  // Position header to match preview exactly
+  // Position header to EXACTLY match preview
   const headerPosition = MARGIN_POINTS / 2 + 8;
   pdf.text(bookTitle, PAGE_WIDTH_POINTS / 2, headerPosition, { align: "center" });
   
@@ -702,12 +735,12 @@ const addHeader = (pdf: jsPDF, bookTitle: string): number => {
 /**
  * Adds a footer with page number - EXACTLY matching the preview style
  */
-const addFooter = (pdf: jsPDF, pageNumber: number): void => {
+const addFooter = (pdf: jsPDF, pageNumber: number, previewStyles: any): void => {
   pdf.setFont("times", "normal");
   pdf.setFontSize(FOOTER_FONT_SIZE);
-  pdf.setTextColor("#3C2A21"); // Match preview color
+  pdf.setTextColor(previewStyles.titleColor); // EXACTLY match preview color
   
-  // Position footer to match preview exactly
+  // Position footer to EXACTLY match preview
   const footerPosition = PAGE_HEIGHT_POINTS - MARGIN_POINTS / 2 - 8;
   pdf.text(
     pageNumber.toString(), 

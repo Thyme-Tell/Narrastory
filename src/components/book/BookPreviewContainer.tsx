@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import BookPreviewContent from "./BookPreviewContent";
 import { CoverData } from "@/components/cover/CoverTypes";
 import { Story } from "@/types/supabase";
@@ -54,9 +54,60 @@ const BookPreviewContainer = ({
   jumpToPage = () => {}
 }: BookPreviewContainerProps) => {
   const isMobile = window.innerWidth < 768;
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Effect to capture exact styling for PDF matching
+  useEffect(() => {
+    if (containerRef.current) {
+      // Store the current styling to use for PDF generation
+      const computedStyle = window.getComputedStyle(containerRef.current);
+      
+      // This allows us to access the exact styling being rendered
+      if (!window.bookPreviewStyles) {
+        window.bookPreviewStyles = {};
+      }
+      
+      // Save key style elements that need to be matched in the PDF
+      window.bookPreviewStyles = {
+        backgroundColor: computedStyle.backgroundColor,
+        fontFamily: computedStyle.fontFamily,
+        fontSize: computedStyle.fontSize,
+        lineHeight: computedStyle.lineHeight,
+        textIndent: getTextIndentFromPage(),
+        dropCapColor: getDropCapColorFromPage(),
+        titleColor: "#3C2A21", // Book title color
+        pageWidth: containerRef.current.offsetWidth,
+        pageHeight: containerRef.current.offsetHeight,
+        aspectRatio: "5/8"
+      };
+    }
+  }, [currentPage, zoomLevel]);
+  
+  // Helper function to get text-indent from paragraphs
+  const getTextIndentFromPage = () => {
+    const paragraphs = document.querySelectorAll('.book-page p');
+    if (paragraphs.length > 0) {
+      const style = window.getComputedStyle(paragraphs[0]);
+      return style.textIndent;
+    }
+    return "1.5em"; // Default if not found
+  };
+  
+  // Helper function to get drop cap color
+  const getDropCapColorFromPage = () => {
+    const dropCap = document.querySelector('.drop-cap:first-letter');
+    if (dropCap) {
+      const style = window.getComputedStyle(dropCap as Element);
+      return style.color;
+    }
+    return "#A33D29"; // Default color
+  };
 
   return (
-    <div className="flex-1 overflow-hidden flex items-center justify-center p-4">
+    <div 
+      className="flex-1 overflow-hidden flex items-center justify-center p-4"
+      ref={containerRef}
+    >
       <BookPreviewContent
         currentPage={currentPage}
         totalPageCount={totalPageCount}
@@ -78,6 +129,24 @@ const BookPreviewContainer = ({
       />
     </div>
   );
+}
+
+// Add the window extension for TypeScript support
+declare global {
+  interface Window {
+    bookPreviewStyles?: {
+      backgroundColor: string;
+      fontFamily: string;
+      fontSize: string;
+      lineHeight: string;
+      textIndent: string;
+      dropCapColor: string;
+      titleColor: string;
+      pageWidth: number;
+      pageHeight: number;
+      aspectRatio: string;
+    };
+  }
 }
 
 export default BookPreviewContainer;

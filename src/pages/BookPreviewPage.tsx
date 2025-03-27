@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useBookPreview } from "@/hooks/useBookPreview";
 import BookPreviewLayout from "@/components/book/BookPreviewLayout";
 import BookPreviewContainer from "@/components/book/BookPreviewContainer";
@@ -22,6 +22,30 @@ const BookPreviewPage = () => {
 
   // Get the current story to display
   const currentStoryInfo = bookNavigation.getCurrentStory();
+  
+  // We need to ensure PDF generation gets the exact same styling
+  useEffect(() => {
+    const updateViewportMeta = () => {
+      // Make sure no weird scaling happens that might affect the PDF output
+      let viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (!viewportMeta) {
+        viewportMeta = document.createElement('meta');
+        viewportMeta.setAttribute('name', 'viewport');
+        document.head.appendChild(viewportMeta);
+      }
+      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    };
+    
+    updateViewportMeta();
+    
+    return () => {
+      // Reset viewport when component unmounts
+      const viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (viewportMeta) {
+        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+      }
+    };
+  }, []);
 
   return (
     <BookPreviewLayout
