@@ -56,12 +56,12 @@ const GetStarted = () => {
         </Link>
 
         <div className="flex flex-col sm:flex-row items-center">
-          <div className="bg-[#8A9096] rounded-lg p-1 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 sm:mr-4 w-full sm:w-auto">
+          <div className="bg-[#8A9096] rounded-[2px] p-1 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 sm:mr-4 w-full sm:w-auto">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center px-4 py-2 rounded-md text-sm font-medium ${
+                className={`flex items-center px-4 py-2 rounded-[3px] text-sm font-medium ${
                   activeItem === item.name
                     ? "bg-[#17342C] text-white"
                     : "text-[#262626] hover:bg-[#17342C]/10"
@@ -75,7 +75,7 @@ const GetStarted = () => {
           
           <Link
             to="/"
-            className={`flex items-center px-4 py-2 rounded-md text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center`}
+            className={`flex items-center px-4 py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center`}
           >
             Sign Up <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -86,7 +86,7 @@ const GetStarted = () => {
         className="w-full py-16 sm:py-24 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
-          backgroundSize: "65%", 
+          backgroundSize: "85%", 
           backgroundPosition: "center",
           minHeight: "80vh",
           maxHeight: "80vh",
