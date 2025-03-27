@@ -4,13 +4,11 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const isMobile = useIsMobile();
   
   useEffect(() => {
     document.title = "Narra Story | Get Started";
@@ -108,16 +106,16 @@ const GetStarted = () => {
           </p>
           
           <div className="max-w-md mx-auto px-4">
-            <div className={`relative ${isMobile ? 'flex flex-col space-y-3' : 'w-full'}`}>
+            <div className="relative w-full">
               <Input
                 type="text"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="Your phone number"
-                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] ${isMobile ? 'rounded-[7px]' : 'rounded-full pr-[150px]'} px-5 outline-none`}
+                className="w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full px-5 pr-[150px] outline-none"
               />
               <Button 
-                className={`${isMobile ? 'w-full rounded-[7px]' : 'absolute right-1 top-1 rounded-full'} h-10 text-white text-sm flex items-center justify-center gap-2`}
+                className="absolute right-1 top-1 rounded-full h-10 text-white text-sm flex items-center gap-2"
                 style={{
                   background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
                 }}
