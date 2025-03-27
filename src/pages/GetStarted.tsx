@@ -105,51 +105,32 @@ const GetStarted = () => {
             Narra transforms your everyday chats into meaningful and lasting stories that capture your essence.
           </p>
           
-          <div className="relative" style={{ 
-            width: "391px", 
-            height: "51px", 
-            margin: "0 auto",
-            position: "relative"
-          }}>
-            <Input
-              type="text"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Your phone number"
-              className="w-full h-[51px] bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-[42.8px] px-6 outline-none"
-              style={{
-                boxSizing: "border-box",
-                border: "0.713335px solid rgba(89, 89, 89, 0.32)",
-                color: "#2F3546",
-                opacity: "0.8",
-                fontSize: "14.2667px",
-                fontWeight: "500",
-                lineHeight: "154.2%",
-              }}
-            />
-            <Button 
-              className="absolute right-0 top-0 rounded-[44.94px] h-[37.4px] flex items-center gap-[8.56px]"
-              style={{
-                background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
-                width: "205.77px",
-                padding: "10.7px 23px",
-                position: "absolute",
-                top: "6.13px",
-                right: "4px",
-                fontSize: "12.84px",
-                fontWeight: "500"
-              }}
-              onClick={() => console.log("Try Narra with", phoneNumber)}
-            >
-              Talk with 
-              <img 
-                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-                alt="Narra Icon" 
-                className="w-5 h-5"
+          <div className="max-w-md mx-auto px-4">
+            <div className="relative w-full">
+              <Input
+                type="text"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Your phone number"
+                className="w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full px-5 pr-[150px] outline-none"
               />
-              <span className="font-bold">Narra</span> 
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+              <Button 
+                className="absolute right-1 top-1 rounded-full h-10 text-white text-sm flex items-center gap-2"
+                style={{
+                  background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
+                }}
+                onClick={() => console.log("Talk with", phoneNumber)}
+              >
+                Talk with 
+                <img 
+                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                  alt="Narra Icon" 
+                  className="w-5 h-5"
+                />
+                <span className="font-bold">Narra</span> 
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
