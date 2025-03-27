@@ -114,13 +114,20 @@ serve(async (req) => {
       const filename = `${storyId}-${Date.now()}.mp3`
       const publicUrl = await uploadAudioFile(filename, audioBuffer)
       
-      // Save audio metadata - may or may not include provider field depending on schema
+      // Save audio metadata with better error handling
       try {
         await saveAudioMetadata(storyId, publicUrl, selectedVoiceId, 'elevenlabs')
       } catch (metadataError) {
         console.error('Error saving metadata, trying without provider:', metadataError.message);
-        // Try again without provider field
-        await saveAudioMetadata(storyId, publicUrl, selectedVoiceId)
+        
+        try {
+          // Try again without provider field
+          await saveAudioMetadata(storyId, publicUrl, selectedVoiceId)
+        } catch (secondError) {
+          console.error('Second attempt to save metadata failed:', secondError.message);
+          // Still return success since the audio was generated and stored
+          // The audio URL just won't be in the database for future lookups
+        }
       }
   
       return new Response(
