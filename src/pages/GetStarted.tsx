@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
@@ -44,9 +43,7 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen bg-[#EFF1E9]">
-      {/* Navbar - Changed breakpoint from md to sm */}
       <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center">
-        {/* Logo */}
         <Link to="/get-started">
           <img 
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
@@ -55,7 +52,6 @@ const GetStarted = () => {
           />
         </Link>
 
-        {/* Navigation items - Changed breakpoint from md to sm */}
         <div className="flex flex-col sm:flex-row items-center">
           <div className="bg-[#8A9096] rounded-lg p-1 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 sm:mr-4 w-full sm:w-auto">
             {navItems.map((item) => (
@@ -74,7 +70,6 @@ const GetStarted = () => {
             ))}
           </div>
           
-          {/* Sign Up Button */}
           <Link
             to="/"
             className={`flex items-center px-4 py-2 rounded-md text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center`}
@@ -84,12 +79,10 @@ const GetStarted = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div 
-        className="w-full py-16 sm:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      <div className="w-full py-16 sm:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
-          backgroundSize: "65%", // Changed from "contain" to "65%"
+          backgroundSize: "65%", 
           backgroundPosition: "center",
           minHeight: "80vh",
           maxHeight: "80vh",
@@ -114,7 +107,7 @@ const GetStarted = () => {
               type="text"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="What's your phone number?"
+              placeholder="Your phone number"
               className="w-full h-[51px] bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-[42.8px] px-6 outline-none"
               style={{
                 boxSizing: "border-box",
@@ -122,14 +115,18 @@ const GetStarted = () => {
               }}
             />
             <Button 
-              className="absolute right-0 top-0 rounded-[42.8px] bg-[#242F3F] hover:bg-[#242F3F]/90 h-[51px] px-6 flex items-center"
+              className="absolute right-0 top-0 rounded-[44.94px] h-[37.4px] px-[22.83px] flex items-center gap-[8.56px]"
+              style={{
+                background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
+                width: "205.77px"
+              }}
               onClick={() => console.log("Try Narra with", phoneNumber)}
             >
               Try a call with 
               <img 
                 src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
                 alt="Narra Icon" 
-                className="w-5 h-5 mx-1"
+                className="w-5 h-5"
               />
               <span className="font-bold">Narra</span> 
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -138,7 +135,6 @@ const GetStarted = () => {
         </div>
       </div>
 
-      {/* Content Section */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-caslon font-bold text-atlantic mb-6">
@@ -148,7 +144,6 @@ const GetStarted = () => {
             Your place to create, share, and preserve your most important stories.
           </p>
           
-          {/* Content Placeholder - to be filled with actual content */}
           <div className="bg-white rounded-lg shadow-md p-8 mb-8">
             <h3 className="text-2xl font-caslon font-bold text-atlantic mb-4">
               Get Started with Narra
