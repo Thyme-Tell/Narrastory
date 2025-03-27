@@ -47,7 +47,7 @@ const GetStarted = () => {
         {/* Logo */}
         <Link to="/get-started">
           <img 
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/narra-logo.svg" 
+            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
             alt="Narra Logo" 
             className="w-[220px] h-auto mb-4 md:mb-0"
           />
