@@ -152,7 +152,7 @@ const GetStarted = () => {
                 <img 
                   src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
                   alt="Narra Icon" 
-                  className="w-5 h-5"
+                  className="w-5 h-5 relative -top-[2px]"
                 />
                 <span className="font-light">Narra</span> 
                 <ArrowRight className="h-4 w-4" />
