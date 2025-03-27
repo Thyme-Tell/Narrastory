@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -22,6 +21,7 @@ export default {
 				rosemartin: ['Rosemartin', 'serif'],
 				serif: ['Playfair Display', 'Georgia', 'serif'],
 				caslon: ['"Adobe Caslon Pro"', 'Palatino', '"Palatino Linotype"', '"Palatino LT STD"', '"Book Antiqua"', 'Georgia', 'serif'],
+				'uncut-sans': ['Uncut Sans', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

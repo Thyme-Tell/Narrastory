@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -107,7 +106,7 @@ const GetStarted = () => {
         <div className="max-w-3xl mx-auto text-center">
           <h1 
             className="text-4xl md:text-5xl lg:text-6xl font-caslon font-thin mb-6 leading-tight text-[#262626]"
-            style={{ letterSpacing: "-0.02em" }} // -2% kerning
+            style={{ letterSpacing: "-0.02em" }}
           >
             Narrate as only <em className="italic font-caslon font-thin">you</em> can.
           </h1>
@@ -116,7 +115,15 @@ const GetStarted = () => {
             Share your life stories through simple conversation.
           </h2>
           
-          <p className="text-lg md:text-xl text-[#262626] mb-12 max-w-2xl mx-auto">
+          <p 
+            className="text-lg md:text-xl text-[#2F3546] mb-12 max-w-2xl mx-auto"
+            style={{ 
+              fontFamily: "'Uncut Sans Variable', sans-serif", 
+              fontStyle: 'normal', 
+              fontWeight: 400, 
+              opacity: 0.8 
+            }}
+          >
             Narra transforms your everyday chats into meaningful and lasting stories that capture your essence.
           </p>
           
