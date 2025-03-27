@@ -117,8 +117,8 @@ const GetStarted = () => {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="Your phone number"
-                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full px-5 ${
-                  isMobile ? 'mb-2 pr-5' : 'pr-[150px]'
+                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full ${
+                  isMobile ? 'mb-2 pr-5 text-center' : 'pr-[150px]'
                 } outline-none`}
               />
               <Button 
