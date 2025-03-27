@@ -27,6 +27,7 @@ const LINE_HEIGHT_FACTOR = 1.2;
 
 /**
  * Generates a PDF book from an array of stories with correct book dimensions
+ * This is an optimized version that processes content in chunks to avoid UI freezing
  */
 export const generateBookPDF = async (
   stories: Story[],
@@ -52,8 +53,11 @@ export const generateBookPDF = async (
   let pageNumber = 2; // Start after cover and TOC
   const bookTitle = coverData?.titleText || "My Book";
 
-  // Process each story
+  // Process each story with yielding to prevent UI freezing
   for (let i = 0; i < stories.length; i++) {
+    // Yield to the main thread occasionally to prevent UI freezing
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
     const story = stories[i];
     
     // Add story title page
@@ -64,7 +68,7 @@ export const generateBookPDF = async (
     // Add content pages
     const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
     if (paragraphs.length > 0) {
-      const storyPages = processStoryContent(pdf, paragraphs, bookTitle, pageNumber);
+      const storyPages = await processStoryContent(pdf, paragraphs, bookTitle, pageNumber);
       pageNumber += storyPages;
     }
 
@@ -72,6 +76,9 @@ export const generateBookPDF = async (
     const mediaItems = storyMediaMap.get(story.id) || [];
     if (mediaItems.length > 0) {
       for (const media of mediaItems) {
+        // Yield to the main thread occasionally
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
         pdf.addPage();
         await addMediaPage(pdf, media, bookTitle, pageNumber);
         pageNumber++;
@@ -208,7 +215,7 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
     if (coverData.titleText) {
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(coverData.titleSize * 1.2 || TITLE_FONT_SIZE * 1.5);
-      pdf.setTextColor(coverData.titleColor || "#303441");
+      pdf.setTextColor(coverData.titleColor || "#303030");
       
       const titleLines = pdf.splitTextToSize(
         coverData.titleText, 
@@ -229,7 +236,7 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
     // Add author name at bottom
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(coverData.authorSize || BODY_FONT_SIZE);
-    pdf.setTextColor(coverData.authorColor || "#303441");
+    pdf.setTextColor(coverData.authorColor || "#303030");
     pdf.text(
       `By ${authorName}`, 
       PAGE_WIDTH_POINTS / 2, 
@@ -295,13 +302,14 @@ const addStoryTitlePage = (pdf: jsPDF, story: Story, pageNumber: number): void =
 /**
  * Processes story content and adds it to the PDF with proper pagination
  * Returns the number of content pages added
+ * Now with async processing to prevent UI freezing
  */
-const processStoryContent = (
+const processStoryContent = async (
   pdf: jsPDF, 
   paragraphs: string[], 
   bookTitle: string, 
   startPageNumber: number
-): number => {
+): Promise<number> => {
   let currentPage = 0;
   let yPosition = MARGIN_POINTS;
   
@@ -324,8 +332,14 @@ const processStoryContent = (
   // Add header (except on first content page)
   yPosition = addHeader(pdf, bookTitle);
   
-  // Process each paragraph
-  for (const paragraph of paragraphs) {
+  // Process each paragraph with periodic yielding to prevent UI freezing
+  for (let pIndex = 0; pIndex < paragraphs.length; pIndex++) {
+    // Every 10 paragraphs, yield to the main thread
+    if (pIndex % 10 === 0 && pIndex > 0) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+    
+    const paragraph = paragraphs[pIndex];
     // Wrap text to fit within margins
     const contentWidth = CONTENT_WIDTH_INCHES * POINTS_PER_INCH;
     const wrappedText = pdf.splitTextToSize(paragraph, contentWidth);

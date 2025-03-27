@@ -34,33 +34,47 @@ const BookPreviewPage = () => {
         description: "This may take a moment depending on the book size.",
       });
       
-      const pdfDataUrl = await generateBookPDF(
-        stories, 
-        coverData, 
-        authorName,
-        bookNavigation.storyMediaMap
-      );
+      // Add timeout to ensure UI updates before heavy processing
+      setTimeout(async () => {
+        try {
+          const pdfDataUrl = await generateBookPDF(
+            stories, 
+            coverData, 
+            authorName,
+            bookNavigation.storyMediaMap
+          );
+          
+          // Create a temporary link to download the PDF
+          const link = document.createElement("a");
+          link.href = pdfDataUrl;
+          link.download = `${coverData.titleText || "My Book"}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          toast({
+            title: "PDF Downloaded",
+            description: "Your book has been successfully downloaded as a PDF.",
+          });
+        } catch (error) {
+          console.error("Error generating PDF:", error);
+          toast({
+            title: "PDF Generation Failed",
+            description: "There was an error creating your PDF. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsGeneratingPDF(false);
+        }
+      }, 100); // Small delay to ensure UI updates first
       
-      // Create a temporary link to download the PDF
-      const link = document.createElement("a");
-      link.href = pdfDataUrl;
-      link.download = `${coverData.titleText || "My Book"}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast({
-        title: "PDF Downloaded",
-        description: "Your book has been successfully downloaded as a PDF.",
-      });
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error initiating PDF generation:", error);
       toast({
         title: "PDF Generation Failed",
-        description: "There was an error creating your PDF. Please try again.",
+        description: "Could not start PDF generation. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsGeneratingPDF(false);
     }
   };
