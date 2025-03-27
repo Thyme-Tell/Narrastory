@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Story } from "@/types/supabase";
 import { useCoverData } from "@/hooks/useCoverData";
 import { useBookNavigation } from "@/hooks/useBookNavigation";
+import { StoryMediaItem } from "@/types/media";
 
 export const useBookPreview = () => {
   const { profileId } = useParams();
@@ -64,6 +65,31 @@ export const useBookPreview = () => {
     },
   });
 
+  // Fetch all media for the stories in one query to ensure PDF has all media
+  const { data: allMediaItems = [], isLoading: isMediaLoading } = useQuery({
+    queryKey: ["all-story-media", stories?.map(s => s.id).join(",")],
+    queryFn: async () => {
+      if (!stories || stories.length === 0) return [];
+      
+      const storyIds = stories.map(s => s.id);
+      console.log("Fetching media for stories:", storyIds);
+      
+      const { data, error } = await supabase
+        .from("story_media")
+        .select("*")
+        .in("story_id", storyIds)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching all story media:", error);
+        return [];
+      }
+
+      return data as StoryMediaItem[];
+    },
+    enabled: !!stories && stories.length > 0,
+  });
+
   // Get profile info
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -85,8 +111,18 @@ export const useBookPreview = () => {
     },
   });
 
-  // Use our custom hook for book navigation
-  const bookNavigation = useBookNavigation(stories, true);
+  // Organize media by story ID for PDF generation
+  const mediaMap = new Map<string, StoryMediaItem[]>();
+  if (allMediaItems.length > 0) {
+    allMediaItems.forEach(item => {
+      const existing = mediaMap.get(item.story_id) || [];
+      existing.push(item);
+      mediaMap.set(item.story_id, existing);
+    });
+  }
+
+  // Use our custom hook for book navigation with the media map
+  const bookNavigation = useBookNavigation(stories, true, mediaMap);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -119,13 +155,14 @@ export const useBookPreview = () => {
   return {
     profileId,
     stories,
-    isStoriesLoading,
+    isStoriesLoading: isStoriesLoading || isMediaLoading,
     coverData,
     isCoverLoading,
     authorName,
     bookNavigation,
     isRendered,
     isIOSDevice,
-    handleClose
+    handleClose,
+    allMediaItems
   };
 };

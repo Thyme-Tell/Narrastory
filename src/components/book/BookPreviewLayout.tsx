@@ -3,7 +3,7 @@ import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BookPreviewHeader from "./BookPreviewHeader";
 import TableOfContents from "./TableOfContents";
-import BookPreviewContainer from "./BookPreviewContainer";
+import { Progress } from "@/components/ui/progress";
 
 interface BookPreviewLayoutProps {
   totalPageCount: number;
@@ -25,6 +25,7 @@ interface BookPreviewLayoutProps {
   isIOSDevice: boolean;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
+  generationProgress?: number;
 }
 
 const BookPreviewLayout = ({
@@ -46,7 +47,8 @@ const BookPreviewLayout = ({
   isRendered,
   isIOSDevice,
   onDownloadPDF,
-  isGeneratingPDF = false
+  isGeneratingPDF = false,
+  generationProgress = 0
 }: BookPreviewLayoutProps) => {
   const isMobile = useIsMobile();
 
@@ -77,6 +79,17 @@ const BookPreviewLayout = ({
         isGeneratingPDF={isGeneratingPDF}
         isMobile={isMobile}
       />
+
+      {/* PDF Generation Progress */}
+      {isGeneratingPDF && generationProgress > 0 && (
+        <div className="w-full px-4 py-2 bg-[#3C2A21]/90">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-white text-sm">Generating PDF...</p>
+            <p className="text-white text-sm">{generationProgress}%</p>
+          </div>
+          <Progress value={generationProgress} className="h-1.5 bg-amber-200/30" indicatorClassName="bg-amber-400" />
+        </div>
+      )}
 
       <div className="flex-1 w-full flex overflow-hidden">
         {/* TOC Sidebar - Now with bookish styling */}

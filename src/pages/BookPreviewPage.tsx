@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useBookPreview } from "@/hooks/useBookPreview";
 import BookPreviewLayout from "@/components/book/BookPreviewLayout";
 import BookPreviewContainer from "@/components/book/BookPreviewContainer";
@@ -21,30 +21,48 @@ const BookPreviewPage = () => {
   } = useBookPreview();
   const { toast } = useToast();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
 
   // Get the current story to display
   const currentStoryInfo = bookNavigation.getCurrentStory();
+
+  useEffect(() => {
+    // Reset PDF generation state when component mounts or stories change
+    setIsGeneratingPDF(false);
+    setGenerationProgress(0);
+  }, [stories]);
 
   const handleDownloadPDF = async () => {
     if (isGeneratingPDF || isStoriesLoading || !stories || stories.length === 0) return;
     
     try {
       setIsGeneratingPDF(true);
+      setGenerationProgress(10);
+      
       toast({
         title: "Generating PDF",
         description: "This process may take up to 30 seconds depending on book size. Please wait...",
-        duration: 6000,
+        duration: 10000,
       });
+      
+      console.log("Starting PDF generation with story media map:", 
+        Array.from(bookNavigation.storyMediaMap.entries())
+          .map(([id, items]) => `${id}: ${items.length} items`)
+      );
       
       // Add timeout to ensure UI updates before heavy processing
       setTimeout(async () => {
         try {
+          setGenerationProgress(20);
+          
           const pdfDataUrl = await generateBookPDF(
             stories, 
             coverData, 
             authorName,
             bookNavigation.storyMediaMap
           );
+          
+          setGenerationProgress(90);
           
           if (!pdfDataUrl) {
             throw new Error("Failed to generate PDF data");
@@ -57,6 +75,8 @@ const BookPreviewPage = () => {
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+          
+          setGenerationProgress(100);
           
           toast({
             title: "PDF Downloaded",
@@ -72,6 +92,7 @@ const BookPreviewPage = () => {
           });
         } finally {
           setIsGeneratingPDF(false);
+          setGenerationProgress(0);
         }
       }, 300); // Slightly longer delay to ensure UI updates first
       
@@ -83,6 +104,7 @@ const BookPreviewPage = () => {
         variant: "destructive",
       });
       setIsGeneratingPDF(false);
+      setGenerationProgress(0);
     }
   };
 
@@ -106,6 +128,7 @@ const BookPreviewPage = () => {
       isIOSDevice={isIOSDevice}
       onDownloadPDF={handleDownloadPDF}
       isGeneratingPDF={isGeneratingPDF}
+      generationProgress={generationProgress}
     >
       <BookPreviewContainer
         currentPage={bookNavigation.currentPage}
@@ -122,6 +145,10 @@ const BookPreviewPage = () => {
         isIOSDevice={isIOSDevice}
         onDownloadPDF={handleDownloadPDF}
         isGeneratingPDF={isGeneratingPDF}
+        bookmarks={bookNavigation.bookmarks}
+        storyPages={bookNavigation.storyPages}
+        storyMediaMap={bookNavigation.storyMediaMap}
+        jumpToPage={bookNavigation.jumpToPage}
       />
     </BookPreviewLayout>
   );

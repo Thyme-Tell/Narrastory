@@ -1,4 +1,3 @@
-
 import { jsPDF } from "jspdf";
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
@@ -49,6 +48,8 @@ export const generateBookPDF = async (
     // PDF generation promise
     const generationPromise = new Promise<string>(async (resolve, reject) => {
       try {
+        console.log("Starting PDF generation with media map:", Array.from(storyMediaMap.entries()).map(([id, items]) => `${id}: ${items.length} items`));
+        
         // Initialize PDF with correct dimensions
         const pdf = new jsPDF({
           unit: "pt",
@@ -113,16 +114,21 @@ export const generateBookPDF = async (
   
             // Add media pages if any
             const mediaItems = storyMediaMap.get(story.id) || [];
+            console.log(`Processing media for story ${story.id}: ${mediaItems.length} items`);
+            
             if (mediaItems.length > 0) {
-              for (const media of mediaItems) {
+              for (let j = 0; j < mediaItems.length; j++) {
+                const media = mediaItems[j];
                 // Yield to the main thread occasionally
                 await new Promise(resolve => setTimeout(resolve, 10));
                 
                 pdf.addPage();
                 try {
+                  console.log(`Adding media page for item: ${media.id}, type: ${media.content_type}`);
                   await addMediaPage(pdf, media, bookTitle, pageNumber);
+                  console.log(`Successfully added media page for: ${media.id}`);
                 } catch (mediaError) {
-                  console.error("Error adding media page:", mediaError);
+                  console.error(`Error adding media page for ${media.id}:`, mediaError);
                   // Add fallback media page
                   pdf.setFillColor("#FFFFFF");
                   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
@@ -137,6 +143,7 @@ export const generateBookPDF = async (
                 }
                 pageNumber++;
               }
+              console.log(`Completed media pages for story: ${story.id}`);
             }
           } catch (storyError) {
             console.error(`Error processing story ${i}:`, storyError);
@@ -463,132 +470,174 @@ const addMediaPage = async (
   bookTitle: string, 
   pageNumber: number
 ): Promise<void> => {
-  // Set page background
-  pdf.setFillColor("#FFFFFF");
-  pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
-  
-  // Add header
-  const yPosition = addHeader(pdf, bookTitle);
-  
   try {
-    // Handle image media
-    if (media.content_type.startsWith("image/")) {
-      // Fetch image
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/story-media/${media.file_path}`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-      }
-      
-      const blob = await response.blob();
-      
-      // Convert blob to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      
-      const base64data = await base64Promise;
-      
-      // Calculate image dimensions to fit within content area
-      const img = new Image();
-      
-      const imageLoadPromise = new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error("Failed to load image"));
-        img.src = base64data;
-      });
-      
-      // Set a timeout for image loading
-      const imageTimeoutPromise = new Promise<void>((_, reject) => {
-        setTimeout(() => reject(new Error("Image load timed out")), 5000);
-      });
-      
-      await Promise.race([imageLoadPromise, imageTimeoutPromise]);
-      
-      const aspectRatio = img.width / img.height;
-      const maxWidth = CONTENT_WIDTH_INCHES * POINTS_PER_INCH;
-      const maxHeight = (PAGE_HEIGHT_POINTS - MARGIN_POINTS * 3 - yPosition);
-      
-      let width = maxWidth;
-      let height = width / aspectRatio;
-      
-      if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
-      }
-      
-      // Center the image horizontally
-      const xPosition = MARGIN_POINTS + (maxWidth - width) / 2;
-      
-      // Add image to PDF
-      pdf.addImage(
-        base64data, 
-        media.content_type.split('/')[1].toUpperCase(), 
-        xPosition, 
-        yPosition + 20, 
-        width, 
-        height
-      );
-      
-      // Add caption if available
-      if (media.caption) {
+    console.log(`Starting to add media page: ${media.id}, type: ${media.content_type}`);
+    
+    // Set page background
+    pdf.setFillColor("#FFFFFF");
+    pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
+    
+    // Add header
+    const yPosition = addHeader(pdf, bookTitle);
+    
+    // Create the full URL for the media
+    const mediaUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/story-media/${media.file_path}`;
+    console.log(`Media URL: ${mediaUrl}`);
+    
+    try {
+      // Handle image media
+      if (media.content_type.startsWith("image/")) {
+        // Fetch image with a timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+        
+        try {
+          const response = await fetch(mediaUrl, { 
+            signal: controller.signal 
+          });
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+          }
+          
+          const blob = await response.blob();
+          
+          // Convert blob to base64
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          
+          const base64data = await base64Promise;
+          console.log(`Successfully converted image to base64: ${media.id.substring(0, 8)}...`);
+          
+          // Create an Image object to get dimensions
+          const img = new Image();
+          const imageLoadPromise = new Promise<{width: number, height: number}>((resolve, reject) => {
+            img.onload = () => resolve({width: img.width, height: img.height});
+            img.onerror = (e) => {
+              console.error("Image load error:", e);
+              reject(new Error("Failed to load image"));
+            };
+            img.src = base64data;
+          });
+          
+          // Set a timeout for image loading
+          const imageTimeoutPromise = new Promise<{width: number, height: number}>((_, reject) => {
+            setTimeout(() => reject(new Error("Image load timed out")), 5000);
+          });
+          
+          // Use default dimensions if image loading fails
+          let dimensions;
+          try {
+            dimensions = await Promise.race([imageLoadPromise, imageTimeoutPromise]);
+            console.log(`Got image dimensions: ${dimensions.width}x${dimensions.height}`);
+          } catch (error) {
+            console.warn("Using default dimensions due to error:", error);
+            dimensions = { width: 300, height: 200 };
+          }
+          
+          // Calculate image dimensions to fit within content area
+          const aspectRatio = dimensions.width / dimensions.height;
+          const maxWidth = CONTENT_WIDTH_INCHES * POINTS_PER_INCH;
+          const maxHeight = (PAGE_HEIGHT_POINTS - MARGIN_POINTS * 3 - yPosition);
+          
+          let width = maxWidth;
+          let height = width / aspectRatio;
+          
+          if (height > maxHeight) {
+            height = maxHeight;
+            width = height * aspectRatio;
+          }
+          
+          // Center the image horizontally
+          const xPosition = MARGIN_POINTS + (maxWidth - width) / 2;
+          
+          console.log(`Adding image to PDF: ${width}x${height} at position (${xPosition}, ${yPosition + 20})`);
+          
+          // Add image to PDF
+          try {
+            pdf.addImage(
+              base64data, 
+              media.content_type.split('/')[1].toUpperCase() || 'JPEG', 
+              xPosition, 
+              yPosition + 20, 
+              width, 
+              height
+            );
+            console.log(`Successfully added image to PDF: ${media.id}`);
+          } catch (addImageError) {
+            console.error("Error adding image to PDF:", addImageError);
+            throw addImageError;
+          }
+          
+          // Add caption if available
+          if (media.caption) {
+            pdf.setFont("helvetica", "italic");
+            pdf.setFontSize(BODY_FONT_SIZE - 2);
+            
+            const captionY = yPosition + 40 + height;
+            const captionLines = pdf.splitTextToSize(
+              media.caption, 
+              CONTENT_WIDTH_INCHES * POINTS_PER_INCH
+            );
+            
+            pdf.text(
+              captionLines, 
+              PAGE_WIDTH_POINTS / 2, 
+              captionY, 
+              { align: "center" }
+            );
+          }
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          console.error("Error fetching image:", fetchError);
+          throw fetchError;
+        }
+      } else {
+        // For non-image media, just show a placeholder
         pdf.setFont("helvetica", "italic");
-        pdf.setFontSize(BODY_FONT_SIZE - 2);
-        
-        const captionY = yPosition + 40 + height;
-        const captionLines = pdf.splitTextToSize(
-          media.caption, 
-          CONTENT_WIDTH_INCHES * POINTS_PER_INCH
-        );
-        
+        pdf.setFontSize(BODY_FONT_SIZE);
         pdf.text(
-          captionLines, 
+          `[Media: ${media.content_type}]`, 
           PAGE_WIDTH_POINTS / 2, 
-          captionY, 
+          PAGE_HEIGHT_POINTS / 2, 
           { align: "center" }
         );
+        
+        if (media.caption) {
+          pdf.text(
+            media.caption, 
+            PAGE_WIDTH_POINTS / 2, 
+            PAGE_HEIGHT_POINTS / 2 + 40, 
+            { align: "center" }
+          );
+        }
       }
-    } else {
-      // For non-image media, just show a placeholder
+    } catch (error) {
+      console.error("Error adding media to PDF:", error);
+      
+      // Add error placeholder
       pdf.setFont("helvetica", "italic");
       pdf.setFontSize(BODY_FONT_SIZE);
       pdf.text(
-        `[Media: ${media.content_type}]`, 
+        `[Could not load media: ${error.message || 'Unknown error'}]`, 
         PAGE_WIDTH_POINTS / 2, 
         PAGE_HEIGHT_POINTS / 2, 
         { align: "center" }
       );
-      
-      if (media.caption) {
-        pdf.text(
-          media.caption, 
-          PAGE_WIDTH_POINTS / 2, 
-          PAGE_HEIGHT_POINTS / 2 + 40, 
-          { align: "center" }
-        );
-      }
     }
-  } catch (error) {
-    console.error("Error adding media to PDF:", error);
     
-    // Add error placeholder
-    pdf.setFont("helvetica", "italic");
-    pdf.setFontSize(BODY_FONT_SIZE);
-    pdf.text(
-      `[Could not load media]`, 
-      PAGE_WIDTH_POINTS / 2, 
-      PAGE_HEIGHT_POINTS / 2, 
-      { align: "center" }
-    );
+    // Add page number at bottom
+    addFooter(pdf, pageNumber);
+    console.log(`Completed media page ${pageNumber} for media ${media.id}`);
+  } catch (error) {
+    console.error("Error in addMediaPage:", error);
+    throw error;
   }
-  
-  // Add page number at bottom
-  addFooter(pdf, pageNumber);
 };
 
 /**
