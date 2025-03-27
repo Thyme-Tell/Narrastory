@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
@@ -44,7 +45,7 @@ const GetStarted = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
+    <div className="min-h-screen bg-[#EFF1E9] px-[7%] text-[#262626]">
       <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center">
         <Link to="/get-started">
           <img 
@@ -94,7 +95,7 @@ const GetStarted = () => {
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-caslon font-thin mb-6 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-caslon font-thin mb-6 leading-tight tracking-[-0.05em]">
             Narrate as only <em className="italic font-caslon">you</em> can.
           </h1>
           
