@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
@@ -115,10 +116,11 @@ const GetStarted = () => {
               }}
             />
             <Button 
-              className="absolute right-0 top-0 rounded-[44.94px] h-[37.4px] px-[22.83px] flex items-center gap-[8.56px]"
+              className="absolute right-0 top-0 rounded-[44.94px] h-[37.4px] flex items-center gap-[8.56px]"
               style={{
                 background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
-                width: "205.77px"
+                width: "205.77px",
+                padding: "10.7px 23px"
               }}
               onClick={() => console.log("Try Narra with", phoneNumber)}
             >
