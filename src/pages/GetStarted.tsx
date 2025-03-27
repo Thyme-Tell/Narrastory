@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -107,13 +106,13 @@ const GetStarted = () => {
       >
         <div className="max-w-3xl mx-auto text-center">
           <h1 
-            className="text-4xl md:text-5xl lg:text-[45px] font-caslon font-thin mb-6 leading-tight text-[#262626]"
+            className="text-4xl md:text-5xl lg:text-[56px] font-caslon font-thin mb-6 leading-tight text-[#262626]"
             style={{ letterSpacing: "-0.02em" }}
           >
             Narrate as only <em className="italic font-caslon font-thin">you</em> can.
           </h1>
           
-          <h2 className="text-xl md:text-2xl lg:text-[25px] font-caslon mb-4 text-[#262626]">
+          <h2 className="text-xl md:text-2xl lg:text-[30px] font-caslon mb-4 text-[#262626]">
             Share your life stories through simple conversation.
           </h2>
           
@@ -143,7 +142,7 @@ const GetStarted = () => {
                 onBlur={() => !phoneNumber && setInputFocused(false)}
               />
               <Button 
-                className={`${isMobile ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-base flex items-center gap-2`}
+                className={`${isMobile ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-base flex items-center gap-2 font-light`}
                 style={{
                   background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
                 }}
@@ -155,7 +154,7 @@ const GetStarted = () => {
                   alt="Narra Icon" 
                   className="w-5 h-5"
                 />
-                <span className="font-bold">Narra</span> 
+                <span className="font-light">Narra</span> 
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
