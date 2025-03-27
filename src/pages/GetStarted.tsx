@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -9,6 +10,7 @@ const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [inputFocused, setInputFocused] = useState(false);
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -133,13 +135,15 @@ const GetStarted = () => {
                 type="text"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="Your phone number"
-                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full ${
+                placeholder={inputFocused ? "" : "Your phone number"}
+                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full text-base ${
                   isMobile ? 'mb-2 pr-5 text-center' : 'pr-[150px]'
                 } outline-none`}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => !phoneNumber && setInputFocused(false)}
               />
               <Button 
-                className={`${isMobile ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-sm flex items-center gap-2`}
+                className={`${isMobile ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-base flex items-center gap-2`}
                 style={{
                   background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
                 }}
