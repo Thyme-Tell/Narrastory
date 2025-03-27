@@ -8,6 +8,7 @@ import { Story } from "@/types/supabase";
 import { useCoverData } from "@/hooks/useCoverData";
 import { useBookNavigation } from "@/hooks/useBookNavigation";
 import { StoryMediaItem } from "@/types/media";
+import { generateBookPDF } from "@/utils/pdfGenerator";
 
 export const useBookPreview = () => {
   const { profileId } = useParams();
@@ -151,6 +152,81 @@ export const useBookPreview = () => {
   };
 
   const authorName = profile ? `${profile.first_name} ${profile.last_name}` : "";
+  
+  // New function to handle PDF generation
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  
+  const handleDownloadPDF = async () => {
+    if (isGeneratingPDF || isStoriesLoading || !stories || stories.length === 0) return;
+    
+    try {
+      setIsGeneratingPDF(true);
+      setGenerationProgress(10);
+      
+      toast({
+        title: "Generating PDF",
+        description: "This process may take a few moments. Please wait...",
+        duration: 10000,
+      });
+      
+      // Add timeout to ensure UI updates before heavy processing
+      setTimeout(async () => {
+        try {
+          setGenerationProgress(20);
+          
+          const pdfDataUrl = await generateBookPDF(
+            stories, 
+            coverData, 
+            authorName,
+            bookNavigation.storyMediaMap
+          );
+          
+          setGenerationProgress(90);
+          
+          if (!pdfDataUrl) {
+            throw new Error("Failed to generate PDF data");
+          }
+          
+          // Create a temporary link to download the PDF
+          const link = document.createElement("a");
+          link.href = pdfDataUrl;
+          link.download = `${coverData.titleText || "My Book"}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setGenerationProgress(100);
+          
+          toast({
+            title: "PDF Downloaded",
+            description: "Your book has been successfully downloaded as a PDF.",
+          });
+        } catch (error) {
+          console.error("Error generating PDF:", error);
+          toast({
+            title: "PDF Generation Failed",
+            description: "There was an error creating your PDF. Please try again.",
+            variant: "destructive",
+            duration: 5000,
+          });
+        } finally {
+          setIsGeneratingPDF(false);
+          setGenerationProgress(0);
+        }
+      }, 300);
+      
+    } catch (error) {
+      console.error("Error initiating PDF generation:", error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "Could not start PDF generation. Please try again.",
+        variant: "destructive",
+      });
+      setIsGeneratingPDF(false);
+      setGenerationProgress(0);
+    }
+  };
 
   return {
     profileId,
@@ -163,6 +239,9 @@ export const useBookPreview = () => {
     isRendered,
     isIOSDevice,
     handleClose,
-    allMediaItems
+    allMediaItems,
+    isGeneratingPDF,
+    generationProgress,
+    handleDownloadPDF
   };
 };
