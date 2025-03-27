@@ -42,7 +42,7 @@ const GetStarted = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#EFF1E9]">
+    <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center">
         <Link to="/get-started">
           <img 
