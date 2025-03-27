@@ -87,7 +87,7 @@ const BookPreviewLayout = ({
             <p className="text-white text-sm">Generating PDF...</p>
             <p className="text-white text-sm">{generationProgress}%</p>
           </div>
-          <Progress value={generationProgress} className="h-1.5 bg-amber-200/30" indicatorClassName="bg-amber-400" />
+          <Progress value={generationProgress} className="h-1.5 bg-amber-200/30" />
         </div>
       )}
 

@@ -10,7 +10,7 @@ import {
   X 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface BookPreviewHeaderProps {
@@ -113,21 +113,28 @@ const BookPreviewHeader = ({
         </Button>
         
         {onDownloadPDF && (
-          <Tooltip content={isGeneratingPDF ? "Generating PDF..." : "Download as PDF"}>
-            <Button
-              onClick={onDownloadPDF}
-              variant="outline"
-              size="icon"
-              disabled={isGeneratingPDF}
-              className="rounded-full bg-white/10 hover:bg-white/20 border-transparent relative"
-            >
-              {isGeneratingPDF ? (
-                <LoadingSpinner className="h-4 w-4 text-white" />
-              ) : (
-                <Download className="h-4 w-4 text-white" />
-              )}
-            </Button>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={onDownloadPDF}
+                  variant="outline"
+                  size="icon"
+                  disabled={isGeneratingPDF}
+                  className="rounded-full bg-white/10 hover:bg-white/20 border-transparent relative"
+                >
+                  {isGeneratingPDF ? (
+                    <LoadingSpinner className="h-4 w-4 text-white" />
+                  ) : (
+                    <Download className="h-4 w-4 text-white" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isGeneratingPDF ? "Generating PDF..." : "Download as PDF"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
         
         <Button
