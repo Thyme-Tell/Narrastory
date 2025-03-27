@@ -42,20 +42,20 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen bg-[#EFF1E9]">
-      {/* Navbar */}
-      <nav className="py-4 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center">
+      {/* Navbar - Changed breakpoint from md to sm */}
+      <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center">
         {/* Logo */}
         <Link to="/get-started">
           <img 
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
             alt="Narra Logo" 
-            className="w-[130px] h-auto mb-4 md:mb-0"
+            className="w-[130px] h-auto mb-4 sm:mb-0"
           />
         </Link>
 
-        {/* Navigation items */}
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="bg-[#8A9096] rounded-lg p-1 flex flex-col md:flex-row items-center mb-4 md:mb-0 md:mr-4 w-full md:w-auto">
+        {/* Navigation items - Changed breakpoint from md to sm */}
+        <div className="flex flex-col sm:flex-row items-center">
+          <div className="bg-[#8A9096] rounded-lg p-1 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 sm:mr-4 w-full sm:w-auto">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -64,7 +64,7 @@ const GetStarted = () => {
                   activeItem === item.name
                     ? "bg-[#17342C] text-white"
                     : "text-gray-800 hover:bg-[#17342C]/10"
-                } transition-colors duration-200 w-full md:w-auto mb-1 md:mb-0 md:mr-1`}
+                } transition-colors duration-200 w-full sm:w-auto mb-1 sm:mb-0 sm:mr-1`}
               >
                 {item.icon}
                 {item.label}
@@ -75,7 +75,7 @@ const GetStarted = () => {
           {/* Sign Up Button */}
           <Link
             to="/"
-            className={`flex items-center px-4 py-2 rounded-md text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full md:w-auto justify-center`}
+            className={`flex items-center px-4 py-2 rounded-md text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center`}
           >
             Sign Up <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -84,7 +84,7 @@ const GetStarted = () => {
 
       {/* Hero Section */}
       <div 
-        className="w-full py-16 md:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="w-full py-16 sm:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "65%", // Changed from "contain" to "65%"
