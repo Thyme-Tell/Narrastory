@@ -87,9 +87,9 @@ const GetStarted = () => {
         className="w-full py-16 md:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
-          minHeight: "90vh", // Changed from previous setting to 90vh
-          maxHeight: "90vh", // Added to explicitly limit height
-          height: "90vh"
+          minHeight: "50vh", // Changed from 90vh to 50vh
+          maxHeight: "50vh", // Changed from 90vh to 50vh
+          height: "50vh"     // Changed from 90vh to 50vh
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
