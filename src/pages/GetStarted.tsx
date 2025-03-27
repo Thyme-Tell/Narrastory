@@ -45,7 +45,7 @@ const GetStarted = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#EFF1E9] px-[7%] text-[#262626]">
+    <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center">
         <Link to="/get-started">
           <img 
@@ -95,7 +95,7 @@ const GetStarted = () => {
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-caslon font-thin mb-6 leading-tight tracking-[-0.05em]">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-caslon font-bold mb-6 leading-tight">
             Narrate as only <em className="italic font-caslon">you</em> can.
           </h1>
           
@@ -114,10 +114,10 @@ const GetStarted = () => {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="Your phone number"
-                className="w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full px-5 pr-[150px] outline-none"
+                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] ${isMobile ? 'rounded-[7px]' : 'rounded-full pr-[150px]'} px-5 outline-none`}
               />
               <Button 
-                className="absolute right-1 top-1 rounded-full h-10 text-white text-sm flex items-center gap-2"
+                className={`${isMobile ? 'w-full rounded-[7px]' : 'absolute right-1 top-1 rounded-full'} h-10 text-white text-sm flex items-center justify-center gap-2`}
                 style={{
                   background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
                 }}
