@@ -87,7 +87,8 @@ const GetStarted = () => {
           backgroundPosition: "center",
           minHeight: "80vh",
           maxHeight: "80vh",
-          height: "80vh"
+          height: "80vh",
+          position: "relative"
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
@@ -103,7 +104,12 @@ const GetStarted = () => {
             Narra transforms your everyday chats into meaningful and lasting stories that capture your essence.
           </p>
           
-          <div className="relative max-w-xl mx-auto">
+          <div className="relative" style={{ 
+            width: "391px", 
+            height: "51px", 
+            margin: "0 auto",
+            position: "relative"
+          }}>
             <Input
               type="text"
               value={phoneNumber}
@@ -113,6 +119,11 @@ const GetStarted = () => {
               style={{
                 boxSizing: "border-box",
                 border: "0.713335px solid rgba(89, 89, 89, 0.32)",
+                color: "#2F3546",
+                opacity: "0.8",
+                fontSize: "14.2667px",
+                fontWeight: "500",
+                lineHeight: "154.2%",
               }}
             />
             <Button 
@@ -120,7 +131,12 @@ const GetStarted = () => {
               style={{
                 background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
                 width: "205.77px",
-                padding: "10.7px 23px"
+                padding: "10.7px 23px",
+                position: "absolute",
+                top: "6.13px",
+                right: "4px",
+                fontSize: "12.84px",
+                fontWeight: "500"
               }}
               onClick={() => console.log("Try Narra with", phoneNumber)}
             >
