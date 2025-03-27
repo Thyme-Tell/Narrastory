@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -27,25 +28,25 @@ const GetStarted = () => {
       name: "home", 
       label: "Home", 
       path: "/get-started",
-      icon: <Home className="mr-2 h-4 w-4" />
+      icon: <Home className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
     },
     { 
       name: "how-it-works", 
       label: "How it Works", 
       path: "/how-it-works",
-      icon: <Book className="mr-2 h-4 w-4" />
+      icon: <Book className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
     },
     { 
       name: "join-story-circle", 
       label: "Join a Story Circle", 
       path: "/join-story-circle",
-      icon: <Users className="mr-2 h-4 w-4" />
+      icon: <Users className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
     },
     {
       name: "sign-up",
       label: "Sign Up",
       path: "/",
-      icon: <ArrowRight className="mr-2 h-4 w-4" />,
+      icon: <ArrowRight className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />,
       isButton: true
     }
   ];
@@ -62,25 +63,25 @@ const GetStarted = () => {
         </Link>
 
         <div className="flex flex-col sm:flex-row items-center">
-          <div className="bg-[#8A9096] rounded-[2px] p-1 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto">
+          <div className="bg-[#8A9096] rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto">
             {navItems.map((item) => (
               item.isButton ? (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center px-3 py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center ml-1`}
+                  className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center ml-0.5`}
                 >
-                  Sign Up <ArrowRight className="ml-2 h-4 w-4" />
+                  Sign Up <ArrowRight className="ml-1 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Link>
               ) : (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center px-3 py-2 rounded-[3px] text-sm font-medium ${
+                  className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium ${
                     activeItem === item.name
                       ? "bg-[#17342C] text-white"
                       : "text-[#262626] hover:bg-[#17342C]/10"
-                  } transition-colors duration-200 w-full sm:w-auto mb-1 sm:mb-0 sm:mr-1`}
+                  } transition-colors duration-200 w-full sm:w-auto mb-0.5 sm:mb-0 sm:mr-0.5`}
                 >
                   {item.icon}
                   {item.label}
@@ -184,3 +185,4 @@ const GetStarted = () => {
 };
 
 export default GetStarted;
+
