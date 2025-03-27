@@ -7,8 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Story } from "@/types/supabase";
 import { useCoverData } from "@/hooks/useCoverData";
 import { useBookNavigation } from "@/hooks/useBookNavigation";
-import { StoryMediaItem } from "@/types/media";
-import { generateBookPDF } from "@/utils/pdfGenerator";
 
 export const useBookPreview = () => {
   const { profileId } = useParams();
@@ -66,31 +64,6 @@ export const useBookPreview = () => {
     },
   });
 
-  // Fetch all media for the stories in one query to ensure PDF has all media
-  const { data: allMediaItems = [], isLoading: isMediaLoading } = useQuery({
-    queryKey: ["all-story-media", stories?.map(s => s.id).join(",")],
-    queryFn: async () => {
-      if (!stories || stories.length === 0) return [];
-      
-      const storyIds = stories.map(s => s.id);
-      console.log("Fetching media for stories:", storyIds);
-      
-      const { data, error } = await supabase
-        .from("story_media")
-        .select("*")
-        .in("story_id", storyIds)
-        .order("created_at", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching all story media:", error);
-        return [];
-      }
-
-      return data as StoryMediaItem[];
-    },
-    enabled: !!stories && stories.length > 0,
-  });
-
   // Get profile info
   const { data: profile } = useQuery({
     queryKey: ["profile", profileId],
@@ -112,18 +85,8 @@ export const useBookPreview = () => {
     },
   });
 
-  // Organize media by story ID for PDF generation
-  const mediaMap = new Map<string, StoryMediaItem[]>();
-  if (allMediaItems.length > 0) {
-    allMediaItems.forEach(item => {
-      const existing = mediaMap.get(item.story_id) || [];
-      existing.push(item);
-      mediaMap.set(item.story_id, existing);
-    });
-  }
-
-  // Use our custom hook for book navigation with the media map
-  const bookNavigation = useBookNavigation(stories, true, mediaMap);
+  // Use our custom hook for book navigation
+  const bookNavigation = useBookNavigation(stories, true);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -152,96 +115,17 @@ export const useBookPreview = () => {
   };
 
   const authorName = profile ? `${profile.first_name} ${profile.last_name}` : "";
-  
-  // New function to handle PDF generation
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [generationProgress, setGenerationProgress] = useState(0);
-  
-  const handleDownloadPDF = async () => {
-    if (isGeneratingPDF || isStoriesLoading || !stories || stories.length === 0) return;
-    
-    try {
-      setIsGeneratingPDF(true);
-      setGenerationProgress(10);
-      
-      toast({
-        title: "Generating PDF",
-        description: "This process may take a few moments. Please wait...",
-        duration: 10000,
-      });
-      
-      // Add timeout to ensure UI updates before heavy processing
-      setTimeout(async () => {
-        try {
-          setGenerationProgress(20);
-          
-          const pdfDataUrl = await generateBookPDF(
-            stories, 
-            coverData, 
-            authorName,
-            bookNavigation.storyMediaMap
-          );
-          
-          setGenerationProgress(90);
-          
-          if (!pdfDataUrl) {
-            throw new Error("Failed to generate PDF data");
-          }
-          
-          // Create a temporary link to download the PDF
-          const link = document.createElement("a");
-          link.href = pdfDataUrl;
-          link.download = `${coverData.titleText || "My Book"}.pdf`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          setGenerationProgress(100);
-          
-          toast({
-            title: "PDF Downloaded",
-            description: "Your book has been successfully downloaded as a PDF.",
-          });
-        } catch (error) {
-          console.error("Error generating PDF:", error);
-          toast({
-            title: "PDF Generation Failed",
-            description: "There was an error creating your PDF. Please try again.",
-            variant: "destructive",
-            duration: 5000,
-          });
-        } finally {
-          setIsGeneratingPDF(false);
-          setGenerationProgress(0);
-        }
-      }, 300);
-      
-    } catch (error) {
-      console.error("Error initiating PDF generation:", error);
-      toast({
-        title: "PDF Generation Failed",
-        description: "Could not start PDF generation. Please try again.",
-        variant: "destructive",
-      });
-      setIsGeneratingPDF(false);
-      setGenerationProgress(0);
-    }
-  };
 
   return {
     profileId,
     stories,
-    isStoriesLoading: isStoriesLoading || isMediaLoading,
+    isStoriesLoading,
     coverData,
     isCoverLoading,
     authorName,
     bookNavigation,
     isRendered,
     isIOSDevice,
-    handleClose,
-    allMediaItems,
-    isGeneratingPDF,
-    generationProgress,
-    handleDownloadPDF
+    handleClose
   };
 };

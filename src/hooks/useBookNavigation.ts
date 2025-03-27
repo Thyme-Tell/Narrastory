@@ -15,26 +15,20 @@ type StoryInfo = {
   isTableOfContentsPage?: boolean;
 } | null;
 
-export const useBookNavigation = (
-  stories: Story[] | undefined, 
-  open: boolean,
-  initialMediaMap?: Map<string, StoryMediaItem[]>
-) => {
+export const useBookNavigation = (stories: Story[] | undefined, open: boolean) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [showToc, setShowToc] = useState(false);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [storyPages, setStoryPages] = useState<number[]>([]);
   const [totalPageCount, setTotalPageCount] = useState(1); // Cover page by default
-  const [storyMediaMap, setStoryMediaMap] = useState<Map<string, StoryMediaItem[]>>(
-    initialMediaMap || new Map()
-  );
+  const [storyMediaMap, setStoryMediaMap] = useState<Map<string, StoryMediaItem[]>>(new Map());
 
-  // Fetch media items for all stories if not provided
+  // Fetch media items for all stories
   const { data: allMediaItems = [] } = useQuery({
     queryKey: ["all-story-media", stories?.map(s => s.id).join(",")],
     queryFn: async () => {
-      if (!stories || stories.length === 0 || initialMediaMap) return [];
+      if (!stories || stories.length === 0) return [];
       
       const storyIds = stories.map(s => s.id);
       const { data, error } = await supabase
@@ -50,12 +44,12 @@ export const useBookNavigation = (
 
       return data as StoryMediaItem[];
     },
-    enabled: !!stories && stories.length > 0 && !initialMediaMap,
+    enabled: !!stories && stories.length > 0,
   });
 
-  // Organize media items by story ID if we don't have an initial map
+  // Organize media items by story ID
   useEffect(() => {
-    if (!initialMediaMap && allMediaItems.length > 0) {
+    if (allMediaItems.length > 0) {
       const mediaMap = new Map<string, StoryMediaItem[]>();
       
       allMediaItems.forEach(item => {
@@ -65,15 +59,8 @@ export const useBookNavigation = (
       });
       
       setStoryMediaMap(mediaMap);
-      console.log("Updated story media map from query:", 
-        Array.from(mediaMap.entries()).map(([id, items]) => `${id}: ${items.length} items`)
-      );
-    } else if (initialMediaMap) {
-      console.log("Using provided media map:", 
-        Array.from(initialMediaMap.entries()).map(([id, items]) => `${id}: ${items.length} items`)
-      );
     }
-  }, [allMediaItems, initialMediaMap]);
+  }, [allMediaItems]);
 
   // Calculate page distribution for stories using our pagination logic
   useEffect(() => {

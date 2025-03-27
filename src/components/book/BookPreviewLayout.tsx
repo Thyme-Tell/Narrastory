@@ -3,7 +3,7 @@ import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BookPreviewHeader from "./BookPreviewHeader";
 import TableOfContents from "./TableOfContents";
-import { Progress } from "@/components/ui/progress";
+import BookPreviewContainer from "./BookPreviewContainer";
 
 interface BookPreviewLayoutProps {
   totalPageCount: number;
@@ -24,8 +24,6 @@ interface BookPreviewLayoutProps {
   isRendered: boolean;
   isIOSDevice: boolean;
   onDownloadPDF?: () => void;
-  isGeneratingPDF?: boolean;
-  generationProgress?: number;
 }
 
 const BookPreviewLayout = ({
@@ -46,9 +44,7 @@ const BookPreviewLayout = ({
   children,
   isRendered,
   isIOSDevice,
-  onDownloadPDF,
-  isGeneratingPDF = false,
-  generationProgress = 0
+  onDownloadPDF
 }: BookPreviewLayoutProps) => {
   const isMobile = useIsMobile();
 
@@ -76,20 +72,8 @@ const BookPreviewLayout = ({
         onToggleBookmark={onToggleBookmark}
         onClose={onClose}
         onDownloadPDF={onDownloadPDF}
-        isGeneratingPDF={isGeneratingPDF}
         isMobile={isMobile}
       />
-
-      {/* PDF Generation Progress */}
-      {isGeneratingPDF && generationProgress > 0 && (
-        <div className="w-full px-4 py-2 bg-[#3C2A21]/90">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-white text-sm">Generating PDF...</p>
-            <p className="text-white text-sm">{generationProgress}%</p>
-          </div>
-          <Progress value={generationProgress} className="h-1.5 bg-amber-200/30" />
-        </div>
-      )}
 
       <div className="flex-1 w-full flex overflow-hidden">
         {/* TOC Sidebar - Now with bookish styling */}

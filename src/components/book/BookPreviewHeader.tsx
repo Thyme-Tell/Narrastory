@@ -1,17 +1,8 @@
 
 import React from "react";
-import { 
-  ChevronLeft, 
-  BookOpen, 
-  ZoomIn, 
-  ZoomOut, 
-  Bookmark, 
-  Download, 
-  X 
-} from "lucide-react";
+import { Book, ZoomIn, ZoomOut, Bookmark, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { cn } from "@/lib/utils";
 
 interface BookPreviewHeaderProps {
   totalPageCount: number;
@@ -24,9 +15,8 @@ interface BookPreviewHeaderProps {
   onZoomOut: () => void;
   onToggleBookmark: () => void;
   onClose: () => void;
-  isMobile?: boolean;
   onDownloadPDF?: () => void;
-  isGeneratingPDF?: boolean;
+  isMobile?: boolean;
 }
 
 const BookPreviewHeader = ({
@@ -34,116 +24,70 @@ const BookPreviewHeader = ({
   currentPage,
   zoomLevel,
   showToc,
-  bookmarks = [],
+  bookmarks,
   onToggleToc,
   onZoomIn,
   onZoomOut,
   onToggleBookmark,
   onClose,
-  isMobile = false,
   onDownloadPDF,
-  isGeneratingPDF = false
+  isMobile = false,
 }: BookPreviewHeaderProps) => {
-  // Format zoom level as percentage
-  const zoomPercentage = Math.round(zoomLevel * 100);
-  const isCurrentPageBookmarked = bookmarks.includes(currentPage);
-  
   return (
-    <div className="bg-[#3C2A21] w-full py-2 px-4 flex items-center justify-between shadow-md">
-      <div className="flex items-center space-x-2">
+    <div className="w-full bg-white p-4 flex flex-wrap items-center justify-between gap-2">
+      <div className={`flex ${isMobile ? 'flex-wrap' : ''} items-center gap-2`}>
         <Button 
-          onClick={onClose} 
-          variant="outline" 
-          size="icon"
-          className="rounded-full bg-white/10 hover:bg-white/20 border-transparent"
+          variant={showToc ? "default" : "outline"}
+          size={isMobile ? "icon" : "sm"}
+          onClick={onToggleToc}
+          className={isMobile ? "p-2" : ""}
         >
-          <ChevronLeft className="h-4 w-4 text-white" />
+          <Book className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Contents</span>}
         </Button>
         
-        <div className="text-white text-sm">
-          Page {currentPage + 1} of {totalPageCount}
+        <div className="flex items-center space-x-1">
+          <Button variant="outline" size="icon" onClick={onZoomOut} className={isMobile ? "h-8 w-8 p-1" : ""}>
+            <ZoomOut className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+          </Button>
+          <span className="text-xs sm:text-sm">{Math.round(zoomLevel * 100)}%</span>
+          <Button variant="outline" size="icon" onClick={onZoomIn} className={isMobile ? "h-8 w-8 p-1" : ""}>
+            <ZoomIn className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+          </Button>
         </div>
+        
+        <Button 
+          variant="outline" 
+          size={isMobile ? "icon" : "sm"}
+          onClick={onToggleBookmark}
+          className={cn(
+            bookmarks.includes(currentPage) && "text-amber-500",
+            isMobile ? "p-2" : ""
+          )}
+        >
+          <Bookmark className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">{bookmarks.includes(currentPage) ? "Bookmarked" : "Bookmark"}</span>}
+        </Button>
+
+        {onDownloadPDF && (
+          <Button 
+            variant="outline" 
+            size={isMobile ? "icon" : "sm"}
+            onClick={onDownloadPDF}
+            className={isMobile ? "p-2" : ""}
+          >
+            <Download className="h-4 w-4" />
+            {!isMobile && <span className="ml-2">Download</span>}
+          </Button>
+        )}
       </div>
       
-      <div className="flex items-center space-x-2">
-        {!isMobile && (
-          <>
-            <Button
-              onClick={onToggleToc}
-              variant="outline"
-              size="icon"
-              className={`rounded-full ${showToc ? 'bg-white/20' : 'bg-white/10'} hover:bg-white/20 border-transparent`}
-            >
-              <BookOpen className="h-4 w-4 text-white" />
-            </Button>
-            
-            <Button
-              onClick={onZoomOut}
-              variant="outline"
-              size="icon"
-              disabled={zoomLevel <= 0.5}
-              className="rounded-full bg-white/10 hover:bg-white/20 border-transparent"
-            >
-              <ZoomOut className="h-4 w-4 text-white" />
-            </Button>
-            
-            <div className="text-white text-xs w-12 text-center">
-              {zoomPercentage}%
-            </div>
-            
-            <Button
-              onClick={onZoomIn}
-              variant="outline"
-              size="icon"
-              disabled={zoomLevel >= 2}
-              className="rounded-full bg-white/10 hover:bg-white/20 border-transparent"
-            >
-              <ZoomIn className="h-4 w-4 text-white" />
-            </Button>
-          </>
-        )}
-        
-        <Button
-          onClick={onToggleBookmark}
-          variant="outline"
-          size="icon"
-          className={`rounded-full ${isCurrentPageBookmarked ? 'bg-amber-400/70 hover:bg-amber-400/90' : 'bg-white/10 hover:bg-white/20'} border-transparent`}
-        >
-          <Bookmark className={`h-4 w-4 ${isCurrentPageBookmarked ? 'text-[#3C2A21]' : 'text-white'}`} />
-        </Button>
-        
-        {onDownloadPDF && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={onDownloadPDF}
-                  variant="outline"
-                  size="icon"
-                  disabled={isGeneratingPDF}
-                  className="rounded-full bg-white/10 hover:bg-white/20 border-transparent relative"
-                >
-                  {isGeneratingPDF ? (
-                    <LoadingSpinner className="h-4 w-4 text-white" />
-                  ) : (
-                    <Download className="h-4 w-4 text-white" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isGeneratingPDF ? "Generating PDF..." : "Download as PDF"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-        
-        <Button
-          onClick={onClose}
-          variant="outline"
-          size="icon"
-          className="rounded-full bg-white/10 hover:bg-white/20 border-transparent lg:hidden"
-        >
-          <X className="h-4 w-4 text-white" />
+      <div className="flex items-center gap-2">
+        <span className="text-xs sm:text-sm whitespace-nowrap">
+          {currentPage + 1}/{totalPageCount}
+        </span>
+        <Button variant="ghost" size="icon" onClick={onClose} className={isMobile ? "h-8 w-8 p-1" : ""}>
+          <X className={isMobile ? "h-4 w-4" : "h-5 w-5"} />
         </Button>
       </div>
     </div>

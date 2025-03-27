@@ -1,8 +1,10 @@
 
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { useBookPreview } from "@/hooks/useBookPreview";
 import BookPreviewLayout from "@/components/book/BookPreviewLayout";
 import BookPreviewContainer from "@/components/book/BookPreviewContainer";
+import { generateBookPDF } from "@/utils/pdfGenerator";
+import { useToast } from "@/hooks/use-toast";
 
 const BookPreviewPage = () => {
   const {
@@ -14,38 +16,54 @@ const BookPreviewPage = () => {
     bookNavigation,
     isRendered,
     isIOSDevice,
-    handleClose,
-    isGeneratingPDF,
-    generationProgress,
-    handleDownloadPDF
+    handleClose
   } = useBookPreview();
+  const { toast } = useToast();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // Get the current story to display
   const currentStoryInfo = bookNavigation.getCurrentStory();
-  
-  // We need to ensure PDF generation gets the exact same styling
-  useEffect(() => {
-    const updateViewportMeta = () => {
-      // Make sure no weird scaling happens that might affect the PDF output
-      let viewportMeta = document.querySelector('meta[name="viewport"]');
-      if (!viewportMeta) {
-        viewportMeta = document.createElement('meta');
-        viewportMeta.setAttribute('name', 'viewport');
-        document.head.appendChild(viewportMeta);
-      }
-      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-    };
+
+  const handleDownloadPDF = async () => {
+    if (isGeneratingPDF || isStoriesLoading || !stories || stories.length === 0) return;
     
-    updateViewportMeta();
-    
-    return () => {
-      // Reset viewport when component unmounts
-      const viewportMeta = document.querySelector('meta[name="viewport"]');
-      if (viewportMeta) {
-        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
-      }
-    };
-  }, []);
+    try {
+      setIsGeneratingPDF(true);
+      toast({
+        title: "Generating PDF",
+        description: "This may take a moment depending on the book size.",
+      });
+      
+      const pdfDataUrl = await generateBookPDF(
+        stories, 
+        coverData, 
+        authorName,
+        bookNavigation.storyMediaMap
+      );
+      
+      // Create a temporary link to download the PDF
+      const link = document.createElement("a");
+      link.href = pdfDataUrl;
+      link.download = `${coverData.titleText || "My Book"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "PDF Downloaded",
+        description: "Your book has been successfully downloaded as a PDF.",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "There was an error creating your PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   return (
     <BookPreviewLayout
@@ -66,15 +84,13 @@ const BookPreviewPage = () => {
       isRendered={isRendered}
       isIOSDevice={isIOSDevice}
       onDownloadPDF={handleDownloadPDF}
-      isGeneratingPDF={isGeneratingPDF}
-      generationProgress={generationProgress}
     >
       <BookPreviewContainer
         currentPage={bookNavigation.currentPage}
         totalPageCount={bookNavigation.totalPageCount}
         zoomLevel={bookNavigation.zoomLevel}
         stories={stories}
-        isStoriesLoading={isStoriesLoading || isGeneratingPDF}
+        isStoriesLoading={isStoriesLoading}
         isCoverLoading={isCoverLoading}
         coverData={coverData}
         authorName={authorName}
@@ -84,10 +100,6 @@ const BookPreviewPage = () => {
         isIOSDevice={isIOSDevice}
         onDownloadPDF={handleDownloadPDF}
         isGeneratingPDF={isGeneratingPDF}
-        bookmarks={bookNavigation.bookmarks}
-        storyPages={bookNavigation.storyPages}
-        storyMediaMap={bookNavigation.storyMediaMap}
-        jumpToPage={bookNavigation.jumpToPage}
       />
     </BookPreviewLayout>
   );
