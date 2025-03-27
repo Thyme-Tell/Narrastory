@@ -1,10 +1,11 @@
+
 import { jsPDF } from "jspdf";
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
 import { getPageContent } from "@/utils/bookPagination";
 import { format } from "date-fns";
 
-// Book format specifications
+// Book format specifications - matching the preview dimensions
 const PAGE_WIDTH_INCHES = 5;
 const PAGE_HEIGHT_INCHES = 8;
 const MARGIN_INCHES = 0.5;
@@ -17,12 +18,13 @@ const PAGE_WIDTH_POINTS = PAGE_WIDTH_INCHES * POINTS_PER_INCH;
 const PAGE_HEIGHT_POINTS = PAGE_HEIGHT_INCHES * POINTS_PER_INCH;
 const MARGIN_POINTS = MARGIN_INCHES * POINTS_PER_INCH;
 
-// Font sizes and spacing
+// Font sizes and spacing - matching the preview
 const TITLE_FONT_SIZE = 16;
-const BODY_FONT_SIZE = 12;
+const BODY_FONT_SIZE = 11; // Match text size with preview
 const HEADER_FONT_SIZE = 10;
 const FOOTER_FONT_SIZE = 10;
-const LINE_HEIGHT_FACTOR = 1.2;
+const LINE_HEIGHT_FACTOR = 1.5; // Match line height with preview
+const PARAGRAPH_INDENT = 6 * (POINTS_PER_INCH / 72); // Match paragraph indentation
 
 // Maximum time for PDF generation (ms)
 const MAX_GENERATION_TIME = 45000; // 45 seconds
@@ -57,6 +59,9 @@ export const generateBookPDF = async (
           orientation: "portrait",
         });
 
+        // Add standard serif fonts for better book formatting
+        pdf.setFont("times", "normal");
+
         // Add cover page
         try {
           await addCoverPage(pdf, coverData, authorName);
@@ -66,7 +71,7 @@ export const generateBookPDF = async (
           // Add fallback cover
           pdf.setFillColor("#CADCDA");
           pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
-          pdf.setFont("helvetica", "bold");
+          pdf.setFont("times", "bold");
           pdf.setFontSize(TITLE_FONT_SIZE);
           pdf.text("My Book", PAGE_WIDTH_POINTS / 2, PAGE_HEIGHT_POINTS / 2, { align: "center" });
         }
@@ -80,9 +85,9 @@ export const generateBookPDF = async (
           console.error("Error adding TOC:", error);
           // Add simple TOC
           pdf.addPage();
-          pdf.setFillColor("#f5f5f0");
+          pdf.setFillColor("#f8f7f1"); // Match preview color
           pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
-          pdf.setFont("helvetica", "bold");
+          pdf.setFont("times", "bold");
           pdf.setFontSize(TITLE_FONT_SIZE);
           pdf.text("Table of Contents", PAGE_WIDTH_POINTS / 2, PAGE_HEIGHT_POINTS / 2, { align: "center" });
         }
@@ -132,7 +137,7 @@ export const generateBookPDF = async (
                   // Add fallback media page
                   pdf.setFillColor("#FFFFFF");
                   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
-                  pdf.setFont("helvetica", "italic");
+                  pdf.setFont("times", "italic");
                   pdf.setFontSize(BODY_FONT_SIZE);
                   pdf.text(
                     `[Media could not be loaded]`, 
@@ -181,28 +186,28 @@ const addTableOfContentsPage = (
   bookTitle: string,
   storyMediaMap: Map<string, StoryMediaItem[]>
 ): void => {
-  // Set page background
-  pdf.setFillColor("#f5f5f0");
+  // Set page background to match preview
+  pdf.setFillColor("#f8f7f1");
   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
   
   // Add header
   addHeader(pdf, bookTitle);
   
   // Add ToC title
-  pdf.setFont("helvetica", "bold");
+  pdf.setFont("times", "bold");
   pdf.setFontSize(TITLE_FONT_SIZE);
-  pdf.setTextColor("#000000");
+  pdf.setTextColor("#3C2A21"); // Match preview color
   pdf.text("Table of Contents", PAGE_WIDTH_POINTS / 2, MARGIN_POINTS * 2, { align: "center" });
   
   // Set up for content entries
-  pdf.setFont("helvetica", "normal");
+  pdf.setFont("times", "normal");
   pdf.setFontSize(BODY_FONT_SIZE);
   const lineHeight = BODY_FONT_SIZE * LINE_HEIGHT_FACTOR;
   let yPosition = MARGIN_POINTS * 3;
   
   // Add entries
   // First add cover
-  pdf.setFont("helvetica", "normal");
+  pdf.setFont("times", "normal");
   pdf.text("Cover", MARGIN_POINTS, yPosition);
   pdf.text("1", PAGE_WIDTH_POINTS - MARGIN_POINTS, yPosition, { align: "right" });
   yPosition += lineHeight * 1.5;
@@ -219,18 +224,18 @@ const addTableOfContentsPage = (
     const story = stories[i];
     
     // Add story title
-    pdf.setFont("helvetica", "bold");
+    pdf.setFont("times", "bold");
     pdf.text(story.title || "Untitled Story", MARGIN_POINTS, yPosition);
     pdf.text(currentPage.toString(), PAGE_WIDTH_POINTS - MARGIN_POINTS, yPosition, { align: "right" });
     yPosition += lineHeight * 1.5;
     currentPage++; // Move past title page
     
-    // Estimate story pages (simplified for TOC)
-    const contentLength = story.content.length;
-    const estimatedPages = Math.max(1, Math.ceil(contentLength / 2000)); // Rough estimate
+    // Estimate story pages using the same logic as in preview
+    const contentParagraphs = story.content.split('\n').filter(p => p.trim() !== '');
+    const estimatedPages = Math.max(1, Math.ceil(contentParagraphs.length / 10)); // Approximate page estimate
     
     // Add page ranges for story content
-    pdf.setFont("helvetica", "italic");
+    pdf.setFont("times", "italic");
     const pageRange = `${currentPage}${estimatedPages > 1 ? `-${currentPage + estimatedPages - 1}` : ""}`;
     
     // Indent this entry
@@ -259,7 +264,7 @@ const addTableOfContentsPage = (
       pdf.addPage();
       
       // Set page background
-      pdf.setFillColor("#f5f5f0");
+      pdf.setFillColor("#f8f7f1");
       pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
       
       // Add header
@@ -269,13 +274,13 @@ const addTableOfContentsPage = (
       yPosition = MARGIN_POINTS * 2;
       
       // Add continuation indicator
-      pdf.setFont("helvetica", "italic");
+      pdf.setFont("times", "italic");
       pdf.setFontSize(BODY_FONT_SIZE - 2);
       pdf.text("(Table of Contents continued)", PAGE_WIDTH_POINTS / 2, yPosition, { align: "center" });
       yPosition += lineHeight * 2;
       
       // Reset font for entries
-      pdf.setFont("helvetica", "normal");
+      pdf.setFont("times", "normal");
       pdf.setFontSize(BODY_FONT_SIZE);
     }
   }
@@ -295,7 +300,7 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
     
     // Add title
     if (coverData.titleText) {
-      pdf.setFont("helvetica", "bold");
+      pdf.setFont("times", "bold");
       pdf.setFontSize(coverData.titleSize * 1.2 || TITLE_FONT_SIZE * 1.5);
       pdf.setTextColor(coverData.titleColor || "#303030");
       
@@ -316,7 +321,7 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
     }
     
     // Add author name at bottom
-    pdf.setFont("helvetica", "normal");
+    pdf.setFont("times", "normal");
     pdf.setFontSize(coverData.authorSize || BODY_FONT_SIZE);
     pdf.setTextColor(coverData.authorColor || "#303030");
     pdf.text(
@@ -335,14 +340,14 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
  * Adds a story title page to the PDF
  */
 const addStoryTitlePage = (pdf: jsPDF, story: Story, pageNumber: number): void => {
-  // Set page background
-  pdf.setFillColor("#f5f5f0");
+  // Set page background to match preview
+  pdf.setFillColor("#f8f7f1");
   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
   
   // Add story title
-  pdf.setFont("helvetica", "bold");
+  pdf.setFont("times", "bold");
   pdf.setFontSize(TITLE_FONT_SIZE);
-  pdf.setTextColor("#000000");
+  pdf.setTextColor("#3C2A21"); // Match preview color
   
   const title = story.title || "Untitled Story";
   const titleLines = pdf.splitTextToSize(title, CONTENT_WIDTH_INCHES * POINTS_PER_INCH);
@@ -356,7 +361,7 @@ const addStoryTitlePage = (pdf: jsPDF, story: Story, pageNumber: number): void =
   
   // Add date
   const storyDate = format(new Date(story.created_at), "MMMM d, yyyy");
-  pdf.setFont("helvetica", "italic");
+  pdf.setFont("times", "italic");
   pdf.setFontSize(BODY_FONT_SIZE);
   pdf.text(
     storyDate, 
@@ -366,20 +371,13 @@ const addStoryTitlePage = (pdf: jsPDF, story: Story, pageNumber: number): void =
   );
   
   // Add page number at bottom
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(FOOTER_FONT_SIZE);
-  pdf.text(
-    pageNumber.toString(), 
-    PAGE_WIDTH_POINTS / 2, 
-    PAGE_HEIGHT_POINTS - MARGIN_POINTS / 2, 
-    { align: "center" }
-  );
+  addFooter(pdf, pageNumber);
 };
 
 /**
  * Processes story content and adds it to the PDF with proper pagination
+ * matching the preview formatting
  * Returns the number of content pages added
- * Now with async processing to prevent UI freezing
  */
 const processStoryContent = async (
   pdf: jsPDF, 
@@ -391,11 +389,11 @@ const processStoryContent = async (
   let yPosition = MARGIN_POINTS;
   
   // Set text properties for content
-  pdf.setFont("helvetica", "normal");
+  pdf.setFont("times", "normal");
   pdf.setFontSize(BODY_FONT_SIZE);
   pdf.setTextColor("#000000");
   
-  // Calculate the line height
+  // Calculate the line height to match preview
   const lineHeight = BODY_FONT_SIZE * LINE_HEIGHT_FACTOR;
   
   // Add a new page to start
@@ -403,7 +401,7 @@ const processStoryContent = async (
   currentPage++;
   
   // Set page background
-  pdf.setFillColor("#f5f5f0");
+  pdf.setFillColor("#f8f7f1"); // Match preview
   pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
   
   // Add header (except on first content page)
@@ -417,13 +415,14 @@ const processStoryContent = async (
     }
     
     const paragraph = paragraphs[pIndex];
+    
     // Wrap text to fit within margins
     const contentWidth = CONTENT_WIDTH_INCHES * POINTS_PER_INCH;
     const wrappedText = pdf.splitTextToSize(paragraph, contentWidth);
     
     // Calculate if this paragraph will fit on current page
     const paragraphHeight = wrappedText.length * lineHeight;
-    const spaceRemaining = PAGE_HEIGHT_POINTS - MARGIN_POINTS - yPosition;
+    const spaceRemaining = PAGE_HEIGHT_POINTS - MARGIN_POINTS - yPosition - (MARGIN_POINTS * 2); // Add bottom margin space
     
     // If it doesn't fit, add a new page
     if (paragraphHeight > spaceRemaining) {
@@ -431,28 +430,67 @@ const processStoryContent = async (
       currentPage++;
       
       // Set page background
-      pdf.setFillColor("#f5f5f0");
+      pdf.setFillColor("#f8f7f1");
       pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
       
       // Add header and reset y position
       yPosition = addHeader(pdf, bookTitle);
     }
     
-    // Add paragraph with first line indentation
-    const indent = 20; // 20 points indent
-    pdf.text(wrappedText[0], MARGIN_POINTS + indent, yPosition);
-    yPosition += lineHeight;
+    // Implement drop cap for first paragraph on first page
+    const isFirstParagraph = pIndex === 0;
+    const isFirstPage = currentPage === 1;
+    const shouldUseDropCap = isFirstParagraph && isFirstPage;
     
-    // Add remaining lines without indentation if any
-    if (wrappedText.length > 1) {
+    if (shouldUseDropCap && wrappedText.length > 0 && wrappedText[0].length > 0) {
+      // Save current font settings
+      const currentFont = pdf.getFont();
+      const currentFontSize = pdf.getFontSize();
+      
+      // Extract first character for drop cap
+      const firstChar = wrappedText[0].charAt(0);
+      const remainingText = wrappedText[0].substring(1);
+      
+      // Draw the drop cap character
+      pdf.setFont("times", "bold");
+      pdf.setFontSize(BODY_FONT_SIZE * 3); // Larger for drop cap
+      pdf.setTextColor("#A33D29"); // Brown-red color from preview
+      pdf.text(firstChar, MARGIN_POINTS, yPosition + BODY_FONT_SIZE);
+      
+      // Measure drop cap width
+      const dropCapWidth = pdf.getTextWidth(firstChar) * 1.1; // Add a little spacing
+      
+      // Reset to normal font for remaining text
+      pdf.setFont(currentFont.fontName, currentFont.fontStyle);
+      pdf.setFontSize(currentFontSize);
+      pdf.setTextColor("#000000");
+      
+      // Place the remaining first line text after the drop cap
+      pdf.text(remainingText, MARGIN_POINTS + dropCapWidth, yPosition);
+      yPosition += lineHeight;
+      
+      // Draw remaining lines with normal paragraph indentation
       for (let i = 1; i < wrappedText.length; i++) {
         pdf.text(wrappedText[i], MARGIN_POINTS, yPosition);
         yPosition += lineHeight;
       }
+    } else {
+      // Add paragraph with first line indentation (matches preview)
+      const indent = PARAGRAPH_INDENT;
+      pdf.text(wrappedText[0], MARGIN_POINTS + indent, yPosition);
+      yPosition += lineHeight;
+      
+      // Add remaining lines without indentation
+      if (wrappedText.length > 0) {
+        for (let i = 1; i < wrappedText.length; i++) {
+          pdf.text(wrappedText[i], MARGIN_POINTS, yPosition);
+          yPosition += lineHeight;
+        }
+      }
     }
     
-    // Add spacing after paragraph
-    yPosition += lineHeight / 2;
+    // Add spacing after paragraph to match preview
+    yPosition += lineHeight / 3;
     
     // Add page number at bottom
     addFooter(pdf, startPageNumber + currentPage - 1);
@@ -473,7 +511,7 @@ const addMediaPage = async (
   try {
     console.log(`Starting to add media page: ${media.id}, type: ${media.content_type}`);
     
-    // Set page background
+    // Set page background to match preview
     pdf.setFillColor("#FFFFFF");
     pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
     
@@ -540,10 +578,10 @@ const addMediaPage = async (
             dimensions = { width: 300, height: 200 };
           }
           
-          // Calculate image dimensions to fit within content area
+          // Calculate image dimensions to fit within content area (centered)
           const aspectRatio = dimensions.width / dimensions.height;
           const maxWidth = CONTENT_WIDTH_INCHES * POINTS_PER_INCH;
-          const maxHeight = (PAGE_HEIGHT_POINTS - MARGIN_POINTS * 3 - yPosition);
+          const maxHeight = (PAGE_HEIGHT_POINTS - MARGIN_POINTS * 4 - yPosition);
           
           let width = maxWidth;
           let height = width / aspectRatio;
@@ -556,7 +594,7 @@ const addMediaPage = async (
           // Center the image horizontally
           const xPosition = MARGIN_POINTS + (maxWidth - width) / 2;
           
-          console.log(`Adding image to PDF: ${width}x${height} at position (${xPosition}, ${yPosition + 20})`);
+          console.log(`Adding image to PDF: ${width}x${height} at position (${xPosition}, ${yPosition + 40})`);
           
           // Add image to PDF
           try {
@@ -564,7 +602,7 @@ const addMediaPage = async (
               base64data, 
               media.content_type.split('/')[1].toUpperCase() || 'JPEG', 
               xPosition, 
-              yPosition + 20, 
+              yPosition + 40, 
               width, 
               height
             );
@@ -574,12 +612,12 @@ const addMediaPage = async (
             throw addImageError;
           }
           
-          // Add caption if available
+          // Add caption if available - match preview style
           if (media.caption) {
-            pdf.setFont("helvetica", "italic");
-            pdf.setFontSize(BODY_FONT_SIZE - 2);
+            pdf.setFont("times", "italic");
+            pdf.setFontSize(BODY_FONT_SIZE - 1);
             
-            const captionY = yPosition + 40 + height;
+            const captionY = yPosition + 50 + height;
             const captionLines = pdf.splitTextToSize(
               media.caption, 
               CONTENT_WIDTH_INCHES * POINTS_PER_INCH
@@ -599,7 +637,7 @@ const addMediaPage = async (
         }
       } else {
         // For non-image media, just show a placeholder
-        pdf.setFont("helvetica", "italic");
+        pdf.setFont("times", "italic");
         pdf.setFontSize(BODY_FONT_SIZE);
         pdf.text(
           `[Media: ${media.content_type}]`, 
@@ -621,7 +659,7 @@ const addMediaPage = async (
       console.error("Error adding media to PDF:", error);
       
       // Add error placeholder
-      pdf.setFont("helvetica", "italic");
+      pdf.setFont("times", "italic");
       pdf.setFontSize(BODY_FONT_SIZE);
       pdf.text(
         `[Could not load media: ${error.message || 'Unknown error'}]`, 
@@ -644,11 +682,11 @@ const addMediaPage = async (
  * Adds a header to a page and returns the Y position after the header
  */
 const addHeader = (pdf: jsPDF, bookTitle: string): number => {
-  pdf.setFont("helvetica", "italic");
+  pdf.setFont("times", "italic");
   pdf.setFontSize(HEADER_FONT_SIZE);
-  pdf.setTextColor("#303441");
+  pdf.setTextColor("#3C2A21"); // Match preview color
   
-  // Position header 0.5 inches from the top
+  // Position header to match preview
   const headerPosition = MARGIN_POINTS / 2;
   pdf.text(bookTitle, PAGE_WIDTH_POINTS / 2, headerPosition, { align: "center" });
   
@@ -657,14 +695,14 @@ const addHeader = (pdf: jsPDF, bookTitle: string): number => {
 };
 
 /**
- * Adds a footer with page number
+ * Adds a footer with page number - matching the preview style
  */
 const addFooter = (pdf: jsPDF, pageNumber: number): void => {
-  pdf.setFont("helvetica", "normal");
+  pdf.setFont("times", "normal");
   pdf.setFontSize(FOOTER_FONT_SIZE);
-  pdf.setTextColor("#000000");
+  pdf.setTextColor("#3C2A21"); // Match preview color
   
-  // Position footer 0.5 inches from the bottom
+  // Position footer to match preview
   const footerPosition = PAGE_HEIGHT_POINTS - MARGIN_POINTS / 2;
   pdf.text(
     pageNumber.toString(), 
