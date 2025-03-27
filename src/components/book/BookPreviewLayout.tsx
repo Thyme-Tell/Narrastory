@@ -24,6 +24,7 @@ interface BookPreviewLayoutProps {
   isRendered: boolean;
   isIOSDevice: boolean;
   onDownloadPDF?: () => void;
+  isGeneratingPDF?: boolean;
 }
 
 const BookPreviewLayout = ({
@@ -44,7 +45,8 @@ const BookPreviewLayout = ({
   children,
   isRendered,
   isIOSDevice,
-  onDownloadPDF
+  onDownloadPDF,
+  isGeneratingPDF = false
 }: BookPreviewLayoutProps) => {
   const isMobile = useIsMobile();
 
@@ -72,6 +74,7 @@ const BookPreviewLayout = ({
         onToggleBookmark={onToggleBookmark}
         onClose={onClose}
         onDownloadPDF={onDownloadPDF}
+        isGeneratingPDF={isGeneratingPDF}
         isMobile={isMobile}
       />
 

@@ -17,6 +17,7 @@ interface BookPreviewHeaderProps {
   onClose: () => void;
   onDownloadPDF?: () => void;
   isMobile?: boolean;
+  isGeneratingPDF?: boolean;
 }
 
 const BookPreviewHeader = ({
@@ -32,6 +33,7 @@ const BookPreviewHeader = ({
   onClose,
   onDownloadPDF,
   isMobile = false,
+  isGeneratingPDF = false,
 }: BookPreviewHeaderProps) => {
   return (
     <div className="w-full bg-white p-4 flex flex-wrap items-center justify-between gap-2">
@@ -74,10 +76,15 @@ const BookPreviewHeader = ({
             variant="outline" 
             size={isMobile ? "icon" : "sm"}
             onClick={onDownloadPDF}
+            disabled={isGeneratingPDF}
             className={isMobile ? "p-2" : ""}
           >
             <Download className="h-4 w-4" />
-            {!isMobile && <span className="ml-2">Download</span>}
+            {!isMobile && (
+              <span className="ml-2">
+                {isGeneratingPDF ? "Generating..." : "Download"}
+              </span>
+            )}
           </Button>
         )}
       </div>

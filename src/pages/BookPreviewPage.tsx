@@ -84,13 +84,14 @@ const BookPreviewPage = () => {
       isRendered={isRendered}
       isIOSDevice={isIOSDevice}
       onDownloadPDF={handleDownloadPDF}
+      isGeneratingPDF={isGeneratingPDF}
     >
       <BookPreviewContainer
         currentPage={bookNavigation.currentPage}
         totalPageCount={bookNavigation.totalPageCount}
         zoomLevel={bookNavigation.zoomLevel}
         stories={stories}
-        isStoriesLoading={isStoriesLoading}
+        isStoriesLoading={isStoriesLoading || isGeneratingPDF}
         isCoverLoading={isCoverLoading}
         coverData={coverData}
         authorName={authorName}
