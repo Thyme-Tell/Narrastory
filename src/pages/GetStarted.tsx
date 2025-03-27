@@ -4,11 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     document.title = "Narra Story | Get Started";
@@ -62,7 +64,7 @@ const GetStarted = () => {
                 className={`flex items-center px-4 py-2 rounded-md text-sm font-medium ${
                   activeItem === item.name
                     ? "bg-[#17342C] text-white"
-                    : "text-gray-800 hover:bg-[#17342C]/10"
+                    : "text-[#262626] hover:bg-[#17342C]/10"
                 } transition-colors duration-200 w-full sm:w-auto mb-1 sm:mb-0 sm:mr-1`}
               >
                 {item.icon}
@@ -93,29 +95,34 @@ const GetStarted = () => {
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-caslon font-bold mb-6 leading-tight">
-            Narrate as only <em className="italic font-caslon">you</em> can.
+          <h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-caslon font-thin mb-6 leading-tight text-[#262626]"
+            style={{ letterSpacing: "-0.02em" }} // -2% kerning
+          >
+            Narrate as only <em className="italic font-caslon font-thin">you</em> can.
           </h1>
           
-          <h2 className="text-xl md:text-2xl font-caslon mb-4">
+          <h2 className="text-xl md:text-2xl font-caslon mb-4 text-[#262626]">
             Share your life stories through simple conversation.
           </h2>
           
-          <p className="text-lg md:text-xl text-gray-700 mb-12 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-[#262626] mb-12 max-w-2xl mx-auto">
             Narra transforms your everyday chats into meaningful and lasting stories that capture your essence.
           </p>
           
           <div className="max-w-md mx-auto px-4">
-            <div className="relative w-full">
+            <div className={`relative w-full ${isMobile ? 'flex flex-col' : ''}`}>
               <Input
                 type="text"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="Your phone number"
-                className="w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full px-5 pr-[150px] outline-none"
+                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full px-5 ${
+                  isMobile ? 'mb-2 pr-5' : 'pr-[150px]'
+                } outline-none`}
               />
               <Button 
-                className="absolute right-1 top-1 rounded-full h-10 text-white text-sm flex items-center gap-2"
+                className={`${isMobile ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-sm flex items-center gap-2`}
                 style={{
                   background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
                 }}
@@ -140,7 +147,7 @@ const GetStarted = () => {
           <h2 className="text-4xl md:text-5xl font-caslon font-bold text-atlantic mb-6">
             Welcome to Narra
           </h2>
-          <p className="text-lg md:text-xl text-gray-700 mb-8">
+          <p className="text-lg md:text-xl text-[#262626] mb-8">
             Your place to create, share, and preserve your most important stories.
           </p>
           
@@ -148,7 +155,7 @@ const GetStarted = () => {
             <h3 className="text-2xl font-caslon font-bold text-atlantic mb-4">
               Get Started with Narra
             </h3>
-            <p className="text-gray-700 mb-4">
+            <p className="text-[#262626] mb-4">
               Narra helps you create beautiful storybooks from your personal memories and experiences.
               Our intuitive tools make it easy to write, illustrate, and share your stories with loved ones.
             </p>
