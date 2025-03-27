@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
@@ -80,7 +79,8 @@ const GetStarted = () => {
         </div>
       </nav>
 
-      <div className="w-full py-16 sm:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      <div 
+        className="w-full py-16 sm:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "65%", 
@@ -140,7 +140,7 @@ const GetStarted = () => {
               }}
               onClick={() => console.log("Try Narra with", phoneNumber)}
             >
-              Try a call with 
+              Talk with 
               <img 
                 src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
                 alt="Narra Icon" 
