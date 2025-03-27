@@ -5,6 +5,7 @@ import BookPreviewLayout from "@/components/book/BookPreviewLayout";
 import BookPreviewContainer from "@/components/book/BookPreviewContainer";
 import { generateBookPDF } from "@/utils/pdfGenerator";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const BookPreviewPage = () => {
   const {
@@ -31,7 +32,8 @@ const BookPreviewPage = () => {
       setIsGeneratingPDF(true);
       toast({
         title: "Generating PDF",
-        description: "This may take a moment depending on the book size.",
+        description: "This process may take up to 30 seconds depending on book size. Please wait...",
+        duration: 6000,
       });
       
       // Add timeout to ensure UI updates before heavy processing
@@ -43,6 +45,10 @@ const BookPreviewPage = () => {
             authorName,
             bookNavigation.storyMediaMap
           );
+          
+          if (!pdfDataUrl) {
+            throw new Error("Failed to generate PDF data");
+          }
           
           // Create a temporary link to download the PDF
           const link = document.createElement("a");
@@ -62,11 +68,12 @@ const BookPreviewPage = () => {
             title: "PDF Generation Failed",
             description: "There was an error creating your PDF. Please try again.",
             variant: "destructive",
+            duration: 5000,
           });
         } finally {
           setIsGeneratingPDF(false);
         }
-      }, 100); // Small delay to ensure UI updates first
+      }, 300); // Slightly longer delay to ensure UI updates first
       
     } catch (error) {
       console.error("Error initiating PDF generation:", error);

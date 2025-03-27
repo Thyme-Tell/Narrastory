@@ -1,5 +1,5 @@
+
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import { Story } from "@/types/supabase";
 import { StoryMediaItem } from "@/types/media";
 import { getPageContent } from "@/utils/bookPagination";
@@ -25,6 +25,9 @@ const HEADER_FONT_SIZE = 10;
 const FOOTER_FONT_SIZE = 10;
 const LINE_HEIGHT_FACTOR = 1.2;
 
+// Maximum time for PDF generation (ms)
+const MAX_GENERATION_TIME = 45000; // 45 seconds
+
 /**
  * Generates a PDF book from an array of stories with correct book dimensions
  * This is an optimized version that processes content in chunks to avoid UI freezing
@@ -35,59 +38,131 @@ export const generateBookPDF = async (
   authorName: string,
   storyMediaMap: Map<string, StoryMediaItem[]>
 ): Promise<string> => {
-  // Initialize PDF with correct dimensions
-  const pdf = new jsPDF({
-    unit: "pt",
-    format: [PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS],
-    orientation: "portrait",
-  });
+  try {
+    // Set timeout to prevent infinite processing
+    const timeoutPromise = new Promise<string>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error("PDF generation timed out"));
+      }, MAX_GENERATION_TIME);
+    });
 
-  // Add cover page
-  await addCoverPage(pdf, coverData, authorName);
+    // PDF generation promise
+    const generationPromise = new Promise<string>(async (resolve, reject) => {
+      try {
+        // Initialize PDF with correct dimensions
+        const pdf = new jsPDF({
+          unit: "pt",
+          format: [PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS],
+          orientation: "portrait",
+        });
 
-  // Add table of contents page
-  pdf.addPage();
-  addTableOfContentsPage(pdf, stories, coverData?.titleText || "My Book", storyMediaMap);
+        // Add cover page
+        try {
+          await addCoverPage(pdf, coverData, authorName);
+          console.log("Cover page added successfully");
+        } catch (error) {
+          console.error("Error adding cover page:", error);
+          // Add fallback cover
+          pdf.setFillColor("#CADCDA");
+          pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(TITLE_FONT_SIZE);
+          pdf.text("My Book", PAGE_WIDTH_POINTS / 2, PAGE_HEIGHT_POINTS / 2, { align: "center" });
+        }
 
-  // Add content pages
-  let pageNumber = 2; // Start after cover and TOC
-  const bookTitle = coverData?.titleText || "My Book";
+        // Add table of contents page
+        try {
+          pdf.addPage();
+          addTableOfContentsPage(pdf, stories, coverData?.titleText || "My Book", storyMediaMap);
+          console.log("TOC page added successfully");
+        } catch (error) {
+          console.error("Error adding TOC:", error);
+          // Add simple TOC
+          pdf.addPage();
+          pdf.setFillColor("#f5f5f0");
+          pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(TITLE_FONT_SIZE);
+          pdf.text("Table of Contents", PAGE_WIDTH_POINTS / 2, PAGE_HEIGHT_POINTS / 2, { align: "center" });
+        }
 
-  // Process each story with yielding to prevent UI freezing
-  for (let i = 0; i < stories.length; i++) {
-    // Yield to the main thread occasionally to prevent UI freezing
-    await new Promise(resolve => setTimeout(resolve, 0));
-    
-    const story = stories[i];
-    
-    // Add story title page
-    pdf.addPage();
-    addStoryTitlePage(pdf, story, pageNumber);
-    pageNumber++;
-
-    // Add content pages
-    const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
-    if (paragraphs.length > 0) {
-      const storyPages = await processStoryContent(pdf, paragraphs, bookTitle, pageNumber);
-      pageNumber += storyPages;
-    }
-
-    // Add media pages if any
-    const mediaItems = storyMediaMap.get(story.id) || [];
-    if (mediaItems.length > 0) {
-      for (const media of mediaItems) {
-        // Yield to the main thread occasionally
-        await new Promise(resolve => setTimeout(resolve, 0));
+        // Add content pages
+        let pageNumber = 2; // Start after cover and TOC
+        const bookTitle = coverData?.titleText || "My Book";
+  
+        // Process each story with yielding to prevent UI freezing
+        for (let i = 0; i < stories.length; i++) {
+          // Yield to the main thread occasionally to prevent UI freezing
+          await new Promise(resolve => setTimeout(resolve, 10));
+          
+          const story = stories[i];
+          
+          try {
+            // Add story title page
+            pdf.addPage();
+            addStoryTitlePage(pdf, story, pageNumber);
+            pageNumber++;
+  
+            // Add content pages
+            const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
+            if (paragraphs.length > 0) {
+              const storyPages = await processStoryContent(pdf, paragraphs, bookTitle, pageNumber);
+              pageNumber += storyPages;
+              console.log(`Added ${storyPages} content pages for story: ${story.title || "Untitled"}`);
+            }
+  
+            // Add media pages if any
+            const mediaItems = storyMediaMap.get(story.id) || [];
+            if (mediaItems.length > 0) {
+              for (const media of mediaItems) {
+                // Yield to the main thread occasionally
+                await new Promise(resolve => setTimeout(resolve, 10));
+                
+                pdf.addPage();
+                try {
+                  await addMediaPage(pdf, media, bookTitle, pageNumber);
+                } catch (mediaError) {
+                  console.error("Error adding media page:", mediaError);
+                  // Add fallback media page
+                  pdf.setFillColor("#FFFFFF");
+                  pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
+                  pdf.setFont("helvetica", "italic");
+                  pdf.setFontSize(BODY_FONT_SIZE);
+                  pdf.text(
+                    `[Media could not be loaded]`, 
+                    PAGE_WIDTH_POINTS / 2, 
+                    PAGE_HEIGHT_POINTS / 2, 
+                    { align: "center" }
+                  );
+                }
+                pageNumber++;
+              }
+            }
+          } catch (storyError) {
+            console.error(`Error processing story ${i}:`, storyError);
+            // Skip to next story on error
+            continue;
+          }
+        }
+  
+        // Yield once more before finalizing PDF
+        await new Promise(resolve => setTimeout(resolve, 50));
         
-        pdf.addPage();
-        await addMediaPage(pdf, media, bookTitle, pageNumber);
-        pageNumber++;
+        // Return the PDF as base64 data URL
+        const pdfOutput = pdf.output('datauristring');
+        resolve(pdfOutput);
+      } catch (error) {
+        console.error("Error in PDF generation:", error);
+        reject(error);
       }
-    }
-  }
+    });
 
-  // Return the PDF as base64 data URL
-  return pdf.output('datauristring');
+    // Race against timeout
+    return await Promise.race([generationPromise, timeoutPromise]);
+  } catch (error) {
+    console.error("Fatal error in PDF generation:", error);
+    throw error;
+  }
 };
 
 /**
@@ -245,12 +320,7 @@ const addCoverPage = async (pdf: jsPDF, coverData: any, authorName: string): Pro
     );
   } catch (error) {
     console.error("Error creating cover page:", error);
-    // Add fallback cover if there's an error
-    pdf.setFillColor("#CADCDA");
-    pdf.rect(0, 0, PAGE_WIDTH_POINTS, PAGE_HEIGHT_POINTS, "F");
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(TITLE_FONT_SIZE);
-    pdf.text("My Book", PAGE_WIDTH_POINTS / 2, PAGE_HEIGHT_POINTS / 2, { align: "center" });
+    throw error;
   }
 };
 
@@ -334,9 +404,9 @@ const processStoryContent = async (
   
   // Process each paragraph with periodic yielding to prevent UI freezing
   for (let pIndex = 0; pIndex < paragraphs.length; pIndex++) {
-    // Every 10 paragraphs, yield to the main thread
-    if (pIndex % 10 === 0 && pIndex > 0) {
-      await new Promise(resolve => setTimeout(resolve, 0));
+    // Every 5 paragraphs, yield to the main thread
+    if (pIndex % 5 === 0 && pIndex > 0) {
+      await new Promise(resolve => setTimeout(resolve, 5));
     }
     
     const paragraph = paragraphs[pIndex];
@@ -407,12 +477,18 @@ const addMediaPage = async (
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/story-media/${media.file_path}`
       );
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      }
+      
       const blob = await response.blob();
       
       // Convert blob to base64
       const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
+      const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
       
@@ -420,11 +496,19 @@ const addMediaPage = async (
       
       // Calculate image dimensions to fit within content area
       const img = new Image();
-      img.src = base64data;
       
-      await new Promise((resolve) => {
-        img.onload = resolve;
+      const imageLoadPromise = new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = base64data;
       });
+      
+      // Set a timeout for image loading
+      const imageTimeoutPromise = new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error("Image load timed out")), 5000);
+      });
+      
+      await Promise.race([imageLoadPromise, imageTimeoutPromise]);
       
       const aspectRatio = img.width / img.height;
       const maxWidth = CONTENT_WIDTH_INCHES * POINTS_PER_INCH;
