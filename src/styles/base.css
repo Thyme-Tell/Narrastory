@@ -6,6 +6,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
 
+/* Adobe Caslon Pro font */
+@font-face {
+  font-family: 'Adobe Caslon Pro';
+  src: local('Adobe Caslon Pro');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Adobe Caslon Pro';
+  src: local('Adobe Caslon Pro Bold');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Adobe Caslon Pro';
+  src: local('Adobe Caslon Pro Italic');
+  font-weight: normal;
+  font-style: italic;
+}
+
 @layer utilities {
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);

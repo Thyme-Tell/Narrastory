@@ -49,7 +49,7 @@ const GetStarted = () => {
           <img 
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
             alt="Narra Logo" 
-            className="w-[220px] h-auto mb-4 md:mb-0"
+            className="w-[130px] h-auto mb-4 md:mb-0"
           />
         </Link>
 
@@ -87,19 +87,19 @@ const GetStarted = () => {
         className="w-full py-16 md:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
-          backgroundSize: "contain", // This makes the background image fit within the container
+          backgroundSize: "65%", // Changed from "contain" to "65%"
           backgroundPosition: "center",
-          minHeight: "80vh", // Changed from 50vh to 80vh for the container
-          maxHeight: "80vh", // Changed from 50vh to 80vh for the container
-          height: "80vh"     // Changed from 50vh to 80vh for the container
+          minHeight: "80vh",
+          maxHeight: "80vh",
+          height: "80vh"
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 leading-tight">
-            Narrate as only <em className="italic font-serif">you</em> can.
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-caslon font-bold mb-6 leading-tight">
+            Narrate as only <em className="italic font-caslon">you</em> can.
           </h1>
           
-          <h2 className="text-xl md:text-2xl font-serif mb-4">
+          <h2 className="text-xl md:text-2xl font-caslon mb-4">
             Share your life stories through simple conversation.
           </h2>
           
@@ -123,7 +123,7 @@ const GetStarted = () => {
       {/* Content Section */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-atlantic mb-6">
+          <h2 className="text-4xl md:text-5xl font-caslon font-bold text-atlantic mb-6">
             Welcome to Narra
           </h2>
           <p className="text-lg md:text-xl text-gray-700 mb-8">
@@ -132,7 +132,7 @@ const GetStarted = () => {
           
           {/* Content Placeholder - to be filled with actual content */}
           <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-            <h3 className="text-2xl font-serif font-bold text-atlantic mb-4">
+            <h3 className="text-2xl font-caslon font-bold text-atlantic mb-4">
               Get Started with Narra
             </h3>
             <p className="text-gray-700 mb-4">

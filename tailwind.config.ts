@@ -21,6 +21,7 @@ export default {
 			fontFamily: {
 				rosemartin: ['Rosemartin', 'serif'],
 				serif: ['Playfair Display', 'Georgia', 'serif'],
+				caslon: ['"Adobe Caslon Pro"', 'Palatino', '"Palatino Linotype"', '"Palatino LT STD"', '"Book Antiqua"', 'Georgia', 'serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
