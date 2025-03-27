@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
@@ -85,7 +86,7 @@ const GetStarted = () => {
       <div 
         className="w-full py-16 md:py-24 px-4 flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-prev.png')",
+          backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           minHeight: "70vh"
         }}
       >
