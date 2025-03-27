@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Info, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
+  const [phoneNumber, setPhoneNumber] = useState("");
   
   useEffect(() => {
     document.title = "Narra Story | Get Started";
@@ -107,14 +109,30 @@ const GetStarted = () => {
             Narra transforms your everyday chats into meaningful and lasting stories that capture your essence.
           </p>
           
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 p-2 bg-white/90 rounded-full max-w-xl mx-auto">
-            <input
+          <div className="relative max-w-xl mx-auto">
+            <Input
               type="text"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="What's your phone number?"
-              className="px-6 py-3 w-full md:w-auto rounded-full bg-transparent outline-none"
+              className="w-full h-[51px] bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-[42.8px] px-6 outline-none"
+              style={{
+                boxSizing: "border-box",
+                border: "0.713335px solid rgba(89, 89, 89, 0.32)",
+              }}
             />
-            <Button className="w-full md:w-auto rounded-full bg-[#242F3F] hover:bg-[#242F3F]/90 px-6">
-              Try a call with <span className="font-bold">Narra</span> <ArrowRight className="ml-1 h-4 w-4" />
+            <Button 
+              className="absolute right-0 top-0 rounded-[42.8px] bg-[#242F3F] hover:bg-[#242F3F]/90 h-[51px] px-6 flex items-center"
+              onClick={() => console.log("Try Narra with", phoneNumber)}
+            >
+              Try a call with 
+              <img 
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                alt="Narra Icon" 
+                className="w-5 h-5 mx-1"
+              />
+              <span className="font-bold">Narra</span> 
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
         </div>
