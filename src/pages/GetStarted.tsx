@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -106,13 +105,13 @@ const GetStarted = () => {
       >
         <div className="max-w-3xl mx-auto text-center">
           <h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-caslon font-thin mb-6 leading-tight text-[#262626]"
+            className="text-4xl md:text-5xl lg:text-[45px] font-caslon font-thin mb-6 leading-tight text-[#262626]"
             style={{ letterSpacing: "-0.02em" }}
           >
             Narrate as only <em className="italic font-caslon font-thin">you</em> can.
           </h1>
           
-          <h2 className="text-xl md:text-2xl font-caslon mb-4 text-[#262626]">
+          <h2 className="text-xl md:text-2xl lg:text-[25px] font-caslon mb-4 text-[#262626]">
             Share your life stories through simple conversation.
           </h2>
           
@@ -185,4 +184,3 @@ const GetStarted = () => {
 };
 
 export default GetStarted;
-
