@@ -89,10 +89,10 @@ const GetStarted = () => {
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
-        <nav className="flex flex-col items-center bg-transparent py-1.5 sm:py-2">
+        <nav className="flex items-center bg-transparent py-1.5 sm:py-2">
           <Link 
             to="/get-started" 
-            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block mb-4"
+            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block mr-4"
           >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
@@ -101,8 +101,8 @@ const GetStarted = () => {
             />
           </Link>
 
-          <div className="flex flex-col items-center w-full">
-            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col items-center w-full max-w-md shadow-sm">
+          <div className="flex items-center">
+            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex items-center shadow-sm">
               {navItems.map((item) => (
                 item.isButton ? (
                   <Link
