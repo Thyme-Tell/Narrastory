@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -261,6 +262,27 @@ const GetStarted = () => {
                 ))}
               </div>
 
+              {/* Desktop navigation arrows moved below steps */}
+              <div className="hidden md:flex justify-start mt-6 space-x-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrevStep}
+                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleNextStep}
+                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Mobile navigation arrows */}
               <div className="flex justify-center mt-6 space-x-4 md:hidden">
                 <Button
                   variant="outline"
@@ -304,24 +326,7 @@ const GetStarted = () => {
                 </div>
               </Card>
               
-              <div className="hidden md:flex justify-end mt-6 space-x-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handlePrevStep}
-                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleNextStep}
-                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Removed the desktop navigation arrows from here */}
             </div>
           </div>
         </div>
