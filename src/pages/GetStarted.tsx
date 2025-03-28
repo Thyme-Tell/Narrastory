@@ -86,7 +86,7 @@ const GetStarted = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
         <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent py-1.5 sm:py-2">
           <Link 
@@ -232,7 +232,7 @@ const GetStarted = () => {
                       </h3>
                       {!isMobile && (
                         <p
-                          className={`text-[0.7rem] md:text-[1rem] font-uncut-sans transition-colors duration-300 ${
+                          className={`text-[0.35rem] md:text-[0.5rem] font-uncut-sans transition-colors duration-300 ${
                             idx === activeStep
                               ? "text-[#403E43]"
                               : "text-[#9F9EA1] group-hover:text-[#555555]"
