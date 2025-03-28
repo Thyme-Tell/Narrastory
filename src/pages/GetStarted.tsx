@@ -88,11 +88,11 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
-      <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 bg-[#EFF1E9]/70 backdrop-blur-md shadow-sm">
-        <nav className="flex flex-col sm:flex-row justify-between items-center py-1.5 sm:py-2">
+      <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
+        <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent py-1.5 sm:py-2">
           <Link 
             to="/get-started" 
-            className="inline-block"
+            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-lg p-2 inline-block"
           >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
@@ -102,7 +102,7 @@ const GetStarted = () => {
           </Link>
 
           <div className="flex flex-col sm:flex-row items-center">
-            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto shadow-sm my-5">
+            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto shadow-sm">
               {navItems.map((item) => (
                 item.isButton ? (
                   <Link
@@ -200,7 +200,7 @@ const GetStarted = () => {
 
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-caslon font-thin text-[#242F3F] mb-12 md:mb-16">
+          <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 md:mb-16">
             How it Works
           </h2>
           
