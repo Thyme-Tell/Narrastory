@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, Home, Book, Users } from "lucide-react";
+import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Card, CardContent } from "@/components/ui/card";
 
 const GetStarted = () => {
   const location = useLocation();
@@ -11,6 +13,34 @@ const GetStarted = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
   const isMobile = useIsMobile();
+  
+  // New state for the How it Works section
+  const [activeStep, setActiveStep] = useState(0);
+  
+  // How it Works steps data
+  const howItWorksSteps = [
+    {
+      id: 0,
+      title: "Talk with Narra",
+      description: "Call Narra and chat casually.",
+      content: "She'll ask thoughtful questions to help you tell your story in your own words.",
+      image: "/lovable-uploads/db2cf5d9-471d-4740-a5b2-8b7deae5669d.png"
+    },
+    {
+      id: 1,
+      title: "Receive Your Story",
+      description: "Get your story delivered to you.",
+      content: "After your conversation, Narra transforms your words into a beautiful narrative that captures your unique voice and experience.",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
+    },
+    {
+      id: 2,
+      title: "Order Your Book",
+      description: "Turn your stories into a keepsake.",
+      content: "Choose from various book formats and designs to create a physical memento of your stories that can be shared for generations.",
+      image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04"
+    }
+  ];
   
   useEffect(() => {
     document.title = "Narra Story | Get Started";
@@ -50,6 +80,16 @@ const GetStarted = () => {
       isButton: true
     }
   ];
+
+  // Navigation to previous step
+  const handlePrevStep = () => {
+    setActiveStep((prev) => (prev > 0 ? prev - 1 : howItWorksSteps.length - 1));
+  };
+
+  // Navigation to next step
+  const handleNextStep = () => {
+    setActiveStep((prev) => (prev < howItWorksSteps.length - 1 ? prev + 1 : 0));
+  };
 
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
@@ -98,7 +138,7 @@ const GetStarted = () => {
         className="w-full h-[70vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
-          backgroundSize: "contain", 
+          backgroundSize: "90%", 
           backgroundPosition: "center",
         }}
       >
@@ -159,6 +199,127 @@ const GetStarted = () => {
           </div>
         </div>
       </div>
+
+      {/* How it Works Section */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-caslon font-bold text-[#242F3F] mb-12 md:mb-16">
+            How it Works
+          </h2>
+          
+          <div className="flex flex-col md:flex-row gap-8 md:gap-16">
+            {/* Vertical Navigation */}
+            <div className="w-full md:w-1/3">
+              <div className="flex flex-row md:flex-col gap-2 md:gap-4">
+                {howItWorksSteps.map((step, idx) => (
+                  <div
+                    key={step.id}
+                    className={`relative cursor-pointer group ${
+                      isMobile ? "flex-1" : ""
+                    }`}
+                    onClick={() => setActiveStep(idx)}
+                  >
+                    <div
+                      className={`relative border-l-4 pl-4 py-3 transition-all duration-300 ${
+                        idx === activeStep
+                          ? "border-[#242F3F]"
+                          : "border-[#C8C8C9] group-hover:border-[#555555]"
+                      }`}
+                    >
+                      <h3
+                        className={`font-caslon text-xl md:text-2xl mb-1 transition-colors duration-300 ${
+                          idx === activeStep
+                            ? "text-[#242F3F] font-semibold"
+                            : "text-[#8A898C] group-hover:text-[#555555]"
+                        }`}
+                      >
+                        {step.title}
+                      </h3>
+                      {!isMobile && (
+                        <p
+                          className={`text-sm transition-colors duration-300 ${
+                            idx === activeStep
+                              ? "text-[#403E43]"
+                              : "text-[#9F9EA1] group-hover:text-[#555555]"
+                          }`}
+                        >
+                          {step.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mobile Navigation Controls */}
+              <div className="flex justify-center mt-6 space-x-4 md:hidden">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrevStep}
+                  className="rounded-full border-[#C8C8C9] text-[#403E43]"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleNextStep}
+                  className="rounded-full border-[#C8C8C9] text-[#403E43]"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Content Card */}
+            <div className="w-full md:w-2/3">
+              <Card className="bg-white rounded-xl shadow-md overflow-hidden">
+                <div className="flex flex-col md:flex-row">
+                  <div className="p-6 md:p-8 md:w-1/2 flex flex-col justify-center">
+                    <h3 className="text-2xl md:text-3xl font-caslon font-semibold mb-4 text-[#242F3F]">
+                      {howItWorksSteps[activeStep].description}
+                    </h3>
+                    <p className="text-[#403E43] text-lg">
+                      {howItWorksSteps[activeStep].content}
+                    </p>
+                  </div>
+                  <div className="md:w-1/2 bg-[#F6F6F7]">
+                    <div className="h-full">
+                      <img
+                        src={howItWorksSteps[activeStep].image}
+                        alt={howItWorksSteps[activeStep].title}
+                        className="w-full h-full object-cover"
+                        style={{ maxHeight: "400px" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              
+              {/* Desktop Navigation Controls */}
+              <div className="hidden md:flex justify-end mt-6 space-x-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrevStep}
+                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleNextStep}
+                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
