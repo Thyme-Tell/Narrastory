@@ -21,21 +21,24 @@ const GetStarted = () => {
       title: "Talk with Narra",
       description: "Call Narra and chat casually.",
       content: "Narra, an AI-powered interviewer, will ask thoughtful questions to help you tell your story in your own words.",
-      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//call-narra%20(1).jpg"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//call-narra%20(1).jpg",
+      descriptionStyle: "text-[12px]"
     },
     {
       id: 1,
       title: "Receive Your Story",
       description: "Receive your story through text.",
       content: "In about a minute, you'll be able to read your story, written in your authentic voice.",
-      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//story%20(1).jpg"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//story%20(1).jpg",
+      descriptionStyle: "text-[12px]"
     },
     {
       id: 2,
       title: "Order Your Book",
       description: "Order your beautiful book.",
       content: "Once you have enough content, give your book a quick read and get a beautifully designed copy in your hands.",
-      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book%20(1).jpg"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book%20(1).jpg",
+      descriptionStyle: "text-[12px]"
     }
   ];
   
@@ -232,7 +235,7 @@ const GetStarted = () => {
                       </h3>
                       {!isMobile && (
                         <p
-                          className={`text-[0.35rem] md:text-[0.5rem] font-uncut-sans transition-colors duration-300 ${
+                          className={`${step.descriptionStyle} font-uncut-sans transition-colors duration-300 ${
                             idx === activeStep
                               ? "text-[#403E43]"
                               : "text-[#9F9EA1] group-hover:text-[#555555]"
