@@ -282,7 +282,7 @@ const GetStarted = () => {
             </div>
             
             <div className="w-full md:w-2/3">
-              <Card className="bg-white rounded-xl shadow-md overflow-hidden max-h-[500px]">
+              <Card className="bg-white rounded-xl shadow-md overflow-hidden min-h-[700px] max-h-[700px]">
                 <div className="flex flex-col">
                   <div className="p-6 md:p-8 flex flex-col justify-center">
                     <h3 className="text-[1.6rem] md:text-[1.6rem] font-caslon font-thin mb-2 text-[#242F3F]">
