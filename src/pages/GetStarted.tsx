@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -98,9 +99,8 @@ const GetStarted = () => {
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "85%", 
           backgroundPosition: "center",
-          minHeight: "80vh",
-          maxHeight: "80vh",
-          height: "80vh",
+          height: "auto",
+          minHeight: "500px",
           position: "relative"
         }}
       >
