@@ -54,25 +54,25 @@ const GetStarted = () => {
       name: "home", 
       label: "Home", 
       path: "/get-started",
-      icon: <Home className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+      icon: <Home className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />
     },
     { 
       name: "how-it-works", 
       label: "How it Works", 
       path: "/how-it-works",
-      icon: <Book className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+      icon: <Book className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />
     },
     { 
       name: "join-story-circle", 
       label: "Join a Story Circle", 
       path: "/join-story-circle",
-      icon: <Users className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+      icon: <Users className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />
     },
     {
       name: "sign-up",
       label: "Sign Up",
       path: "/",
-      icon: <ArrowRight className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />,
+      icon: <ArrowRight className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />,
       isButton: true
     }
   ];
@@ -104,18 +104,18 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center ml-0.5`}
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center ml-0.5 m-[3px]`}
                   >
-                    Sign Up <ArrowRight className="ml-1 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    Sign Up <ArrowRight className="ml-1 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                   </Link>
                 ) : (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium ${
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium m-[3px] ${
                       activeItem === item.name
                         ? "bg-[#17342C] text-white"
-                        : "text-[#262626] hover:bg-[#17342C]/10"
+                        : "text-white hover:bg-[#17342C]/10"
                     } transition-colors duration-200 w-full sm:w-auto mb-0.5 sm:mb-0 sm:mr-0.5`}
                   >
                     {item.icon}
