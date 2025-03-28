@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -91,7 +92,7 @@ const GetStarted = () => {
         <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent py-1.5 sm:py-2">
           <Link 
             to="/get-started" 
-            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-lg p-2 inline-block"
+            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block"
           >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
@@ -222,7 +223,7 @@ const GetStarted = () => {
                       }`}
                     >
                       <h3
-                        className={`font-uncut-sans text-xl md:text-2xl mb-1 transition-colors duration-300 ${
+                        className={`font-uncut-sans text-[0.7rem] md:text-base mb-1 transition-colors duration-300 ${
                           idx === activeStep
                             ? "text-[#242F3F] font-thin"
                             : "text-[#8A898C] group-hover:text-[#555555] font-thin"
@@ -232,7 +233,7 @@ const GetStarted = () => {
                       </h3>
                       {!isMobile && (
                         <p
-                          className={`text-sm font-uncut-sans transition-colors duration-300 ${
+                          className={`text-[0.6rem] font-uncut-sans transition-colors duration-300 ${
                             idx === activeStep
                               ? "text-[#403E43]"
                               : "text-[#9F9EA1] group-hover:text-[#555555]"
