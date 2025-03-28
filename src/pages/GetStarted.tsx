@@ -1,17 +1,14 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
+import CallNarraForm from "@/components/CallNarraForm";
 
 const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [inputFocused, setInputFocused] = useState(false);
   const isMobile = useIsMobile();
   
   const [activeStep, setActiveStep] = useState(0);
@@ -168,35 +165,7 @@ const GetStarted = () => {
           </p>
           
           <div className="max-w-md mx-auto px-4">
-            <div className={`relative w-full ${isMobile ? 'flex flex-col' : ''}`}>
-              <Input
-                type="text"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder={inputFocused ? "" : "Your phone number"}
-                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full text-base ${
-                  isMobile ? 'mb-2 pr-5 text-center' : 'pr-[150px]'
-                } outline-none`}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => !phoneNumber && setInputFocused(false)}
-              />
-              <Button 
-                className={`${isMobile ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-base flex items-center gap-2 font-light`}
-                style={{
-                  background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
-                }}
-                onClick={() => console.log("Talk with", phoneNumber)}
-              >
-                Talk with 
-                <img 
-                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-                  alt="Narra Icon" 
-                  className="w-5 h-5 relative -top-[2px]"
-                />
-                <span className="font-light">Narra</span> 
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <CallNarraForm mobileLayout={isMobile} />
           </div>
         </div>
       </div>
@@ -325,8 +294,6 @@ const GetStarted = () => {
                   </div>
                 </div>
               </Card>
-              
-              {/* Removed the desktop navigation arrows from here */}
             </div>
           </div>
         </div>
