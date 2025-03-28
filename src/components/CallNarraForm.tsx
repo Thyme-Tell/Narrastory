@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -51,28 +50,30 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     try {
       const normalized = normalizePhoneNumber(phoneNumber);
       
-      const { data, error } = await supabase.functions.invoke("start-narra-call", {
-        body: { phoneNumber: normalized }
+      // Direct submission to Synthflow form
+      const formUrl = 'https://workflow.synthflow.ai/forms/et8Cg0Wn3HmcRuKyv8rGN';
+      const formData = new FormData();
+      formData.append('phone_number', normalized.replace('+', ''));
+
+      const response = await fetch(formUrl, {
+        method: 'POST',
+        body: formData
       });
 
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (!data.success) {
-        throw new Error(data.error || "Failed to start call");
+      if (!response.ok) {
+        throw new Error('Failed to submit phone number');
       }
 
       toast({
-        title: "Call initiated!",
-        description: "You'll receive a call from Narra shortly.",
+        title: "Success",
+        description: "Your phone number has been submitted. Expect a call soon!",
       });
 
       onSuccess?.(normalized);
       setPhoneNumber("");
       
     } catch (error) {
-      console.error("Error initiating call:", error);
+      console.error("Error submitting phone number:", error);
       toast({
         title: "Error",
         description: error.message || "Something went wrong. Please try again later.",
