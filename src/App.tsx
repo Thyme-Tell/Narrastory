@@ -36,6 +36,8 @@ function App() {
           <Route path="/reset-password/confirm" element={<PasswordResetConfirm />} />
           <Route path="/book-preview/:profileId" element={<BookPreviewPage />} />
           <Route path="/get-started" element={<GetStarted />} />
+          <Route path="/how-it-works" element={<GetStarted />} />
+          <Route path="/join-story-circle" element={<GetStarted />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
