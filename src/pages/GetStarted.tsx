@@ -20,14 +20,14 @@ const GetStarted = () => {
       id: 0,
       title: "Talk with Narra",
       description: "Call Narra and chat casually.",
-      content: "She'll ask thoughtful questions to help you tell your story in your own words.",
+      content: "Narra, an AI-powered interviewer, will ask thoughtful questions to help you tell your story in your own words.",
       image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//call-narra%20(1).jpg"
     },
     {
       id: 1,
       title: "Receive Your Story",
-      description: "Get your story delivered to you.",
-      content: "After your conversation, Narra transforms your words into a beautiful narrative that captures your unique voice and experience.",
+      description: "Receive your story through text.",
+      content: "In about a minute, you'll be able to read your story, written in your authentic voice.",
       image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//story%20(1).jpg"
     },
     {
