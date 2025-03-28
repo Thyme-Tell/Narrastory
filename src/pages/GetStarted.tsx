@@ -99,7 +99,7 @@ const GetStarted = () => {
         className="w-full h-[70vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
-          backgroundSize: "contain", 
+          backgroundSize: "90%", 
           backgroundPosition: "center",
         }}
       >
