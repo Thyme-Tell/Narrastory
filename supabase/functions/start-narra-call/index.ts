@@ -27,8 +27,10 @@ Deno.serve(async (req) => {
     // Normalize phone number for consistency
     const normalizedPhone = normalizePhoneNumber(phoneNumber);
     
+    console.log(`Initiating call to ${normalizedPhone} with campaign ID ${SYNTHFLOW_CAMPAIGN_ID}`);
+    
     // Make request to Synthflow API to initiate call
-    const response = await fetch('https://api.synthflow.ai/v1/campaigns/start', {
+    const response = await fetch('https://api.synthflow.ai/api/v1/campaigns/start', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
