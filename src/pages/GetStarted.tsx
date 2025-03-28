@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -95,7 +96,7 @@ const GetStarted = () => {
       </header>
 
       <div 
-        className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="w-full h-[70vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "85%", 
