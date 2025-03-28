@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -42,6 +43,15 @@ const GetStarted = () => {
     }
   ];
   
+  // Move arrow navigation controls here, below howItWorksSteps array
+  const handlePrevStep = () => {
+    setActiveStep((prev) => (prev > 0 ? prev - 1 : howItWorksSteps.length - 1));
+  };
+
+  const handleNextStep = () => {
+    setActiveStep((prev) => (prev < howItWorksSteps.length - 1 ? prev + 1 : 0));
+  };
+  
   useEffect(() => {
     document.title = "Narra Story | Get Started";
     
@@ -79,14 +89,6 @@ const GetStarted = () => {
       isButton: true
     }
   ];
-
-  const handlePrevStep = () => {
-    setActiveStep((prev) => (prev > 0 ? prev - 1 : howItWorksSteps.length - 1));
-  };
-
-  const handleNextStep = () => {
-    setActiveStep((prev) => (prev < howItWorksSteps.length - 1 ? prev + 1 : 0));
-  };
 
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
@@ -304,6 +306,7 @@ const GetStarted = () => {
                 </div>
               </Card>
               
+              {/* Moved arrow navigation here */}
               <div className="hidden md:flex justify-end mt-6 space-x-4">
                 <Button
                   variant="outline"
@@ -311,7 +314,7 @@ const GetStarted = () => {
                   onClick={handlePrevStep}
                   className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <Button
                   variant="outline"
@@ -319,7 +322,7 @@ const GetStarted = () => {
                   onClick={handleNextStep}
                   className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
             </div>
