@@ -196,7 +196,7 @@ const GetStarted = () => {
 
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-caslon font-bold text-[#242F3F] mb-12 md:mb-16">
+          <h2 className="text-4xl md:text-5xl font-caslon font-thin text-[#242F3F] mb-12 md:mb-16">
             How it Works
           </h2>
           
