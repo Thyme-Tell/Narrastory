@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users } from "lucide-react";
@@ -54,7 +53,7 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
-      <header className="py-4 px-4 sm:px-8 bg-transparent">
+      <header className="py-4 px-4 sm:px-8 bg-transparent h-[10vh]">
         <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent">
           <Link to="/get-started">
             <img 
@@ -96,14 +95,11 @@ const GetStarted = () => {
       </header>
 
       <div 
-        className="w-full py-16 sm:py-24 flex items-center justify-center bg-cover bg-center bg-no-repeat mt-4"
+        className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "85%", 
           backgroundPosition: "center",
-          height: "auto",
-          minHeight: "500px",
-          position: "relative"
         }}
       >
         <div className="max-w-3xl mx-auto text-center">
