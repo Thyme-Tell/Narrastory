@@ -21,21 +21,21 @@ const GetStarted = () => {
       title: "Talk with Narra",
       description: "Call Narra and chat casually.",
       content: "She'll ask thoughtful questions to help you tell your story in your own words.",
-      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//call-narra.jpg"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//call-narra%20(1).jpg"
     },
     {
       id: 1,
       title: "Receive Your Story",
       description: "Get your story delivered to you.",
       content: "After your conversation, Narra transforms your words into a beautiful narrative that captures your unique voice and experience.",
-      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//story.jpg"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//story%20(1).jpg"
     },
     {
       id: 2,
       title: "Order Your Book",
       description: "Turn your stories into a keepsake.",
       content: "Choose from various book formats and designs to create a physical memento of your stories that can be shared for generations.",
-      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book.jpg"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book%20(1).jpg"
     }
   ];
   
