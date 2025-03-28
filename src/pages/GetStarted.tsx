@@ -285,7 +285,7 @@ const GetStarted = () => {
               <Card className="bg-white rounded-xl shadow-md overflow-hidden max-h-[500px]">
                 <div className="flex flex-col">
                   <div className="p-6 md:p-8 flex flex-col justify-center">
-                    <h3 className="text-[1.6rem] md:text-[1.6rem] font-caslon font-thin mb-4 text-[#242F3F]">
+                    <h3 className="text-[1.6rem] md:text-[1.6rem] font-caslon font-thin mb-2 text-[#242F3F]">
                       {howItWorksSteps[activeStep].description}
                     </h3>
                     <p className="text-[#403E43] text-[14px]">
