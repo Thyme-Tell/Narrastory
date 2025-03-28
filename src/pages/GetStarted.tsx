@@ -90,11 +90,14 @@ const GetStarted = () => {
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
         <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent py-1.5 sm:py-2">
-          <Link to="/get-started">
+          <Link 
+            to="/get-started" 
+            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-lg p-2 inline-block"
+          >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
               alt="Narra Logo" 
-              className="w-[130px] h-auto mb-4 sm:mb-0"
+              className="w-[130px] h-auto"
             />
           </Link>
 
