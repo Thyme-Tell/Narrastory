@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -208,7 +209,19 @@ const GetStarted = () => {
           
           <div className="flex flex-col md:flex-row gap-8 md:gap-16">
             <div className="w-full md:w-1/3">
-              <div className="flex flex-row md:flex-col gap-2 md:gap-4">
+              <div className="flex flex-row md:flex-col gap-2 md:gap-4 relative">
+                {/* Background vertical line */}
+                <div className="hidden md:block absolute left-0 top-0 w-0.5 h-full bg-[rgba(47,53,70,0.13)]"></div>
+                
+                {/* Active indicator */}
+                <div 
+                  className="hidden md:block absolute left-0 w-0.5 bg-[#2F3546] transition-all duration-300"
+                  style={{ 
+                    top: `${activeStep * (100 / howItWorksSteps.length) + 9}%`,
+                    height: '17px'
+                  }}
+                ></div>
+                
                 {howItWorksSteps.map((step, idx) => (
                   <div
                     key={step.id}
@@ -218,10 +231,10 @@ const GetStarted = () => {
                     onClick={() => setActiveStep(idx)}
                   >
                     <div
-                      className={`relative border-l-4 pl-4 py-3 transition-all duration-300 ${
+                      className={`relative pl-4 py-3 transition-all duration-300 md:border-l-0 ${
                         idx === activeStep
-                          ? "border-[#242F3F]"
-                          : "border-[#C8C8C9] group-hover:border-[#555555]"
+                          ? "border-l-4 border-[#242F3F] md:border-l-0"
+                          : "border-l-4 border-[#C8C8C9] md:border-l-0 group-hover:border-[#555555] md:group-hover:border-l-0"
                       }`}
                     >
                       <h3
