@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -14,10 +13,8 @@ const GetStarted = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const isMobile = useIsMobile();
   
-  // New state for the How it Works section
   const [activeStep, setActiveStep] = useState(0);
   
-  // How it Works steps data
   const howItWorksSteps = [
     {
       id: 0,
@@ -45,7 +42,6 @@ const GetStarted = () => {
   useEffect(() => {
     document.title = "Narra Story | Get Started";
     
-    // Set active nav item based on path
     const path = location.pathname;
     if (path === "/get-started") setActiveItem("home");
     if (path === "/how-it-works") setActiveItem("how-it-works");
@@ -81,12 +77,10 @@ const GetStarted = () => {
     }
   ];
 
-  // Navigation to previous step
   const handlePrevStep = () => {
     setActiveStep((prev) => (prev > 0 ? prev - 1 : howItWorksSteps.length - 1));
   };
 
-  // Navigation to next step
   const handleNextStep = () => {
     setActiveStep((prev) => (prev < howItWorksSteps.length - 1 ? prev + 1 : 0));
   };
@@ -135,7 +129,7 @@ const GetStarted = () => {
       </header>
 
       <div 
-        className="w-full h-[70vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "contain", 
@@ -200,7 +194,6 @@ const GetStarted = () => {
         </div>
       </div>
 
-      {/* How it Works Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-caslon font-bold text-[#242F3F] mb-12 md:mb-16">
@@ -208,7 +201,6 @@ const GetStarted = () => {
           </h2>
           
           <div className="flex flex-col md:flex-row gap-8 md:gap-16">
-            {/* Vertical Navigation */}
             <div className="w-full md:w-1/3">
               <div className="flex flex-row md:flex-col gap-2 md:gap-4">
                 {howItWorksSteps.map((step, idx) => (
@@ -251,7 +243,6 @@ const GetStarted = () => {
                 ))}
               </div>
 
-              {/* Mobile Navigation Controls */}
               <div className="flex justify-center mt-6 space-x-4 md:hidden">
                 <Button
                   variant="outline"
@@ -272,7 +263,6 @@ const GetStarted = () => {
               </div>
             </div>
             
-            {/* Content Card */}
             <div className="w-full md:w-2/3">
               <Card className="bg-white rounded-xl shadow-md overflow-hidden">
                 <div className="flex flex-col md:flex-row">
@@ -297,7 +287,6 @@ const GetStarted = () => {
                 </div>
               </Card>
               
-              {/* Desktop Navigation Controls */}
               <div className="hidden md:flex justify-end mt-6 space-x-4">
                 <Button
                   variant="outline"
