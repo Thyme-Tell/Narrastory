@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -43,7 +42,6 @@ const GetStarted = () => {
     }
   ];
   
-  // Move arrow navigation controls here, below howItWorksSteps array
   const handlePrevStep = () => {
     setActiveStep((prev) => (prev > 0 ? prev - 1 : howItWorksSteps.length - 1));
   };
@@ -211,10 +209,8 @@ const GetStarted = () => {
           <div className="flex flex-col md:flex-row gap-8 md:gap-16">
             <div className="w-full md:w-1/3">
               <div className="flex flex-row md:flex-col gap-2 md:gap-4 relative">
-                {/* Background vertical line */}
                 <div className="hidden md:block absolute left-0 top-0 w-0.5 h-full bg-[rgba(47,53,70,0.13)]"></div>
                 
-                {/* Active indicator */}
                 <div 
                   className="hidden md:block absolute left-0 w-0.5 bg-[#2F3546] transition-all duration-300"
                   style={{ 
@@ -306,24 +302,26 @@ const GetStarted = () => {
                 </div>
               </Card>
               
-              {/* Moved arrow navigation here */}
-              <div className="hidden md:flex justify-end mt-6 space-x-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handlePrevStep}
-                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleNextStep}
-                  className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
+              <div className="hidden md:flex justify-between mt-6">
+                <div></div>
+                <div className="space-x-4">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handlePrevStep}
+                    className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleNextStep}
+                    className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
