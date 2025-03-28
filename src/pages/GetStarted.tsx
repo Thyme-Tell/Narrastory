@@ -53,7 +53,7 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
-      <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center">
+      <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center bg-transparent">
         <Link to="/get-started">
           <img 
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
