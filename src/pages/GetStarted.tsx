@@ -57,25 +57,25 @@ const GetStarted = () => {
       name: "home", 
       label: "Home", 
       path: "/get-started",
-      icon: <Home className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />
+      icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
     },
     { 
       name: "how-it-works", 
       label: "How it Works", 
       path: "/how-it-works",
-      icon: <Book className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />
+      icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
     },
     { 
       name: "join-story-circle", 
       label: "Join a Story Circle", 
       path: "/join-story-circle",
-      icon: <Users className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />
+      icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
     },
     {
       name: "sign-up",
       label: "Sign Up",
       path: "/",
-      icon: <ArrowRight className="mr-1 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 text-white" />,
+      icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
       isButton: true
     }
   ];
@@ -110,15 +110,15 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto`}
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto`}
                   >
-                    Sign Up <ArrowRight className="ml-1 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                    Sign Up <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 text-white" />
                   </Link>
                 ) : (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium m-[3px] my-auto ${
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium m-[3px] my-auto ${
                       activeItem === item.name
                         ? "bg-[#17342C] text-white"
                         : "text-white hover:bg-[#17342C]/10"
@@ -144,18 +144,18 @@ const GetStarted = () => {
       >
         <div className="max-w-3xl mx-auto text-center">
           <h1 
-            className="text-4xl md:text-5xl lg:text-[56px] font-caslon font-thin mb-6 leading-tight text-[#262626]"
+            className="text-4xl md:text-5xl lg:text-6xl font-caslon font-thin mb-6 leading-tight text-[#262626]"
             style={{ letterSpacing: "-0.02em" }}
           >
             Narrate as only <em className="italic font-caslon font-thin">you</em> can.
           </h1>
           
-          <h2 className="text-xl md:text-2xl lg:text-[30px] font-caslon mb-4 text-[#262626]">
+          <h2 className="text-2xl md:text-3xl font-caslon mb-4 text-[#262626]">
             Share your life stories through simple conversation.
           </h2>
           
           <p 
-            className="text-lg md:text-xl text-[#2F3546] mb-12 max-w-2xl mx-auto"
+            className="text-base md:text-lg text-[#2F3546] mb-12 max-w-2xl mx-auto"
             style={{ 
               fontFamily: "'Uncut Sans Variable', sans-serif", 
               fontStyle: 'normal', 
@@ -237,7 +237,7 @@ const GetStarted = () => {
                       }`}
                     >
                       <h3
-                        className={`font-uncut-sans text-[0.7rem] md:text-base mb-1 transition-colors duration-300 font-normal ${
+                        className={`font-uncut-sans text-sm md:text-base mb-1 transition-colors duration-300 font-normal ${
                           idx === activeStep
                             ? "text-[#242F3F]"
                             : "text-[#8A898C] group-hover:text-[#555555]"
@@ -247,7 +247,7 @@ const GetStarted = () => {
                       </h3>
                       {!isMobile && (
                         <p
-                          className={`${step.descriptionStyle} font-uncut-sans transition-colors duration-300 ${
+                          className={`text-xs md:text-sm font-uncut-sans transition-colors duration-300 ${
                             idx === activeStep
                               ? "text-[#403E43]"
                               : "text-[#9F9EA1] group-hover:text-[#555555]"
@@ -285,10 +285,10 @@ const GetStarted = () => {
               <Card className="bg-white rounded-xl shadow-md overflow-hidden">
                 <div className="flex flex-col h-full">
                   <div className="p-6 md:p-8 flex flex-col justify-center">
-                    <h3 className="text-[1.6rem] md:text-[1.6rem] font-caslon font-thin mb-2 text-[#242F3F]">
+                    <h3 className="text-xl md:text-2xl font-caslon font-thin mb-2 text-[#242F3F]">
                       {howItWorksSteps[activeStep].description}
                     </h3>
-                    <p className="text-[#403E43] text-[14px]">
+                    <p className="text-sm md:text-base text-[#403E43]">
                       {howItWorksSteps[activeStep].content}
                     </p>
                   </div>
@@ -311,7 +311,7 @@ const GetStarted = () => {
                   onClick={handlePrevStep}
                   className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
                 >
-                  <ChevronLeft className="h-5 w-5" />
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
@@ -319,7 +319,7 @@ const GetStarted = () => {
                   onClick={handleNextStep}
                   className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -329,18 +329,18 @@ const GetStarted = () => {
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-caslon font-bold text-atlantic mb-6">
+          <h2 className="text-3xl md:text-4xl font-caslon font-bold text-atlantic mb-6">
             Welcome to Narra
           </h2>
-          <p className="text-lg md:text-xl text-[#262626] mb-8">
+          <p className="text-base md:text-lg text-[#262626] mb-8">
             Your place to create, share, and preserve your most important stories.
           </p>
           
           <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-            <h3 className="text-2xl font-caslon font-bold text-atlantic mb-4">
+            <h3 className="text-xl md:text-2xl font-caslon font-bold text-atlantic mb-4">
               Get Started with Narra
             </h3>
-            <p className="text-[#262626] mb-4">
+            <p className="text-sm md:text-base text-[#262626] mb-4">
               Narra helps you create beautiful storybooks from your personal memories and experiences.
               Our intuitive tools make it easy to write, illustrate, and share your stories with loved ones.
             </p>
