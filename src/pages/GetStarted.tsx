@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -282,8 +283,8 @@ const GetStarted = () => {
             </div>
             
             <div className="w-full md:w-2/3">
-              <Card className="bg-white rounded-xl shadow-md overflow-hidden max-h-[500px]">
-                <div className="flex flex-col">
+              <Card className="bg-white rounded-xl shadow-md overflow-hidden" style={{ minHeight: "700px" }}>
+                <div className="flex flex-col h-full">
                   <div className="p-6 md:p-8 flex flex-col justify-center">
                     <h3 className="text-[1.6rem] md:text-[1.6rem] font-caslon font-thin mb-2 text-[#242F3F]">
                       {howItWorksSteps[activeStep].description}
@@ -292,13 +293,13 @@ const GetStarted = () => {
                       {howItWorksSteps[activeStep].content}
                     </p>
                   </div>
-                  <div className="bg-[#F6F6F7]">
-                    <div>
+                  <div className="bg-[#F6F6F7] flex-grow">
+                    <div className="h-full">
                       <img
                         src={howItWorksSteps[activeStep].image}
                         alt={howItWorksSteps[activeStep].title}
                         className="w-full h-full object-cover"
-                        style={{ maxHeight: "400px" }}
+                        style={{ maxHeight: "600px" }}
                       />
                     </div>
                   </div>
