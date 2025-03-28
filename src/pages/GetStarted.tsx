@@ -1,17 +1,14 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
+import CallNarraForm from "@/components/CallNarraForm";
 
 const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [inputFocused, setInputFocused] = useState(false);
   const isMobile = useIsMobile();
   
   const [activeStep, setActiveStep] = useState(0);
@@ -92,10 +89,10 @@ const GetStarted = () => {
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
-        <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent py-1.5 sm:py-2">
+        <nav className="flex flex-col items-center bg-transparent py-1.5 sm:py-2">
           <Link 
             to="/get-started" 
-            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block"
+            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block mb-4"
           >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
@@ -104,14 +101,14 @@ const GetStarted = () => {
             />
           </Link>
 
-          <div className="flex flex-col sm:flex-row items-center">
-            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto shadow-sm">
+          <div className="flex flex-col items-center w-full">
+            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col items-center w-full max-w-md shadow-sm">
               {navItems.map((item) => (
                 item.isButton ? (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto`}
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full justify-center m-[3px] my-auto`}
                   >
                     Sign Up <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 text-white" />
                   </Link>
@@ -123,7 +120,7 @@ const GetStarted = () => {
                       activeItem === item.name
                         ? "bg-[#17342C] text-white"
                         : "text-white hover:bg-[#17342C]/10"
-                    } transition-colors duration-200 w-full sm:w-auto mb-0.5 sm:mb-0 sm:mr-0.5`}
+                    } transition-colors duration-200 w-full mb-0.5 sm:mb-0`}
                   >
                     {item.icon}
                     {item.label}
@@ -168,35 +165,7 @@ const GetStarted = () => {
           </p>
           
           <div className="max-w-md mx-auto px-4">
-            <div className={`relative w-full ${isMobile ? 'flex flex-col' : ''}`}>
-              <Input
-                type="text"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder={inputFocused ? "" : "Your phone number"}
-                className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full text-base ${
-                  isMobile ? 'mb-2 pr-5 text-center' : 'pr-[150px]'
-                } outline-none`}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => !phoneNumber && setInputFocused(false)}
-              />
-              <Button 
-                className={`${isMobile ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-base flex items-center gap-2 font-light`}
-                style={{
-                  background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
-                }}
-                onClick={() => console.log("Talk with", phoneNumber)}
-              >
-                Talk with 
-                <img 
-                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-                  alt="Narra Icon" 
-                  className="w-5 h-5 relative -top-[2px]"
-                />
-                <span className="font-light">Narra</span> 
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <CallNarraForm />
           </div>
         </div>
       </div>
@@ -325,8 +294,6 @@ const GetStarted = () => {
                   </div>
                 </div>
               </Card>
-              
-              {/* Removed the desktop navigation arrows from here */}
             </div>
           </div>
         </div>

@@ -1,0 +1,10 @@
+
+# project_id is the Supabase project ID found in the dashboard
+project_id = "pohnhzxqorelllbfnqyj"
+
+# Override the function name
+name = "synthflow-call"
+
+# Define environment variables
+[env]
+# Environment variables here
