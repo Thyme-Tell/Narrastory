@@ -33,8 +33,8 @@ const GetStarted = () => {
     {
       id: 2,
       title: "Order Your Book",
-      description: "Turn your stories into a keepsake.",
-      content: "Choose from various book formats and designs to create a physical memento of your stories that can be shared for generations.",
+      description: "Order your beautiful book.",
+      content: "Once you have enough content, give your book a quick read and get a beautifully designed copy in your hands.",
       image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book%20(1).jpg"
     }
   ];
