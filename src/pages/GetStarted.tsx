@@ -92,10 +92,10 @@ const GetStarted = () => {
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
-        <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent py-1.5 sm:py-2">
+        <nav className="flex flex-col items-center bg-transparent py-1.5 sm:py-2">
           <Link 
             to="/get-started" 
-            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block"
+            className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block mb-4 md:mb-4"
           >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
@@ -104,14 +104,14 @@ const GetStarted = () => {
             />
           </Link>
 
-          <div className="flex flex-col sm:flex-row items-center">
-            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto shadow-sm">
+          <div className="flex flex-col items-center w-full sm:w-auto">
+            <div className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col items-center w-full max-w-md shadow-sm">
               {navItems.map((item) => (
                 item.isButton ? (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto`}
+                    className="flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto"
                   >
                     Sign Up <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 text-white" />
                   </Link>
