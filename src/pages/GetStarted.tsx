@@ -38,7 +38,7 @@ const GetStarted = () => {
       title: "Order Your Book",
       description: "Order your beautiful book.",
       content: "Once you have enough content, give your book a quick read and get a beautifully designed copy in your hands.",
-      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book%20(1).jpg",
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book(2).jpg",
       descriptionStyle: "text-[12px]"
     }
   ];
