@@ -54,47 +54,49 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
-      <nav className="py-4 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center bg-transparent">
-        <Link to="/get-started">
-          <img 
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
-            alt="Narra Logo" 
-            className="w-[130px] h-auto mb-4 sm:mb-0"
-          />
-        </Link>
+      <header className="py-4 px-4 sm:px-8 bg-transparent">
+        <nav className="flex flex-col sm:flex-row justify-between items-center bg-transparent">
+          <Link to="/get-started">
+            <img 
+              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
+              alt="Narra Logo" 
+              className="w-[130px] h-auto mb-4 sm:mb-0"
+            />
+          </Link>
 
-        <div className="flex flex-col sm:flex-row items-center">
-          <div className="bg-[#8A9096] rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto">
-            {navItems.map((item) => (
-              item.isButton ? (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center ml-0.5`}
-                >
-                  Sign Up <ArrowRight className="ml-1 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                </Link>
-              ) : (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium ${
-                    activeItem === item.name
-                      ? "bg-[#17342C] text-white"
-                      : "text-[#262626] hover:bg-[#17342C]/10"
-                  } transition-colors duration-200 w-full sm:w-auto mb-0.5 sm:mb-0 sm:mr-0.5`}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              )
-            ))}
+          <div className="flex flex-col sm:flex-row items-center">
+            <div className="bg-[#8A9096] rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto">
+              {navItems.map((item) => (
+                item.isButton ? (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center ml-0.5`}
+                  >
+                    Sign Up <ArrowRight className="ml-1 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </Link>
+                ) : (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-xs sm:text-sm font-medium ${
+                      activeItem === item.name
+                        ? "bg-[#17342C] text-white"
+                        : "text-[#262626] hover:bg-[#17342C]/10"
+                    } transition-colors duration-200 w-full sm:w-auto mb-0.5 sm:mb-0 sm:mr-0.5`}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                )
+              ))}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
       <div 
-        className="w-full py-16 sm:py-24 flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="w-full py-16 sm:py-24 flex items-center justify-center bg-cover bg-center bg-no-repeat mt-4"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "85%", 
