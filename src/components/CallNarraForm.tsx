@@ -51,7 +51,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       const normalized = normalizePhoneNumber(phoneNumber);
       
       // Direct submission to Synthflow form
-      const formUrl = 'https://workflow.synthflow.ai/forms/et8Cg0Wn3HmcRuKyv8rGN';
+      const formUrl = 'https://workflow.synthflow.ai/forms/Si4tARFS5QOwgMbnPE4I7';
       const formData = new FormData();
       formData.append('phone_number', normalized.replace('+', ''));
 
