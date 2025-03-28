@@ -265,8 +265,8 @@ const GetStarted = () => {
             
             <div className="w-full md:w-2/3">
               <Card className="bg-white rounded-xl shadow-md overflow-hidden">
-                <div className="flex flex-col md:flex-row">
-                  <div className="p-6 md:p-8 md:w-1/2 flex flex-col justify-center">
+                <div className="flex flex-col">
+                  <div className="p-6 md:p-8 flex flex-col justify-center">
                     <h3 className="text-2xl md:text-3xl font-caslon font-semibold mb-4 text-[#242F3F]">
                       {howItWorksSteps[activeStep].description}
                     </h3>
@@ -274,8 +274,8 @@ const GetStarted = () => {
                       {howItWorksSteps[activeStep].content}
                     </p>
                   </div>
-                  <div className="md:w-1/2 bg-[#F6F6F7]">
-                    <div className="h-full">
+                  <div className="bg-[#F6F6F7]">
+                    <div>
                       <img
                         src={howItWorksSteps[activeStep].image}
                         alt={howItWorksSteps[activeStep].title}
