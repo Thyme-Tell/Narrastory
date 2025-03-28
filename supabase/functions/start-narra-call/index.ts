@@ -4,7 +4,7 @@ import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
 
 // Get Synthflow credentials from environment variables
 const SYNTHFLOW_API_KEY = Deno.env.get('SYNTHFLOW_API_KEY') || '';
-const SYNTHFLOW_CAMPAIGN_ID = Deno.env.get('SYNTHFLOW_CAMPAIGN_ID') || '';
+const SYNTHFLOW_CAMPAIGN_ID = '1743177315065x596041660443303700';
 const SYNTHFLOW_WEBHOOK_URL = 'https://workflow.synthflow.ai/api/v1/webhooks/et8Cg0Wn3HmcRuKyv8rGN';
 
 // Main server function
