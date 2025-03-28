@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -22,21 +21,21 @@ const GetStarted = () => {
       title: "Talk with Narra",
       description: "Call Narra and chat casually.",
       content: "She'll ask thoughtful questions to help you tell your story in your own words.",
-      image: "/lovable-uploads/db2cf5d9-471d-4740-a5b2-8b7deae5669d.png"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//call-narra.jpg"
     },
     {
       id: 1,
       title: "Receive Your Story",
       description: "Get your story delivered to you.",
       content: "After your conversation, Narra transforms your words into a beautiful narrative that captures your unique voice and experience.",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//story.jpg"
     },
     {
       id: 2,
       title: "Order Your Book",
       description: "Turn your stories into a keepsake.",
       content: "Choose from various book formats and designs to create a physical memento of your stories that can be shared for generations.",
-      image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04"
+      image: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//book.jpg"
     }
   ];
   
