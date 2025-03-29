@@ -94,6 +94,21 @@ const Header: React.FC<HeaderProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Handle manual navigation when clicking on a nav item
+  const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
+    e.preventDefault();
+    
+    // Call the handleMenuItemClick function to update the active item
+    handleMenuItemClick(item);
+    
+    // Scroll to the appropriate section
+    if (item.ref && item.ref.current) {
+      item.ref.current.scrollIntoView({ behavior: 'smooth' });
+    } else if (item.name === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Modify nav items to show Narra icon instead of Home icon when scrolled
   const displayNavItems = navItems.map(item => {
     if (scrolled && item.name === 'home') {
@@ -153,10 +168,7 @@ const Header: React.FC<HeaderProps> = ({
                       <Link
                         key={item.name}
                         to={item.path}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleMenuItemClick(item);
-                        }}
+                        onClick={(e) => handleNavItemClick(e, item)}
                         className="flex items-center w-full px-4 py-2 text-xs font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
                       >
                         {item.icon}
@@ -167,10 +179,7 @@ const Header: React.FC<HeaderProps> = ({
                       <DropdownMenuItem key={item.name} asChild>
                         <Link
                           to={item.path}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleMenuItemClick(item);
-                          }}
+                          onClick={(e) => handleNavItemClick(e, item)}
                           className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] ${
                             activeItem === item.name
                               ? "bg-[#17342C]"
@@ -214,10 +223,7 @@ const Header: React.FC<HeaderProps> = ({
                 <Link
                   key={item.name}
                   to={item.path}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleMenuItemClick(item);
-                  }}
+                  onClick={(e) => handleNavItemClick(e, item)}
                   className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
                 >
                   Sign Up <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 text-white" />
@@ -226,10 +232,7 @@ const Header: React.FC<HeaderProps> = ({
                 <Link
                   key={item.name}
                   to={item.path}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleMenuItemClick(item);
-                  }}
+                  onClick={(e) => handleNavItemClick(e, item)}
                   className={`flex items-center px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap text-white m-[2px] my-auto ${
                     activeItem === item.name
                       ? "bg-[#17342C]"
