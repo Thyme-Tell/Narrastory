@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Define the Synthflow webhook URL for reference
+// Define the Synthflow webhook URL for direct form submission
 const SYNTHFLOW_WEBHOOK_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
 
 interface CallNarraFormProps {
@@ -61,13 +61,10 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         Phone: normalized
       };
       
-      console.log("Sending webhook payload:", webhookPayload);
+      console.log("Sending webhook payload to Synthflow:", webhookPayload);
       
-      // Use server-to-server call instead of direct browser call
-      // We'll use a simple proxy approach to avoid CORS issues
-      const proxyUrl = "/api/synthflow-proxy";
-      
-      const response = await fetch(proxyUrl, {
+      // Send the request directly to the Synthflow form URL
+      const response = await fetch(SYNTHFLOW_WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,11 +72,11 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         body: JSON.stringify(webhookPayload),
       });
       
-      console.log("Proxy response status:", response.status);
+      console.log("Synthflow response status:", response.status);
       
       // Try to parse response text for debugging
       const responseText = await response.text();
-      console.log("Proxy response:", responseText);
+      console.log("Synthflow response:", responseText);
       
       if (!response.ok) {
         throw new Error(`Failed to submit phone number: ${responseText || response.statusText}`);
