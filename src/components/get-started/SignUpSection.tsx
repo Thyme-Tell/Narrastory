@@ -1,5 +1,8 @@
 
 import React from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import ProfileForm from "@/components/ProfileForm";
 
 interface SignUpSectionProps {
@@ -13,16 +16,55 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
       id="sign-up"
       className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24"
     >
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 text-center">
-          Sign Up for Narra
-        </h2>
-        <p className="text-base md:text-lg text-[#403E43] mb-12 text-center max-w-2xl mx-auto">
-          Join Narra today and start preserving your most important stories. Create a free account to begin your storytelling journey.
-        </p>
-        
-        <div className="bg-white rounded-xl shadow-md p-8 md:p-10 max-w-md mx-auto">
-          <ProfileForm />
+      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden">
+        <div className="grid md:grid-cols-2">
+          {/* Left Panel - Form */}
+          <div className="p-8 md:p-12 flex flex-col justify-center">
+            <div className="max-w-md mx-auto w-full">
+              <div className="mb-8">
+                <h2 className="text-2xl font-caslon font-medium text-[#242F3F] mb-3">
+                  Join Narra
+                </h2>
+                <p className="text-sm text-[#403E43]/80">
+                  Preserve your most meaningful stories for generations to come, wherever you are, whenever you want.
+                </p>
+              </div>
+              
+              <div className="flex flex-col gap-6">
+                <ProfileForm />
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Panel - Image or Info */}
+          <div className="hidden md:block bg-[#242F3F] text-white p-12 flex flex-col justify-center">
+            <div className="flex flex-col justify-center h-full">
+              <div className="text-center mb-6">
+                <p className="text-white/80 text-sm uppercase tracking-wide">Preserve Your Legacy</p>
+                <h2 className="text-3xl font-caslon mt-2 mb-4">Family Stories.<br />Forever.</h2>
+              </div>
+              
+              <div className="bg-[#1d2532] rounded-2xl p-6 shadow-lg mx-auto max-w-xs">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-white/60 text-xs">STORIES</p>
+                    <p className="text-xl font-medium">24 Family Memories</p>
+                  </div>
+                  
+                  <div className="w-full h-40 bg-gradient-to-br from-[#A33D29]/90 to-[#A33D29]/60 rounded-lg flex items-center justify-center">
+                    <span className="font-caslon text-2xl">Narra Book</span>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="w-full bg-white/10 h-2 rounded-full">
+                      <div className="bg-[#A33D29] h-2 rounded-full w-3/4"></div>
+                    </div>
+                    <p className="text-xs text-white/60 text-right">75% Complete</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
