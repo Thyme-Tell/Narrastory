@@ -8,12 +8,23 @@ export function useLumaEvents() {
     data: events, 
     isLoading, 
     error, 
-    refetch 
+    refetch,
+    isError
   } = useQuery({
     queryKey: ["lumaEvents"],
-    queryFn: fetchLumaEvents,
+    queryFn: async () => {
+      try {
+        const result = await fetchLumaEvents();
+        console.log("Events fetched successfully:", result);
+        return result;
+      } catch (err) {
+        console.error("Error in queryFn:", err);
+        throw err;
+      }
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 3,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(attempt > 1 ? 2000 : 1000, 30 * 1000),
     meta: {
       onError: (error: Error) => {
         console.error("Failed to fetch Luma events:", error);
@@ -30,6 +41,7 @@ export function useLumaEvents() {
     events: events || [],
     isLoading,
     error,
+    isError,
     refetch
   };
 }

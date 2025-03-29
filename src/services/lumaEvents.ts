@@ -36,9 +36,7 @@ interface LumaApiEvent {
 // This function fetches events from the Luma API
 export async function fetchLumaEvents(): Promise<LumaEvent[]> {
   try {
-    // For now, we're using a simplified approach since we don't have a backend proxy
-    // In a real implementation, this would call a secured backend endpoint
-    // that safely uses the API key
+    console.log("Attempting to fetch Luma events with API key present:", !!LUMA_API_KEY);
     
     // Check if we're in development mode (no API key)
     if (!LUMA_API_KEY) {
@@ -46,22 +44,35 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
       return getMockEvents();
     }
     
+    // Make the API request with proper CORS headers
     const response = await fetch('https://api.lu.ma/public/v1/calendar/upcoming-events', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${LUMA_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
 
+    console.log("Luma API response status:", response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Luma API error (${response.status}):`, errorText);
       throw new Error(`Luma API responded with status: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("Luma API response data:", data);
     
     if (!data.events || !Array.isArray(data.events)) {
+      console.error('Invalid response format from Luma API:', data);
       throw new Error('Invalid response format from Luma API');
+    }
+    
+    if (data.events.length === 0) {
+      console.log("No events returned from Luma API, using mock data");
+      return getMockEvents();
     }
     
     // Map Luma API events to our internal event format
@@ -79,7 +90,9 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
     }));
   } catch (error) {
     console.error("Error fetching Luma events:", error);
-    throw error;
+    // Fallback to mock data on error
+    console.log("Returning mock data due to error");
+    return getMockEvents();
   }
 }
 

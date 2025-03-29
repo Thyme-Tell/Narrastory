@@ -1,22 +1,37 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
 import LumaEventCard from "./LumaEventCard";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Calendar, RefreshCw } from "lucide-react";
+import { Calendar, RefreshCw, AlertTriangle } from "lucide-react";
+import { LUMA_API_KEY } from "@/config/constants";
 
 const LumaEventsSection: React.FC = () => {
-  const { events, isLoading, error, refetch } = useLumaEvents();
+  const { events, isLoading, error, isError, refetch } = useLumaEvents();
   
+  useEffect(() => {
+    // Debug information in console
+    console.log("LumaEventsSection rendered with:", {
+      eventsCount: events?.length,
+      isLoading,
+      hasError: !!error,
+      apiKeyPresent: !!LUMA_API_KEY
+    });
+  }, [events, isLoading, error]);
+
   // Handle error state
-  if (error) {
+  if (isError) {
     return (
       <div className="mt-12">
         <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4 mr-2" />
           <AlertTitle>Error loading events</AlertTitle>
           <AlertDescription>
             We couldn't load the upcoming story circles. Please try again later.
+            {error instanceof Error && (
+              <div className="mt-2 text-xs opacity-80">{error.message}</div>
+            )}
           </AlertDescription>
         </Alert>
         <Button 
@@ -45,7 +60,7 @@ const LumaEventsSection: React.FC = () => {
   }
 
   // Handle empty state
-  if (events.length === 0) {
+  if (!events || events.length === 0) {
     return (
       <div className="mt-12 text-center p-8 bg-[#F6F6F7] rounded-xl">
         <Calendar className="h-12 w-12 mx-auto text-[#A33D29] mb-4" />
