@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
@@ -56,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
   });
 
   return (
-    <header className={`py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#17342C]/90' : 'bg-[#17342C]/60'}`}>
+    <header className={`py-4 px-4 sm:px-8 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-transparent' : 'bg-transparent'}`}>
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex sm:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown */}
