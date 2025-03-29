@@ -39,17 +39,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { phoneNumber } = requestBody;
+    const { Phone } = requestBody;
     
-    if (!phoneNumber) {
+    if (!Phone) {
       return new Response(
         JSON.stringify({ success: false, error: 'Phone number is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Normalize phone number for consistency
-    const normalizedPhone = normalizePhoneNumber(phoneNumber);
+    // Normalize phone number for consistency if needed
+    const normalizedPhone = Phone.startsWith('+') ? Phone : normalizePhoneNumber(Phone);
     
     console.log(`Submitting phone number to Synthflow workflow: ${normalizedPhone}`);
     console.log(`Using webhook URL: ${SYNTHFLOW_WEBHOOK_URL}`);
