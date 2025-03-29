@@ -27,6 +27,19 @@ Deno.serve(async (req) => {
     const normalizedPhone = normalizePhoneNumber(phoneNumber);
     
     console.log(`Initiating direct call to ${normalizedPhone}`);
+    console.log(`Using webhook URL: ${SYNTHFLOW_WEBHOOK_URL}`);
+    
+    // Check if API key is available
+    if (!SYNTHFLOW_API_KEY) {
+      console.error('Missing SYNTHFLOW_API_KEY environment variable');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'API key configuration error' 
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Make direct call to Synthflow API
     const response = await fetch('https://api.synthflow.ai/api/v1/calls/start', {
@@ -42,21 +55,32 @@ Deno.serve(async (req) => {
       }),
     });
     
+    // Log full response for debugging
+    const responseText = await response.text();
+    console.log(`Synthflow API response status: ${response.status}`);
+    console.log(`Synthflow API response body: ${responseText}`);
+    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Synthflow API error:', errorText);
+      console.error('Synthflow API error:', responseText);
       
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: 'Failed to start call', 
-          details: errorText 
+          details: responseText,
+          status: response.status
         }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    const responseData = await response.json();
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Error parsing response JSON:', e);
+      responseData = { message: 'Response received but not valid JSON' };
+    }
     
     return new Response(
       JSON.stringify({ success: true, data: responseData }),

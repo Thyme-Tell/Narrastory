@@ -50,8 +50,12 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     try {
       const normalized = normalizePhoneNumber(phoneNumber);
       
+      // Log the normalized phone number for debugging
+      console.log("Normalized phone number:", normalized);
+      
       // Call our Supabase function to initiate the call
       const webhookUrl = 'https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/start-narra-call';
+      console.log("Calling function at:", webhookUrl);
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
@@ -63,10 +67,13 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         })
       });
 
+      console.log("Response status:", response.status);
       const data = await response.json();
+      console.log("Response data:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to initiate call');
+        const errorMessage = data.error || data.details || 'Failed to initiate call';
+        throw new Error(errorMessage);
       }
 
       toast({
@@ -79,12 +86,18 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       
     } catch (error) {
       console.error("Error initiating call:", error);
+      
+      let errorMessage = "Something went wrong. Please try again later.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "Something went wrong. Please try again later.",
+        description: errorMessage,
         variant: "destructive"
       });
-      onError?.(error.message);
+      onError?.(errorMessage);
     } finally {
       setIsLoading(false);
     }
