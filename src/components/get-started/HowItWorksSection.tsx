@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Step {
   id: number;
@@ -145,58 +144,27 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
           </div>
           
           <div className="w-full md:w-2/3">
-            <ScrollArea className="w-full whitespace-nowrap pb-4">
-              <div className="flex space-x-4">
-                {howItWorksSteps.map((step, idx) => (
-                  <Card 
-                    key={step.id}
-                    className={`bg-white rounded-xl shadow-md overflow-hidden min-w-[280px] sm:min-w-[320px] md:min-w-full transition-all duration-300 ${
-                      idx === activeStep ? "scale-100 opacity-100" : "scale-95 opacity-70"
-                    }`}
-                    onClick={() => setActiveStep(idx)}
-                  >
-                    <div className="flex flex-col h-full">
-                      <div className="p-6 md:p-8 flex flex-col justify-center">
-                        <h3 className="text-xl md:text-2xl font-caslon font-thin mb-2 text-[#242F3F]">
-                          {step.description}
-                        </h3>
-                        <p className="text-sm md:text-base text-[#403E43]">
-                          {step.content}
-                        </p>
-                      </div>
-                      <div className="bg-[#F6F6F7] flex-grow">
-                        <div>
-                          <img
-                            src={step.image}
-                            alt={step.title}
-                            className="w-full h-64 object-cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+            <Card className="bg-white rounded-xl shadow-md overflow-hidden">
+              <div className="flex flex-col h-full">
+                <div className="p-6 md:p-8 flex flex-col justify-center">
+                  <h3 className="text-xl md:text-2xl font-caslon font-thin mb-2 text-[#242F3F]">
+                    {howItWorksSteps[activeStep].description}
+                  </h3>
+                  <p className="text-sm md:text-base text-[#403E43]">
+                    {howItWorksSteps[activeStep].content}
+                  </p>
+                </div>
+                <div className="bg-[#F6F6F7] flex-grow">
+                  <div>
+                    <img
+                      src={howItWorksSteps[activeStep].image}
+                      alt={howItWorksSteps[activeStep].title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
               </div>
-            </ScrollArea>
-            
-            <div className="flex justify-center mt-6 md:hidden space-x-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePrevStep}
-                className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNextStep}
-                className="rounded-full border-[#C8C8C9] text-[#403E43] hover:bg-[#F6F6F7] hover:text-[#242F3F]"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
