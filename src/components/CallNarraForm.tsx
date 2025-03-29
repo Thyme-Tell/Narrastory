@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CallNarraFormProps {
   className?: string;
@@ -53,28 +54,18 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       // Log the normalized phone number for debugging
       console.log("Normalized phone number:", normalized);
       
-      // Use the correct format for the edge function URL
-      // Important: We're using the full URL with the project ID
-      const functionUrl = 'https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/start-narra-call';
-      console.log("Calling function at:", functionUrl);
-      
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Use Supabase functions.invoke instead of direct fetch for proper authentication
+      const { data, error } = await supabase.functions.invoke('start-narra-call', {
+        body: {
           phoneNumber: normalized,
-        })
+        }
       });
 
-      console.log("Response status:", response.status);
-      const data = await response.json();
       console.log("Response data:", data);
 
-      if (!response.ok) {
-        const errorMessage = data.error || data.details || 'Failed to initiate call';
-        throw new Error(errorMessage);
+      if (error) {
+        console.error("Error response:", error);
+        throw new Error(error.message || 'Failed to initiate call');
       }
 
       toast({
