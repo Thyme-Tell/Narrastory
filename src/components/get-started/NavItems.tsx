@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Home, Book, Users, ArrowRight } from "lucide-react";
 
@@ -23,7 +24,7 @@ export const getNavItems = (
     path: "/get-started#home",
     icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
     ref: homeRef,
-    anchorId: "home" // Ensure anchorId is set
+    anchorId: "home"
   },
   { 
     name: "how-it-works", 
