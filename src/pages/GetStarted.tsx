@@ -1,11 +1,12 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import CallNarraForm from "@/components/CallNarraForm";
+import ProfileForm from "@/components/ProfileForm";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,11 @@ const GetStarted = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const [activeStep, setActiveStep] = useState(0);
+  
+  // Create refs for each section
+  const howItWorksRef = useRef<HTMLElement>(null);
+  const storyCirclesRef = useRef<HTMLElement>(null);
+  const signUpRef = useRef<HTMLElement>(null);
   
   const howItWorksSteps = [
     {
@@ -51,12 +57,22 @@ const GetStarted = () => {
   useEffect(() => {
     document.title = "Narra Story | Get Started";
     
+    // Handle both path and hash for active item
     const path = location.pathname;
-    if (path === "/get-started") setActiveItem("home");
-    if (path === "/how-it-works") setActiveItem("how-it-works");
-    if (path === "/join-story-circle") setActiveItem("join-story-circle");
-    if (path === "/sign-up" || path === "/") setActiveItem("sign-up");
+    const hash = location.hash;
+
+    if (path === "/get-started" && !hash) setActiveItem("home");
+    if (hash === "#how-it-works") setActiveItem("how-it-works");
+    if (hash === "#join-story-circle") setActiveItem("join-story-circle");
+    if (hash === "#sign-up") setActiveItem("sign-up");
   }, [location]);
+
+  // Function to scroll to section
+  const scrollToSection = (ref: React.RefObject<HTMLElement>) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const navItems = [
     { 
@@ -68,21 +84,24 @@ const GetStarted = () => {
     { 
       name: "how-it-works", 
       label: "How it Works", 
-      path: "/how-it-works",
-      icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
+      path: "/get-started#how-it-works",
+      icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
+      onClick: () => scrollToSection(howItWorksRef)
     },
     { 
       name: "join-story-circle", 
       label: "Join a Story Circle", 
-      path: "/join-story-circle",
-      icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
+      path: "/get-started#join-story-circle",
+      icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
+      onClick: () => scrollToSection(storyCirclesRef)
     },
     {
       name: "sign-up",
       label: "Sign Up",
-      path: "/",
+      path: "/get-started#sign-up",
       icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      isButton: true
+      isButton: true,
+      onClick: () => scrollToSection(signUpRef)
     }
   ];
 
@@ -119,6 +138,10 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (item.onClick) item.onClick();
+                    }}
                     className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] mr-[5px] my-auto`}
                   >
                     Sign Up <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 text-white" />
@@ -127,6 +150,10 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (item.onClick) item.onClick();
+                    }}
                     className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap text-white m-[3px] my-auto ${
                       activeItem === item.name
                         ? "bg-[#17342C]"
@@ -157,6 +184,11 @@ const GetStarted = () => {
                       <Link
                         key={item.name}
                         to={item.path}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (item.onClick) item.onClick();
+                          setIsDropdownOpen(false);
+                        }}
                         className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px]"
                       >
                         {item.icon}
@@ -167,6 +199,11 @@ const GetStarted = () => {
                       <DropdownMenuItem key={item.name} asChild>
                         <Link
                           to={item.path}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (item.onClick) item.onClick();
+                            setIsDropdownOpen(false);
+                          }}
                           className={`flex items-center w-full px-4 py-2 text-white ${
                             activeItem === item.name
                               ? "bg-[#17342C]"
@@ -186,7 +223,9 @@ const GetStarted = () => {
         </nav>
       </header>
 
+      {/* Hero Section - Home */}
       <div 
+        id="home"
         className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
@@ -224,7 +263,12 @@ const GetStarted = () => {
         </div>
       </div>
 
-      <section className="container mx-auto px-4 py-16 md:py-24">
+      {/* How it Works Section */}
+      <section 
+        ref={howItWorksRef}
+        id="how-it-works"
+        className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24"
+      >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 md:mb-16">
             How it Works
@@ -345,6 +389,94 @@ const GetStarted = () => {
                 </div>
               </Card>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Narra Story Circles Section */}
+      <section 
+        ref={storyCirclesRef}
+        id="join-story-circle"
+        className="container mx-auto px-4 py-16 md:py-24 bg-white scroll-mt-24"
+      >
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12">
+            Narra Story Circles
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-[#EFF1E9] rounded-xl p-6 md:p-8 shadow-sm">
+              <h3 className="text-xl md:text-2xl font-caslon font-thin mb-4 text-[#242F3F]">
+                Join a Circle
+              </h3>
+              <p className="text-sm md:text-base text-[#403E43] mb-6">
+                Connect with others who share your interests and experiences. Story Circles offer a supportive environment to share memories and create collective narratives.
+              </p>
+              <Button className="bg-[#242F3F] hover:bg-[#242F3F]/90 text-white">
+                Find a Circle
+              </Button>
+            </div>
+            
+            <div className="bg-[#EFF1E9] rounded-xl p-6 md:p-8 shadow-sm">
+              <h3 className="text-xl md:text-2xl font-caslon font-thin mb-4 text-[#242F3F]">
+                Create a Circle
+              </h3>
+              <p className="text-sm md:text-base text-[#403E43] mb-6">
+                Start your own Story Circle with family, friends, or colleagues. Customize topics and invite participants to build a shared story collection.
+              </p>
+              <Button className="bg-[#242F3F] hover:bg-[#242F3F]/90 text-white">
+                Start a Circle
+              </Button>
+            </div>
+          </div>
+          
+          <div className="mt-12 md:mt-16 bg-[#F6F6F7] rounded-xl p-6 md:p-8">
+            <h3 className="text-xl md:text-2xl font-caslon font-thin mb-4 text-[#242F3F] text-center">
+              Why Join a Story Circle?
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              <div className="text-center">
+                <div className="bg-[#242F3F]/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-[#242F3F]" />
+                </div>
+                <h4 className="font-medium text-[#242F3F] mb-2">Community</h4>
+                <p className="text-sm text-[#403E43]">Connect with others who share your experiences and interests</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-[#242F3F]/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Book className="h-8 w-8 text-[#242F3F]" />
+                </div>
+                <h4 className="font-medium text-[#242F3F] mb-2">Preservation</h4>
+                <p className="text-sm text-[#403E43]">Create a lasting record of shared stories and memories</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-[#242F3F]/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <ArrowRight className="h-8 w-8 text-[#242F3F]" />
+                </div>
+                <h4 className="font-medium text-[#242F3F] mb-2">Growth</h4>
+                <p className="text-sm text-[#403E43]">Discover new perspectives and deepen your own storytelling</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Sign Up Section */}
+      <section 
+        ref={signUpRef}
+        id="sign-up"
+        className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24"
+      >
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 text-center">
+            Sign Up for Narra
+          </h2>
+          <p className="text-base md:text-lg text-[#403E43] mb-12 text-center max-w-2xl mx-auto">
+            Join Narra today and start preserving your most important stories. Create a free account to begin your storytelling journey.
+          </p>
+          
+          <div className="bg-white rounded-xl shadow-md p-8 md:p-10 max-w-md mx-auto">
+            <ProfileForm />
           </div>
         </div>
       </section>
