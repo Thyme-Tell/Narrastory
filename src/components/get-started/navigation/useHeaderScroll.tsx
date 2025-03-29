@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { NavItem } from "../NavItems";
 
@@ -19,12 +18,6 @@ export const useHeaderScroll = ({
 
   // Function to scroll to a section
   const scrollToSection = (item: NavItem) => {
-    // If it's the home item, scroll to top
-    if (item.name === 'home') {
-      scrollToTop();
-      return;
-    }
-
     if (item.ref && item.ref.current) {
       // Update URL with anchor without causing navigation
       if (item.anchorId) {
