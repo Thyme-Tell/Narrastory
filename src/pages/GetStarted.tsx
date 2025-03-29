@@ -1,10 +1,10 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
-import CallNarraForm from "@/components/CallNarraForm";
 
 const GetStarted = () => {
   const location = useLocation();
@@ -165,7 +165,14 @@ const GetStarted = () => {
           </p>
           
           <div className="max-w-md mx-auto px-4">
-            <CallNarraForm mobileLayout={isMobile} />
+            <Button 
+              className="w-full rounded-full h-12 text-white text-base items-center gap-2 font-light"
+              style={{
+                background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
+              }}
+            >
+              Get Started <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
