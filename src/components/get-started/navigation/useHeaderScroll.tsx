@@ -39,35 +39,42 @@ export const useHeaderScroll = ({
       } else {
         // Find the section that's currently most visible in the viewport
         const viewportHeight = window.innerHeight;
-        const scrollPosition = window.scrollY + viewportHeight * 0.3; // Bias towards the top of the viewport
+        const scrollPosition = window.scrollY + (viewportHeight * 0.2); // Bias towards the top of the viewport
         
-        // Find the section whose top is closest to but below our scroll position
-        let mostVisibleSection = null;
-        let smallestDistance = Infinity;
-        
-        sections.forEach(section => {
-          const rect = section.element.getBoundingClientRect();
-          const sectionTop = rect.top + window.scrollY - 120; // Offset for header
-          
-          // Calculate how far this section is from our target scroll position
-          if (sectionTop <= scrollPosition) {
-            const distance = scrollPosition - sectionTop;
-            if (distance < smallestDistance) {
-              smallestDistance = distance;
-              mostVisibleSection = section;
-            }
-          }
+        // Sort sections by their position from top to bottom
+        const sortedSections = [...sections].sort((a, b) => {
+          const rectA = a.element.getBoundingClientRect();
+          const rectB = b.element.getBoundingClientRect();
+          return (rectA.top + window.scrollY) - (rectB.top + window.scrollY);
         });
         
-        // If we found a section, use it
-        if (mostVisibleSection) {
-          currentSection = mostVisibleSection.name;
+        // Find the first section that starts at or before the current scroll position
+        for (let i = 0; i < sortedSections.length; i++) {
+          const section = sortedSections[i];
+          const rect = section.element.getBoundingClientRect();
+          const sectionTop = rect.top + window.scrollY - 150; // Offset for header
+          
+          if (scrollPosition >= sectionTop) {
+            currentSection = section.name;
+            
+            // If we're close to the next section, peek ahead
+            if (i < sortedSections.length - 1) {
+              const nextSection = sortedSections[i + 1];
+              const nextRect = nextSection.element.getBoundingClientRect();
+              const nextSectionTop = nextRect.top + window.scrollY - 150;
+              
+              // If we're very close to the next section (within 50px), use it instead
+              if (scrollPosition >= nextSectionTop - 50) {
+                currentSection = nextSection.name;
+              }
+            }
+          }
         }
         
         // Special case for last section - if we're at the bottom of the page
         const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
-        if (isAtBottom) {
-          const lastSection = sections[sections.length - 1];
+        if (isAtBottom && sortedSections.length > 0) {
+          const lastSection = sortedSections[sortedSections.length - 1];
           currentSection = lastSection.name;
         }
       }
@@ -92,7 +99,7 @@ export const useHeaderScroll = ({
     // Initial scroll check - run after a short delay to ensure DOM is fully loaded
     setTimeout(() => {
       handleScroll();
-    }, 100);
+    }, 300);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);

@@ -32,6 +32,11 @@ const Header: React.FC<HeaderProps> = ({
     // Call the handleMenuItemClick function to update the active item
     handleMenuItemClick(item);
     
+    // Close mobile dropdown if it's open
+    if (isDropdownOpen) {
+      setIsDropdownOpen(false);
+    }
+    
     // Scroll to the appropriate section
     if (item.ref && item.ref.current) {
       const sectionTop = item.ref.current.getBoundingClientRect().top + window.scrollY;
