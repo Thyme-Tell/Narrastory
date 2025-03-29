@@ -111,37 +111,37 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       
       {/* Phone Dialog for Desktop/iPad */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-xl bg-white">
           <DialogHeader>
-            <DialogTitle className="text-xl font-caslon mb-2">Call Narra</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl font-caslon font-thin text-[#242F3F] mb-2">Call Narra</DialogTitle>
+            <DialogDescription className="text-[#403E43]">
               Call Narra to share your story through a casual conversation.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col items-center justify-center p-6 bg-[#F6F6F7] rounded-lg">
-            <div className="flex items-center justify-center w-16 h-16 bg-[#EFF1E9] rounded-full mb-4">
-              <Phone className="h-8 w-8 text-[#A33D29]" />
+          <div className="flex flex-col items-center justify-center p-6 bg-[#EFF1E9] rounded-xl">
+            <div className="flex items-center justify-center w-16 h-16 bg-[#242F3F]/10 rounded-full mb-4">
+              <Phone className="h-8 w-8 text-[#242F3F]" />
             </div>
-            <p className="text-xl font-caslon mb-1">Narra's Phone Number</p>
+            <p className="text-xl font-caslon font-thin text-[#242F3F] mb-1">Narra's Phone Number</p>
             <div className="flex items-center gap-2 mt-2">
               <p className="text-2xl font-semibold text-[#A33D29]">{FORMATTED_NARRA_PHONE}</p>
               <Button 
                 variant="outline" 
                 size="icon"
                 onClick={handleCopyNumber}
-                className="rounded-full"
+                className="rounded-full border-[#242F3F]/20 hover:bg-[#242F3F]/10"
               >
-                <Copy className="h-4 w-4" />
+                <Copy className="h-4 w-4 text-[#242F3F]" />
                 <span className="sr-only">Copy phone number</span>
               </Button>
             </div>
-            <p className="text-center text-sm text-muted-foreground mt-4">
+            <p className="text-center text-sm text-[#403E43] mt-4 opacity-80">
               Call this number from your phone to start your conversation with Narra.
             </p>
           </div>
           <div className="flex flex-col space-y-2 mt-2">
             <Button 
-              className="w-full"
+              className="w-full bg-[#242F3F] hover:bg-[#242F3F]/90 rounded-[4px]"
               onClick={() => {
                 window.location.href = `tel:${NARRA_PHONE_NUMBER}`;
                 setIsDialogOpen(false);
@@ -152,7 +152,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
             </Button>
             <Button 
               variant="outline"
-              className="w-full"
+              className="w-full border-[#242F3F]/20 text-[#242F3F] hover:bg-[#242F3F]/10 rounded-[4px]"
               onClick={() => setIsDialogOpen(false)}
             >
               Close
