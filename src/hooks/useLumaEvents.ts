@@ -14,13 +14,15 @@ export function useLumaEvents() {
     queryFn: fetchLumaEvents,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 3,
-    onError: (error) => {
-      console.error("Failed to fetch Luma events:", error);
-      toast({
-        title: "Error loading events",
-        description: "We couldn't load the upcoming story circles. Please try again later.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        console.error("Failed to fetch Luma events:", error);
+        toast({
+          title: "Error loading events",
+          description: "We couldn't load the upcoming story circles. Please try again later.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
