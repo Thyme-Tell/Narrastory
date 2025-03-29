@@ -15,7 +15,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
       className="container mx-auto px-4 py-16 md:py-24 bg-white scroll-mt-24"
     >
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12">
+        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 text-center">
           Narra Story Circles
         </h2>
         
