@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -140,10 +139,10 @@ const GetStarted = () => {
               ))}
             </div>
 
-            <div className="sm:hidden w-full max-w-sm mx-auto">
+            <div className="sm:hidden w-full max-w-[200px] mx-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-full flex items-center justify-between px-4 py-2 bg-green-700 rounded-[2px] text-white">
+                  <button className="w-full flex items-center justify-between px-4 py-2 bg-[#17342C] rounded-[2px] text-white">
                     <div className="flex items-center">
                       {activeNavItem && activeNavItem.icon}
                       <span className="ml-2">{activeNavItem ? activeNavItem.label : 'Menu'}</span>
@@ -151,7 +150,7 @@ const GetStarted = () => {
                     <ChevronDown className="h-4 w-4 text-white opacity-70" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-full min-w-[200px] bg-green-700 backdrop-blur-sm border-0 text-white">
+                <DropdownMenuContent className="w-[200px] bg-[#17342C] backdrop-blur-sm border-0 text-white">
                   {navItems.map((item) => (
                     item.isButton ? (
                       <Link
@@ -169,7 +168,7 @@ const GetStarted = () => {
                           to={item.path}
                           className={`flex items-center w-full px-4 py-2 text-white ${
                             activeItem === item.name
-                              ? "bg-[#17342C]"
+                              ? "bg-[#17342C]/60"
                               : "hover:bg-[#17342C]/30"
                           }`}
                         >
