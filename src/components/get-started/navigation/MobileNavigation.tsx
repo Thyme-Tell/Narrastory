@@ -37,7 +37,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
     <div className="w-full flex sm:hidden justify-between items-center">
       <Link 
         to="/get-started" 
-        onClick={scrollToTop}
         className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
         style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
       >

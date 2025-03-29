@@ -14,7 +14,6 @@ const DesktopLogo: React.FC<DesktopLogoProps> = ({ scrolled, scrollToTop }) => {
   return (
     <Link 
       to="/get-started" 
-      onClick={scrollToTop}
       className="hidden sm:inline-block bg-[#EFF1E9]/50 rounded-[100px] p-4 lg:p-3 w-full sm:w-auto flex justify-center"
       style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
     >

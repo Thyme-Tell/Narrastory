@@ -1,15 +1,13 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Import our new components
+// Import our components
 import Header from "@/components/get-started/Header";
 import HomeSection from "@/components/get-started/HomeSection";
 import HowItWorksSection from "@/components/get-started/HowItWorksSection";
 import StoryCirclesSection from "@/components/get-started/StoryCirclesSection";
 import SignUpSection from "@/components/get-started/SignUpSection";
-// Removed WelcomeSection import
 import Footer from "@/components/get-started/Footer";
 import { getNavItems } from "@/components/get-started/NavItems";
 
@@ -18,7 +16,7 @@ const GetStarted = () => {
   const [activeItem, setActiveItem] = useState("home");
   const isMobile = useIsMobile();
   
-  // References for scrolling to sections
+  // References for sections (keeping refs without scroll functionality)
   const homeRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
   const storyCirclesRef = useRef<HTMLElement>(null);
@@ -33,24 +31,13 @@ const GetStarted = () => {
     const path = location.pathname;
     const hash = location.hash;
 
-    // Handle initial navigation based on URL hash
+    // Handle navigation based on URL hash (without scrolling)
     if (hash) {
       const targetSection = hash.substring(1); // Remove the # character
       const selectedItem = navItems.find(item => item.name === targetSection);
       
       if (selectedItem) {
         setActiveItem(selectedItem.name);
-        
-        // Add a small delay to ensure the DOM is fully loaded
-        setTimeout(() => {
-          if (selectedItem.ref && selectedItem.ref.current) {
-            const sectionTop = selectedItem.ref.current.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({
-              top: sectionTop - 100, // Offset for header
-              behavior: 'smooth'
-            });
-          }
-        }, 100);
       }
     } else if (path === "/get-started") {
       setActiveItem("home");
@@ -74,7 +61,6 @@ const GetStarted = () => {
         <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
         <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
         <SignUpSection signUpRef={signUpRef} />
-        {/* Removed WelcomeSection */}
       </div>
       <Footer />
     </div>

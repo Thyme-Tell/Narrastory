@@ -1,11 +1,9 @@
 
 import React, { useState } from "react";
-import { Home } from "lucide-react";
 import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
 import DesktopNavigation from "./navigation/DesktopNavigation";
-import useHeaderScroll from "./navigation/useHeaderScroll";
 
 interface HeaderProps {
   navItems: NavItem[];
@@ -19,30 +17,20 @@ const Header: React.FC<HeaderProps> = ({
   handleMenuItemClick 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { scrolled } = useHeaderScroll({ navItems, activeItem, handleMenuItemClick });
+  const [scrolled, setScrolled] = useState(false);
   const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
 
+  // No scroll to top function needed
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Function kept but implementation removed
   };
 
-  // Handle manual navigation when clicking on a nav item
+  // Handle navigation when clicking on a nav item (without scrolling)
   const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
     e.preventDefault();
     
     // Call the handleMenuItemClick function to update the active item
     handleMenuItemClick(item);
-    
-    // Scroll to the appropriate section
-    if (item.ref && item.ref.current) {
-      const sectionTop = item.ref.current.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ 
-        top: sectionTop - 100, // Offset to account for header height
-        behavior: 'smooth' 
-      });
-    } else if (item.name === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   };
 
   // Modify nav items to show Narra icon instead of Home icon when scrolled
