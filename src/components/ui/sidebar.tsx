@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import { Home, User, LogIn } from "lucide-react";
+import { LogIn, Home, User } from "lucide-react";
 import {
   Sidebar as ShadcnSidebar,
   SidebarGroup as ShadcnSidebarGroup,
