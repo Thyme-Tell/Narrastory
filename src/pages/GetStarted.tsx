@@ -22,6 +22,8 @@ const GetStarted = () => {
   
   const [activeStep, setActiveStep] = useState(0);
   
+  // Add homeRef to reference the top of the page
+  const homeRef = useRef<HTMLElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
   const storyCirclesRef = useRef<HTMLElement>(null);
   const signUpRef = useRef<HTMLElement>(null);
@@ -87,7 +89,7 @@ const GetStarted = () => {
       label: "Home", 
       path: "/get-started",
       icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      ref: null
+      ref: homeRef // Update to use homeRef
     },
     { 
       name: "how-it-works", 
@@ -119,6 +121,9 @@ const GetStarted = () => {
     
     if (item.ref && item.ref.current) {
       item.ref.current.scrollIntoView({ behavior: 'smooth' });
+    } else if (item.name === 'home') {
+      // If it's the home item and somehow the ref is not working, scroll to top manually
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -239,6 +244,7 @@ const GetStarted = () => {
       </header>
 
       <div 
+        ref={homeRef} // Add ref to the home section
         id="home"
         className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
