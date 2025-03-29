@@ -6,9 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Edge Function URL for initiating the call
-const EDGE_FUNCTION_URL = "/api/synthflow-proxy";
-// Fallback direct URL
+// Synthflow form URL
 const SYNTHFLOW_FORM_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
 
 interface CallNarraFormProps {
@@ -58,55 +56,24 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       const normalized = normalizePhoneNumber(phoneNumber);
       console.log("Normalized phone number:", normalized);
       
-      // Submit the phone number to our edge function
-      const response = await fetch(EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone: normalized }),
-      });
+      // Direct redirect to Synthflow form
+      window.location.href = `${SYNTHFLOW_FORM_URL}?Phone=${encodeURIComponent(normalized)}`;
       
-      const responseData = await response.json();
-      console.log("Response from edge function:", responseData);
+      // Call onSuccess callback
+      onSuccess?.(normalized);
       
-      if (responseData.success) {
-        // Success path - call initiated successfully
-        if (!responseData.redirectUrl) {
-          // Direct API call was successful, no redirect needed
-          toast({
-            title: "Success",
-            description: "We're calling you now!",
-          });
-          
-          onSuccess?.(normalized);
-          setPhoneNumber("");
-        } else {
-          // We got a redirect URL - this means both direct API calls failed
-          // and we need to fallback to the form
-          console.log("API calls failed, redirecting to:", responseData.redirectUrl);
-          window.location.href = responseData.redirectUrl;
-        }
-      } else {
-        // Error path
-        throw new Error(responseData.error || "Failed to initiate call");
-      }
     } catch (error) {
       console.error("Error:", error);
       
-      // As a fallback, redirect directly to Synthflow form
-      const normalized = normalizePhoneNumber(phoneNumber);
-      console.log("Using direct Synthflow fallback for:", normalized);
-      window.location.href = `${SYNTHFLOW_FORM_URL}?Phone=${encodeURIComponent(normalized)}`;
-      
-      let errorMessage = "Something went wrong. Redirecting you to our call system...";
+      let errorMessage = "Something went wrong. Please try again.";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
       
       toast({
-        title: "Note",
+        title: "Error",
         description: errorMessage,
+        variant: "destructive"
       });
       onError?.(errorMessage);
     } finally {
