@@ -78,25 +78,16 @@ Deno.serve(async (req) => {
     
     console.log(`Sending webhook payload: ${JSON.stringify(webhookPayload)}`);
     
-    // Make direct call to Synthflow API
-    // First, check if we have a campaign ID to use the campaigns endpoint
-    let url = 'https://api.synthflow.ai/api/v1/calls/start';
-    let body = {
+    // Instead of using the campaigns endpoint, let's try the direct call endpoint
+    const url = 'https://api.synthflow.ai/api/v1/calls/start';
+    const body = {
       phone: normalizedPhone,
       transferOnError: false,
       webhook: SYNTHFLOW_WEBHOOK_URL,
-      webhookRawBody: JSON.stringify(webhookPayload)
+      webhookRawBody: JSON.stringify(webhookPayload),
+      // Include campaign ID as a separate field if needed
+      campaignId: SYNTHFLOW_CAMPAIGN_ID
     };
-    
-    // If we have a campaign ID, use the campaigns endpoint instead
-    if (SYNTHFLOW_CAMPAIGN_ID) {
-      url = `https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`;
-      body = {
-        to: normalizedPhone,
-        variables: webhookPayload
-      };
-      console.log(`Using campaigns endpoint with ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
-    }
     
     console.log(`Making API call to: ${url}`);
     console.log(`With body: ${JSON.stringify(body)}`);
