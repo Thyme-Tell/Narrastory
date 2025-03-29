@@ -29,32 +29,29 @@ const GetStarted = () => {
   useEffect(() => {
     document.title = "Narra Story | Get Started";
     
-    const path = location.pathname;
-    const hash = location.hash;
-
-    // Handle navigation based on URL hash
-    if (hash) {
-      const targetSection = hash.substring(1); // Remove the # character
-      const selectedItem = navItems.find(item => {
-        // Extract the section name from the path (after the #)
-        const itemHash = item.path.includes('#') ? item.path.split('#')[1] : '';
-        return itemHash === targetSection;
-      });
-      
-      if (selectedItem) {
-        setActiveItem(selectedItem.name);
-        // Scroll to the section with a small delay to ensure DOM is ready
-        setTimeout(() => {
-          if (selectedItem.ref && selectedItem.ref.current) {
-            selectedItem.ref.current.scrollIntoView({ behavior: 'smooth' });
-          }
-        }, 100);
+    // Handle direct access via URL hash
+    const handleAnchorNavigation = () => {
+      const hash = location.hash.substring(1); // Remove the # character
+      if (hash) {
+        const targetItem = navItems.find(item => item.anchorId === hash);
+        if (targetItem) {
+          setActiveItem(targetItem.name);
+          // Scroll will be handled by useHeaderScroll
+        }
+      } else {
+        setActiveItem("home");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } else if (path === "/get-started") {
-      setActiveItem("home");
-      // Scroll to top when navigating to home
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    };
+    
+    handleAnchorNavigation();
+    
+    // Listen for hashchange events
+    window.addEventListener('hashchange', handleAnchorNavigation);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleAnchorNavigation);
+    };
   }, [location, navItems]);
 
   const handleMenuItemClick = (item: any) => {
@@ -70,10 +67,19 @@ const GetStarted = () => {
           handleMenuItemClick={handleMenuItemClick} 
         />
 
-        <HomeSection homeRef={homeRef} isMobile={isMobile} />
-        <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
-        <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
-        <SignUpSection signUpRef={signUpRef} />
+        {/* Add id attributes to each section for direct anchor links */}
+        <div id="home">
+          <HomeSection homeRef={homeRef} isMobile={isMobile} />
+        </div>
+        <section id="how-it-works">
+          <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
+        </section>
+        <section id="join-story-circle">
+          <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
+        </section>
+        <section id="sign-up">
+          <SignUpSection signUpRef={signUpRef} />
+        </section>
       </div>
       <Footer />
     </div>

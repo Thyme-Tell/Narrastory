@@ -4,14 +4,15 @@ import { Link } from "react-router-dom";
 
 interface DesktopLogoProps {
   scrolled: boolean;
-  scrollToTop?: () => void;  // Make scrollToTop optional
+  scrollToTop?: () => void;
 }
 
 const DesktopLogo: React.FC<DesktopLogoProps> = ({ scrolled, scrollToTop }) => {
   // Only render when not scrolled
   if (scrolled) return null;
   
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (scrollToTop) {
       scrollToTop();
     }

@@ -16,6 +16,26 @@ export const useHeaderScroll = ({
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState(activeItem);
 
+  // Function to scroll to a section
+  const scrollToSection = (item: NavItem) => {
+    if (item.ref && item.ref.current) {
+      // Update URL with anchor without causing navigation
+      if (item.anchorId) {
+        window.history.pushState({}, '', `#${item.anchorId}`);
+      }
+      
+      // Scroll to the element
+      item.ref.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Update URL to remove anchor
+    window.history.pushState({}, '', window.location.pathname);
+  };
+
   useEffect(() => {
     // Function to check if element is in viewport
     const isElementInViewport = (el: Element): boolean => {
@@ -50,7 +70,10 @@ export const useHeaderScroll = ({
             foundVisibleSection = true;
             if (activeSection !== item.name) {
               setActiveSection(item.name);
-              // Don't call handleMenuItemClick here as it would cause unwanted scrolling
+              // Update URL with anchor without causing navigation
+              if (item.anchorId) {
+                window.history.pushState({}, '', `#${item.anchorId}`);
+              }
             }
           }
         }
@@ -59,11 +82,26 @@ export const useHeaderScroll = ({
       // If no section is visible (e.g., in between sections), keep the current activeSection
     };
 
+    // Handle initial hash in URL
+    const handleInitialHash = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const targetItem = navItems.find(item => item.anchorId === hash);
+        if (targetItem && targetItem.ref && targetItem.ref.current) {
+          // Use setTimeout to ensure DOM is ready
+          setTimeout(() => {
+            targetItem.ref.current?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }
+      }
+    };
+
     // Set up scroll event listener
     window.addEventListener('scroll', handleScroll);
     
     // Call once to initialize
     handleScroll();
+    handleInitialHash();
     
     // Clean up event listener on unmount
     return () => {
@@ -73,7 +111,9 @@ export const useHeaderScroll = ({
 
   return { 
     scrolled,
-    activeSection 
+    activeSection,
+    scrollToSection,
+    scrollToTop
   };
 };
 
