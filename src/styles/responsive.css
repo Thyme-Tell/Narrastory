@@ -1,5 +1,5 @@
 
-@media (max-width: 768px) {
+@media (max-width: 750px) {
   .book-preview-container {
     max-width: 100%;
     margin: 0 auto;
@@ -110,22 +110,30 @@
   }
 }
 
-@media (max-width: 768px) {
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
+/* New breakpoint-specific styles */
+@media (min-width: 920px) {
+  .navbar-below-logo {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 919px) {
+  .navbar-below-logo {
+    flex-direction: column;
+    align-items: center;
   }
   
-  .min-text-size {
-    font-size: 16px !important;
+  .navbar-menu {
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 600px;
   }
-  
-  .mobile-button-spacing > * {
-    margin: 0.25rem !important;
-  }
-  
-  .ios-book-preview-fix {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
+}
+
+@media (max-width: 639px) {
+  .navbar-menu {
+    margin-top: 0.75rem;
   }
 }
