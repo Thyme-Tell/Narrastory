@@ -16,7 +16,7 @@ export const usePageNavigation = (defaultActive: string = "home") => {
   const defaultLinks: PageNavigationLink[] = [
     { text: "Home", href: "/get-started", active: activeLink === "home" },
     { text: "How It Works", href: "/get-started#how-it-works", active: activeLink === "how-it-works" },
-    { text: "Narra Story Circles", href: "/get-started#join-story-circle", active: activeLink === "join-story-circle" },
+    { text: "Join a Story Circle", href: "/get-started#join-story-circle", active: activeLink === "join-story-circle" },
     { text: "Sign Up", href: "/get-started#sign-up", active: activeLink === "sign-up" }
   ];
   
