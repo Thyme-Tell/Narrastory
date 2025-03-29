@@ -1,90 +1,48 @@
 
-import React, { useEffect } from "react";
-import { useLumaEvents } from "@/hooks/useLumaEvents";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchLumaEvents } from "@/services/lumaEvents";
 import LumaEventCard from "./LumaEventCard";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Calendar, RefreshCw, AlertTriangle } from "lucide-react";
-import { LUMA_API_KEY } from "@/config/constants";
 
-const LumaEventsSection: React.FC = () => {
-  const { events, isLoading, error, isError, refetch } = useLumaEvents();
-  
-  useEffect(() => {
-    // Debug information in console
-    console.log("LumaEventsSection rendered with:", {
-      eventsCount: events?.length,
-      isLoading,
-      hasError: !!error,
-      apiKeyPresent: !!LUMA_API_KEY
-    });
-  }, [events, isLoading, error]);
+const LumaEventsSection = () => {
+  const { data: events, isLoading, error } = useQuery({
+    queryKey: ['lumaEvents'],
+    queryFn: fetchLumaEvents,
+  });
 
-  // Handle error state
-  if (isError) {
-    return (
-      <div className="mt-12">
-        <Alert variant="destructive" className="mb-4">
-          <AlertTriangle className="h-4 w-4 mr-2" />
-          <AlertTitle>Error loading events</AlertTitle>
-          <AlertDescription>
-            We couldn't load the upcoming story circles. Please try again later.
-            {error instanceof Error && (
-              <div className="mt-2 text-xs opacity-80">{error.message}</div>
-            )}
-          </AlertDescription>
-        </Alert>
-        <Button 
-          variant="outline" 
-          onClick={() => refetch()} 
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Try Again
-        </Button>
-      </div>
-    );
-  }
-
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <div className="mt-12 animate-pulse">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-200 rounded-xl h-72 opacity-40"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Handle empty state
-  if (!events || events.length === 0) {
-    return (
-      <div className="mt-12 text-center p-8 bg-[#F6F6F7] rounded-xl">
-        <Calendar className="h-12 w-12 mx-auto text-[#A33D29] mb-4" />
-        <h3 className="text-xl font-caslon font-thin mb-2 text-[#242F3F]">
-          No Upcoming Events
-        </h3>
-        <p className="text-[#403E43] mb-4">
-          We don't have any scheduled story circles at the moment. Check back soon!
-        </p>
-      </div>
-    );
-  }
-
-  // Normal state with events
   return (
-    <div className="mt-12">
-      <h3 className="text-xl md:text-2xl font-caslon font-thin mb-6 text-[#242F3F]">
+    <div className="mt-16 bg-[#F6F6F7] rounded-xl p-6 md:p-8">
+      <h3 className="text-xl md:text-2xl font-caslon font-thin mb-4 text-[#242F3F] text-center">
         Upcoming Story Circles
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {events.map((event) => (
-          <LumaEventCard key={event.id} event={event} />
-        ))}
-      </div>
+      
+      {isLoading ? (
+        <div className="text-center py-8">Loading events...</div>
+      ) : error ? (
+        <div className="text-center py-8 text-[#A33D29]">
+          Unable to load events. Please try again later.
+        </div>
+      ) : events && events.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 mt-4">
+          {events.slice(0, 3).map((event) => (
+            <LumaEventCard key={event.id} event={event} />
+          ))}
+          
+          <div className="text-center mt-6">
+            <Button 
+              className="bg-[#242F3F] hover:bg-[#242F3F]/90 text-white"
+              onClick={() => window.open("https://lu.ma/narra", "_blank")}
+            >
+              View All Events
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          No upcoming events at the moment. Check back soon!
+        </div>
+      )}
     </div>
   );
 };
