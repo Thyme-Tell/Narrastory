@@ -34,7 +34,7 @@ interface LumaApiEvent {
 
 // This function fetches events from the Luma API
 export async function fetchLumaEvents(): Promise<LumaEvent[]> {
-  // Create the specific event directly
+  // Moved specificEvent definition outside the try block so it's accessible in catch block
   const specificEvent: LumaEvent = {
     id: "vfr6gipv",
     title: "Storytelling Workshop - Narra",
@@ -103,14 +103,15 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
       spotsRemaining: event.num_remaining_spots || 0
     }));
     
-    // Ensure the specific event is included
-    const eventExists = apiEvents.some(event => event.id === specificEvent.id);
+    // Add the specific event if it's not already in the list
+    const eventExists = apiEvents.some(event => event.registrationUrl.includes("vfr6gipv"));
+    
     return eventExists ? apiEvents : [...apiEvents, specificEvent];
   } catch (error) {
     console.error("Error fetching Luma events:", error);
     // Fallback to mock data plus specific event on error
     console.log("Returning mock data plus specific event due to error");
-    return [specificEvent];
+    return [...getMockEvents(), specificEvent];
   }
 }
 
