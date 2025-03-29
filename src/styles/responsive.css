@@ -1,3 +1,4 @@
+
 @media (max-width: 768px) {
   .book-preview-container {
     max-width: 100%;
@@ -109,7 +110,15 @@
   }
 }
 
-@media (max-width: 860px) and (min-width: 640px) {
+@media (min-width: 801px) {
+  .navbar-below-logo {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+@media (max-width: 800px) {
   .navbar-below-logo {
     flex-direction: column;
     align-items: center;
