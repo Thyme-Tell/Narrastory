@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -111,7 +112,7 @@ const GetStarted = () => {
           </Link>
 
           <div className="flex w-full justify-center mt-4 navbar-menu">
-            <div className="hidden sm:flex bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 items-center w-full max-w-lg mx-auto shadow-sm whitespace-nowrap overflow-x-auto" 
+            <div className="hidden sm:flex bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 items-center mx-auto shadow-sm whitespace-nowrap overflow-x-auto" 
               style={{ padding: "5px 2px" }}>
               {navItems.map((item) => (
                 item.isButton ? (
