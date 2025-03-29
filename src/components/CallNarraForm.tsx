@@ -1,14 +1,14 @@
 
-import React, { useState, useRef, FormEvent } from "react";
+import React, { useState, FormEvent } from "react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Define the Synthflow webhook URL for direct form submission if needed
+// Synthflow direct URL for fallback
 const SYNTHFLOW_WEBHOOK_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
-// Edge Function URL for proxied submission
+// Edge Function URL for getting the redirect URL
 const EDGE_FUNCTION_URL = "/api/synthflow-proxy";
 
 interface CallNarraFormProps {
@@ -39,36 +39,6 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     setPhoneNumber(e.target.value);
   };
 
-  // Client-side direct submission to Synthflow
-  const clientSideSubmit = async (phone: string): Promise<boolean> => {
-    try {
-      console.log("Attempting client-side submission...");
-      
-      // Create form data
-      const formData = new URLSearchParams();
-      formData.append('Phone', phone);
-      
-      console.log(`Sending direct form submission to ${SYNTHFLOW_WEBHOOK_URL} with phone: ${phone}`);
-      
-      await fetch(SYNTHFLOW_WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors', // This prevents CORS errors but we won't get a useful response
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString(),
-      });
-      
-      console.log("Client-side submission completed");
-      // Since we're using no-cors mode, we can't check the actual result
-      // We'll assume it was successful and show a toast
-      return true;
-    } catch (error) {
-      console.error("Client-side submission failed:", error);
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -88,54 +58,42 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       const normalized = normalizePhoneNumber(phoneNumber);
       console.log("Normalized phone number:", normalized);
       
-      // First attempt: Use the Edge Function
-      console.log("Attempting to use Edge Function");
-      let success = false;
-      
+      // First, try to use the Edge Function to get a redirect URL
       try {
+        console.log("Fetching redirect URL from Edge Function");
         const response = await fetch(EDGE_FUNCTION_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ Phone: normalized }),
+          body: JSON.stringify({ phone: normalized }),
         });
         
         if (response.ok) {
           const result = await response.json();
-          console.log("Edge function response:", result);
           
-          if (result.success) {
-            success = true;
-            console.log("Call initiated successfully via Edge Function");
-          } else if (result.useClientFallback) {
-            // Edge function suggests client-side fallback
-            console.log("Using client-side fallback as suggested by edge function");
-            success = await clientSideSubmit(normalized);
+          if (result.success && result.redirectUrl) {
+            console.log("Redirecting to:", result.redirectUrl);
+            // Simply redirect the user to the Synthflow URL
+            window.location.href = result.redirectUrl;
+            return; // Exit early as we're redirecting
           }
-        } else {
-          console.log("Edge function failed with status:", response.status);
-          // If Edge Function fails, try client-side submission
-          success = await clientSideSubmit(normalized);
         }
       } catch (error) {
-        console.error("Edge function error:", error);
-        // If Edge Function fails, try client-side submission
-        success = await clientSideSubmit(normalized);
+        console.error("Edge Function error:", error);
+        // Continue to fallback if Edge Function fails
       }
       
-      if (success) {
-        toast({
-          title: "Success",
-          description: "Your call is being initiated. Expect a call soon!",
-        });
-        setPhoneNumber("");
-        onSuccess?.(normalized);
-      } else {
-        throw new Error("Failed to initiate call through all available methods");
-      }
+      // Fallback: Direct redirect to Synthflow
+      console.log("Using direct redirect fallback");
+      window.location.href = `${SYNTHFLOW_WEBHOOK_URL}?Phone=${encodeURIComponent(normalized)}`;
+      
+      // The following won't execute due to the redirect, but we include it for completeness
+      onSuccess?.(normalized);
+      setPhoneNumber("");
+      
     } catch (error) {
-      console.error("Error submitting phone number:", error);
+      console.error("Error:", error);
       
       let errorMessage = "Something went wrong. Please try again later.";
       if (error instanceof Error) {
