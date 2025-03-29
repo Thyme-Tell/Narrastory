@@ -33,6 +33,18 @@ interface BookPreviewContentProps {
   storyPages: number[];
   storyMediaMap: Map<string, StoryMediaItem[]>;
   jumpToPage: (pageIndex: number) => void;
+  pageStyles?: {
+    backgroundColor: string;
+    fontFamily: string;
+    fontSize: string;
+    lineHeight: string;
+    textIndent: string;
+    dropCapColor: string;
+    titleColor: string;
+    pageWidth: number;
+    pageHeight: number;
+    aspectRatio: string;
+  };
 }
 
 const BookPreviewContent = ({

@@ -31,6 +31,18 @@ interface BookPreviewContainerProps {
   storyPages?: number[];
   storyMediaMap?: Map<string, StoryMediaItem[]>;
   jumpToPage?: (page: number) => void;
+  pageStyles?: {
+    backgroundColor: string;
+    fontFamily: string;
+    fontSize: string;
+    lineHeight: string;
+    textIndent: string;
+    dropCapColor: string;
+    titleColor: string;
+    pageWidth: number;
+    pageHeight: number;
+    aspectRatio: string;
+  };
 }
 
 const BookPreviewContainer = ({
@@ -51,7 +63,19 @@ const BookPreviewContainer = ({
   bookmarks = [],
   storyPages = [],
   storyMediaMap = new Map(),
-  jumpToPage = () => {}
+  jumpToPage = () => {},
+  pageStyles = {
+    backgroundColor: "#f5f5f0",
+    fontFamily: "Libre Baskerville, serif",
+    fontSize: "16px",
+    lineHeight: "1.6",
+    textIndent: "1.5em",
+    dropCapColor: "#A33D29",
+    titleColor: "#242F3F",
+    pageWidth: 400,
+    pageHeight: 600,
+    aspectRatio: "2/3"
+  }
 }: BookPreviewContainerProps) => {
   const isMobile = window.innerWidth < 768;
 
@@ -75,6 +99,7 @@ const BookPreviewContainer = ({
         storyPages={storyPages}
         storyMediaMap={storyMediaMap}
         jumpToPage={jumpToPage}
+        pageStyles={pageStyles}
       />
     </div>
   );

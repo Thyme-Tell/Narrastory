@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0", // Increased icon size from size-4 to size-5
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[7px] text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0", // Updated rounded-md to rounded-[7px]
   {
     variants: {
       variant: {
@@ -22,9 +22,9 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-11 w-11", // Increased from h-10 w-10 to h-11 w-11
+        sm: "h-9 rounded-[7px] px-3", // Updated rounded-md to rounded-[7px]
+        lg: "h-11 rounded-[7px] px-8", // Updated rounded-md to rounded-[7px]
+        icon: "h-11 w-11", // Already updated from h-10 w-10 to h-11 w-11 previously
       },
     },
     defaultVariants: {

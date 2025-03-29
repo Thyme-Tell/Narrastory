@@ -3,12 +3,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import FormField from "@/components/FormField";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormData } from "@/types/profile";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { encryptText } from "@/utils/encryptionUtils";
 
 const ProfileForm = () => {
@@ -16,6 +18,7 @@ const ProfileForm = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
     firstName: "",
     lastName: "",
@@ -24,6 +27,7 @@ const ProfileForm = () => {
     password: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileFormData, string>>>({});
+  const [rememberMe, setRememberMe] = useState(false);
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof ProfileFormData, string>> = {};
@@ -169,72 +173,181 @@ const ProfileForm = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {formError && (
-        <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800">
+        <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800 rounded-[7px]">
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
       )}
     
-      <div className="space-y-4">
-        <FormField
-          label="First Name"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
-          required
-          placeholder="Jane"
-          error={errors.firstName}
-        />
+      <div className="space-y-5">
+        <div>
+          <Label htmlFor="email" className="text-sm font-medium text-[#242F3F]">
+            Email
+          </Label>
+          <div className="mt-1.5">
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              className={`w-full rounded-[7px] border ${
+                errors.email ? "border-red-500" : "border-[#E5E7EB]"
+              }`}
+            />
+            {errors.email && (
+              <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+            )}
+          </div>
+        </div>
 
-        <FormField
-          label="Last Name"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-          required
-          placeholder="Brown"
-          error={errors.lastName}
-        />
+        <div>
+          <Label htmlFor="firstName" className="text-sm font-medium text-[#242F3F]">
+            First Name
+          </Label>
+          <div className="mt-1.5">
+            <Input
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+              placeholder="Jane"
+              className={`w-full rounded-[7px] border ${
+                errors.firstName ? "border-red-500" : "border-[#E5E7EB]"
+              }`}
+            />
+            {errors.firstName && (
+              <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
+            )}
+          </div>
+        </div>
 
-        <FormField
-          label="Phone Number"
-          name="phoneNumber"
-          type="tel"
-          value={formData.phoneNumber}
-          onChange={handleChange}
-          required
-          placeholder="(555) 000-0000"
-          error={errors.phoneNumber}
-        />
+        <div>
+          <Label htmlFor="lastName" className="text-sm font-medium text-[#242F3F]">
+            Last Name
+          </Label>
+          <div className="mt-1.5">
+            <Input
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+              placeholder="Doe"
+              className={`w-full rounded-[7px] border ${
+                errors.lastName ? "border-red-500" : "border-[#E5E7EB]"
+              }`}
+            />
+            {errors.lastName && (
+              <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
+            )}
+          </div>
+        </div>
 
-        <FormField
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="jane@example.com"
-          error={errors.email}
-        />
+        <div>
+          <Label htmlFor="phoneNumber" className="text-sm font-medium text-[#242F3F]">
+            Phone Number
+          </Label>
+          <div className="mt-1.5">
+            <Input
+              id="phoneNumber"
+              name="phoneNumber"
+              type="tel"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              required
+              placeholder="(555) 000-0000"
+              className={`w-full rounded-[7px] border ${
+                errors.phoneNumber ? "border-red-500" : "border-[#E5E7EB]"
+              }`}
+            />
+            {errors.phoneNumber && (
+              <p className="text-xs text-red-500 mt-1">{errors.phoneNumber}</p>
+            )}
+          </div>
+        </div>
 
-        <FormField
-          label="Password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          placeholder="Enter a secure password"
-          error={errors.password}
-        />
+        <div>
+          <Label htmlFor="password" className="text-sm font-medium text-[#242F3F]">
+            Password
+          </Label>
+          <div className="mt-1.5 relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Enter a secure password"
+              className={`w-full rounded-[7px] border pr-10 ${
+                errors.password ? "border-red-500" : "border-[#E5E7EB]"
+              }`}
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+            {errors.password && (
+              <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Checkbox 
+              id="remember-me" 
+              checked={rememberMe}
+              onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+              className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
+            />
+            <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
+              Remember me
+            </Label>
+          </div>
+          <div className="text-sm">
+            <a href="#" className="text-[#A33D29] hover:text-[#A33D29]/80">
+              Forgot password?
+            </a>
+          </div>
+        </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Creating Account..." : "Continue"}
-      </Button>
+      <div>
+        <Button 
+          type="submit" 
+          className="w-full py-2.5 rounded-[7px] bg-gradient-to-r from-[#A33D29] to-[#B65644] hover:from-[#933629] hover:to-[#A34C3D] text-white"
+          disabled={loading}
+        >
+          {loading ? "Creating Account..." : "Continue"}
+        </Button>
+      </div>
+      
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">
+          Already have an account?{" "}
+          <a href="/sign-in" className="text-[#A33D29] hover:text-[#A33D29]/80 font-medium">
+            Sign in
+          </a>
+        </p>
+      </div>
     </form>
   );
 };
