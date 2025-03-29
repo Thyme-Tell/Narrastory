@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -70,7 +71,17 @@ const GetStarted = () => {
     }
   };
 
-  const navItems = [
+  // Define a type for the navigation items
+  type NavItem = {
+    name: string;
+    label: string;
+    path: string;
+    icon: React.ReactNode;
+    ref: React.RefObject<HTMLElement> | null;
+    isButton?: boolean; // Add the isButton property as optional
+  };
+
+  const navItems: NavItem[] = [
     { 
       name: "home", 
       label: "Home", 
@@ -97,11 +108,12 @@ const GetStarted = () => {
       label: "Sign Up",
       path: "/get-started#sign-up",
       icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      ref: signUpRef
+      ref: signUpRef,
+      isButton: true // Set this item as a button
     }
   ];
 
-  const handleMenuItemClick = (item: typeof navItems[number]) => {
+  const handleMenuItemClick = (item: NavItem) => {
     setIsDropdownOpen(false);
     setActiveItem(item.name);
     
