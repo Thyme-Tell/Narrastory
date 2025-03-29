@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Facebook, Instagram, Twitter, Mail, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -9,7 +10,7 @@ const Footer = () => {
   return (
     <footer className="bg-atlantic text-white pt-16 pb-8 mt-16">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {/* Company Info */}
           <div>
             <div className="flex items-center mb-4">
@@ -18,7 +19,7 @@ const Footer = () => {
                 alt="Narra Logo" 
                 className="h-10 mr-3"
               />
-              <h3 className="text-xl font-caslon">Narra</h3>
+              {/* Removed "Narra" text after logo */}
             </div>
             <p className="text-gray-300 mb-4">
               Narrate your story in a way only you can.
@@ -74,7 +75,7 @@ const Footer = () => {
             </ul>
           </div>
           
-          {/* Resources */}
+          {/* Resources section - temporarily commented out
           <div>
             <h3 className="text-xl font-caslon mb-4">Resources</h3>
             <ul className="space-y-2">
@@ -105,24 +106,9 @@ const Footer = () => {
               </li>
             </ul>
           </div>
+          */}
           
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-xl font-caslon mb-4">Stay Updated</h3>
-            <p className="text-gray-300 mb-4">
-              Subscribe to our newsletter for the latest updates and stories.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input 
-                type="email" 
-                placeholder="Your email" 
-                className="px-4 py-2 rounded-md bg-[#32415a] border border-[#4a5c78] text-white w-full"
-              />
-              <Button variant="default" className="shrink-0">
-                Subscribe
-              </Button>
-            </div>
-          </div>
+          {/* Newsletter/Stay Updated section removed */}
         </div>
         
         {/* Bottom section */}
