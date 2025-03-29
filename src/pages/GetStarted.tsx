@@ -156,7 +156,7 @@ const GetStarted = () => {
                       <Link
                         key={item.name}
                         to={item.path}
-                        className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white"
+                        className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px]"
                       >
                         {item.icon}
                         <span className="ml-2">Sign Up</span>
