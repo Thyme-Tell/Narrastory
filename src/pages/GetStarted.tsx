@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePageNavigation } from "@/hooks/usePageNavigation";
 
 // Import our components
 import Header from "@/components/get-started/Header";
@@ -9,12 +10,14 @@ import HowItWorksSection from "@/components/get-started/HowItWorksSection";
 import StoryCirclesSection from "@/components/get-started/StoryCirclesSection";
 import SignUpSection from "@/components/get-started/SignUpSection";
 import Footer from "@/components/get-started/Footer";
+import PageNavigation from "@/components/get-started/navigation/PageNavigation";
 import { getNavItems } from "@/components/get-started/NavItems";
 
 const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
   const isMobile = useIsMobile();
+  const { links, activeLink, handleLinkClick } = usePageNavigation();
   
   // References for sections (keeping refs without scroll functionality)
   const homeRef = useRef<HTMLDivElement>(null);
@@ -56,6 +59,14 @@ const GetStarted = () => {
           activeItem={activeItem} 
           handleMenuItemClick={handleMenuItemClick} 
         />
+        
+        <div className="flex justify-center my-4">
+          <PageNavigation 
+            links={links} 
+            defaultActive={activeLink} 
+            onLinkClick={handleLinkClick} 
+          />
+        </div>
 
         <HomeSection homeRef={homeRef} isMobile={isMobile} />
         <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
