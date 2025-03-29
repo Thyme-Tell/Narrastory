@@ -50,30 +50,35 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     try {
       const normalized = normalizePhoneNumber(phoneNumber);
       
-      // Direct submission to Synthflow form
-      const formUrl = 'https://workflow.synthflow.ai/forms/et8Cg0Wn3HmcRuKyv8rGN';
-      const formData = new FormData();
-      formData.append('phone_number', normalized.replace('+', ''));
-
-      const response = await fetch(formUrl, {
+      // Call our Supabase function to initiate the call
+      const webhookUrl = 'https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/start-narra-call';
+      
+      const response = await fetch(webhookUrl, {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: normalized,
+        })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to submit phone number');
+        throw new Error(data.error || 'Failed to initiate call');
       }
 
       toast({
         title: "Success",
-        description: "Your phone number has been submitted. Expect a call soon!",
+        description: "Your call is being initiated. Expect a call soon!",
       });
 
       onSuccess?.(normalized);
       setPhoneNumber("");
       
     } catch (error) {
-      console.error("Error submitting phone number:", error);
+      console.error("Error initiating call:", error);
       toast({
         title: "Error",
         description: error.message || "Something went wrong. Please try again later.",
