@@ -103,7 +103,11 @@ const Header: React.FC<HeaderProps> = ({
     
     // Scroll to the appropriate section
     if (item.ref && item.ref.current) {
-      item.ref.current.scrollIntoView({ behavior: 'smooth' });
+      const sectionTop = item.ref.current.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ 
+        top: sectionTop - 100, // Offset to account for header height
+        behavior: 'smooth' 
+      });
     } else if (item.name === 'home') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

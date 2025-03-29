@@ -32,20 +32,32 @@ const GetStarted = () => {
     const path = location.pathname;
     const hash = location.hash;
 
-    if (path === "/get-started" && !hash) setActiveItem("home");
-    if (hash === "#how-it-works") setActiveItem("how-it-works");
-    if (hash === "#join-story-circle") setActiveItem("join-story-circle");
-    if (hash === "#sign-up") setActiveItem("sign-up");
-  }, [location]);
+    // Handle initial navigation based on URL hash
+    if (hash) {
+      const targetSection = hash.substring(1); // Remove the # character
+      const selectedItem = navItems.find(item => item.name === targetSection);
+      
+      if (selectedItem) {
+        setActiveItem(selectedItem.name);
+        
+        // Add a small delay to ensure the DOM is fully loaded
+        setTimeout(() => {
+          if (selectedItem.ref && selectedItem.ref.current) {
+            const sectionTop = selectedItem.ref.current.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+              top: sectionTop - 100, // Offset for header
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
+    } else if (path === "/get-started") {
+      setActiveItem("home");
+    }
+  }, [location, navItems]);
 
   const handleMenuItemClick = (item: any) => {
     setActiveItem(item.name);
-    
-    if (item.ref && item.ref.current) {
-      item.ref.current.scrollIntoView({ behavior: 'smooth' });
-    } else if (item.name === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   };
 
   return (
