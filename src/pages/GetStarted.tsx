@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -70,6 +71,23 @@ const GetStarted = () => {
     }
   };
 
+  // New function to handle logo click
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveItem("home");
+  };
+
+  // New function to handle menu item click
+  const handleMenuItemClick = (e: React.MouseEvent, item: any) => {
+    e.preventDefault();
+    setIsDropdownOpen(false);
+    if (item.onClick) {
+      item.onClick();
+    }
+    setActiveItem(item.name);
+  };
+
   const navItems = [
     { 
       name: "home", 
@@ -117,6 +135,7 @@ const GetStarted = () => {
         <nav className="flex flex-col justify-between items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
           <Link 
             to="/get-started" 
+            onClick={handleLogoClick}
             className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block w-full sm:w-auto flex justify-center"
           >
             <img 
@@ -134,10 +153,7 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (item.onClick) item.onClick();
-                    }}
+                    onClick={(e) => handleMenuItemClick(e, item)}
                     className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] mr-[5px] my-auto`}
                   >
                     Sign Up <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 text-white" />
@@ -146,10 +162,7 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (item.onClick) item.onClick();
-                    }}
+                    onClick={(e) => handleMenuItemClick(e, item)}
                     className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap text-white m-[3px] my-auto ${
                       activeItem === item.name
                         ? "bg-[#17342C]"
@@ -164,7 +177,7 @@ const GetStarted = () => {
             </div>
 
             <div className="sm:hidden w-full max-w-[200px] mx-auto">
-              <DropdownMenu>
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <button className="w-full flex items-center justify-between px-4 py-2 bg-[#17342C] rounded-[2px] text-white">
                     <div className="flex items-center">
@@ -180,11 +193,7 @@ const GetStarted = () => {
                       <Link
                         key={item.name}
                         to={item.path}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (item.onClick) item.onClick();
-                          setIsDropdownOpen(false);
-                        }}
+                        onClick={(e) => handleMenuItemClick(e, item)}
                         className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px]"
                       >
                         {item.icon}
@@ -195,11 +204,7 @@ const GetStarted = () => {
                       <DropdownMenuItem key={item.name} asChild>
                         <Link
                           to={item.path}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (item.onClick) item.onClick();
-                            setIsDropdownOpen(false);
-                          }}
+                          onClick={(e) => handleMenuItemClick(e, item)}
                           className={`flex items-center w-full px-4 py-2 text-white ${
                             activeItem === item.name
                               ? "bg-[#17342C]"
