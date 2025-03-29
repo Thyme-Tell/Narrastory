@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -104,7 +105,7 @@ const GetStarted = () => {
           <div className="flex flex-col sm:flex-row items-center">
             <div 
               className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto shadow-sm" 
-              style={{ padding: "5px 2px;" }}
+              style={{ padding: "5px 2px" }}
             >
               {navItems.map((item) => (
                 item.isButton ? (
