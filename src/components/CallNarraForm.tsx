@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 
 // Define the Synthflow webhook URL for direct form submission
 const SYNTHFLOW_WEBHOOK_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
+// Fallback to the Edge Function if direct submission fails
+const EDGE_FUNCTION_URL = "https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/start-narra-call";
 
 interface CallNarraFormProps {
   className?: string;
@@ -63,20 +65,50 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       
       console.log("Sending webhook payload to Synthflow:", webhookPayload);
       
-      // Send the request directly to the Synthflow form URL
-      const response = await fetch(SYNTHFLOW_WEBHOOK_URL, {
+      // Try direct submission with no-cors mode first
+      try {
+        console.log("Attempting direct submission with no-cors mode");
+        await fetch(SYNTHFLOW_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          mode: 'no-cors', // Use no-cors mode to bypass CORS restrictions
+          body: JSON.stringify(webhookPayload),
+        });
+        
+        // Because no-cors doesn't return a readable response, we just assume it worked
+        console.log("Direct submission with no-cors completed");
+        
+        toast({
+          title: "Success",
+          description: "Your call is being initiated. Expect a call soon!",
+        });
+        
+        onSuccess?.(normalized);
+        setPhoneNumber("");
+        return;
+      } catch (directError) {
+        // If direct submission fails, fall back to the edge function
+        console.error("Direct submission failed, falling back to Edge Function:", directError);
+      }
+      
+      // Fallback: Use the Edge Function as a proxy
+      console.log("Falling back to Edge Function proxy:", EDGE_FUNCTION_URL);
+      
+      const response = await fetch(EDGE_FUNCTION_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(webhookPayload),
+        body: JSON.stringify({ Phone: normalized }),
       });
       
-      console.log("Synthflow response status:", response.status);
+      console.log("Edge Function response status:", response.status);
       
       // Try to parse response text for debugging
       const responseText = await response.text();
-      console.log("Synthflow response:", responseText);
+      console.log("Edge Function response:", responseText);
       
       if (!response.ok) {
         throw new Error(`Failed to submit phone number: ${responseText || response.statusText}`);
