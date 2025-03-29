@@ -118,9 +118,9 @@ const Header: React.FC<HeaderProps> = ({
                     e.preventDefault();
                     handleMenuItemClick(item);
                   }}
-                  className={`flex items-center px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-[4px] text-xs font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
+                  className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
                 >
-                  Sign Up <ArrowRight className="ml-1 sm:ml-1.5 h-3 w-3 text-white" />
+                  Sign Up <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 text-white" />
                 </Link>
               ) : (
                 <Link
@@ -130,13 +130,15 @@ const Header: React.FC<HeaderProps> = ({
                     e.preventDefault();
                     handleMenuItemClick(item);
                   }}
-                  className={`flex items-center px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-[4px] text-xs font-medium whitespace-nowrap text-white m-[2px] my-auto ${
+                  className={`flex items-center px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap text-white m-[2px] my-auto ${
                     activeItem === item.name
                       ? "bg-[#17342C]"
                       : "hover:bg-[#17342C]/10"
                   } transition-colors duration-200 w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
                 >
-                  {item.icon}
+                  {React.cloneElement(item.icon as React.ReactElement, { 
+                    className: "h-4 w-4 mr-2" 
+                  })}
                   {item.label}
                 </Link>
               )
