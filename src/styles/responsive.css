@@ -108,6 +108,27 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
   }
+
+  /* Improve section scrolling on mobile */
+  section {
+    scroll-margin-top: 100px;
+  }
+  
+  /* Fix for mobile address bar appearance/disappearance */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Fix mobile touch targets */
+  .navbar-menu a, 
+  .navbar-menu button,
+  .dropdown-item {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+  }
 }
 
 /* New breakpoint-specific styles */
@@ -135,5 +156,21 @@
 @media (max-width: 639px) {
   .navbar-menu {
     margin-top: 0.75rem;
+  }
+  
+  /* Better scroll handling */
+  html, body {
+    overscroll-behavior-y: none;
+  }
+  
+  /* Section scroll margins */
+  #home {
+    scroll-margin-top: 50px;
+  }
+  
+  #how-it-works,
+  #join-story-circle,
+  #sign-up {
+    scroll-margin-top: 80px;
   }
 }

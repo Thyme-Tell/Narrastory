@@ -12,7 +12,7 @@ import { NavItem } from "../NavItems";
 
 interface MobileNavigationProps {
   navItems: NavItem[];
-  activeItem: string;
+  activeSection: string;
   isDropdownOpen: boolean;
   setIsDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
   scrollToTop: () => void;
@@ -24,7 +24,7 @@ interface MobileNavigationProps {
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
   navItems,
-  activeItem,
+  activeSection,
   isDropdownOpen,
   setIsDropdownOpen,
   scrollToTop,
@@ -35,10 +35,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 }) => {
   return (
     <div className="w-full flex sm:hidden justify-between items-center">
-      <Link 
-        to="/get-started" 
+      <div 
         onClick={scrollToTop}
-        className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
+        className="bg-[#EFF1E9]/50 rounded-[100px] p-2 cursor-pointer"
         style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
       >
         {scrolled ? (
@@ -54,7 +53,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             className="w-[100px] h-auto"
           />
         )}
-      </Link>
+      </div>
 
       <div className="ml-2">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
@@ -70,30 +69,28 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
           <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
             {displayNavItems.map((item) => (
               item.isButton ? (
-                <Link
+                <div
                   key={item.name}
-                  to={item.path}
                   onClick={(e) => handleNavItemClick(e, item)}
-                  className="flex items-center w-full px-4 py-2 text-xs font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
+                  className="flex items-center w-full px-4 py-2 text-xs font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px] cursor-pointer"
                 >
                   {item.icon}
                   <span className="ml-2 text-xs">Sign Up</span>
                   <ArrowRight className="ml-auto h-3 w-3 text-white" />
-                </Link>
+                </div>
               ) : (
                 <DropdownMenuItem key={item.name} asChild>
-                  <Link
-                    to={item.path}
+                  <div
                     onClick={(e) => handleNavItemClick(e, item)}
-                    className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] ${
-                      activeItem === item.name
+                    className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] cursor-pointer ${
+                      activeSection === item.name
                         ? "bg-[#17342C]"
                         : "hover:bg-[#17342C]/30"
                     }`}
                   >
                     {item.icon}
                     <span className="text-xs">{item.label}</span>
-                  </Link>
+                  </div>
                 </DropdownMenuItem>
               )
             ))}

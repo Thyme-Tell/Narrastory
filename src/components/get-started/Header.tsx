@@ -1,48 +1,46 @@
 
 import React, { useState } from "react";
-import { Home } from "lucide-react";
-import { NavItem } from "./NavItems";
+import { Section } from "@/hooks/useScrollToSection";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
 import DesktopNavigation from "./navigation/DesktopNavigation";
-import useHeaderScroll from "./navigation/useHeaderScroll";
+import { NavItem, getNavItems } from "./NavItems";
 
 interface HeaderProps {
-  navItems: NavItem[];
-  activeItem: string;
-  handleMenuItemClick: (item: NavItem) => void;
+  sections: Section[];
+  activeSection: string;
+  scrolled: boolean;
+  scrollToSection: (sectionId: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  navItems, 
-  activeItem, 
-  handleMenuItemClick 
+  sections, 
+  activeSection, 
+  scrolled, 
+  scrollToSection 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { scrolled } = useHeaderScroll({ navItems, activeItem, handleMenuItemClick });
-  const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
+  
+  // Create nav items based on the sections
+  const navItems = getNavItems();
+  
+  // Find the active nav item
+  const activeNavItem = navItems.find(item => item.name === activeSection) || navItems[0];
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Handle manual navigation when clicking on a nav item
+  // Handle navigation item click 
   const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
     e.preventDefault();
+    scrollToSection(item.name);
     
-    // Call the handleMenuItemClick function to update the active item
-    handleMenuItemClick(item);
-    
-    // Scroll to the appropriate section
-    if (item.ref && item.ref.current) {
-      const sectionTop = item.ref.current.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ 
-        top: sectionTop - 100, // Offset to account for header height
-        behavior: 'smooth' 
-      });
-    } else if (item.name === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Close mobile dropdown if open
+    if (isDropdownOpen) {
+      setIsDropdownOpen(false);
     }
+  };
+
+  // Handle home/logo click
+  const scrollToTop = () => {
+    scrollToSection("home");
   };
 
   // Modify nav items to show Narra icon instead of Home icon when scrolled
@@ -67,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Mobile dropdown - visible below 640px */}
           <MobileNavigation 
             navItems={navItems}
-            activeItem={activeItem}
+            activeSection={activeSection}
             isDropdownOpen={isDropdownOpen}
             setIsDropdownOpen={setIsDropdownOpen}
             scrollToTop={scrollToTop}
@@ -85,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
           <DesktopNavigation 
             displayNavItems={displayNavItems} 
-            activeItem={activeItem} 
+            activeSection={activeSection} 
             handleNavItemClick={handleNavItemClick} 
           />
         </div>

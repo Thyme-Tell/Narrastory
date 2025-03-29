@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
 import { Home, Book, Users, ArrowRight } from "lucide-react";
 
 export type NavItem = {
@@ -8,43 +7,33 @@ export type NavItem = {
   label: string;
   path: string;
   icon: React.ReactNode;
-  ref: React.RefObject<HTMLElement | HTMLDivElement> | null;
   isButton?: boolean;
 };
 
-export const getNavItems = (
-  homeRef: React.RefObject<HTMLDivElement>,
-  howItWorksRef: React.RefObject<HTMLElement>,
-  storyCirclesRef: React.RefObject<HTMLElement>,
-  signUpRef: React.RefObject<HTMLElement>
-): NavItem[] => [
+export const getNavItems = (): NavItem[] => [
   { 
     name: "home", 
     label: "Home", 
     path: "/get-started",
-    icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: homeRef
+    icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
   },
   { 
     name: "how-it-works", 
     label: "How It Works", 
     path: "/get-started#how-it-works",
-    icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: howItWorksRef
+    icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
   },
   { 
     name: "join-story-circle", 
     label: "Join a Story Circle", 
     path: "/get-started#join-story-circle",
-    icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: storyCirclesRef
+    icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
   },
   {
     name: "sign-up",
     label: "Sign Up",
     path: "/get-started#sign-up",
     icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: signUpRef,
     isButton: true
   }
 ];
