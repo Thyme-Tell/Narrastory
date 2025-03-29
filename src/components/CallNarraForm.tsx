@@ -34,9 +34,91 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   const [inputFocused, setInputFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
+  };
+
+  const submitToSynthflowViaForm = (phone: string) => {
+    // Create a hidden iframe to handle the form submission without navigating away
+    const iframe = document.createElement('iframe');
+    iframe.name = 'synthflow-submit-frame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    
+    // Create a form element to submit directly
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = SYNTHFLOW_WEBHOOK_URL;
+    form.target = 'synthflow-submit-frame';
+    
+    // Add the phone input field
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'Phone';
+    input.value = phone;
+    form.appendChild(input);
+    
+    // Add the form to the document, submit it, and clean up
+    document.body.appendChild(form);
+    
+    // Set up message listener for iframe load
+    iframe.onload = () => {
+      console.log("Form submission iframe loaded");
+      
+      // Clean up after some delay to ensure the submission completes
+      setTimeout(() => {
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
+        setIsFormSubmitting(false);
+        
+        toast({
+          title: "Success",
+          description: "Your call is being initiated. Expect a call soon!",
+        });
+        
+        onSuccess?.(phone);
+      }, 1000);
+    };
+    
+    // Submit the form
+    console.log("Submitting form directly to Synthflow");
+    form.submit();
+  };
+
+  const submitToEdgeFunction = async (phone: string) => {
+    try {
+      console.log("Falling back to Edge Function proxy:", EDGE_FUNCTION_URL);
+      
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Phone: phone }),
+      });
+      
+      console.log("Edge Function response status:", response.status);
+      
+      // Try to parse response text for debugging
+      const responseText = await response.text();
+      console.log("Edge Function response:", responseText);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to submit phone number: ${responseText || response.statusText}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "Your call is being initiated. Expect a call soon!",
+      });
+
+      onSuccess?.(phone);
+    } catch (error) {
+      console.error("Error submitting phone number to Edge Function:", error);
+      throw error; // Re-throw to be caught by the main handler
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,68 +140,17 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       // Log the normalized phone number for debugging
       console.log("Normalized phone number:", normalized);
       
-      // Create the payload with the expected field name "Phone"
-      const webhookPayload = {
-        Phone: normalized
-      };
-      
-      console.log("Sending webhook payload to Synthflow:", webhookPayload);
-      
-      // Try direct submission with no-cors mode first
-      try {
-        console.log("Attempting direct submission with no-cors mode");
-        await fetch(SYNTHFLOW_WEBHOOK_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          mode: 'no-cors', // Use no-cors mode to bypass CORS restrictions
-          body: JSON.stringify(webhookPayload),
-        });
-        
-        // Because no-cors doesn't return a readable response, we just assume it worked
-        console.log("Direct submission with no-cors completed");
-        
-        toast({
-          title: "Success",
-          description: "Your call is being initiated. Expect a call soon!",
-        });
-        
-        onSuccess?.(normalized);
+      // First try direct form submission (most reliable for webhook forms)
+      if (!isFormSubmitting) {
+        setIsFormSubmitting(true);
+        submitToSynthflowViaForm(normalized);
         setPhoneNumber("");
+        setIsLoading(false);
         return;
-      } catch (directError) {
-        // If direct submission fails, fall back to the edge function
-        console.error("Direct submission failed, falling back to Edge Function:", directError);
       }
       
-      // Fallback: Use the Edge Function as a proxy
-      console.log("Falling back to Edge Function proxy:", EDGE_FUNCTION_URL);
-      
-      const response = await fetch(EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ Phone: normalized }),
-      });
-      
-      console.log("Edge Function response status:", response.status);
-      
-      // Try to parse response text for debugging
-      const responseText = await response.text();
-      console.log("Edge Function response:", responseText);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to submit phone number: ${responseText || response.statusText}`);
-      }
-
-      toast({
-        title: "Success",
-        description: "Your call is being initiated. Expect a call soon!",
-      });
-
-      onSuccess?.(normalized);
+      // If we're already submitting a form, try the Edge Function as backup
+      await submitToEdgeFunction(normalized);
       setPhoneNumber("");
       
     } catch (error) {
@@ -167,7 +198,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           } outline-none ${phoneInputClassName}`}
           onFocus={() => setInputFocused(true)}
           onBlur={() => !phoneNumber && setInputFocused(false)}
-          disabled={isLoading}
+          disabled={isLoading || isFormSubmitting}
         />
         <Button 
           type="submit"
@@ -175,9 +206,9 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           style={{
             background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
           }}
-          disabled={isLoading}
+          disabled={isLoading || isFormSubmitting}
         >
-          {isLoading ? "Calling..." : buttonText || defaultButton}
+          {isLoading || isFormSubmitting ? "Calling..." : buttonText || defaultButton}
         </Button>
       </div>
     </form>
