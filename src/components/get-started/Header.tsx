@@ -4,6 +4,7 @@ import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
 import DesktopNavigation from "./navigation/DesktopNavigation";
+import useHeaderScroll from "./navigation/useHeaderScroll";
 
 interface HeaderProps {
   navItems: NavItem[];
@@ -17,8 +18,12 @@ const Header: React.FC<HeaderProps> = ({
   handleMenuItemClick 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
+  const { scrolled, activeSection } = useHeaderScroll({ 
+    navItems, 
+    activeItem, 
+    handleMenuItemClick 
+  });
+  const activeNavItem = navItems.find(item => item.name === activeSection) || navItems[0];
 
   // Handle navigation when clicking on a nav item
   const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
@@ -55,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Mobile dropdown - visible below 640px */}
           <MobileNavigation 
             navItems={navItems}
-            activeItem={activeItem}
+            activeItem={activeSection}
             isDropdownOpen={isDropdownOpen}
             setIsDropdownOpen={setIsDropdownOpen}
             handleNavItemClick={handleNavItemClick}
@@ -72,7 +77,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
           <DesktopNavigation 
             displayNavItems={displayNavItems} 
-            activeItem={activeItem} 
+            activeItem={activeSection} 
             handleNavItemClick={handleNavItemClick} 
           />
         </div>

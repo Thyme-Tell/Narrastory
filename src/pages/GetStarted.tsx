@@ -43,9 +43,17 @@ const GetStarted = () => {
       
       if (selectedItem) {
         setActiveItem(selectedItem.name);
+        // Scroll to the section with a small delay to ensure DOM is ready
+        setTimeout(() => {
+          if (selectedItem.ref && selectedItem.ref.current) {
+            selectedItem.ref.current.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
       }
     } else if (path === "/get-started") {
       setActiveItem("home");
+      // Scroll to top when navigating to home
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [location, navItems]);
 
