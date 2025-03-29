@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { Home } from "lucide-react";
 import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
@@ -40,8 +39,18 @@ const Header: React.FC<HeaderProps> = ({
         top: sectionTop - 100, // Offset to account for header height
         behavior: 'smooth' 
       });
+      
+      // Update URL hash without scrolling
+      const url = new URL(window.location.href);
+      url.hash = item.name === 'home' ? '' : `#${item.name}`;
+      window.history.replaceState({}, "", url.toString());
     } else if (item.name === 'home') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Remove hash from URL
+      const url = new URL(window.location.href);
+      url.hash = '';
+      window.history.replaceState({}, "", url.toString());
     }
   };
 

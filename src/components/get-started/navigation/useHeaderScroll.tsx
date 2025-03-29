@@ -75,6 +75,10 @@ export const useHeaderScroll = ({
     };
 
     window.addEventListener('scroll', handleScroll);
+    
+    // Initial scroll check
+    handleScroll();
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
