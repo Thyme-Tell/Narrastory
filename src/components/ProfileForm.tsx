@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -179,7 +180,7 @@ const ProfileForm = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {formError && (
-        <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800">
+        <Alert variant="destructive" className="border-red-300 bg-red-50 text-red-800 rounded-[7px]">
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
@@ -198,7 +199,7 @@ const ProfileForm = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              className={`w-full rounded-lg border ${
+              className={`w-full rounded-[7px] border ${
                 errors.email ? "border-red-500" : "border-[#E5E7EB]"
               }`}
             />
@@ -220,7 +221,7 @@ const ProfileForm = () => {
               onChange={handleChange}
               required
               placeholder="Jane"
-              className={`w-full rounded-lg border ${
+              className={`w-full rounded-[7px] border ${
                 errors.firstName ? "border-red-500" : "border-[#E5E7EB]"
               }`}
             />
@@ -242,7 +243,7 @@ const ProfileForm = () => {
               onChange={handleChange}
               required
               placeholder="Doe"
-              className={`w-full rounded-lg border ${
+              className={`w-full rounded-[7px] border ${
                 errors.lastName ? "border-red-500" : "border-[#E5E7EB]"
               }`}
             />
@@ -265,7 +266,7 @@ const ProfileForm = () => {
               onChange={handleChange}
               required
               placeholder="(555) 000-0000"
-              className={`w-full rounded-lg border ${
+              className={`w-full rounded-[7px] border ${
                 errors.phoneNumber ? "border-red-500" : "border-[#E5E7EB]"
               }`}
             />
@@ -288,7 +289,7 @@ const ProfileForm = () => {
               onChange={handleChange}
               required
               placeholder="Enter a secure password"
-              className={`w-full rounded-lg border pr-10 ${
+              className={`w-full rounded-[7px] border pr-10 ${
                 errors.password ? "border-red-500" : "border-[#E5E7EB]"
               }`}
             />
@@ -315,7 +316,7 @@ const ProfileForm = () => {
               id="remember-me" 
               checked={rememberMe}
               onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-              className="h-4 w-4 rounded border-gray-300 text-[#A33D29]"
+              className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
             />
             <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
               Remember me
@@ -332,7 +333,7 @@ const ProfileForm = () => {
       <div>
         <Button 
           type="submit" 
-          className="w-full py-2.5 rounded-lg bg-gradient-to-r from-[#A33D29] to-[#B65644] hover:from-[#933629] hover:to-[#A34C3D] text-white"
+          className="w-full py-2.5 rounded-[7px] bg-gradient-to-r from-[#A33D29] to-[#B65644] hover:from-[#933629] hover:to-[#A34C3D] text-white"
           disabled={loading}
         >
           {loading ? "Creating Account..." : "Continue"}

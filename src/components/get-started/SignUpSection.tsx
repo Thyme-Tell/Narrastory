@@ -16,7 +16,7 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
       id="sign-up"
       className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24"
     >
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden">
+      <div className="max-w-6xl mx-auto bg-white rounded-[7px] shadow-lg overflow-hidden">
         <div className="grid md:grid-cols-2">
           {/* Left Panel - Form */}
           <div className="p-8 md:p-12 flex flex-col justify-center">
@@ -44,14 +44,14 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
                 <h2 className="text-3xl font-caslon mt-2 mb-4">Family Stories.<br />Forever.</h2>
               </div>
               
-              <div className="bg-[#1d2532] rounded-2xl p-6 shadow-lg mx-auto max-w-xs">
+              <div className="bg-[#1d2532] rounded-[7px] p-6 shadow-lg mx-auto max-w-xs">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <p className="text-white/60 text-xs">STORIES</p>
                     <p className="text-xl font-medium">24 Family Memories</p>
                   </div>
                   
-                  <div className="w-full h-40 bg-gradient-to-br from-[#A33D29]/90 to-[#A33D29]/60 rounded-lg flex items-center justify-center">
+                  <div className="w-full h-40 bg-gradient-to-br from-[#A33D29]/90 to-[#A33D29]/60 rounded-[7px] flex items-center justify-center">
                     <span className="font-caslon text-2xl">Narra Book</span>
                   </div>
                   
