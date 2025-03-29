@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -22,7 +21,6 @@ const GetStarted = () => {
   
   const [activeStep, setActiveStep] = useState(0);
   
-  // Create refs for each section
   const howItWorksRef = useRef<HTMLElement>(null);
   const storyCirclesRef = useRef<HTMLElement>(null);
   const signUpRef = useRef<HTMLElement>(null);
@@ -57,7 +55,6 @@ const GetStarted = () => {
   useEffect(() => {
     document.title = "Narra Story | Get Started";
     
-    // Handle both path and hash for active item
     const path = location.pathname;
     const hash = location.hash;
 
@@ -67,7 +64,6 @@ const GetStarted = () => {
     if (hash === "#sign-up") setActiveItem("sign-up");
   }, [location]);
 
-  // Function to scroll to section
   const scrollToSection = (ref: React.RefObject<HTMLElement>) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth' });
@@ -223,7 +219,6 @@ const GetStarted = () => {
         </nav>
       </header>
 
-      {/* Hero Section - Home */}
       <div 
         id="home"
         className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
@@ -263,7 +258,6 @@ const GetStarted = () => {
         </div>
       </div>
 
-      {/* How it Works Section */}
       <section 
         ref={howItWorksRef}
         id="how-it-works"
@@ -345,25 +339,6 @@ const GetStarted = () => {
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
-
-              <div className="flex justify-center mt-6 space-x-4 md:hidden">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handlePrevStep}
-                  className="rounded-full border-[#C8C8C9] text-[#403E43]"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleNextStep}
-                  className="rounded-full border-[#C8C8C9] text-[#403E43]"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
             
             <div className="w-full md:w-2/3">
@@ -393,7 +368,6 @@ const GetStarted = () => {
         </div>
       </section>
 
-      {/* Narra Story Circles Section */}
       <section 
         ref={storyCirclesRef}
         id="join-story-circle"
@@ -461,7 +435,6 @@ const GetStarted = () => {
         </div>
       </section>
       
-      {/* Sign Up Section */}
       <section 
         ref={signUpRef}
         id="sign-up"
