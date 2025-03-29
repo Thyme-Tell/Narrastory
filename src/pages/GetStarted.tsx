@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
+import CallNarraForm from "@/components/CallNarraForm";
 
 const GetStarted = () => {
   const location = useLocation();
@@ -165,14 +165,7 @@ const GetStarted = () => {
           </p>
           
           <div className="max-w-md mx-auto px-4">
-            <Button 
-              className="w-full rounded-full h-12 text-white text-base items-center gap-2 font-light"
-              style={{
-                background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
-              }}
-            >
-              Get Started <ArrowRight className="h-4 w-4" />
-            </Button>
+            <CallNarraForm mobileLayout={isMobile} />
           </div>
         </div>
       </div>
@@ -186,10 +179,8 @@ const GetStarted = () => {
           <div className="flex flex-col md:flex-row gap-8 md:gap-16">
             <div className="w-full md:w-1/3">
               <div className="flex flex-row md:flex-col gap-2 md:gap-4 relative">
-                {/* Background vertical line */}
                 <div className="hidden md:block absolute left-0 top-0 w-0.5 h-full bg-[rgba(47,53,70,0.13)]"></div>
                 
-                {/* Active indicator */}
                 <div 
                   className="hidden md:block absolute left-0 w-0.5 bg-[#2F3546] transition-all duration-300"
                   style={{ 
@@ -238,7 +229,6 @@ const GetStarted = () => {
                 ))}
               </div>
 
-              {/* Desktop navigation arrows moved below steps */}
               <div className="hidden md:flex justify-start mt-6 space-x-4">
                 <Button
                   variant="outline"
@@ -258,7 +248,6 @@ const GetStarted = () => {
                 </Button>
               </div>
 
-              {/* Mobile navigation arrows */}
               <div className="flex justify-center mt-6 space-x-4 md:hidden">
                 <Button
                   variant="outline"
