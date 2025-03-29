@@ -48,14 +48,15 @@ const LumaEvents: React.FC = () => {
           throw new Error(error.message);
         }
         
-        if (!data || !data.events) {
+        if (!data || !Array.isArray(data.events)) {
+          console.error("Invalid response format:", data);
           throw new Error("Invalid response format from Lu.ma API");
         }
         
         // Use the events from the API response
         setEvents(data.events);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch Lu.ma events:", err);
         setError("Failed to load upcoming events. Please try again later.");
         toast({
