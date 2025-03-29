@@ -75,33 +75,42 @@ const GetStarted = () => {
       name: "home", 
       label: "Home", 
       path: "/get-started",
-      icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
+      icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
+      ref: null
     },
     { 
       name: "how-it-works", 
-      label: "How it Works", 
+      label: "How It Works", 
       path: "/get-started#how-it-works",
       icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      onClick: () => scrollToSection(howItWorksRef)
+      ref: howItWorksRef
     },
     { 
       name: "join-story-circle", 
       label: "Join a Story Circle", 
       path: "/get-started#join-story-circle",
       icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      onClick: () => scrollToSection(storyCirclesRef)
+      ref: storyCirclesRef
     },
     {
       name: "sign-up",
       label: "Sign Up",
       path: "/get-started#sign-up",
       icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      isButton: true,
-      onClick: () => scrollToSection(signUpRef)
+      ref: signUpRef
     }
   ];
 
-  const activeNavItem = navItems.find(item => item.name === activeItem);
+  const handleMenuItemClick = (item: typeof navItems[number]) => {
+    setIsDropdownOpen(false);
+    setActiveItem(item.name);
+    
+    if (item.ref && item.ref.current) {
+      item.ref.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
 
   const handlePrevStep = () => {
     setActiveStep((prev) => (prev > 0 ? prev - 1 : howItWorksSteps.length - 1));
@@ -136,7 +145,7 @@ const GetStarted = () => {
                     to={item.path}
                     onClick={(e) => {
                       e.preventDefault();
-                      if (item.onClick) item.onClick();
+                      handleMenuItemClick(item);
                     }}
                     className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] mr-[5px] my-auto`}
                   >
@@ -148,7 +157,7 @@ const GetStarted = () => {
                     to={item.path}
                     onClick={(e) => {
                       e.preventDefault();
-                      if (item.onClick) item.onClick();
+                      handleMenuItemClick(item);
                     }}
                     className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap text-white m-[3px] my-auto ${
                       activeItem === item.name
@@ -164,12 +173,12 @@ const GetStarted = () => {
             </div>
 
             <div className="sm:hidden w-full max-w-[200px] mx-auto">
-              <DropdownMenu>
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <button className="w-full flex items-center justify-between px-4 py-2 bg-[#17342C] rounded-[2px] text-white">
                     <div className="flex items-center">
-                      {activeNavItem && activeNavItem.icon}
-                      <span className="ml-2">{activeNavItem ? activeNavItem.label : 'Menu'}</span>
+                      {activeNavItem.icon}
+                      <span className="ml-2">{activeNavItem.label}</span>
                     </div>
                     <ChevronDown className="h-4 w-4 text-white opacity-70" />
                   </button>
@@ -182,8 +191,7 @@ const GetStarted = () => {
                         to={item.path}
                         onClick={(e) => {
                           e.preventDefault();
-                          if (item.onClick) item.onClick();
-                          setIsDropdownOpen(false);
+                          handleMenuItemClick(item);
                         }}
                         className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px]"
                       >
@@ -197,8 +205,7 @@ const GetStarted = () => {
                           to={item.path}
                           onClick={(e) => {
                             e.preventDefault();
-                            if (item.onClick) item.onClick();
-                            setIsDropdownOpen(false);
+                            handleMenuItemClick(item);
                           }}
                           className={`flex items-center w-full px-4 py-2 text-white ${
                             activeItem === item.name
