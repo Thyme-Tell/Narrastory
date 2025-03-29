@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Facebook, Instagram, Twitter, Mail, Heart } from "lucide-react";
+import { Instagram, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -25,25 +24,10 @@ const Footer = () => {
               Narrate your story in a way only you can.
             </p>
             <div className="flex space-x-4">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
-                className="text-gray-300 hover:text-white transition-colors">
-                <Facebook size={20} />
-                <span className="sr-only">Facebook</span>
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/narracreators/" target="_blank" rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition-colors">
                 <Instagram size={20} />
                 <span className="sr-only">Instagram</span>
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors">
-                <Twitter size={20} />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a href="mailto:contact@narrastory.com"
-                className="text-gray-300 hover:text-white transition-colors">
-                <Mail size={20} />
-                <span className="sr-only">Email</span>
               </a>
             </div>
           </div>
