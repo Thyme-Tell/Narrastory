@@ -1,16 +1,23 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import CallNarraForm from "@/components/CallNarraForm";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem
+} from "@/components/ui/dropdown-menu";
 
 const GetStarted = () => {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("home");
   const isMobile = useIsMobile();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const [activeStep, setActiveStep] = useState(0);
   
@@ -79,6 +86,8 @@ const GetStarted = () => {
     }
   ];
 
+  const activeNavItem = navItems.find(item => item.name === activeItem);
+
   const handlePrevStep = () => {
     setActiveStep((prev) => (prev > 0 ? prev - 1 : howItWorksSteps.length - 1));
   };
@@ -90,7 +99,7 @@ const GetStarted = () => {
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
-        <nav className="flex flex-col justify-between items-center bg-transparent py-1.5 sm:py-2">
+        <nav className="flex flex-col justify-between items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
           <Link 
             to="/get-started" 
             className="bg-[#EFF1E9]/50 backdrop-blur-sm rounded-[100px] p-4 inline-block w-full sm:w-auto flex justify-center"
@@ -102,17 +111,15 @@ const GetStarted = () => {
             />
           </Link>
 
-          <div className="flex w-full justify-center mt-4">
-            <div 
-              className="bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 flex flex-row items-center w-full max-w-md mx-auto shadow-sm" 
-              style={{ padding: "5px 2px" }}
-            >
+          <div className="flex w-full justify-center mt-4 navbar-menu">
+            <div className="hidden sm:flex bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] p-0.5 items-center w-full max-w-lg mx-auto shadow-sm" 
+              style={{ padding: "5px 2px" }}>
               {navItems.map((item) => (
                 item.isButton ? (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto`}
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto`}
                   >
                     Sign Up <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 text-white" />
                   </Link>
@@ -120,7 +127,7 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium m-[3px] my-auto ${
+                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap m-[3px] my-auto ${
                       activeItem === item.name
                         ? "bg-[#17342C] text-white"
                         : "text-white hover:bg-[#17342C]/10"
@@ -131,6 +138,50 @@ const GetStarted = () => {
                   </Link>
                 )
               ))}
+            </div>
+
+            {/* Mobile dropdown menu */}
+            <div className="sm:hidden w-full max-w-sm mx-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-full flex items-center justify-between px-4 py-2 bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] text-white">
+                    <div className="flex items-center">
+                      {activeNavItem && activeNavItem.icon}
+                      <span className="ml-2">{activeNavItem ? activeNavItem.label : 'Menu'}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-white opacity-70" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full min-w-[200px] bg-[#8A9096]/95 backdrop-blur-sm border-0 text-white">
+                  {navItems.map((item) => (
+                    item.isButton ? (
+                      <Link
+                        key={item.name}
+                        to={item.path}
+                        className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white"
+                      >
+                        {item.icon}
+                        <span className="ml-2">Sign Up</span>
+                        <ArrowRight className="ml-auto h-4 w-4 text-white" />
+                      </Link>
+                    ) : (
+                      <DropdownMenuItem key={item.name} asChild>
+                        <Link
+                          to={item.path}
+                          className={`flex items-center w-full px-4 py-2 ${
+                            activeItem === item.name
+                              ? "bg-[#17342C]"
+                              : "hover:bg-[#17342C]/30"
+                          }`}
+                        >
+                          {item.icon}
+                          <span className="ml-2">{item.label}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </nav>
