@@ -62,22 +62,28 @@ const Header: React.FC<HeaderProps> = ({
         <div className="w-full flex sm:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown */}
           <div className="w-full flex sm:hidden justify-between items-center">
-            {!scrolled && (
-              <Link 
-                to="/get-started" 
-                onClick={scrollToTop}
-                className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
-                style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
-              >
+            <Link 
+              to="/get-started" 
+              onClick={scrollToTop}
+              className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
+              style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+            >
+              {scrolled ? (
+                <img 
+                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon.svg" 
+                  alt="Narra Icon" 
+                  className="w-[30px] h-auto"
+                />
+              ) : (
                 <img 
                   src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
                   alt="Narra Logo" 
                   className="w-[100px] h-auto"
                 />
-              </Link>
-            )}
+              )}
+            </Link>
 
-            <div className={`ml-2 ${!scrolled ? '' : 'ml-auto'}`}>
+            <div className="ml-2">
               <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/70 rounded-[4px] text-white">
