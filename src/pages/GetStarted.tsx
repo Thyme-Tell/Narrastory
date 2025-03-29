@@ -9,7 +9,8 @@ import HomeSection from "@/components/get-started/HomeSection";
 import HowItWorksSection from "@/components/get-started/HowItWorksSection";
 import StoryCirclesSection from "@/components/get-started/StoryCirclesSection";
 import SignUpSection from "@/components/get-started/SignUpSection";
-import WelcomeSection from "@/components/get-started/WelcomeSection";
+// Removed WelcomeSection import
+import Footer from "@/components/get-started/Footer";
 import { getNavItems } from "@/components/get-started/NavItems";
 
 const GetStarted = () => {
@@ -61,18 +62,21 @@ const GetStarted = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
-      <Header 
-        navItems={navItems} 
-        activeItem={activeItem} 
-        handleMenuItemClick={handleMenuItemClick} 
-      />
+    <div className="min-h-screen bg-[#EFF1E9]">
+      <div className="px-[7%]">
+        <Header 
+          navItems={navItems} 
+          activeItem={activeItem} 
+          handleMenuItemClick={handleMenuItemClick} 
+        />
 
-      <HomeSection homeRef={homeRef} isMobile={isMobile} />
-      <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
-      <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
-      <SignUpSection signUpRef={signUpRef} />
-      <WelcomeSection />
+        <HomeSection homeRef={homeRef} isMobile={isMobile} />
+        <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
+        <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
+        <SignUpSection signUpRef={signUpRef} />
+        {/* Removed WelcomeSection */}
+      </div>
+      <Footer />
     </div>
   );
 };

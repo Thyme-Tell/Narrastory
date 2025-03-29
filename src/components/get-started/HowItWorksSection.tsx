@@ -144,7 +144,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
           </div>
           
           <div className="w-full md:w-2/3">
-            <Card className="bg-white rounded-xl shadow-md overflow-hidden">
+            <Card className="bg-white rounded-[7px] shadow-md overflow-hidden">
               <div className="flex flex-col h-full">
                 <div className="p-6 md:p-8 flex flex-col justify-center">
                   <h3 className="text-xl md:text-2xl font-caslon font-thin mb-2 text-[#242F3F]">
