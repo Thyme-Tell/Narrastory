@@ -100,14 +100,13 @@ Deno.serve(async (req) => {
     } catch (error) {
       console.error('Synthflow API error:', error);
       
-      // Try backup method with direct form submission
-      console.log('Trying backup method with direct form submission...');
+      // Return direct form submission details
+      console.log('Returning direct form submission instructions');
       
-      // Return instructions to use direct form submission
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'API call method failed. Please try direct form submission method.',
+          error: 'API call method failed. Please use direct form submission.',
           useDirectSubmission: true,
           formUrl: SYNTHFLOW_WEBHOOK_URL,
           phoneNumber: normalizedPhone

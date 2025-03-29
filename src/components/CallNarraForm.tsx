@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 // Define the Synthflow webhook URL for direct form submission
 const SYNTHFLOW_WEBHOOK_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
 // Fallback to the Edge Function if direct submission fails
-const EDGE_FUNCTION_URL = "https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/start-narra-call";
+const EDGE_FUNCTION_URL = "/api/synthflow-proxy";
 
 interface CallNarraFormProps {
   className?: string;
@@ -39,36 +39,62 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     setPhoneNumber(e.target.value);
   };
 
-  const submitFormDirectly = (phone: string) => {
+  const submitDirectlyToSynthflow = async (phone: string) => {
+    try {
+      console.log("Submitting data using the edge function");
+      
+      // Use the edge function to post the data
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Phone: phone }),
+      });
+      
+      if (!response.ok) {
+        const result = await response.json();
+        console.log("Edge function response:", result);
+        
+        if (result.useDirectSubmission) {
+          // If the edge function recommends direct submission, use an actual form submission
+          console.log("Using direct form submission as recommended by edge function");
+          return await submitHiddenForm(phone);
+        }
+        
+        throw new Error(result.error || "Failed to initiate call");
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Edge function error:", error);
+      // Try direct form submission as a last resort
+      return await submitHiddenForm(phone);
+    }
+  };
+
+  const submitHiddenForm = async (phone: string) => {
     return new Promise<boolean>((resolve) => {
       try {
-        console.log("Submitting directly to Synthflow form:", SYNTHFLOW_WEBHOOK_URL);
+        console.log("Submitting directly using hidden form");
         
-        // Create a form element to submit directly
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = SYNTHFLOW_WEBHOOK_URL;
-        form.target = '_blank'; // Open in new tab to avoid navigation
-        form.style.display = 'none';
+        // Create the form data
+        const formData = new FormData();
+        formData.append('Phone', phone);
         
-        // Add the phone input field
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'Phone';
-        input.value = phone;
-        form.appendChild(input);
-        
-        // Add the form to the document, submit it, and clean up
-        document.body.appendChild(form);
-        
-        // Submit the form
-        form.submit();
-        
-        // Clean up
-        setTimeout(() => {
-          document.body.removeChild(form);
+        // Fetch API with POST method
+        fetch(SYNTHFLOW_WEBHOOK_URL, {
+          method: 'POST',
+          body: formData,
+          mode: 'no-cors' // This is crucial for cross-origin form submissions
+        }).then(() => {
+          // We can't actually check the response with no-cors
+          // So we assume it succeeded
           resolve(true);
-        }, 1000);
+        }).catch((error) => {
+          console.error("Direct form fetch error:", error);
+          resolve(false);
+        });
       } catch (error) {
         console.error("Error with direct form submission:", error);
         resolve(false);
@@ -93,37 +119,10 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       const normalized = normalizePhoneNumber(phoneNumber);
       console.log("Normalized phone number:", normalized);
       
-      // First try direct form submission
-      const directSubmissionResult = await submitFormDirectly(normalized);
+      // Try submitting directly to Synthflow
+      const submissionResult = await submitDirectlyToSynthflow(normalized);
       
-      if (directSubmissionResult) {
-        toast({
-          title: "Success",
-          description: "Your call is being initiated. Expect a call soon!",
-        });
-        setPhoneNumber("");
-        onSuccess?.(normalized);
-        setIsLoading(false);
-        return;
-      }
-      
-      // If direct submission fails, try the Edge Function
-      console.log("Direct form submission failed, trying Edge Function:", EDGE_FUNCTION_URL);
-      
-      const response = await fetch(EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ Phone: normalized }),
-      });
-      
-      console.log("Edge Function response status:", response.status);
-      
-      const result = await response.json();
-      console.log("Edge Function response:", result);
-      
-      if (result.success) {
+      if (submissionResult) {
         toast({
           title: "Success",
           description: "Your call is being initiated. Expect a call soon!",
@@ -131,23 +130,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         setPhoneNumber("");
         onSuccess?.(normalized);
       } else {
-        // If Edge Function recommends direct submission
-        if (result.useDirectSubmission) {
-          console.log("Edge Function suggests direct submission, trying again...");
-          const secondAttemptResult = await submitFormDirectly(normalized);
-          
-          if (secondAttemptResult) {
-            toast({
-              title: "Success",
-              description: "Your call is being initiated. Expect a call soon!",
-            });
-            setPhoneNumber("");
-            onSuccess?.(normalized);
-            return;
-          }
-        }
-        
-        throw new Error(result.error || "Failed to initiate call");
+        throw new Error("Failed to initiate call through all available methods");
       }
     } catch (error) {
       console.error("Error submitting phone number:", error);
