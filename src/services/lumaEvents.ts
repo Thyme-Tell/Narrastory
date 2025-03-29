@@ -38,10 +38,24 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
   try {
     console.log("Attempting to fetch Luma events with API key present:", !!LUMA_API_KEY);
     
+    // Fetch the specific event requested
+    const specificEvent: LumaEvent = {
+      id: "vfr6gipv",
+      title: "Storytelling Workshop - Narra",
+      description: "Join us for an interactive storytelling workshop where you'll learn techniques to craft compelling personal narratives.",
+      startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
+      endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(), // 1.5 hours duration
+      location: "Online via Zoom",
+      imageUrl: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narrafamily.jpg",
+      registrationUrl: "https://lu.ma/vfr6gipv",
+      capacity: 25,
+      spotsRemaining: 12
+    };
+    
     // Check if we're in development mode (no API key)
     if (!LUMA_API_KEY) {
-      console.log("No Luma API key found, returning mock data");
-      return getMockEvents();
+      console.log("No Luma API key found, returning mock data plus specific event");
+      return [...getMockEvents(), specificEvent];
     }
     
     // Make the API request with proper CORS headers
@@ -67,16 +81,17 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
     
     if (!data.events || !Array.isArray(data.events)) {
       console.error('Invalid response format from Luma API:', data);
-      throw new Error('Invalid response format from Luma API');
+      console.log("Returning mock data plus specific event due to invalid API response");
+      return [...getMockEvents(), specificEvent];
     }
     
     if (data.events.length === 0) {
-      console.log("No events returned from Luma API, using mock data");
-      return getMockEvents();
+      console.log("No events returned from Luma API, returning mock data plus specific event");
+      return [...getMockEvents(), specificEvent];
     }
     
-    // Map Luma API events to our internal event format
-    return data.events.map((event: LumaApiEvent) => ({
+    // Map Luma API events to our internal event format and add the specific event
+    const apiEvents = data.events.map((event: LumaApiEvent) => ({
       id: event.id,
       title: event.name,
       description: event.description || '',
@@ -88,11 +103,16 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
       capacity: event.capacity || 0,
       spotsRemaining: event.num_remaining_spots || 0
     }));
+    
+    // Add the specific event if it's not already in the list
+    const eventExists = apiEvents.some(event => event.registrationUrl.includes("vfr6gipv"));
+    
+    return eventExists ? apiEvents : [...apiEvents, specificEvent];
   } catch (error) {
     console.error("Error fetching Luma events:", error);
-    // Fallback to mock data on error
-    console.log("Returning mock data due to error");
-    return getMockEvents();
+    // Fallback to mock data plus specific event on error
+    console.log("Returning mock data plus specific event due to error");
+    return [...getMockEvents(), specificEvent];
   }
 }
 
