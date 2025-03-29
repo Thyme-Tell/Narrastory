@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({
   handleMenuItemClick 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { scrolled, activeSection } = useHeaderScroll({ 
+  const { scrolled, activeSection, scrollToSection } = useHeaderScroll({ 
     navItems, 
     activeItem, 
     handleMenuItemClick 
@@ -29,13 +29,27 @@ const Header: React.FC<HeaderProps> = ({
   const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
     e.preventDefault();
     
-    // If item has a ref, scroll to that section
-    if (item.ref && item.ref.current) {
-      item.ref.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    // Use the scrollToSection function to smoothly scroll to the target section
+    scrollToSection(item);
     
     // Call the handleMenuItemClick function to update the active item
     handleMenuItemClick(item);
+    
+    // Close mobile dropdown if open
+    if (isDropdownOpen) {
+      setIsDropdownOpen(false);
+    }
+  };
+
+  // Function to scroll to top of page
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Set the active item to home
+    const homeItem = navItems.find(item => item.name === 'home');
+    if (homeItem) {
+      handleMenuItemClick(homeItem);
+    }
   };
 
   // Modify nav items to show Narra icon instead of Home icon when scrolled
@@ -70,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({
           />
 
           {/* Tablet/desktop logo - only visible when not scrolled */}
-          <DesktopLogo scrolled={scrolled} />
+          <DesktopLogo scrolled={scrolled} scrollToTop={scrollToTop} />
         </div>
 
         {/* Navigation menu */}

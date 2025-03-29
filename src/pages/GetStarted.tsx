@@ -46,7 +46,14 @@ const GetStarted = () => {
         // Scroll to the section with a small delay to ensure DOM is ready
         setTimeout(() => {
           if (selectedItem.ref && selectedItem.ref.current) {
-            selectedItem.ref.current.scrollIntoView({ behavior: 'smooth' });
+            const headerOffset = 100;
+            const elementPosition = selectedItem.ref.current.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
           }
         }, 100);
       }

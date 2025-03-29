@@ -15,6 +15,7 @@ export const useHeaderScroll = ({
   // Track scroll state
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState(activeItem);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
     // Function to check if element is in viewport
@@ -32,6 +33,9 @@ export const useHeaderScroll = ({
 
     // Function to handle scroll events
     const handleScroll = () => {
+      // Don't update active section if currently programmatically scrolling
+      if (isScrolling) return;
+      
       // Set scrolled state based on scroll position
       const isScrolled = window.scrollY > 50;
       if (scrolled !== isScrolled) {
@@ -69,11 +73,35 @@ export const useHeaderScroll = ({
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [navItems, scrolled, activeSection, handleMenuItemClick]);
+  }, [navItems, scrolled, activeSection, handleMenuItemClick, isScrolling]);
+
+  // Function to scroll to a section when a menu item is clicked
+  const scrollToSection = (item: NavItem) => {
+    if (item.ref && item.ref.current) {
+      setIsScrolling(true);
+      setActiveSection(item.name);
+      
+      // Add a small offset to account for the header height
+      const headerOffset = 100;
+      const elementPosition = item.ref.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      // Reset isScrolling after the scroll animation is likely complete
+      setTimeout(() => {
+        setIsScrolling(false);
+      }, 1000);
+    }
+  };
 
   return { 
     scrolled,
-    activeSection 
+    activeSection,
+    scrollToSection
   };
 };
 
