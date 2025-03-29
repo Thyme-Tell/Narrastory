@@ -16,17 +16,9 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
       className="container mx-auto px-4 py-16 md:py-24 bg-white scroll-mt-24"
     >
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 text-center">
+        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 text-center">
           Narra Story Circles
         </h2>
-        
-        {/* Added explanation paragraph */}
-        <p className="text-center text-[#403E43] mb-12 max-w-3xl mx-auto">
-          Story Circles are intimate gatherings where individuals come together to share personal narratives, 
-          preserve family histories, and connect through the power of storytelling. 
-          These collaborative sessions help capture meaningful stories that might otherwise be lost to time, 
-          creating a lasting legacy for future generations.
-        </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-[#EFF1E9] rounded-xl p-6 md:p-8 shadow-sm">
@@ -48,13 +40,9 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
             <p className="text-sm md:text-base text-[#403E43] mb-6">
               Start your own Story Circle with family, friends, or colleagues. Customize topics and invite participants to build a shared story collection.
             </p>
-            {/* Added Coming Soon label and disabled button */}
-            <div className="flex flex-col space-y-2">
-              <Button className="bg-[#242F3F] hover:bg-[#242F3F]/90 text-white opacity-50 cursor-not-allowed" disabled>
-                Start a Circle
-              </Button>
-              <span className="text-sm font-medium text-[#A33D29] text-center">Coming Soon</span>
-            </div>
+            <Button className="bg-[#242F3F] hover:bg-[#242F3F]/90 text-white">
+              Start a Circle
+            </Button>
           </div>
         </div>
         
