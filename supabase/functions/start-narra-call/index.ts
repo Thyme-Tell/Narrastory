@@ -4,7 +4,8 @@ import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
 
 // Get Synthflow credentials from environment variables
 const SYNTHFLOW_API_KEY = Deno.env.get('SYNTHFLOW_API_KEY') || '';
-const SYNTHFLOW_WEBHOOK_URL = 'https://workflow.synthflow.ai/api/v1/webhooks/PnhLacw4fc58JJlHzm3r2';
+const SYNTHFLOW_WEBHOOK_URL = Deno.env.get('SYNTHFLOW_WEBHOOK_URL') || 'https://workflow.synthflow.ai/api/v1/webhooks/PnhLacw4fc58JJlHzm3r2';
+const SYNTHFLOW_CAMPAIGN_ID = Deno.env.get('SYNTHFLOW_CAMPAIGN_ID') || '';
 
 // Main server function
 Deno.serve(async (req) => {
@@ -54,6 +55,7 @@ Deno.serve(async (req) => {
     
     console.log(`Initiating direct call to ${normalizedPhone}`);
     console.log(`Using webhook URL: ${SYNTHFLOW_WEBHOOK_URL}`);
+    console.log(`Using campaign ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
     
     // Check if API key is available
     if (!SYNTHFLOW_API_KEY) {
@@ -77,18 +79,35 @@ Deno.serve(async (req) => {
     console.log(`Sending webhook payload: ${JSON.stringify(webhookPayload)}`);
     
     // Make direct call to Synthflow API
-    const response = await fetch('https://api.synthflow.ai/api/v1/calls/start', {
+    // First, check if we have a campaign ID to use the campaigns endpoint
+    let url = 'https://api.synthflow.ai/api/v1/calls/start';
+    let body = {
+      phone: normalizedPhone,
+      transferOnError: false,
+      webhook: SYNTHFLOW_WEBHOOK_URL,
+      webhookRawBody: JSON.stringify(webhookPayload)
+    };
+    
+    // If we have a campaign ID, use the campaigns endpoint instead
+    if (SYNTHFLOW_CAMPAIGN_ID) {
+      url = `https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`;
+      body = {
+        to: normalizedPhone,
+        variables: webhookPayload
+      };
+      console.log(`Using campaigns endpoint with ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
+    }
+    
+    console.log(`Making API call to: ${url}`);
+    console.log(`With body: ${JSON.stringify(body)}`);
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        phone: normalizedPhone,
-        transferOnError: false,
-        webhook: SYNTHFLOW_WEBHOOK_URL,
-        webhookRawBody: JSON.stringify(webhookPayload) // Send the raw payload to the webhook
-      }),
+      body: JSON.stringify(body),
     });
     
     // Log full response for debugging
