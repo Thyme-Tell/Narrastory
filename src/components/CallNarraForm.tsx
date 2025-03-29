@@ -6,9 +6,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Define the Synthflow webhook URL for direct form submission
+// Define the Synthflow webhook URL for direct form submission if needed
 const SYNTHFLOW_WEBHOOK_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
-// Fallback to the Edge Function if direct submission fails
+// Edge Function URL for proxied submission
 const EDGE_FUNCTION_URL = "/api/synthflow-proxy";
 
 interface CallNarraFormProps {
@@ -35,31 +35,31 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
   };
 
-  // Client-side submission directly to Synthflow - this is used as a fallback
+  // Client-side direct submission to Synthflow
   const clientSideSubmit = async (phone: string): Promise<boolean> => {
     try {
       console.log("Attempting client-side submission...");
       
-      // Create FormData for the submission
-      const formData = new FormData();
-      formData.append('Phone', phone);
+      // Use a plain fetch with no-cors to avoid CORS issues
+      console.log(`Sending direct form submission to ${SYNTHFLOW_WEBHOOK_URL} with phone: ${phone}`);
       
-      // Use fetch with no-cors to avoid CORS issues
-      // Note: This won't return a useful response due to no-cors mode
-      // but it will still submit the data
       await fetch(SYNTHFLOW_WEBHOOK_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        body: formData
+        mode: 'no-cors', // This prevents CORS errors but we won't get a useful response
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `Phone=${encodeURIComponent(phone)}`,
       });
       
       console.log("Client-side submission completed");
+      // Since we're using no-cors mode, we can't check the actual result
+      // We'll assume it was successful and show a toast
       return true;
     } catch (error) {
       console.error("Client-side submission failed:", error);
@@ -112,7 +112,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         }
       } catch (error) {
         console.error("Edge function error:", error);
-        // If Edge Function fails, try client-side submission as fallback
+        // If Edge Function fails, try client-side submission
         success = await clientSideSubmit(normalized);
       }
       
@@ -146,54 +146,43 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   };
 
   return (
-    <>
-      {/* Main form for user interaction */}
-      <form onSubmit={handleSubmit} className={className} ref={formRef}>
-        <div className={`relative w-full ${mobileLayout ? 'flex flex-col' : ''}`}>
-          <Input
-            type="tel"
-            value={phoneNumber}
-            onChange={handleChange}
-            placeholder={inputFocused ? "" : "Your phone number"}
-            className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full text-base ${
-              mobileLayout ? 'mb-2 pr-5 text-center' : 'pr-[150px]'
-            } outline-none ${phoneInputClassName}`}
-            onFocus={() => setInputFocused(true)}
-            onBlur={() => !phoneNumber && setInputFocused(false)}
-            disabled={isLoading}
-          />
-          <Button 
-            type="submit"
-            className={`${mobileLayout ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-base flex items-center gap-2 font-light ${buttonClassName}`}
-            style={{
-              background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
-            }}
-            disabled={isLoading}
-          >
-            {isLoading ? "Calling..." : buttonText || (
-              <>
-                Talk with 
-                <img 
-                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-                  alt="Narra Icon" 
-                  className="w-5 h-5 relative -top-[2px]"
-                />
-                <span className="font-light">Narra</span> 
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
-      
-      {/* Hidden iframe to receive form responses without page navigation */}
-      <iframe 
-        ref={iframeRef}
-        name="synthflow-form-target" 
-        style={{ display: 'none' }} 
-        title="Synthflow form target"
-      />
-    </>
+    <form onSubmit={handleSubmit} className={className} ref={formRef}>
+      <div className={`relative w-full ${mobileLayout ? 'flex flex-col' : ''}`}>
+        <Input
+          type="tel"
+          value={phoneNumber}
+          onChange={handleChange}
+          placeholder={inputFocused ? "" : "Your phone number"}
+          className={`w-full h-12 bg-white/67 border border-[rgba(89,89,89,0.32)] rounded-full text-base ${
+            mobileLayout ? 'mb-2 pr-5 text-center' : 'pr-[150px]'
+          } outline-none ${phoneInputClassName}`}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => !phoneNumber && setInputFocused(false)}
+          disabled={isLoading}
+        />
+        <Button 
+          type="submit"
+          className={`${mobileLayout ? 'w-full' : 'absolute right-1 top-1'} rounded-full h-10 text-white text-base flex items-center gap-2 font-light ${buttonClassName}`}
+          style={{
+            background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? "Calling..." : buttonText || (
+            <>
+              Talk with 
+              <img 
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                alt="Narra Icon" 
+                className="w-5 h-5 relative -top-[2px]"
+              />
+              <span className="font-light">Narra</span> 
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
   );
 };
 

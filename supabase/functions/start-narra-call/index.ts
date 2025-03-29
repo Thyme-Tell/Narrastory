@@ -54,23 +54,23 @@ Deno.serve(async (req) => {
     
     console.log(`Initiating direct call to ${normalizedPhone}`);
     
-    // Try using direct form submission method first
+    // Try using direct form submission method
     try {
       console.log(`Using direct form submission to: ${SYNTHFLOW_WEBHOOK_URL}`);
       
-      // Create a FormData object - this properly formats the data for the form endpoint
+      // Create a FormData object with the phone number
       const formData = new FormData();
       formData.append('Phone', normalizedPhone);
       
       console.log(`Sending form data with Phone: ${normalizedPhone}`);
       
-      // Make the direct form submission
+      // Make the direct form submission with the correct content type
       const response = await fetch(SYNTHFLOW_WEBHOOK_URL, {
         method: 'POST',
         body: formData,
       });
       
-      // Check if the request was successful
+      // Check if the request was successful (Synthflow may respond with HTML instead of JSON)
       if (response.ok) {
         console.log("Direct form submission successful");
         return new Response(
