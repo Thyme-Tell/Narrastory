@@ -34,91 +34,46 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   const [inputFocused, setInputFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
   };
 
-  const submitToSynthflowViaForm = (phone: string) => {
-    // Create a hidden iframe to handle the form submission without navigating away
-    const iframe = document.createElement('iframe');
-    iframe.name = 'synthflow-submit-frame';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    
-    // Create a form element to submit directly
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = SYNTHFLOW_WEBHOOK_URL;
-    form.target = 'synthflow-submit-frame';
-    
-    // Add the phone input field
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'Phone';
-    input.value = phone;
-    form.appendChild(input);
-    
-    // Add the form to the document, submit it, and clean up
-    document.body.appendChild(form);
-    
-    // Set up message listener for iframe load
-    iframe.onload = () => {
-      console.log("Form submission iframe loaded");
-      
-      // Clean up after some delay to ensure the submission completes
-      setTimeout(() => {
-        document.body.removeChild(form);
-        document.body.removeChild(iframe);
-        setIsFormSubmitting(false);
+  const submitFormDirectly = (phone: string) => {
+    return new Promise<boolean>((resolve) => {
+      try {
+        console.log("Submitting directly to Synthflow form:", SYNTHFLOW_WEBHOOK_URL);
         
-        toast({
-          title: "Success",
-          description: "Your call is being initiated. Expect a call soon!",
-        });
+        // Create a form element to submit directly
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = SYNTHFLOW_WEBHOOK_URL;
+        form.target = '_blank'; // Open in new tab to avoid navigation
+        form.style.display = 'none';
         
-        onSuccess?.(phone);
-      }, 1000);
-    };
-    
-    // Submit the form
-    console.log("Submitting form directly to Synthflow");
-    form.submit();
-  };
-
-  const submitToEdgeFunction = async (phone: string) => {
-    try {
-      console.log("Falling back to Edge Function proxy:", EDGE_FUNCTION_URL);
-      
-      const response = await fetch(EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ Phone: phone }),
-      });
-      
-      console.log("Edge Function response status:", response.status);
-      
-      // Try to parse response text for debugging
-      const responseText = await response.text();
-      console.log("Edge Function response:", responseText);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to submit phone number: ${responseText || response.statusText}`);
+        // Add the phone input field
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'Phone';
+        input.value = phone;
+        form.appendChild(input);
+        
+        // Add the form to the document, submit it, and clean up
+        document.body.appendChild(form);
+        
+        // Submit the form
+        form.submit();
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(form);
+          resolve(true);
+        }, 1000);
+      } catch (error) {
+        console.error("Error with direct form submission:", error);
+        resolve(false);
       }
-
-      toast({
-        title: "Success",
-        description: "Your call is being initiated. Expect a call soon!",
-      });
-
-      onSuccess?.(phone);
-    } catch (error) {
-      console.error("Error submitting phone number to Edge Function:", error);
-      throw error; // Re-throw to be caught by the main handler
-    }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,23 +91,64 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
 
     try {
       const normalized = normalizePhoneNumber(phoneNumber);
-      
-      // Log the normalized phone number for debugging
       console.log("Normalized phone number:", normalized);
       
-      // First try direct form submission (most reliable for webhook forms)
-      if (!isFormSubmitting) {
-        setIsFormSubmitting(true);
-        submitToSynthflowViaForm(normalized);
+      // First try direct form submission
+      const directSubmissionResult = await submitFormDirectly(normalized);
+      
+      if (directSubmissionResult) {
+        toast({
+          title: "Success",
+          description: "Your call is being initiated. Expect a call soon!",
+        });
         setPhoneNumber("");
+        onSuccess?.(normalized);
         setIsLoading(false);
         return;
       }
       
-      // If we're already submitting a form, try the Edge Function as backup
-      await submitToEdgeFunction(normalized);
-      setPhoneNumber("");
+      // If direct submission fails, try the Edge Function
+      console.log("Direct form submission failed, trying Edge Function:", EDGE_FUNCTION_URL);
       
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Phone: normalized }),
+      });
+      
+      console.log("Edge Function response status:", response.status);
+      
+      const result = await response.json();
+      console.log("Edge Function response:", result);
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Your call is being initiated. Expect a call soon!",
+        });
+        setPhoneNumber("");
+        onSuccess?.(normalized);
+      } else {
+        // If Edge Function recommends direct submission
+        if (result.useDirectSubmission) {
+          console.log("Edge Function suggests direct submission, trying again...");
+          const secondAttemptResult = await submitFormDirectly(normalized);
+          
+          if (secondAttemptResult) {
+            toast({
+              title: "Success",
+              description: "Your call is being initiated. Expect a call soon!",
+            });
+            setPhoneNumber("");
+            onSuccess?.(normalized);
+            return;
+          }
+        }
+        
+        throw new Error(result.error || "Failed to initiate call");
+      }
     } catch (error) {
       console.error("Error submitting phone number:", error);
       
@@ -185,7 +181,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           } outline-none ${phoneInputClassName}`}
           onFocus={() => setInputFocused(true)}
           onBlur={() => !phoneNumber && setInputFocused(false)}
-          disabled={isLoading || isFormSubmitting}
+          disabled={isLoading}
         />
         <Button 
           type="submit"
@@ -193,9 +189,9 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           style={{
             background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
           }}
-          disabled={isLoading || isFormSubmitting}
+          disabled={isLoading}
         >
-          {isLoading || isFormSubmitting ? "Calling..." : buttonText || (
+          {isLoading ? "Calling..." : buttonText || (
             <>
               Talk with 
               <img 

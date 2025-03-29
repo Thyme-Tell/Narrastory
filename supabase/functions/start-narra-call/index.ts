@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     
     console.log(`Sending webhook payload: ${JSON.stringify(webhookPayload)}`);
     
-    // Try using the campaigns endpoint first (more reliable)
+    // Try using the campaigns endpoint with the POST method
     try {
       console.log(`Using campaigns endpoint with ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
       
@@ -100,58 +100,20 @@ Deno.serve(async (req) => {
     } catch (error) {
       console.error('Synthflow API error:', error);
       
-      // Try backup method if the first one fails
-      console.log('Trying backup method with campaigns endpoint...');
+      // Try backup method with direct form submission
+      console.log('Trying backup method with direct form submission...');
       
-      try {
-        const backupResponse = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: normalizedPhone,
-            variables: webhookPayload
-          }),
-        });
-        
-        console.log(`Backup API response status: ${backupResponse.status}`);
-        const backupResponseText = await backupResponse.text();
-        console.log(`Backup API response body: ${backupResponseText}`);
-        
-        if (!backupResponse.ok) {
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: 'Failed to initiate call through all available methods',
-              details: backupResponseText
-            }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: 'Call initiated successfully via backup method',
-            details: backupResponseText
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      } catch (backupError) {
-        console.error('Backup API call failed:', backupError);
-        
-        // Fall back to direct form submission - create a payload that matches form expectations
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'All API call methods failed. Use direct form submission instead.',
-            originalError: error.message,
-            backupError: backupError.message
-          }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+      // Return instructions to use direct form submission
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'API call method failed. Please try direct form submission method.',
+          useDirectSubmission: true,
+          formUrl: SYNTHFLOW_WEBHOOK_URL,
+          phoneNumber: normalizedPhone
+        }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
   } catch (error) {
     console.error('Error submitting phone number to Synthflow:', error);
