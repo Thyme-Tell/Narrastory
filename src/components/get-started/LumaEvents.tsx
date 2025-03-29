@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Calendar, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LumaEvent {
   id: string;
@@ -38,56 +40,29 @@ const LumaEvents: React.FC = () => {
     const fetchEvents = async () => {
       setLoading(true);
       try {
-        // In a real implementation, this would be a call to your backend that has the API key
-        // For demo purposes, we're mocking the response with sample data
-        // Replace this with actual API call when you have your backend set up
+        // Call the Supabase Edge Function to fetch events
+        const { data, error } = await supabase.functions.invoke("get-luma-events");
         
-        // Simulating API response delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (error) {
+          console.error("Edge function error:", error);
+          throw new Error(error.message);
+        }
         
-        // Sample data - replace with actual API call
-        const sampleEvents: LumaEvent[] = [
-          {
-            id: "evt-1",
-            name: "Introductory Story Circle Session",
-            start_at: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 days from now
-            url: "https://lu.ma/narrastory-intro",
-            cover_url: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg",
-            description: "Join our welcoming community to learn how story circles work and share your first memories.",
-            location: {
-              type: "online",
-              name: "Zoom"
-            }
-          },
-          {
-            id: "evt-2",
-            name: "Family History Circle",
-            start_at: new Date(Date.now() + 86400000 * 10).toISOString(), // 10 days from now
-            url: "https://lu.ma/narrastory-family",
-            description: "A special circle dedicated to preserving and sharing family stories across generations.",
-            location: {
-              type: "online",
-              name: "Google Meet"
-            }
-          },
-          {
-            id: "evt-3",
-            name: "Community Stories Workshop",
-            start_at: new Date(Date.now() + 86400000 * 17).toISOString(), // 17 days from now
-            url: "https://lu.ma/narrastory-community",
-            description: "Learn storytelling techniques and share stories that have shaped your community.",
-            location: {
-              type: "in_person",
-              name: "Community Center"
-            }
-          }
-        ];
+        if (!data || !data.events) {
+          throw new Error("Invalid response format from Lu.ma API");
+        }
         
-        setEvents(sampleEvents);
+        // Use the events from the API response
+        setEvents(data.events);
         setError(null);
       } catch (err) {
         console.error("Failed to fetch Lu.ma events:", err);
         setError("Failed to load upcoming events. Please try again later.");
+        toast({
+          title: "Error",
+          description: "Could not load events. Please try again later.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
