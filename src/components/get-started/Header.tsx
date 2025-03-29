@@ -29,13 +29,66 @@ const Header: React.FC<HeaderProps> = ({
     const handleScroll = () => {
       const isScrolled = window.scrollY > 50;
       setScrolled(isScrolled);
+      
+      // Check which section is currently visible
+      const sections = navItems
+        .filter(item => item.ref && item.ref.current)
+        .map(item => ({
+          name: item.name,
+          element: item.ref!.current!
+        }));
+      
+      // Get the section that is most visible in the viewport
+      let currentSection = "home";
+      
+      if (window.scrollY < 100) {
+        // If near the top, select home
+        currentSection = "home";
+      } else {
+        // Find the section that's currently most visible
+        let maxVisibleSection = null;
+        let maxVisiblePercentage = 0;
+        
+        sections.forEach(section => {
+          const rect = section.element.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          
+          // Calculate how much of the section is visible
+          const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
+          const sectionHeight = rect.height;
+          const visiblePercentage = visibleHeight / sectionHeight;
+          
+          if (visiblePercentage > maxVisiblePercentage && visiblePercentage > 0.2) {
+            maxVisiblePercentage = visiblePercentage;
+            maxVisibleSection = section.name;
+          }
+        });
+        
+        if (maxVisibleSection) {
+          currentSection = maxVisibleSection;
+        }
+      }
+      
+      // Update the active section if it's different
+      if (currentSection !== activeItem) {
+        const newActiveItem = navItems.find(item => item.name === currentSection);
+        if (newActiveItem) {
+          // Update URL hash without scrolling
+          const url = new URL(window.location.href);
+          url.hash = currentSection === "home" ? "" : `#${currentSection}`;
+          window.history.replaceState({}, "", url.toString());
+          
+          // Call the handleMenuItemClick with the new active item
+          handleMenuItemClick(newActiveItem);
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [activeItem, navItems, handleMenuItemClick]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -165,7 +218,7 @@ const Header: React.FC<HeaderProps> = ({
                     e.preventDefault();
                     handleMenuItemClick(item);
                   }}
-                  className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
+                  className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
                 >
                   Sign Up <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 text-white" />
                 </Link>
@@ -181,7 +234,7 @@ const Header: React.FC<HeaderProps> = ({
                     activeItem === item.name
                       ? "bg-[#17342C]"
                       : "hover:bg-[#17342C]/10"
-                  } transition-colors duration-200 w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
+                  } transition-colors w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
                 >
                   {item.icon}
                   {item.label}
