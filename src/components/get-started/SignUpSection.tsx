@@ -52,11 +52,11 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
                 </svg>
                 <blockquote className="mb-6">
                   <p className="text-white/90 text-lg font-caslon italic mb-4">
-                    "Narra helped our family preserve the incredible stories of my grandmother's childhood that would have otherwise been lost forever. Now my children and their children will know where they came from."
+                    "Narra was a way for us to know my parents' stories that would have otherwise been lost forever. Now my children and their children will know where they came from."
                   </p>
                   <footer className="text-white/80">
-                    <p className="font-medium">Sarah Johnson</p>
-                    <p className="text-sm">Family Historian, Mother of 3</p>
+                    <p className="font-medium">Cecille Ubbaonu</p>
+                    <p className="text-sm">Mother of 3</p>
                   </footer>
                 </blockquote>
                 <div className="flex items-center space-x-1">
