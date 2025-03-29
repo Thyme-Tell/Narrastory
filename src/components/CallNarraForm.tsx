@@ -5,7 +5,9 @@ import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
+
+// Define the Synthflow webhook URL
+const SYNTHFLOW_WEBHOOK_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
 
 interface CallNarraFormProps {
   className?: string;
@@ -54,23 +56,30 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       // Log the normalized phone number for debugging
       console.log("Normalized phone number:", normalized);
       
-      // Use Supabase functions.invoke to call our edge function
-      const { data, error } = await supabase.functions.invoke('start-narra-call', {
-        body: {
-          phoneNumber: normalized,
-        }
+      // Create the payload with the expected field name "Phone"
+      const webhookPayload = {
+        Phone: normalized
+      };
+      
+      console.log("Sending webhook payload:", webhookPayload);
+      
+      // Send the request directly to the Synthflow webhook
+      const response = await fetch(SYNTHFLOW_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookPayload),
       });
-
-      console.log("Response data:", data);
-
-      if (error) {
-        console.error("Error response:", error);
-        throw new Error(error.message || 'Failed to initiate call');
-      }
-
-      if (data && !data.success) {
-        console.error("API returned error:", data);
-        throw new Error(data.error || 'Failed to submit phone number');
+      
+      console.log("Synthflow webhook response status:", response.status);
+      
+      // Try to parse response text for debugging
+      const responseText = await response.text();
+      console.log("Synthflow webhook response:", responseText);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to submit phone number: ${responseText || response.statusText}`);
       }
 
       toast({
