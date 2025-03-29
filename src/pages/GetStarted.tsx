@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -150,7 +151,7 @@ const GetStarted = () => {
                     <ChevronDown className="h-4 w-4 text-white opacity-70" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[200px] bg-[#17342C] backdrop-blur-sm border-0 text-white">
+                <DropdownMenuContent className="w-[200px] bg-[#8A9096]/80 backdrop-blur-sm border-0 text-white">
                   {navItems.map((item) => (
                     item.isButton ? (
                       <Link
@@ -168,7 +169,7 @@ const GetStarted = () => {
                           to={item.path}
                           className={`flex items-center w-full px-4 py-2 text-white ${
                             activeItem === item.name
-                              ? "bg-[#17342C]/60"
+                              ? "bg-[#17342C]"
                               : "hover:bg-[#17342C]/30"
                           }`}
                         >
