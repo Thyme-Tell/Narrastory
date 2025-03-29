@@ -49,70 +49,44 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Normalize phone number for consistency if needed
+    // Normalize phone number for consistency
     const normalizedPhone = Phone.startsWith('+') ? Phone : normalizePhoneNumber(Phone);
     
     console.log(`Initiating direct call to ${normalizedPhone}`);
-    console.log(`Using webhook URL: ${SYNTHFLOW_WEBHOOK_URL}`);
-    console.log(`Using campaign ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
+    console.log(`Using direct form submission to: ${SYNTHFLOW_WEBHOOK_URL}`);
     
-    // Create the payload with metadata for tracking
-    const webhookPayload = {
-      phoneNumber: normalizedPhone,
-      timestamp: new Date().toISOString(),
-      source: "narra-app"
-    };
+    // Create the payload for the Synthflow form
+    const formData = new FormData();
+    formData.append('Phone', normalizedPhone);
     
-    console.log(`Sending webhook payload: ${JSON.stringify(webhookPayload)}`);
+    console.log(`Sending form data with Phone: ${normalizedPhone}`);
     
-    // Try using the campaigns endpoint with the POST method
     try {
-      console.log(`Using campaigns endpoint with ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
-      
-      const response = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
+      // Attempt direct form submission to Synthflow
+      const formResponse = await fetch(SYNTHFLOW_WEBHOOK_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: normalizedPhone,
-          variables: webhookPayload
-        }),
+        body: formData,
       });
       
-      console.log(`Synthflow API response status: ${response.status}`);
-      const responseText = await response.text();
-      console.log(`Synthflow API response body: ${responseText}`);
+      console.log(`Synthflow form response status: ${formResponse.status}`);
       
-      if (!response.ok) {
-        console.error('Synthflow API error:', responseText);
-        throw new Error(`Synthflow API returned status ${response.status}: ${responseText}`);
+      if (formResponse.ok) {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Call initiated successfully via direct form submission'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } else {
+        // If form submission fails, try API method as backup
+        console.log('Form submission failed, trying API method...');
+        return await tryAPIMethod(normalizedPhone, corsHeaders);
       }
-      
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Call initiated successfully',
-          details: responseText
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     } catch (error) {
-      console.error('Synthflow API error:', error);
-      
-      // Return direct form submission details
-      console.log('Returning direct form submission instructions');
-      
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'API call method failed. Please use direct form submission.',
-          useDirectSubmission: true,
-          formUrl: SYNTHFLOW_WEBHOOK_URL,
-          phoneNumber: normalizedPhone
-        }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.error('Error with direct form submission:', error);
+      // Try API method as backup
+      return await tryAPIMethod(normalizedPhone, corsHeaders);
     }
   } catch (error) {
     console.error('Error submitting phone number to Synthflow:', error);
@@ -126,3 +100,74 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+async function tryAPIMethod(normalizedPhone: string, corsHeaders: HeadersInit) {
+  console.log('Trying API method as backup...');
+  
+  try {
+    // Create the webhook payload
+    const webhookPayload = {
+      phoneNumber: normalizedPhone,
+      timestamp: new Date().toISOString(),
+      source: "narra-app"
+    };
+    
+    console.log(`Using API endpoint with campaign ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
+    
+    const response = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: normalizedPhone,
+        variables: webhookPayload
+      }),
+    });
+    
+    console.log(`API response status: ${response.status}`);
+    
+    if (response.ok) {
+      const responseText = await response.text();
+      console.log(`API response body: ${responseText}`);
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Call initiated successfully via API',
+          details: responseText
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } else {
+      const errorText = await response.text();
+      console.error('API error:', errorText);
+      
+      // If both methods fail, return direct form submission details for client-side fallback
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'All server-side methods failed. Use client-side direct submission.',
+          useDirectSubmission: true,
+          formUrl: SYNTHFLOW_WEBHOOK_URL,
+          phoneNumber: normalizedPhone
+        }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+  } catch (error) {
+    console.error('API method error:', error);
+    
+    // If both methods fail, return direct form submission details for client-side fallback
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: 'All server-side methods failed. Use client-side direct submission.',
+        useDirectSubmission: true,
+        formUrl: SYNTHFLOW_WEBHOOK_URL,
+        phoneNumber: normalizedPhone
+      }),
+      { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
