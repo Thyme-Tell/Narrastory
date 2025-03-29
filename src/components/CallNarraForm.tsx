@@ -34,7 +34,6 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   const [inputFocused, setInputFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
@@ -45,7 +44,10 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     try {
       console.log("Attempting client-side submission...");
       
-      // Use a plain fetch with no-cors to avoid CORS issues
+      // Create form data
+      const formData = new URLSearchParams();
+      formData.append('Phone', phone);
+      
       console.log(`Sending direct form submission to ${SYNTHFLOW_WEBHOOK_URL} with phone: ${phone}`);
       
       await fetch(SYNTHFLOW_WEBHOOK_URL, {
@@ -54,7 +56,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `Phone=${encodeURIComponent(phone)}`,
+        body: formData.toString(),
       });
       
       console.log("Client-side submission completed");
@@ -99,15 +101,21 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           body: JSON.stringify({ Phone: normalized }),
         });
         
-        const result = await response.json();
-        console.log("Edge function response:", result);
-        
-        if (result.success) {
-          success = true;
-          console.log("Call initiated successfully via Edge Function");
-        } else if (result.useClientFallback) {
-          // Edge function suggests client-side fallback
-          console.log("Using client-side fallback as suggested by edge function");
+        if (response.ok) {
+          const result = await response.json();
+          console.log("Edge function response:", result);
+          
+          if (result.success) {
+            success = true;
+            console.log("Call initiated successfully via Edge Function");
+          } else if (result.useClientFallback) {
+            // Edge function suggests client-side fallback
+            console.log("Using client-side fallback as suggested by edge function");
+            success = await clientSideSubmit(normalized);
+          }
+        } else {
+          console.log("Edge function failed with status:", response.status);
+          // If Edge Function fails, try client-side submission
           success = await clientSideSubmit(normalized);
         }
       } catch (error) {
@@ -146,7 +154,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={className} ref={formRef}>
+    <form onSubmit={handleSubmit} className={className}>
       <div className={`relative w-full ${mobileLayout ? 'flex flex-col' : ''}`}>
         <Input
           type="tel"

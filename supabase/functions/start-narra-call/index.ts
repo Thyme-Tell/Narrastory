@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     
     console.log(`Initiating direct call to ${normalizedPhone}`);
     
-    // Try using direct form submission method
+    // First try using direct form submission with FormData
     try {
       console.log(`Using direct form submission to: ${SYNTHFLOW_WEBHOOK_URL}`);
       
@@ -64,15 +64,30 @@ Deno.serve(async (req) => {
       
       console.log(`Sending form data with Phone: ${normalizedPhone}`);
       
-      // Make the direct form submission with the correct content type
+      // Make the direct form submission - no need for content-type header, it's set automatically
       const response = await fetch(SYNTHFLOW_WEBHOOK_URL, {
         method: 'POST',
         body: formData,
       });
       
-      // Check if the request was successful (Synthflow may respond with HTML instead of JSON)
+      // Check if the request was successful
       if (response.ok) {
+        // Try to get any response content as text
+        const responseText = await response.text();
         console.log("Direct form submission successful");
+        
+        // Check if the response is HTML (success page)
+        if (responseText.includes('<!DOCTYPE html>') || responseText.includes('<html')) {
+          console.log("Received HTML response (success page)");
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              message: 'Call initiated successfully via form submission' 
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
         return new Response(
           JSON.stringify({ 
             success: true, 
