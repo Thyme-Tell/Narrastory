@@ -127,10 +127,10 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap m-[3px] my-auto ${
+                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap text-white m-[3px] my-auto ${
                       activeItem === item.name
-                        ? "bg-[#17342C] text-white"
-                        : "text-white hover:bg-[#17342C]/10"
+                        ? "bg-[#17342C]"
+                        : "hover:bg-[#17342C]/10"
                     } transition-colors duration-200 w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
                   >
                     {item.icon}
@@ -143,7 +143,7 @@ const GetStarted = () => {
             <div className="sm:hidden w-full max-w-sm mx-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-full flex items-center justify-between px-4 py-2 bg-[#8A9096]/80 backdrop-blur-sm rounded-[2px] text-white">
+                  <button className="w-full flex items-center justify-between px-4 py-2 bg-green-700 rounded-[2px] text-white">
                     <div className="flex items-center">
                       {activeNavItem && activeNavItem.icon}
                       <span className="ml-2">{activeNavItem ? activeNavItem.label : 'Menu'}</span>
@@ -151,7 +151,7 @@ const GetStarted = () => {
                     <ChevronDown className="h-4 w-4 text-white opacity-70" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-full min-w-[200px] bg-[#8A9096]/95 backdrop-blur-sm border-0 text-white">
+                <DropdownMenuContent className="w-full min-w-[200px] bg-green-700 backdrop-blur-sm border-0 text-white">
                   {navItems.map((item) => (
                     item.isButton ? (
                       <Link
@@ -167,7 +167,7 @@ const GetStarted = () => {
                       <DropdownMenuItem key={item.name} asChild>
                         <Link
                           to={item.path}
-                          className={`flex items-center w-full px-4 py-2 ${
+                          className={`flex items-center w-full px-4 py-2 text-white ${
                             activeItem === item.name
                               ? "bg-[#17342C]"
                               : "hover:bg-[#17342C]/30"
