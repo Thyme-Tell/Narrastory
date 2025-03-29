@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -140,7 +139,6 @@ const GetStarted = () => {
               ))}
             </div>
 
-            {/* Mobile dropdown menu */}
             <div className="sm:hidden w-full max-w-sm mx-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
