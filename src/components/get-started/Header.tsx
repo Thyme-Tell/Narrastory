@@ -41,34 +41,43 @@ const Header: React.FC<HeaderProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Modify nav items to show Narra icon instead of Home icon when scrolled
+  const displayNavItems = navItems.map(item => {
+    if (scrolled && item.name === 'home') {
+      return {
+        ...item,
+        icon: <img 
+          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+          alt="Narra Icon" 
+          className="h-4 w-4 mr-2"
+        />
+      };
+    }
+    return item;
+  });
+
   return (
     <header className={`py-4 px-4 sm:px-8 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#17342C]/80' : 'bg-transparent'}`}>
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex sm:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown */}
           <div className="w-full flex sm:hidden justify-between items-center">
-            <Link 
-              to="/get-started" 
-              onClick={scrollToTop}
-              className={`transition-all duration-300 ${scrolled ? 'p-0' : 'bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-2'}`}
-              style={{ boxShadow: scrolled ? 'none' : "0 0 20px rgba(239, 241, 233, 0.8)" }}
-            >
-              {scrolled ? (
-                <img 
-                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-                  alt="Narra Icon" 
-                  className="w-[40px] h-auto"
-                />
-              ) : (
+            {!scrolled && (
+              <Link 
+                to="/get-started" 
+                onClick={scrollToTop}
+                className="bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-2"
+                style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+              >
                 <img 
                   src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
                   alt="Narra Logo" 
                   className="w-[100px] h-auto"
                 />
-              )}
-            </Link>
+              </Link>
+            )}
 
-            <div className="ml-2">
+            <div className={`ml-2 ${!scrolled ? '' : 'ml-auto'}`}>
               <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/60 backdrop-blur-xl rounded-[4px] text-white">
@@ -80,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[200px] bg-[#8A9096]/60 backdrop-blur-2xl border-0 text-white rounded-[4px]">
-                  {navItems.map((item) => (
+                  {displayNavItems.map((item) => (
                     item.isButton ? (
                       <Link
                         key={item.name}
@@ -109,9 +118,7 @@ const Header: React.FC<HeaderProps> = ({
                               : "hover:bg-[#17342C]/30"
                           }`}
                         >
-                          {React.cloneElement(item.icon as React.ReactElement, { 
-                            className: "h-3 w-3 mr-2" 
-                          })}
+                          {item.icon}
                           <span className="text-xs">{item.label}</span>
                         </Link>
                       </DropdownMenuItem>
@@ -122,38 +129,28 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Tablet/desktop logo */}
-          <Link 
-            to="/get-started" 
-            onClick={scrollToTop}
-            className={`hidden sm:inline-block transition-all duration-300 ${
-              scrolled 
-                ? 'p-1 bg-transparent' 
-                : 'bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 lg:p-3'
-            } w-full sm:w-auto flex justify-center`}
-            style={{ boxShadow: scrolled ? 'none' : "0 0 20px rgba(239, 241, 233, 0.8)" }}
-          >
-            {scrolled ? (
-              <img 
-                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-                alt="Narra Icon" 
-                className="w-[40px] h-auto"
-              />
-            ) : (
+          {/* Tablet/desktop logo - only visible when not scrolled */}
+          {!scrolled && (
+            <Link 
+              to="/get-started" 
+              onClick={scrollToTop}
+              className="hidden sm:inline-block bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 lg:p-3 w-full sm:w-auto flex justify-center"
+              style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+            >
               <img 
                 src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
                 alt="Narra Logo" 
                 className="w-[130px] h-auto"
               />
-            )}
-          </Link>
+            </Link>
+          )}
         </div>
 
         {/* Navigation menu */}
         <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
           <div className="hidden sm:flex bg-[#8A9096]/40 backdrop-blur-xl rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
             style={{ padding: "3px 2px", backdropFilter: "blur(12px)" }}>
-            {navItems.map((item) => (
+            {displayNavItems.map((item) => (
               item.isButton ? (
                 <Link
                   key={item.name}
@@ -180,9 +177,7 @@ const Header: React.FC<HeaderProps> = ({
                       : "hover:bg-[#17342C]/10"
                   } transition-colors duration-200 w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
                 >
-                  {React.cloneElement(item.icon as React.ReactElement, { 
-                    className: "h-4 w-4 mr-2" 
-                  })}
+                  {item.icon}
                   {item.label}
                 </Link>
               )
