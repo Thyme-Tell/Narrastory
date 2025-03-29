@@ -1,3 +1,4 @@
+
 import React, { useState, FormEvent } from "react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { ArrowRight } from "lucide-react";
@@ -66,20 +67,13 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         body: JSON.stringify({ phone: normalized }),
       });
       
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
+      const responseData = await response.json();
+      console.log("Response from edge function:", responseData);
       
-      const result = await response.json();
-      console.log("Response from edge function:", result);
-      
-      if (result.success) {
-        if (result.redirectUrl) {
-          // If we get a redirect URL, navigate to it
-          console.log("Redirecting to:", result.redirectUrl);
-          window.location.href = result.redirectUrl;
-        } else {
-          // Otherwise, show success message
+      if (responseData.success) {
+        // Success path - call initiated successfully
+        if (!responseData.redirectUrl) {
+          // Direct API call was successful, no redirect needed
           toast({
             title: "Success",
             description: "We're calling you now!",
@@ -87,9 +81,15 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           
           onSuccess?.(normalized);
           setPhoneNumber("");
+        } else {
+          // We got a redirect URL - this means both direct API calls failed
+          // and we need to fallback to the form
+          console.log("API calls failed, redirecting to:", responseData.redirectUrl);
+          window.location.href = responseData.redirectUrl;
         }
       } else {
-        throw new Error(result.error || "Failed to initiate call");
+        // Error path
+        throw new Error(responseData.error || "Failed to initiate call");
       }
     } catch (error) {
       console.error("Error:", error);

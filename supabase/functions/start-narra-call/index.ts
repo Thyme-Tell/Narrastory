@@ -89,50 +89,59 @@ Deno.serve(async (req) => {
       const responseBody = await response.text();
       console.log(`Synthflow API response body: ${responseBody}`);
       
-      if (!response.ok) {
-        console.error(`Synthflow API error: ${responseBody}`);
-        
-        // Try backup method - direct campaign call
-        console.log(`Trying backup method with campaigns endpoint...`);
-        
-        console.log(`Making backup API call to: https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`);
-        
-        const backupPayload = {
-          to: normalizedPhone,
-          variables: webhookData
-        };
-        
-        console.log(`With body: ${JSON.stringify(backupPayload)}`);
-        
-        const backupResponse = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(backupPayload),
-        });
-        
-        console.log(`Backup API response status: ${backupResponse.status}`);
-        const backupResponseBody = await backupResponse.text();
-        console.log(`Backup API response body: ${backupResponseBody}`);
-        
-        if (!backupResponse.ok) {
-          // If both direct methods fail, return URL for client-side redirection as fallback
-          return new Response(
-            JSON.stringify({ 
-              success: true, 
-              redirectUrl: `${SYNTHFLOW_WEBHOOK_URL.replace('/api/v1/webhooks/', '/forms/')}?Phone=${encodeURIComponent(normalizedPhone)}`
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
+      if (response.ok) {
+        // First API call succeeded
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Call initiated successfully' 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       
-      // If we reach here, one of the direct call methods succeeded
+      console.error(`Synthflow API error: ${responseBody}`);
+      
+      // Try backup method - direct campaign call
+      console.log(`Trying backup method with campaigns endpoint...`);
+      
+      console.log(`Making backup API call to: https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`);
+      
+      const backupPayload = {
+        to: normalizedPhone,
+        variables: webhookData
+      };
+      
+      console.log(`With body: ${JSON.stringify(backupPayload)}`);
+      
+      const backupResponse = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(backupPayload),
+      });
+      
+      console.log(`Backup API response status: ${backupResponse.status}`);
+      const backupResponseBody = await backupResponse.text();
+      console.log(`Backup API response body: ${backupResponseBody}`);
+      
+      if (backupResponse.ok) {
+        // Backup API call succeeded
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Call initiated successfully via backup method' 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // Both API calls failed, return URL for client-side redirection as fallback
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'Call initiated successfully' 
+          redirectUrl: `${SYNTHFLOW_WEBHOOK_URL.replace('/api/v1/webhooks/', '/forms/')}?Phone=${encodeURIComponent(normalizedPhone)}`
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
