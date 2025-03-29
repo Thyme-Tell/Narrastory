@@ -136,10 +136,75 @@ const GetStarted = () => {
   return (
     <div className="min-h-screen bg-[#EFF1E9] px-[7%]">
       <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
-        <nav className="flex flex-col justify-between items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
+        <nav className="flex flex-col sm:flex-col justify-between items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
+          <div className="w-full flex sm:hidden justify-between items-center">
+            <Link 
+              to="/get-started" 
+              className="bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-2 inline-block"
+              style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+            >
+              <img 
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
+                alt="Narra Logo" 
+                className="w-[100px] h-auto"
+              />
+            </Link>
+
+            <div className="ml-2">
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/60 backdrop-blur-xl rounded-[4px] text-white">
+                    <div className="flex items-center">
+                      {activeNavItem.icon}
+                      <span className="ml-2">{activeNavItem.label}</span>
+                    </div>
+                    <ChevronDown className="ml-2 h-4 w-4 text-white opacity-70" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[200px] bg-[#8A9096]/60 backdrop-blur-2xl border-0 text-white rounded-[4px]">
+                  {navItems.map((item) => (
+                    item.isButton ? (
+                      <Link
+                        key={item.name}
+                        to={item.path}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleMenuItemClick(item);
+                        }}
+                        className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
+                      >
+                        {item.icon}
+                        <span className="ml-2">Sign Up</span>
+                        <ArrowRight className="ml-auto h-4 w-4 text-white" />
+                      </Link>
+                    ) : (
+                      <DropdownMenuItem key={item.name} asChild>
+                        <Link
+                          to={item.path}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleMenuItemClick(item);
+                          }}
+                          className={`flex items-center w-full px-4 py-2 text-white rounded-[4px] ${
+                            activeItem === item.name
+                              ? "bg-[#17342C]"
+                              : "hover:bg-[#17342C]/30"
+                          }`}
+                        >
+                          {item.icon}
+                          <span className="ml-2">{item.label}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
           <Link 
             to="/get-started" 
-            className="bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 inline-block w-full sm:w-auto flex justify-center"
+            className="hidden sm:inline-block bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 w-full sm:w-auto flex justify-center"
             style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
           >
             <img 
@@ -185,57 +250,6 @@ const GetStarted = () => {
                 )
               ))}
             </div>
-
-            <div className="sm:hidden w-full max-w-[200px] mx-auto">
-              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-                <DropdownMenuTrigger asChild>
-                  <button className="w-full flex items-center justify-between px-4 py-2 bg-[#17342C]/60 backdrop-blur-xl rounded-[4px] text-white">
-                    <div className="flex items-center">
-                      {activeNavItem.icon}
-                      <span className="ml-2">{activeNavItem.label}</span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-white opacity-70" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[200px] bg-[#8A9096]/60 backdrop-blur-2xl border-0 text-white rounded-[4px]">
-                  {navItems.map((item) => (
-                    item.isButton ? (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleMenuItemClick(item);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
-                      >
-                        {item.icon}
-                        <span className="ml-2">Sign Up</span>
-                        <ArrowRight className="ml-auto h-4 w-4 text-white" />
-                      </Link>
-                    ) : (
-                      <DropdownMenuItem key={item.name} asChild>
-                        <Link
-                          to={item.path}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleMenuItemClick(item);
-                          }}
-                          className={`flex items-center w-full px-4 py-2 text-white rounded-[4px] ${
-                            activeItem === item.name
-                              ? "bg-[#17342C]"
-                              : "hover:bg-[#17342C]/30"
-                          }`}
-                        >
-                          {item.icon}
-                          <span className="ml-2">{item.label}</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
         </nav>
       </header>
@@ -243,7 +257,7 @@ const GetStarted = () => {
       <div 
         ref={homeRef}
         id="home"
-        className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat md:mt-0 mt-[-60px]"
+        className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat md:mt-0 mt-0"
         style={{ 
           backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//beacon.png')",
           backgroundSize: "contain", 
