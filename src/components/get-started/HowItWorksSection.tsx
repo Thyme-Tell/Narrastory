@@ -63,7 +63,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
     <section 
       ref={howItWorksRef as React.RefObject<HTMLElement>}
       id="how-it-works"
-      className="container mx-auto px-4 py-16 md:py-24 scroll-mt-32"
+      className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 md:mb-16 text-center">

@@ -11,7 +11,7 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
     <section 
       ref={signUpRef as React.RefObject<HTMLElement>}
       id="sign-up"
-      className="container mx-auto px-4 py-16 md:py-24 scroll-mt-32"
+      className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24"
     >
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 text-center">

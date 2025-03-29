@@ -28,54 +28,34 @@ export const useHeaderScroll = ({
           element: item.ref!.current!
         }));
       
-      if (sections.length === 0) return;
-      
-      // Default to home when near the top of the page
+      // Get the section that is most visible in the viewport
       let currentSection = "home";
       
       if (window.scrollY < 100) {
+        // If near the top, select home
         currentSection = "home";
       } else {
-        // Get the viewport height and current scroll position
-        const viewportHeight = window.innerHeight;
-        const scrollPosition = window.scrollY + (viewportHeight * 0.3); // Slightly biased towards top
+        // Find the section that's currently most visible
+        let maxVisibleSection = null;
+        let maxVisiblePercentage = 0;
         
-        // Sort sections by their position from top to bottom
-        const sortedSections = [...sections].sort((a, b) => {
-          const rectA = a.element.getBoundingClientRect();
-          const rectB = b.element.getBoundingClientRect();
-          return (rectA.top + window.scrollY) - (rectB.top + window.scrollY);
+        sections.forEach(section => {
+          const rect = section.element.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          
+          // Calculate how much of the section is visible
+          const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
+          const sectionHeight = rect.height;
+          const visiblePercentage = visibleHeight / sectionHeight;
+          
+          if (visiblePercentage > maxVisiblePercentage && visiblePercentage > 0.2) {
+            maxVisiblePercentage = visiblePercentage;
+            maxVisibleSection = section.name;
+          }
         });
         
-        // Find the most appropriate section
-        for (let i = 0; i < sortedSections.length; i++) {
-          const section = sortedSections[i];
-          const rect = section.element.getBoundingClientRect();
-          const sectionTop = rect.top + window.scrollY - 150; // Offset for header
-          
-          // Check if current scroll position is past this section's top
-          if (scrollPosition >= sectionTop) {
-            currentSection = section.name;
-            
-            // Peek at next section to ensure precise highlighting
-            if (i < sortedSections.length - 1) {
-              const nextSection = sortedSections[i + 1];
-              const nextRect = nextSection.element.getBoundingClientRect();
-              const nextSectionTop = nextRect.top + window.scrollY - 150;
-              
-              // If very close to next section, switch to it
-              if (scrollPosition >= nextSectionTop - 100) {
-                currentSection = nextSection.name;
-              }
-            }
-          }
-        }
-        
-        // Special case for bottom of the page
-        const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
-        if (isAtBottom && sortedSections.length > 0) {
-          const lastSection = sortedSections[sortedSections.length - 1];
-          currentSection = lastSection.name;
+        if (maxVisibleSection) {
+          currentSection = maxVisibleSection;
         }
       }
       
@@ -95,12 +75,6 @@ export const useHeaderScroll = ({
     };
 
     window.addEventListener('scroll', handleScroll);
-    
-    // Initial scroll check - run after a short delay to ensure DOM is fully loaded
-    setTimeout(() => {
-      handleScroll();
-    }, 300);
-    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -110,4 +84,3 @@ export const useHeaderScroll = ({
 };
 
 export default useHeaderScroll;
-
