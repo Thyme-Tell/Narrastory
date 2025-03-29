@@ -14,7 +14,33 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { phoneNumber } = await req.json();
+    // Validate the request method
+    if (req.method !== 'POST') {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Method ${req.method} not allowed. Only POST is supported.` 
+        }),
+        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parse the request body
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (error) {
+      console.error('Error parsing request body:', error);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid request body. JSON parsing failed.' 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { phoneNumber } = requestBody;
     
     if (!phoneNumber) {
       return new Response(
@@ -91,7 +117,11 @@ Deno.serve(async (req) => {
     console.error('Error initiating Narra call:', error);
     
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message || 'Unknown error occurred',
+        errorObject: JSON.stringify(error)
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

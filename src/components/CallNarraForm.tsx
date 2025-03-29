@@ -53,11 +53,12 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       // Log the normalized phone number for debugging
       console.log("Normalized phone number:", normalized);
       
-      // Call our Supabase function to initiate the call
-      const webhookUrl = 'https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/start-narra-call';
-      console.log("Calling function at:", webhookUrl);
+      // Use the correct format for the edge function URL
+      // Important: We're using the full URL with the project ID
+      const functionUrl = 'https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/start-narra-call';
+      console.log("Calling function at:", functionUrl);
       
-      const response = await fetch(webhookUrl, {
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
