@@ -119,7 +119,7 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] my-auto`}
+                    className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors duration-200 w-full sm:w-auto justify-center m-[3px] mr-[5px] my-auto`}
                   >
                     Sign Up <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 text-white" />
                   </Link>
