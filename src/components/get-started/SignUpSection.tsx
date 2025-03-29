@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -47,14 +46,13 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
             <div className="absolute inset-0 bg-atlantic/60 z-10"></div>
             <div className="relative z-20 flex flex-col justify-center h-full text-white p-12">
               <div className="bg-[#1d2532]/80 backdrop-blur-sm rounded-[7px] p-8 shadow-lg">
-                <span className="text-[#A33D29] text-6xl font-serif leading-none block mb-2">"</span>
                 <blockquote className="mb-6">
-                  <p className="text-white/90 text-lg font-serif font-light italic mb-4 leading-relaxed">
+                  <p className="text-white/90 text-lg font-serif font-extralight italic mb-4 leading-relaxed">
                     "Narra was a way for us to know my parents' stories that would have otherwise been lost forever. Now my children and their children will know where they came from."
                   </p>
                   <footer className="text-white/80">
                     <p className="font-medium">Cecille Ubbaonu</p>
-                    <p className="text-sm">Mother of 3</p>
+                    <p className="text-sm">Mother of 2</p>
                   </footer>
                 </blockquote>
                 <div className="flex items-center space-x-1">
