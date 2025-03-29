@@ -36,7 +36,7 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
             </div>
           </div>
           
-          {/* Right Panel - Image or Info */}
+          {/* Right Panel - Testimonial */}
           <div className="hidden md:block relative">
             <div 
               className="absolute inset-0 z-0 bg-cover bg-center" 
@@ -46,28 +46,30 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
             ></div>
             <div className="absolute inset-0 bg-atlantic/60 z-10"></div>
             <div className="relative z-20 flex flex-col justify-center h-full text-white p-12">
-              <div className="text-center mb-6">
-                <p className="text-white/80 text-sm uppercase tracking-wide">Preserve Your Legacy</p>
-                <h2 className="text-3xl font-caslon mt-2 mb-4">Family Stories.<br />Forever.</h2>
-              </div>
-              
-              <div className="bg-[#1d2532]/80 backdrop-blur-sm rounded-[7px] p-6 shadow-lg mx-auto max-w-xs">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <p className="text-white/60 text-xs">STORIES</p>
-                    <p className="text-xl font-medium">24 Family Memories</p>
-                  </div>
-                  
-                  <div className="w-full h-40 bg-gradient-to-br from-[#A33D29]/90 to-[#A33D29]/60 rounded-[7px] flex items-center justify-center">
-                    <span className="font-caslon text-2xl">Narra Book</span>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div className="w-full bg-white/10 h-2 rounded-full">
-                      <div className="bg-[#A33D29] h-2 rounded-full w-3/4"></div>
-                    </div>
-                    <p className="text-xs text-white/60 text-right">75% Complete</p>
-                  </div>
+              <div className="bg-[#1d2532]/80 backdrop-blur-sm rounded-[7px] p-8 shadow-lg">
+                <svg className="text-[#A33D29] h-10 w-10 mb-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9.135 9H4.5C4.33431 9 4.2 8.86569 4.2 8.7V4.5C4.2 4.33431 4.33431 4.2 4.5 4.2H8.7C8.86569 4.2 9 4.33431 9 4.5V8.865M9.135 9C9.06 9 9 8.94 9 8.865V4.5M9.135 9H19.5C19.6657 9 19.8 9.13431 19.8 9.3V13.5C19.8 13.6657 19.6657 13.8 19.5 13.8H15.3C15.1343 13.8 15 13.6657 15 13.5V9.135C15 9.06 15.06 9 15.135 9H19.5M9 4.5H19.5C19.6657 4.5 19.8 4.33431 19.8 4.5V8.7C19.8 8.86569 19.6657 9 19.5 9M9 4.5V3M19.5 9V3M9 19.5H4.5C4.33431 19.5 4.2 19.6657 4.2 19.5V15.3C4.2 15.1343 4.33431 15 4.5 15H8.7C8.86569 15 9 15.1343 9 15.3V19.5ZM9 19.5H19.5C19.6657 19.5 19.8 19.6657 19.8 19.5V15.3C19.8 15.1343 19.6657 15 19.5 15H15.3C15.1343 15 15 15.1343 15 15.3V19.5M9 19.5V21M15 19.5V21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <blockquote className="mb-6">
+                  <p className="text-white/90 text-lg font-caslon italic mb-4">
+                    "Narra helped our family preserve the incredible stories of my grandmother's childhood that would have otherwise been lost forever. Now my children and their children will know where they came from."
+                  </p>
+                  <footer className="text-white/80">
+                    <p className="font-medium">Sarah Johnson</p>
+                    <p className="text-sm">Family Historian, Mother of 3</p>
+                  </footer>
+                </blockquote>
+                <div className="flex items-center space-x-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg 
+                      key={star} 
+                      className="w-5 h-5 text-[#A33D29]" 
+                      fill="currentColor" 
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                  ))}
                 </div>
               </div>
             </div>
