@@ -1,5 +1,5 @@
 
-@media (max-width: 768px) {
+@media (max-width: 750px) {
   .book-preview-container {
     max-width: 100%;
     margin: 0 auto;
@@ -110,7 +110,7 @@
   }
 }
 
-@media (min-width: 801px) {
+@media (min-width: 751px) {
   .navbar-below-logo {
     flex-direction: row;
     justify-content: space-between;
@@ -118,7 +118,7 @@
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 750px) {
   .navbar-below-logo {
     flex-direction: column;
     align-items: center;
@@ -137,22 +137,4 @@
   }
 }
 
-@media (max-width: 768px) {
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  .min-text-size {
-    font-size: 16px !important;
-  }
-  
-  .mobile-button-spacing > * {
-    margin: 0.25rem !important;
-  }
-  
-  .ios-book-preview-fix {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
-  }
-}
+// Removed the duplicate mobile media query from the original file
