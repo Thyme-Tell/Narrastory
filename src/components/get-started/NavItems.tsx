@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
 import { Home, Book, Users, ArrowRight } from "lucide-react";
 
 export type NavItem = {

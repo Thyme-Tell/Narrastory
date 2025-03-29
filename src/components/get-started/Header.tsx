@@ -20,14 +20,14 @@ const Header: React.FC<HeaderProps> = ({
   const [scrolled, setScrolled] = useState(false);
   const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
 
-  // No scroll to top function needed
-  const scrollToTop = () => {
-    // Function kept but implementation removed
-  };
-
-  // Handle navigation when clicking on a nav item (without scrolling)
+  // Handle navigation when clicking on a nav item
   const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
     e.preventDefault();
+    
+    // If item has a ref, scroll to that section
+    if (item.ref && item.ref.current) {
+      item.ref.current.scrollIntoView({ behavior: 'smooth' });
+    }
     
     // Call the handleMenuItemClick function to update the active item
     handleMenuItemClick(item);
@@ -58,7 +58,6 @@ const Header: React.FC<HeaderProps> = ({
             activeItem={activeItem}
             isDropdownOpen={isDropdownOpen}
             setIsDropdownOpen={setIsDropdownOpen}
-            scrollToTop={scrollToTop}
             handleNavItemClick={handleNavItemClick}
             scrolled={scrolled}
             activeNavItem={activeNavItem}
@@ -66,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({
           />
 
           {/* Tablet/desktop logo - only visible when not scrolled */}
-          <DesktopLogo scrolled={scrolled} scrollToTop={scrollToTop} />
+          <DesktopLogo scrolled={scrolled} />
         </div>
 
         {/* Navigation menu */}

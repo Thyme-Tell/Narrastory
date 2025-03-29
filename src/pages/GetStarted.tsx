@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,7 +17,7 @@ const GetStarted = () => {
   const [activeItem, setActiveItem] = useState("home");
   const isMobile = useIsMobile();
   
-  // References for sections (keeping refs without scroll functionality)
+  // References for sections
   const homeRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
   const storyCirclesRef = useRef<HTMLElement>(null);
@@ -31,10 +32,14 @@ const GetStarted = () => {
     const path = location.pathname;
     const hash = location.hash;
 
-    // Handle navigation based on URL hash (without scrolling)
+    // Handle navigation based on URL hash
     if (hash) {
       const targetSection = hash.substring(1); // Remove the # character
-      const selectedItem = navItems.find(item => item.name === targetSection);
+      const selectedItem = navItems.find(item => {
+        // Extract the section name from the path (after the #)
+        const itemHash = item.path.includes('#') ? item.path.split('#')[1] : '';
+        return itemHash === targetSection;
+      });
       
       if (selectedItem) {
         setActiveItem(selectedItem.name);

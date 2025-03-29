@@ -15,7 +15,6 @@ interface MobileNavigationProps {
   activeItem: string;
   isDropdownOpen: boolean;
   setIsDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  scrollToTop: () => void;
   handleNavItemClick: (e: React.MouseEvent, item: NavItem) => void;
   scrolled: boolean;
   activeNavItem: NavItem;
@@ -27,7 +26,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   activeItem,
   isDropdownOpen,
   setIsDropdownOpen,
-  scrollToTop,
   handleNavItemClick,
   scrolled,
   activeNavItem,
