@@ -30,16 +30,15 @@ export const useHeaderScroll = ({
       
       if (sections.length === 0) return;
       
-      // Get the section that is most visible in the viewport
+      // Default to home when near the top of the page
       let currentSection = "home";
       
-      // Default to home when near the top of the page
       if (window.scrollY < 100) {
         currentSection = "home";
       } else {
-        // Find the section that's currently most visible in the viewport
+        // Get the viewport height and current scroll position
         const viewportHeight = window.innerHeight;
-        const scrollPosition = window.scrollY + (viewportHeight * 0.2); // Bias towards the top of the viewport
+        const scrollPosition = window.scrollY + (viewportHeight * 0.3); // Slightly biased towards top
         
         // Sort sections by their position from top to bottom
         const sortedSections = [...sections].sort((a, b) => {
@@ -48,30 +47,31 @@ export const useHeaderScroll = ({
           return (rectA.top + window.scrollY) - (rectB.top + window.scrollY);
         });
         
-        // Find the first section that starts at or before the current scroll position
+        // Find the most appropriate section
         for (let i = 0; i < sortedSections.length; i++) {
           const section = sortedSections[i];
           const rect = section.element.getBoundingClientRect();
           const sectionTop = rect.top + window.scrollY - 150; // Offset for header
           
+          // Check if current scroll position is past this section's top
           if (scrollPosition >= sectionTop) {
             currentSection = section.name;
             
-            // If we're close to the next section, peek ahead
+            // Peek at next section to ensure precise highlighting
             if (i < sortedSections.length - 1) {
               const nextSection = sortedSections[i + 1];
               const nextRect = nextSection.element.getBoundingClientRect();
               const nextSectionTop = nextRect.top + window.scrollY - 150;
               
-              // If we're very close to the next section (within 50px), use it instead
-              if (scrollPosition >= nextSectionTop - 50) {
+              // If very close to next section, switch to it
+              if (scrollPosition >= nextSectionTop - 100) {
                 currentSection = nextSection.name;
               }
             }
           }
         }
         
-        // Special case for last section - if we're at the bottom of the page
+        // Special case for bottom of the page
         const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
         if (isAtBottom && sortedSections.length > 0) {
           const lastSection = sortedSections[sortedSections.length - 1];
@@ -110,3 +110,4 @@ export const useHeaderScroll = ({
 };
 
 export default useHeaderScroll;
+
