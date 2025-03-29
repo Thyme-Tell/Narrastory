@@ -68,6 +68,11 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
         throw new Error(error.message || 'Failed to initiate call');
       }
 
+      if (data && !data.success) {
+        console.error("API returned error:", data);
+        throw new Error(data.error || 'Failed to initiate call');
+      }
+
       toast({
         title: "Success",
         description: "Your call is being initiated. Expect a call soon!",
