@@ -46,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
                 <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/60 backdrop-blur-xl rounded-[4px] text-white">
                   <div className="flex items-center">
                     {activeNavItem.icon}
-                    <span className="ml-2">{activeNavItem.label}</span>
+                    <span className="ml-2 text-xs">{activeNavItem.label}</span>
                   </div>
                   <ChevronDown className="ml-2 h-4 w-4 text-white opacity-70" />
                 </button>
@@ -61,11 +61,11 @@ const Header: React.FC<HeaderProps> = ({
                         e.preventDefault();
                         handleMenuItemClick(item);
                       }}
-                      className="flex items-center w-full px-4 py-3 text-sm font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
+                      className="flex items-center w-full px-4 py-2 text-xs font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
                     >
                       {item.icon}
-                      <span className="ml-2">Sign Up</span>
-                      <ArrowRight className="ml-auto h-4 w-4 text-white" />
+                      <span className="ml-2 text-xs">Sign Up</span>
+                      <ArrowRight className="ml-auto h-3 w-3 text-white" />
                     </Link>
                   ) : (
                     <DropdownMenuItem key={item.name} asChild>
@@ -75,14 +75,16 @@ const Header: React.FC<HeaderProps> = ({
                           e.preventDefault();
                           handleMenuItemClick(item);
                         }}
-                        className={`flex items-center w-full px-4 py-2 text-white rounded-[4px] ${
+                        className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] ${
                           activeItem === item.name
                             ? "bg-[#17342C]"
                             : "hover:bg-[#17342C]/30"
                         }`}
                       >
-                        {item.icon}
-                        <span className="ml-2">{item.label}</span>
+                        {React.cloneElement(item.icon as React.ReactElement, { 
+                          className: "h-3 w-3 mr-2" 
+                        })}
+                        <span className="text-xs">{item.label}</span>
                       </Link>
                     </DropdownMenuItem>
                   )
