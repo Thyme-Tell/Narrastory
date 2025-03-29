@@ -49,20 +49,35 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
 
     try {
       const normalized = normalizePhoneNumber(phoneNumber);
+      const sanitizedPhoneNumber = normalized.replace('+', '');
       
-      // Direct submission to Synthflow form
+      // Create a hidden form and submit it directly (avoids CORS issues)
       const formUrl = 'https://workflow.synthflow.ai/forms/Si4tARFS5QOwgMbnPE4I7';
-      const formData = new FormData();
-      formData.append('phone_number', normalized.replace('+', ''));
-
-      const response = await fetch(formUrl, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit phone number');
-      }
+      
+      // Create a hidden form element
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = formUrl;
+      form.target = '_blank'; // Open in a new tab (optional)
+      form.style.display = 'none';
+      
+      // Create an input for the phone number
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'phone_number';
+      input.value = sanitizedPhoneNumber;
+      
+      // Append the input to the form
+      form.appendChild(input);
+      
+      // Append the form to the body
+      document.body.appendChild(form);
+      
+      // Submit the form
+      form.submit();
+      
+      // Remove the form from the DOM
+      document.body.removeChild(form);
 
       toast({
         title: "Success",
@@ -76,7 +91,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       console.error("Error submitting phone number:", error);
       toast({
         title: "Error",
-        description: error.message || "Something went wrong. Please try again later.",
+        description: "Something went wrong. Please try again later.",
         variant: "destructive"
       });
       onError?.(error.message);
