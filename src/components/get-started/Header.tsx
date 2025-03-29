@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
   });
 
   return (
-    <header className={`py-4 px-4 sm:px-8 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-transparent' : 'bg-transparent'}`}>
+    <header className={`py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-transparent' : 'bg-transparent'}`}>
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex sm:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown */}
@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({
               <Link 
                 to="/get-started" 
                 onClick={scrollToTop}
-                className="bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-2"
+                className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
                 style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
               >
                 <img 
@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({
             <div className={`ml-2 ${!scrolled ? '' : 'ml-auto'}`}>
               <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/60 backdrop-blur-xl rounded-[4px] text-white">
+                  <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/60 rounded-[4px] text-white">
                     <div className="flex items-center">
                       {activeNavItem.icon}
                       <span className="ml-2 text-xs">{activeNavItem.label}</span>
@@ -88,7 +88,7 @@ const Header: React.FC<HeaderProps> = ({
                     <ChevronDown className="ml-2 h-4 w-4 text-white opacity-70" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[200px] bg-[#8A9096]/60 backdrop-blur-2xl border-0 text-white rounded-[4px]">
+                <DropdownMenuContent className="w-[200px] bg-[#8A9096]/60 border-0 text-white rounded-[4px]">
                   {displayNavItems.map((item) => (
                     item.isButton ? (
                       <Link
@@ -134,7 +134,7 @@ const Header: React.FC<HeaderProps> = ({
             <Link 
               to="/get-started" 
               onClick={scrollToTop}
-              className="hidden sm:inline-block bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 lg:p-3 w-full sm:w-auto flex justify-center"
+              className="hidden sm:inline-block bg-[#EFF1E9]/50 rounded-[100px] p-4 lg:p-3 w-full sm:w-auto flex justify-center"
               style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
             >
               <img 
@@ -148,8 +148,8 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Navigation menu */}
         <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
-          <div className="hidden sm:flex bg-[#8A9096]/40 backdrop-blur-xl rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
-            style={{ padding: "3px 2px", backdropFilter: "blur(12px)" }}>
+          <div className="hidden sm:flex bg-[#8A9096]/40 rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
+            style={{ padding: "3px 2px" }}>
             {displayNavItems.map((item) => (
               item.isButton ? (
                 <Link
