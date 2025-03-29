@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { 
@@ -22,14 +22,27 @@ const Header: React.FC<HeaderProps> = ({
   handleMenuItemClick 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 50;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
+    <header className={`py-4 px-4 sm:px-8 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#17342C]/80' : 'bg-transparent'}`}>
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex sm:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown */}
@@ -37,14 +50,22 @@ const Header: React.FC<HeaderProps> = ({
             <Link 
               to="/get-started" 
               onClick={scrollToTop}
-              className="bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-2 inline-block"
-              style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+              className={`transition-all duration-300 ${scrolled ? 'p-0' : 'bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-2'}`}
+              style={{ boxShadow: scrolled ? 'none' : "0 0 20px rgba(239, 241, 233, 0.8)" }}
             >
-              <img 
-                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
-                alt="Narra Logo" 
-                className="w-[100px] h-auto"
-              />
+              {scrolled ? (
+                <img 
+                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                  alt="Narra Icon" 
+                  className="w-[40px] h-auto"
+                />
+              ) : (
+                <img 
+                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
+                  alt="Narra Logo" 
+                  className="w-[100px] h-auto"
+                />
+              )}
             </Link>
 
             <div className="ml-2">
@@ -105,14 +126,26 @@ const Header: React.FC<HeaderProps> = ({
           <Link 
             to="/get-started" 
             onClick={scrollToTop}
-            className="hidden sm:inline-block bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 lg:p-3 w-full sm:w-auto flex justify-center"
-            style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+            className={`hidden sm:inline-block transition-all duration-300 ${
+              scrolled 
+                ? 'p-1 bg-transparent' 
+                : 'bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 lg:p-3'
+            } w-full sm:w-auto flex justify-center`}
+            style={{ boxShadow: scrolled ? 'none' : "0 0 20px rgba(239, 241, 233, 0.8)" }}
           >
-            <img 
-              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
-              alt="Narra Logo" 
-              className="w-[130px] h-auto"
-            />
+            {scrolled ? (
+              <img 
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                alt="Narra Icon" 
+                className="w-[40px] h-auto"
+              />
+            ) : (
+              <img 
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
+                alt="Narra Logo" 
+                className="w-[130px] h-auto"
+              />
+            )}
           </Link>
         </div>
 
