@@ -1,14 +1,11 @@
 
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, ChevronDown } from "lucide-react";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem
-} from "@/components/ui/dropdown-menu";
+import React, { useState } from "react";
+import { Home } from "lucide-react";
 import { NavItem } from "./NavItems";
+import MobileNavigation from "./navigation/MobileNavigation";
+import DesktopLogo from "./navigation/DesktopLogo";
+import DesktopNavigation from "./navigation/DesktopNavigation";
+import useHeaderScroll from "./navigation/useHeaderScroll";
 
 interface HeaderProps {
   navItems: NavItem[];
@@ -22,73 +19,8 @@ const Header: React.FC<HeaderProps> = ({
   handleMenuItemClick 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const { scrolled } = useHeaderScroll({ navItems, activeItem, handleMenuItemClick });
   const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 50;
-      setScrolled(isScrolled);
-      
-      // Check which section is currently visible
-      const sections = navItems
-        .filter(item => item.ref && item.ref.current)
-        .map(item => ({
-          name: item.name,
-          element: item.ref!.current!
-        }));
-      
-      // Get the section that is most visible in the viewport
-      let currentSection = "home";
-      
-      if (window.scrollY < 100) {
-        // If near the top, select home
-        currentSection = "home";
-      } else {
-        // Find the section that's currently most visible
-        let maxVisibleSection = null;
-        let maxVisiblePercentage = 0;
-        
-        sections.forEach(section => {
-          const rect = section.element.getBoundingClientRect();
-          const windowHeight = window.innerHeight;
-          
-          // Calculate how much of the section is visible
-          const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
-          const sectionHeight = rect.height;
-          const visiblePercentage = visibleHeight / sectionHeight;
-          
-          if (visiblePercentage > maxVisiblePercentage && visiblePercentage > 0.2) {
-            maxVisiblePercentage = visiblePercentage;
-            maxVisibleSection = section.name;
-          }
-        });
-        
-        if (maxVisibleSection) {
-          currentSection = maxVisibleSection;
-        }
-      }
-      
-      // Update the active section if it's different
-      if (currentSection !== activeItem) {
-        const newActiveItem = navItems.find(item => item.name === currentSection);
-        if (newActiveItem) {
-          // Update URL hash without scrolling
-          const url = new URL(window.location.href);
-          url.hash = currentSection === "home" ? "" : `#${currentSection}`;
-          window.history.replaceState({}, "", url.toString());
-          
-          // Call the handleMenuItemClick with the new active item
-          handleMenuItemClick(newActiveItem);
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [activeItem, navItems, handleMenuItemClick]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -133,122 +65,29 @@ const Header: React.FC<HeaderProps> = ({
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex md:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown - visible below 640px */}
-          <div className="w-full flex sm:hidden justify-between items-center">
-            <Link 
-              to="/get-started" 
-              onClick={scrollToTop}
-              className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
-              style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
-            >
-              {scrolled ? (
-                <img 
-                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon.svg" 
-                  alt="Narra Icon" 
-                  className="w-[30px] h-auto"
-                />
-              ) : (
-                <img 
-                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
-                  alt="Narra Logo" 
-                  className="w-[100px] h-auto"
-                />
-              )}
-            </Link>
-
-            <div className="ml-2">
-              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/70 rounded-[4px] text-white">
-                    <div className="flex items-center">
-                      {activeNavItem.icon}
-                      <span className="ml-2 text-xs">{activeNavItem.label}</span>
-                    </div>
-                    <ChevronDown className="ml-2 h-4 w-4 text-white opacity-70" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
-                  {displayNavItems.map((item) => (
-                    item.isButton ? (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        onClick={(e) => handleNavItemClick(e, item)}
-                        className="flex items-center w-full px-4 py-2 text-xs font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
-                      >
-                        {item.icon}
-                        <span className="ml-2 text-xs">Sign Up</span>
-                        <ArrowRight className="ml-auto h-3 w-3 text-white" />
-                      </Link>
-                    ) : (
-                      <DropdownMenuItem key={item.name} asChild>
-                        <Link
-                          to={item.path}
-                          onClick={(e) => handleNavItemClick(e, item)}
-                          className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] ${
-                            activeItem === item.name
-                              ? "bg-[#17342C]"
-                              : "hover:bg-[#17342C]/30"
-                          }`}
-                        >
-                          {item.icon}
-                          <span className="text-xs">{item.label}</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+          <MobileNavigation 
+            navItems={navItems}
+            activeItem={activeItem}
+            isDropdownOpen={isDropdownOpen}
+            setIsDropdownOpen={setIsDropdownOpen}
+            scrollToTop={scrollToTop}
+            handleNavItemClick={handleNavItemClick}
+            scrolled={scrolled}
+            activeNavItem={activeNavItem}
+            displayNavItems={displayNavItems}
+          />
 
           {/* Tablet/desktop logo - only visible when not scrolled */}
-          {!scrolled && (
-            <Link 
-              to="/get-started" 
-              onClick={scrollToTop}
-              className="hidden sm:inline-block bg-[#EFF1E9]/50 rounded-[100px] p-4 lg:p-3 w-full sm:w-auto flex justify-center"
-              style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
-            >
-              <img 
-                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
-                alt="Narra Logo" 
-                className="w-[130px] h-auto"
-              />
-            </Link>
-          )}
+          <DesktopLogo scrolled={scrolled} scrollToTop={scrollToTop} />
         </div>
 
         {/* Navigation menu */}
         <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
-          <div className="hidden sm:flex bg-[#333333]/60 backdrop-blur-md rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
-            style={{ padding: "3px 2px" }}>
-            {displayNavItems.map((item) => (
-              item.isButton ? (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  onClick={(e) => handleNavItemClick(e, item)}
-                  className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
-                >
-                  Sign Up <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 text-white" />
-                </Link>
-              ) : (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  onClick={(e) => handleNavItemClick(e, item)}
-                  className={`flex items-center px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap text-white m-[2px] my-auto ${
-                    activeItem === item.name
-                      ? "bg-[#17342C]"
-                      : "hover:bg-[#17342C]/10"
-                  } transition-colors w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              )
-            ))}
-          </div>
+          <DesktopNavigation 
+            displayNavItems={displayNavItems} 
+            activeItem={activeItem} 
+            handleNavItemClick={handleNavItemClick} 
+          />
         </div>
       </nav>
     </header>
