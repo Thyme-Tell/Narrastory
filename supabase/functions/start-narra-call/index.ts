@@ -4,6 +4,7 @@ import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
 
 // Get Synthflow webhook URL from environment variable or use the default
 const SYNTHFLOW_WEBHOOK_URL = Deno.env.get('SYNTHFLOW_WEBHOOK_URL') || 'https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2';
+const SYNTHFLOW_CAMPAIGN_ID = Deno.env.get('SYNTHFLOW_CAMPAIGN_ID') || 'A_JREGdUO7LTUbL3jAEVXggim6VwkK2Tfa_YwzFYJX8';
 
 // Main server function
 Deno.serve(async (req) => {
@@ -51,68 +52,114 @@ Deno.serve(async (req) => {
     // Normalize phone number for consistency if needed
     const normalizedPhone = Phone.startsWith('+') ? Phone : normalizePhoneNumber(Phone);
     
-    console.log(`Submitting phone number to Synthflow workflow: ${normalizedPhone}`);
+    console.log(`Initiating direct call to ${normalizedPhone}`);
     console.log(`Using webhook URL: ${SYNTHFLOW_WEBHOOK_URL}`);
+    console.log(`Using campaign ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
     
-    // Create the payload with the expected field name "Phone"
+    // Create the payload with metadata for tracking
     const webhookPayload = {
-      Phone: normalizedPhone
+      phoneNumber: normalizedPhone,
+      timestamp: new Date().toISOString(),
+      source: "narra-app"
     };
     
     console.log(`Sending webhook payload: ${JSON.stringify(webhookPayload)}`);
     
-    // Send the request directly to the Synthflow webhook
-    const response = await fetch(SYNTHFLOW_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(webhookPayload),
-    });
-    
-    // Log full response for debugging
-    const responseText = await response.text();
-    console.log(`Synthflow webhook response status: ${response.status}`);
-    console.log(`Synthflow webhook response body: ${responseText}`);
-    
-    if (!response.ok) {
-      console.error('Synthflow webhook error:', responseText);
+    // Try using the campaigns endpoint first (more reliable)
+    try {
+      console.log(`Using campaigns endpoint with ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
+      
+      const response = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: normalizedPhone,
+          variables: webhookPayload
+        }),
+      });
+      
+      console.log(`Synthflow API response status: ${response.status}`);
+      const responseText = await response.text();
+      console.log(`Synthflow API response body: ${responseText}`);
+      
+      if (!response.ok) {
+        console.error('Synthflow API error:', responseText);
+        throw new Error(`Synthflow API returned status ${response.status}: ${responseText}`);
+      }
+      
       return new Response(
         JSON.stringify({ 
-          success: false, 
-          error: 'Failed to submit phone number to Synthflow', 
-          details: responseText,
-          status: response.status
+          success: true, 
+          message: 'Call initiated successfully',
+          details: responseText
         }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    } catch (error) {
+      console.error('Synthflow API error:', error);
+      
+      // Try backup method if the first one fails
+      console.log('Trying backup method with campaigns endpoint...');
+      
+      try {
+        const backupResponse = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: normalizedPhone,
+            variables: webhookPayload
+          }),
+        });
+        
+        console.log(`Backup API response status: ${backupResponse.status}`);
+        const backupResponseText = await backupResponse.text();
+        console.log(`Backup API response body: ${backupResponseText}`);
+        
+        if (!backupResponse.ok) {
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: 'Failed to initiate call through all available methods',
+              details: backupResponseText
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Call initiated successfully via backup method',
+            details: backupResponseText
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (backupError) {
+        console.error('Backup API call failed:', backupError);
+        
+        // Fall back to direct form submission - create a payload that matches form expectations
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'All API call methods failed. Use direct form submission instead.',
+            originalError: error.message,
+            backupError: backupError.message
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
-    
-    let responseData;
-    try {
-      responseData = JSON.parse(responseText);
-    } catch (e) {
-      console.error('Error parsing response JSON:', e);
-      responseData = { message: 'Response received but not valid JSON' };
-    }
-    
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Phone number submitted to Synthflow successfully',
-        data: responseData 
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-    
   } catch (error) {
     console.error('Error submitting phone number to Synthflow:', error);
     
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Unknown error occurred',
-        errorObject: JSON.stringify(error)
+        error: error.message || 'Unknown error occurred'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

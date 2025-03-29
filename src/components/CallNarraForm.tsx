@@ -172,19 +172,6 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     }
   };
 
-  const defaultButton = (
-    <>
-      Talk with 
-      <img 
-        src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-        alt="Narra Icon" 
-        className="w-5 h-5 relative -top-[2px]"
-      />
-      <span className="font-light">Narra</span> 
-      <ArrowRight className="h-4 w-4" />
-    </>
-  );
-
   return (
     <form onSubmit={handleSubmit} className={className}>
       <div className={`relative w-full ${mobileLayout ? 'flex flex-col' : ''}`}>
@@ -208,7 +195,18 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           }}
           disabled={isLoading || isFormSubmitting}
         >
-          {isLoading || isFormSubmitting ? "Calling..." : buttonText || defaultButton}
+          {isLoading || isFormSubmitting ? "Calling..." : buttonText || (
+            <>
+              Talk with 
+              <img 
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                alt="Narra Icon" 
+                className="w-5 h-5 relative -top-[2px]"
+              />
+              <span className="font-light">Narra</span> 
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
         </Button>
       </div>
     </form>
