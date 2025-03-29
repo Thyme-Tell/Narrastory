@@ -12,7 +12,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
     <section 
       ref={storyCirclesRef as React.RefObject<HTMLElement>}
       id="join-story-circle"
-      className="container mx-auto px-4 py-16 md:py-24 bg-white scroll-mt-24"
+      className="container mx-auto px-4 py-16 md:py-24 bg-white scroll-mt-32"
     >
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 text-center">

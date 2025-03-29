@@ -28,34 +28,47 @@ export const useHeaderScroll = ({
           element: item.ref!.current!
         }));
       
+      if (sections.length === 0) return;
+      
       // Get the section that is most visible in the viewport
       let currentSection = "home";
       
+      // Default to home when near the top of the page
       if (window.scrollY < 100) {
-        // If near the top, select home
         currentSection = "home";
       } else {
-        // Find the section that's currently most visible
-        let maxVisibleSection = null;
-        let maxVisiblePercentage = 0;
+        // Find the section that's currently most visible in the viewport
+        const viewportHeight = window.innerHeight;
+        const scrollPosition = window.scrollY + viewportHeight * 0.3; // Bias towards the top of the viewport
+        
+        // Find the section whose top is closest to but below our scroll position
+        let mostVisibleSection = null;
+        let smallestDistance = Infinity;
         
         sections.forEach(section => {
           const rect = section.element.getBoundingClientRect();
-          const windowHeight = window.innerHeight;
+          const sectionTop = rect.top + window.scrollY - 120; // Offset for header
           
-          // Calculate how much of the section is visible
-          const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
-          const sectionHeight = rect.height;
-          const visiblePercentage = visibleHeight / sectionHeight;
-          
-          if (visiblePercentage > maxVisiblePercentage && visiblePercentage > 0.2) {
-            maxVisiblePercentage = visiblePercentage;
-            maxVisibleSection = section.name;
+          // Calculate how far this section is from our target scroll position
+          if (sectionTop <= scrollPosition) {
+            const distance = scrollPosition - sectionTop;
+            if (distance < smallestDistance) {
+              smallestDistance = distance;
+              mostVisibleSection = section;
+            }
           }
         });
         
-        if (maxVisibleSection) {
-          currentSection = maxVisibleSection;
+        // If we found a section, use it
+        if (mostVisibleSection) {
+          currentSection = mostVisibleSection.name;
+        }
+        
+        // Special case for last section - if we're at the bottom of the page
+        const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
+        if (isAtBottom) {
+          const lastSection = sections[sections.length - 1];
+          currentSection = lastSection.name;
         }
       }
       
@@ -76,8 +89,10 @@ export const useHeaderScroll = ({
 
     window.addEventListener('scroll', handleScroll);
     
-    // Initial scroll check
-    handleScroll();
+    // Initial scroll check - run after a short delay to ensure DOM is fully loaded
+    setTimeout(() => {
+      handleScroll();
+    }, 100);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
