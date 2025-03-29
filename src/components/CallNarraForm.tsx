@@ -54,7 +54,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       // Log the normalized phone number for debugging
       console.log("Normalized phone number:", normalized);
       
-      // Use Supabase functions.invoke instead of direct fetch for proper authentication
+      // Use Supabase functions.invoke to call our edge function
       const { data, error } = await supabase.functions.invoke('start-narra-call', {
         body: {
           phoneNumber: normalized,
@@ -70,7 +70,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
 
       if (data && !data.success) {
         console.error("API returned error:", data);
-        throw new Error(data.error || 'Failed to initiate call');
+        throw new Error(data.error || 'Failed to submit phone number');
       }
 
       toast({
@@ -82,7 +82,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       setPhoneNumber("");
       
     } catch (error) {
-      console.error("Error initiating call:", error);
+      console.error("Error submitting phone number:", error);
       
       let errorMessage = "Something went wrong. Please try again later.";
       if (error instanceof Error) {
