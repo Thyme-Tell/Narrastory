@@ -2,6 +2,7 @@
 import React from "react";
 import { Users, Book, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import LumaEvents from "./LumaEvents";
 
 interface StoryCirclesSectionProps {
   storyCirclesRef: React.RefObject<HTMLElement>;
@@ -73,6 +74,9 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
             </div>
           </div>
         </div>
+        
+        {/* Lu.ma Events Integration */}
+        <LumaEvents />
       </div>
     </section>
   );
