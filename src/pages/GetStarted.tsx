@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -127,7 +126,7 @@ const GetStarted = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap m-[3px] my-auto ${
+                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-[3px] text-sm font-medium whitespace-nowrap m-[3px] my-auto pl-4 ${
                       activeItem === item.name
                         ? "bg-[#17342C] text-white"
                         : "text-white hover:bg-[#17342C]/10"
