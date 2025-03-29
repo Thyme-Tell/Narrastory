@@ -78,15 +78,15 @@ Deno.serve(async (req) => {
     
     console.log(`Sending webhook payload: ${JSON.stringify(webhookPayload)}`);
     
-    // Instead of using the campaigns endpoint, let's try the direct call endpoint
-    const url = 'https://api.synthflow.ai/api/v1/calls/start';
+    // Try to use a direct API call that doesn't use the /campaigns/ path
+    // The updated code now tries a different endpoint structure
+    const url = 'https://api.synthflow.ai/api/v1/call';
+    
     const body = {
       phone: normalizedPhone,
-      transferOnError: false,
-      webhook: SYNTHFLOW_WEBHOOK_URL,
-      webhookRawBody: JSON.stringify(webhookPayload),
-      // Include campaign ID as a separate field if needed
-      campaignId: SYNTHFLOW_CAMPAIGN_ID
+      campaignId: SYNTHFLOW_CAMPAIGN_ID,
+      webhookUrl: SYNTHFLOW_WEBHOOK_URL,
+      webhookData: webhookPayload
     };
     
     console.log(`Making API call to: ${url}`);
@@ -109,6 +109,62 @@ Deno.serve(async (req) => {
     if (!response.ok) {
       console.error('Synthflow API error:', responseText);
       
+      // If the /api/v1/call endpoint fails, try a backup method with the /campaigns endpoint
+      if (response.status === 404) {
+        console.log('Trying backup method with campaigns endpoint...');
+        
+        const campaignsUrl = `https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`;
+        const campaignsBody = {
+          to: normalizedPhone,
+          variables: webhookPayload
+        };
+        
+        console.log(`Making backup API call to: ${campaignsUrl}`);
+        console.log(`With body: ${JSON.stringify(campaignsBody)}`);
+        
+        const backupResponse = await fetch(campaignsUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SYNTHFLOW_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(campaignsBody),
+        });
+        
+        const backupResponseText = await backupResponse.text();
+        console.log(`Backup API response status: ${backupResponse.status}`);
+        console.log(`Backup API response body: ${backupResponseText}`);
+        
+        if (!backupResponse.ok) {
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: 'Failed to start call with both methods', 
+              details: {
+                primary: responseText,
+                backup: backupResponseText
+              },
+              status: backupResponse.status
+            }),
+            { status: backupResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        // If backup method succeeded, return that response
+        let backupData;
+        try {
+          backupData = JSON.parse(backupResponseText);
+        } catch (e) {
+          backupData = { message: 'Response received but not valid JSON' };
+        }
+        
+        return new Response(
+          JSON.stringify({ success: true, data: backupData, method: 'backup' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // If not a 404 or backup also failed, return the original error
       return new Response(
         JSON.stringify({ 
           success: false, 
