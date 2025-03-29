@@ -1,4 +1,3 @@
-
 import React, { useState, FormEvent } from "react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { ArrowRight } from "lucide-react";
@@ -6,10 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Synthflow direct URL for fallback
-const SYNTHFLOW_WEBHOOK_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
-// Edge Function URL for getting the redirect URL
+// Edge Function URL for initiating the call
 const EDGE_FUNCTION_URL = "/api/synthflow-proxy";
+// Fallback direct URL
+const SYNTHFLOW_FORM_URL = "https://workflow.synthflow.ai/forms/PnhLacw4fc58JJlHzm3r2";
 
 interface CallNarraFormProps {
   className?: string;
@@ -58,52 +57,56 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       const normalized = normalizePhoneNumber(phoneNumber);
       console.log("Normalized phone number:", normalized);
       
-      // First, try to use the Edge Function to get a redirect URL
-      try {
-        console.log("Fetching redirect URL from Edge Function");
-        const response = await fetch(EDGE_FUNCTION_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ phone: normalized }),
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          
-          if (result.success && result.redirectUrl) {
-            console.log("Redirecting to:", result.redirectUrl);
-            // Simply redirect the user to the Synthflow URL
-            window.location.href = result.redirectUrl;
-            return; // Exit early as we're redirecting
-          }
-        }
-      } catch (error) {
-        console.error("Edge Function error:", error);
-        // Continue to fallback if Edge Function fails
+      // Submit the phone number to our edge function
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone: normalized }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
       }
       
-      // Fallback: Direct redirect to Synthflow
-      console.log("Using direct redirect fallback");
-      window.location.href = `${SYNTHFLOW_WEBHOOK_URL}?Phone=${encodeURIComponent(normalized)}`;
+      const result = await response.json();
+      console.log("Response from edge function:", result);
       
-      // The following won't execute due to the redirect, but we include it for completeness
-      onSuccess?.(normalized);
-      setPhoneNumber("");
-      
+      if (result.success) {
+        if (result.redirectUrl) {
+          // If we get a redirect URL, navigate to it
+          console.log("Redirecting to:", result.redirectUrl);
+          window.location.href = result.redirectUrl;
+        } else {
+          // Otherwise, show success message
+          toast({
+            title: "Success",
+            description: "We're calling you now!",
+          });
+          
+          onSuccess?.(normalized);
+          setPhoneNumber("");
+        }
+      } else {
+        throw new Error(result.error || "Failed to initiate call");
+      }
     } catch (error) {
       console.error("Error:", error);
       
-      let errorMessage = "Something went wrong. Please try again later.";
+      // As a fallback, redirect directly to Synthflow form
+      const normalized = normalizePhoneNumber(phoneNumber);
+      console.log("Using direct Synthflow fallback for:", normalized);
+      window.location.href = `${SYNTHFLOW_FORM_URL}?Phone=${encodeURIComponent(normalized)}`;
+      
+      let errorMessage = "Something went wrong. Redirecting you to our call system...";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
       
       toast({
-        title: "Error",
+        title: "Note",
         description: errorMessage,
-        variant: "destructive"
       });
       onError?.(errorMessage);
     } finally {
