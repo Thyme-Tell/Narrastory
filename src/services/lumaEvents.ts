@@ -1,4 +1,3 @@
-
 import { LUMA_API_KEY } from "@/config/constants";
 
 // Define our event types
@@ -35,22 +34,22 @@ interface LumaApiEvent {
 
 // This function fetches events from the Luma API
 export async function fetchLumaEvents(): Promise<LumaEvent[]> {
+  // Moved specificEvent definition outside the try block so it's accessible in catch block
+  const specificEvent: LumaEvent = {
+    id: "vfr6gipv",
+    title: "Storytelling Workshop - Narra",
+    description: "Join us for an interactive storytelling workshop where you'll learn techniques to craft compelling personal narratives.",
+    startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
+    endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(), // 1.5 hours duration
+    location: "Online via Zoom",
+    imageUrl: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narrafamily.jpg",
+    registrationUrl: "https://lu.ma/vfr6gipv",
+    capacity: 25,
+    spotsRemaining: 12
+  };
+  
   try {
     console.log("Attempting to fetch Luma events with API key present:", !!LUMA_API_KEY);
-    
-    // Fetch the specific event requested
-    const specificEvent: LumaEvent = {
-      id: "vfr6gipv",
-      title: "Storytelling Workshop - Narra",
-      description: "Join us for an interactive storytelling workshop where you'll learn techniques to craft compelling personal narratives.",
-      startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-      endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(), // 1.5 hours duration
-      location: "Online via Zoom",
-      imageUrl: "https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narrafamily.jpg",
-      registrationUrl: "https://lu.ma/vfr6gipv",
-      capacity: 25,
-      spotsRemaining: 12
-    };
     
     // Check if we're in development mode (no API key)
     if (!LUMA_API_KEY) {
