@@ -68,16 +68,16 @@ const GetStarted = () => {
         />
 
         {/* Add id attributes to each section for direct anchor links */}
-        <div id="home">
+        <div id="home" ref={homeRef} className="scroll-mt-24">
           <HomeSection homeRef={homeRef} isMobile={isMobile} />
         </div>
-        <section id="how-it-works">
+        <section id="how-it-works" ref={howItWorksRef} className="scroll-mt-24">
           <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
         </section>
-        <section id="join-story-circle">
+        <section id="join-story-circle" ref={storyCirclesRef} className="scroll-mt-24">
           <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
         </section>
-        <section id="sign-up">
+        <section id="sign-up" ref={signUpRef} className="scroll-mt-24">
           <SignUpSection signUpRef={signUpRef} />
         </section>
       </div>

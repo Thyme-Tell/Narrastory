@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { NavItem } from "../NavItems";
 
@@ -18,22 +19,35 @@ export const useHeaderScroll = ({
 
   // Function to scroll to a section
   const scrollToSection = (item: NavItem) => {
+    // Handle "home" specially - scroll to top
+    if (item.name === "home") {
+      scrollToTop();
+      return;
+    }
+    
     if (item.ref && item.ref.current) {
       // Update URL with anchor without causing navigation
       if (item.anchorId) {
         window.history.pushState({}, '', `#${item.anchorId}`);
       }
       
-      // Scroll to the element
-      item.ref.current.scrollIntoView({ behavior: 'smooth' });
+      // Scroll to the element with offset to account for sticky header
+      const headerOffset = 80;
+      const elementPosition = item.ref.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
   // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Update URL to remove anchor
-    window.history.pushState({}, '', window.location.pathname);
+    // Update URL to include home anchor
+    window.history.pushState({}, '', `#home`);
   };
 
   useEffect(() => {
@@ -61,6 +75,15 @@ export const useHeaderScroll = ({
       // Check which section is currently visible
       let foundVisibleSection = false;
       
+      // Special case: if we're at the top of the page, set "home" as active
+      if (window.scrollY < 100) {
+        if (activeSection !== "home") {
+          setActiveSection("home");
+          window.history.pushState({}, '', `#home`);
+        }
+        return;
+      }
+      
       // We reverse the array to check from bottom to top
       // This ensures we highlight the section closest to the top when multiple are visible
       [...navItems].reverse().forEach(item => {
@@ -86,11 +109,24 @@ export const useHeaderScroll = ({
     const handleInitialHash = () => {
       const hash = window.location.hash.substring(1);
       if (hash) {
+        // If hash is "home", scroll to top
+        if (hash === "home") {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        
         const targetItem = navItems.find(item => item.anchorId === hash);
         if (targetItem && targetItem.ref && targetItem.ref.current) {
           // Use setTimeout to ensure DOM is ready
           setTimeout(() => {
-            targetItem.ref.current?.scrollIntoView({ behavior: 'smooth' });
+            const headerOffset = 80;
+            const elementPosition = targetItem.ref.current?.getBoundingClientRect().top || 0;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
           }, 100);
         }
       }
