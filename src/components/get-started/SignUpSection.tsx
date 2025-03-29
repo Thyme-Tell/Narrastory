@@ -37,14 +37,21 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
           </div>
           
           {/* Right Panel - Image or Info */}
-          <div className="hidden md:block bg-[#242F3F] text-white p-12 flex flex-col justify-center">
-            <div className="flex flex-col justify-center h-full">
+          <div className="hidden md:block relative">
+            <div 
+              className="absolute inset-0 z-0 bg-cover bg-center" 
+              style={{ 
+                backgroundImage: "url('https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narrafamily.jpg')" 
+              }}
+            ></div>
+            <div className="absolute inset-0 bg-atlantic/60 z-10"></div>
+            <div className="relative z-20 flex flex-col justify-center h-full text-white p-12">
               <div className="text-center mb-6">
                 <p className="text-white/80 text-sm uppercase tracking-wide">Preserve Your Legacy</p>
                 <h2 className="text-3xl font-caslon mt-2 mb-4">Family Stories.<br />Forever.</h2>
               </div>
               
-              <div className="bg-[#1d2532] rounded-[7px] p-6 shadow-lg mx-auto max-w-xs">
+              <div className="bg-[#1d2532]/80 backdrop-blur-sm rounded-[7px] p-6 shadow-lg mx-auto max-w-xs">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <p className="text-white/60 text-xs">STORIES</p>
