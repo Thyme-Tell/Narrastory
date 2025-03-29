@@ -60,18 +60,9 @@ const GetStarted = () => {
     const hash = location.hash;
 
     if (path === "/get-started" && !hash) setActiveItem("home");
-    if (hash === "#how-it-works") {
-      setActiveItem("how-it-works");
-      scrollToSection(howItWorksRef);
-    }
-    if (hash === "#join-story-circle") {
-      setActiveItem("join-story-circle");
-      scrollToSection(storyCirclesRef);
-    }
-    if (hash === "#sign-up") {
-      setActiveItem("sign-up");
-      scrollToSection(signUpRef);
-    }
+    if (hash === "#how-it-works") setActiveItem("how-it-works");
+    if (hash === "#join-story-circle") setActiveItem("join-story-circle");
+    if (hash === "#sign-up") setActiveItem("sign-up");
   }, [location]);
 
   const scrollToSection = (ref: React.RefObject<HTMLElement>) => {
@@ -80,29 +71,20 @@ const GetStarted = () => {
     }
   };
 
-  // Handle logo click
+  // New function to handle logo click
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setActiveItem("home");
   };
 
-  // Handle menu item click
+  // New function to handle menu item click
   const handleMenuItemClick = (e: React.MouseEvent, item: any) => {
     e.preventDefault();
     setIsDropdownOpen(false);
-    
-    // Handle direct scroll to sections
-    if (item.name === "how-it-works") {
-      scrollToSection(howItWorksRef);
-    } else if (item.name === "join-story-circle") {
-      scrollToSection(storyCirclesRef);
-    } else if (item.name === "sign-up") {
-      scrollToSection(signUpRef);
-    } else if (item.name === "home") {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (item.onClick) {
+      item.onClick();
     }
-    
     setActiveItem(item.name);
   };
 
@@ -117,20 +99,23 @@ const GetStarted = () => {
       name: "how-it-works", 
       label: "How it Works", 
       path: "/get-started#how-it-works",
-      icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
+      icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
+      onClick: () => scrollToSection(howItWorksRef)
     },
     { 
       name: "join-story-circle", 
       label: "Join a Story Circle", 
       path: "/get-started#join-story-circle",
-      icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />
+      icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
+      onClick: () => scrollToSection(storyCirclesRef)
     },
     {
       name: "sign-up",
       label: "Sign Up",
       path: "/get-started#sign-up",
       icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      isButton: true
+      isButton: true,
+      onClick: () => scrollToSection(signUpRef)
     }
   ];
 
