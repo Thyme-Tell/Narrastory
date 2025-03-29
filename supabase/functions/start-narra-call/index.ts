@@ -1,3 +1,4 @@
+
 import { corsHeaders } from '../_shared/cors.ts';
 import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
 
@@ -66,6 +67,15 @@ Deno.serve(async (req) => {
       );
     }
     
+    // Create a payload that will be sent as rawBody to the webhook
+    const webhookPayload = {
+      phoneNumber: normalizedPhone,
+      timestamp: new Date().toISOString(),
+      source: 'narra-app'
+    };
+    
+    console.log(`Sending webhook payload: ${JSON.stringify(webhookPayload)}`);
+    
     // Make direct call to Synthflow API
     const response = await fetch('https://api.synthflow.ai/api/v1/calls/start', {
       method: 'POST',
@@ -76,7 +86,8 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         phone: normalizedPhone,
         transferOnError: false,
-        webhook: SYNTHFLOW_WEBHOOK_URL
+        webhook: SYNTHFLOW_WEBHOOK_URL,
+        webhookRawBody: JSON.stringify(webhookPayload) // Send the raw payload to the webhook
       }),
     });
     
