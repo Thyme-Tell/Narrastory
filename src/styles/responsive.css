@@ -110,7 +110,8 @@
   }
 }
 
-@media (min-width: 751px) {
+/* New breakpoint-specific styles */
+@media (min-width: 920px) {
   .navbar-below-logo {
     flex-direction: row;
     justify-content: space-between;
@@ -118,7 +119,7 @@
   }
 }
 
-@media (max-width: 750px) {
+@media (min-width: 640px) and (max-width: 919px) {
   .navbar-below-logo {
     flex-direction: column;
     align-items: center;
@@ -136,5 +137,3 @@
     margin-top: 0.75rem;
   }
 }
-
-/* This comment was causing the CSS error and has been fixed */

@@ -59,8 +59,8 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className={`py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all ${scrolled ? 'bg-transparent' : 'bg-transparent'}`}>
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
-        <div className="w-full flex sm:flex lg:w-auto lg:flex-shrink-0">
-          {/* Mobile dropdown */}
+        <div className="w-full flex md:flex lg:w-auto lg:flex-shrink-0">
+          {/* Mobile dropdown - visible below 640px */}
           <div className="w-full flex sm:hidden justify-between items-center">
             <Link 
               to="/get-started" 
