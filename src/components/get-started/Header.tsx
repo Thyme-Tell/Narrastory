@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
   });
 
   return (
-    <header className={`py-4 px-4 sm:px-8 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#17342C]/80' : 'bg-transparent'}`}>
+    <header className={`py-4 px-4 sm:px-8 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-transparent' : 'bg-transparent'}`}>
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex sm:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown */}
