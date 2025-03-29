@@ -5,7 +5,7 @@ import { normalizePhoneNumber } from '../_shared/phoneUtils.ts';
 // Get Synthflow credentials from environment variables
 const SYNTHFLOW_API_KEY = Deno.env.get('SYNTHFLOW_API_KEY') || '1731942694898x268895289669069280';
 const SYNTHFLOW_WEBHOOK_URL = Deno.env.get('SYNTHFLOW_WEBHOOK_URL') || 'https://workflow.synthflow.ai/api/v1/webhooks/PnhLacw4fc58JJlHzm3r2';
-const SYNTHFLOW_CAMPAIGN_ID = Deno.env.get('SYNTHFLOW_CAMPAIGN_ID') || 'A_JREGdUO7LTUbL3jAEVXggim6VwkK2Tfa_YwzFYJX8';
+const SYNTHFLOW_CAMPAIGN_ID = Deno.env.get('SYNTHFLOW_CAMPAIGN_ID') || '1743253169176x907331148856824600';
 
 // Main server function
 Deno.serve(async (req) => {
