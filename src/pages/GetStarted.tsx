@@ -9,7 +9,7 @@ import HomeSection from "@/components/get-started/HomeSection";
 import HowItWorksSection from "@/components/get-started/HowItWorksSection";
 import StoryCirclesSection from "@/components/get-started/StoryCirclesSection";
 import SignUpSection from "@/components/get-started/SignUpSection";
-import WelcomeSection from "@/components/get-started/WelcomeSection";
+// Removed WelcomeSection import
 import { getNavItems } from "@/components/get-started/NavItems";
 
 const GetStarted = () => {
@@ -72,9 +72,10 @@ const GetStarted = () => {
       <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
       <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
       <SignUpSection signUpRef={signUpRef} />
-      <WelcomeSection />
+      {/* Removed WelcomeSection */}
     </div>
   );
 };
 
 export default GetStarted;
+
