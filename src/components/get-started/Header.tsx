@@ -24,12 +24,17 @@ const Header: React.FC<HeaderProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <header className="py-4 px-4 sm:px-8 bg-transparent sticky top-0 z-50">
       <nav className="flex flex-col sm:flex-col justify-between items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex sm:hidden justify-between items-center">
           <Link 
             to="/get-started" 
+            onClick={scrollToTop}
             className="bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-2 inline-block"
             style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
           >
@@ -96,6 +101,7 @@ const Header: React.FC<HeaderProps> = ({
 
         <Link 
           to="/get-started" 
+          onClick={scrollToTop}
           className="hidden sm:inline-block bg-[#EFF1E9]/50 backdrop-blur-2xl rounded-[100px] p-4 w-full sm:w-auto flex justify-center"
           style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
         >
