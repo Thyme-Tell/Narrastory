@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Home, Book, Users, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -22,8 +21,7 @@ const GetStarted = () => {
   
   const [activeStep, setActiveStep] = useState(0);
   
-  // Add homeRef to reference the top of the page
-  const homeRef = useRef<HTMLElement>(null);
+  const homeRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
   const storyCirclesRef = useRef<HTMLElement>(null);
   const signUpRef = useRef<HTMLElement>(null);
@@ -67,20 +65,19 @@ const GetStarted = () => {
     if (hash === "#sign-up") setActiveItem("sign-up");
   }, [location]);
 
-  const scrollToSection = (ref: React.RefObject<HTMLElement>) => {
+  const scrollToSection = (ref: React.RefObject<HTMLElement | HTMLDivElement>) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  // Define a type for the navigation items
   type NavItem = {
     name: string;
     label: string;
     path: string;
     icon: React.ReactNode;
-    ref: React.RefObject<HTMLElement> | null;
-    isButton?: boolean; // Add the isButton property as optional
+    ref: React.RefObject<HTMLElement | HTMLDivElement> | null;
+    isButton?: boolean;
   };
 
   const navItems: NavItem[] = [
@@ -89,7 +86,7 @@ const GetStarted = () => {
       label: "Home", 
       path: "/get-started",
       icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-      ref: homeRef // Update to use homeRef
+      ref: homeRef
     },
     { 
       name: "how-it-works", 
@@ -111,7 +108,7 @@ const GetStarted = () => {
       path: "/get-started#sign-up",
       icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
       ref: signUpRef,
-      isButton: true // Set this item as a button
+      isButton: true
     }
   ];
 
@@ -122,7 +119,6 @@ const GetStarted = () => {
     if (item.ref && item.ref.current) {
       item.ref.current.scrollIntoView({ behavior: 'smooth' });
     } else if (item.name === 'home') {
-      // If it's the home item and somehow the ref is not working, scroll to top manually
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -244,7 +240,7 @@ const GetStarted = () => {
       </header>
 
       <div 
-        ref={homeRef} // Add ref to the home section
+        ref={homeRef}
         id="home"
         className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ 
