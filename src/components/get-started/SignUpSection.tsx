@@ -47,11 +47,9 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
             <div className="absolute inset-0 bg-atlantic/60 z-10"></div>
             <div className="relative z-20 flex flex-col justify-center h-full text-white p-12">
               <div className="bg-[#1d2532]/80 backdrop-blur-sm rounded-[7px] p-8 shadow-lg">
-                <svg className="text-[#A33D29] h-10 w-10 mb-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9.135 9H4.5C4.33431 9 4.2 8.86569 4.2 8.7V4.5C4.2 4.33431 4.33431 4.2 4.5 4.2H8.7C8.86569 4.2 9 4.33431 9 4.5V8.865M9.135 9C9.06 9 9 8.94 9 8.865V4.5M9.135 9H19.5C19.6657 9 19.8 9.13431 19.8 9.3V13.5C19.8 13.6657 19.6657 13.8 19.5 13.8H15.3C15.1343 13.8 15 13.6657 15 13.5V9.135C15 9.06 15.06 9 15.135 9H19.5M9 4.5H19.5C19.6657 4.5 19.8 4.33431 19.8 4.5V8.7C19.8 8.86569 19.6657 9 19.5 9M9 4.5V3M19.5 9V3M9 19.5H4.5C4.33431 19.5 4.2 19.6657 4.2 19.5V15.3C4.2 15.1343 4.33431 15 4.5 15H8.7C8.86569 15 9 15.1343 9 15.3V19.5ZM9 19.5H19.5C19.6657 19.5 19.8 19.6657 19.8 19.5V15.3C19.8 15.1343 19.6657 15 19.5 15H15.3C15.1343 15 15 15.1343 15 15.3V19.5M9 19.5V21M15 19.5V21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <span className="text-[#A33D29] text-6xl font-serif leading-none block mb-2">"</span>
                 <blockquote className="mb-6">
-                  <p className="text-white/90 text-lg font-caslon italic mb-4">
+                  <p className="text-white/90 text-lg font-serif font-light italic mb-4 leading-relaxed">
                     "Narra was a way for us to know my parents' stories that would have otherwise been lost forever. Now my children and their children will know where they came from."
                   </p>
                   <footer className="text-white/80">
