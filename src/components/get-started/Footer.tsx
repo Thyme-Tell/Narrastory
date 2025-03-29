@@ -13,9 +13,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-caslon mb-4">Narra Story</h3>
+            <div className="flex items-center mb-4">
+              <img 
+                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                alt="Narra Logo" 
+                className="h-10 mr-3"
+              />
+              <h3 className="text-xl font-caslon">Narra</h3>
+            </div>
             <p className="text-gray-300 mb-4">
-              Preserving your most meaningful stories for generations to come.
+              Narrate your story in a way only you can.
             </p>
             <div className="flex space-x-4">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
@@ -122,7 +129,7 @@ const Footer = () => {
         {/* Bottom section */}
         <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
-            © {currentYear} Narra Story. All rights reserved.
+            © {currentYear} Narra. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm flex items-center">
             Made with <Heart size={14} className="mx-1 text-[#A33D29]" /> for storytellers everywhere
