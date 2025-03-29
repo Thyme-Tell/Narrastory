@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, FormEvent } from "react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -35,94 +35,41 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const hiddenFormRef = useRef<HTMLFormElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
   };
 
-  const submitDirectlyToSynthflow = async (phone: string) => {
+  // Client-side submission directly to Synthflow - this is used as a fallback
+  const clientSideSubmit = async (phone: string): Promise<boolean> => {
     try {
-      // Create a FormData object for direct submission
+      console.log("Attempting client-side submission...");
+      
+      // Create FormData for the submission
       const formData = new FormData();
       formData.append('Phone', phone);
-
-      // First attempt: Use the Edge Function
-      console.log("Attempting to use Edge Function for submission");
-      try {
-        const response = await fetch(EDGE_FUNCTION_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ Phone: phone }),
-        });
-        
-        const result = await response.json();
-        console.log("Edge function response:", result);
-        
-        if (result.success) {
-          console.log("Call initiated successfully via Edge Function");
-          return true;
-        }
-        
-        if (result.useDirectSubmission) {
-          console.log("Edge function suggests direct submission");
-          // Use the hidden form for direct submission
-          if (hiddenFormRef.current) {
-            console.log("Submitting via hidden form");
-            const phoneInput = hiddenFormRef.current.querySelector('input[name="Phone"]') as HTMLInputElement;
-            if (phoneInput) {
-              phoneInput.value = phone;
-              hiddenFormRef.current.submit();
-              return true;
-            }
-          }
-          
-          // Fallback to fetch with no-cors if hidden form submission fails
-          console.log("Hidden form not available, using fetch with no-cors");
-          await fetch(SYNTHFLOW_WEBHOOK_URL, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors',
-          });
-          
-          return true;
-        }
-      } catch (error) {
-        console.error("Edge function error:", error);
-        // Continue to direct form submission fallback
-      }
       
-      // Second attempt: Direct form submission
-      console.log("Attempting direct form submission");
-      if (hiddenFormRef.current) {
-        console.log("Submitting via hidden form");
-        const phoneInput = hiddenFormRef.current.querySelector('input[name="Phone"]') as HTMLInputElement;
-        if (phoneInput) {
-          phoneInput.value = phone;
-          hiddenFormRef.current.submit();
-          return true;
-        }
-      }
-      
-      // Third attempt: Use fetch with no-cors as last resort
-      console.log("Using fetch with no-cors as last resort");
+      // Use fetch with no-cors to avoid CORS issues
+      // Note: This won't return a useful response due to no-cors mode
+      // but it will still submit the data
       await fetch(SYNTHFLOW_WEBHOOK_URL, {
         method: 'POST',
-        body: formData,
         mode: 'no-cors',
+        body: formData
       });
       
+      console.log("Client-side submission completed");
       return true;
     } catch (error) {
-      console.error("All submission methods failed:", error);
+      console.error("Client-side submission failed:", error);
       return false;
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    
     if (!phoneNumber.trim()) {
       toast({
         title: "Missing information",
@@ -135,13 +82,41 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
     setIsLoading(true);
 
     try {
+      // Normalize the phone number
       const normalized = normalizePhoneNumber(phoneNumber);
       console.log("Normalized phone number:", normalized);
       
-      // Try submitting to Synthflow
-      const submissionResult = await submitDirectlyToSynthflow(normalized);
+      // First attempt: Use the Edge Function
+      console.log("Attempting to use Edge Function");
+      let success = false;
       
-      if (submissionResult) {
+      try {
+        const response = await fetch(EDGE_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ Phone: normalized }),
+        });
+        
+        const result = await response.json();
+        console.log("Edge function response:", result);
+        
+        if (result.success) {
+          success = true;
+          console.log("Call initiated successfully via Edge Function");
+        } else if (result.useClientFallback) {
+          // Edge function suggests client-side fallback
+          console.log("Using client-side fallback as suggested by edge function");
+          success = await clientSideSubmit(normalized);
+        }
+      } catch (error) {
+        console.error("Edge function error:", error);
+        // If Edge Function fails, try client-side submission as fallback
+        success = await clientSideSubmit(normalized);
+      }
+      
+      if (success) {
         toast({
           title: "Success",
           description: "Your call is being initiated. Expect a call soon!",
@@ -172,7 +147,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
 
   return (
     <>
-      {/* Visible form for user interaction */}
+      {/* Main form for user interaction */}
       <form onSubmit={handleSubmit} className={className} ref={formRef}>
         <div className={`relative w-full ${mobileLayout ? 'flex flex-col' : ''}`}>
           <Input
@@ -210,17 +185,14 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
           </Button>
         </div>
       </form>
-
-      {/* Hidden form for direct submission to Synthflow */}
-      <form 
-        ref={hiddenFormRef}
-        action={SYNTHFLOW_WEBHOOK_URL}
-        method="POST"
-        target="_blank"
-        style={{ display: 'none' }}
-      >
-        <input type="hidden" name="Phone" />
-      </form>
+      
+      {/* Hidden iframe to receive form responses without page navigation */}
+      <iframe 
+        ref={iframeRef}
+        name="synthflow-form-target" 
+        style={{ display: 'none' }} 
+        title="Synthflow form target"
+      />
     </>
   );
 };

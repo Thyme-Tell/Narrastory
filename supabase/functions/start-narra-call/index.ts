@@ -53,39 +53,41 @@ Deno.serve(async (req) => {
     const normalizedPhone = Phone.startsWith('+') ? Phone : normalizePhoneNumber(Phone);
     
     console.log(`Initiating direct call to ${normalizedPhone}`);
-    console.log(`Using direct form submission to: ${SYNTHFLOW_WEBHOOK_URL}`);
     
-    // Create the payload for the Synthflow form
-    const formData = new FormData();
-    formData.append('Phone', normalizedPhone);
-    
-    console.log(`Sending form data with Phone: ${normalizedPhone}`);
-    
+    // Try using direct form submission method first
     try {
-      // Attempt direct form submission to Synthflow
-      const formResponse = await fetch(SYNTHFLOW_WEBHOOK_URL, {
+      console.log(`Using direct form submission to: ${SYNTHFLOW_WEBHOOK_URL}`);
+      
+      // Create a FormData object - this properly formats the data for the form endpoint
+      const formData = new FormData();
+      formData.append('Phone', normalizedPhone);
+      
+      console.log(`Sending form data with Phone: ${normalizedPhone}`);
+      
+      // Make the direct form submission
+      const response = await fetch(SYNTHFLOW_WEBHOOK_URL, {
         method: 'POST',
         body: formData,
       });
       
-      console.log(`Synthflow form response status: ${formResponse.status}`);
-      
-      if (formResponse.ok) {
+      // Check if the request was successful
+      if (response.ok) {
+        console.log("Direct form submission successful");
         return new Response(
           JSON.stringify({ 
             success: true, 
-            message: 'Call initiated successfully via direct form submission'
+            message: 'Call initiated successfully via form submission' 
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } else {
-        // If form submission fails, try API method as backup
-        console.log('Form submission failed, trying API method...');
+        console.log(`Form submission failed with status: ${response.status}`);
+        // If the direct submission fails, try the API method
         return await tryAPIMethod(normalizedPhone, corsHeaders);
       }
     } catch (error) {
       console.error('Error with direct form submission:', error);
-      // Try API method as backup
+      // Try the API method as fallback
       return await tryAPIMethod(normalizedPhone, corsHeaders);
     }
   } catch (error) {
@@ -105,24 +107,25 @@ async function tryAPIMethod(normalizedPhone: string, corsHeaders: HeadersInit) {
   console.log('Trying API method as backup...');
   
   try {
-    // Create the webhook payload
-    const webhookPayload = {
-      phoneNumber: normalizedPhone,
-      timestamp: new Date().toISOString(),
-      source: "narra-app"
+    // First try using the campaigns endpoint with direct call
+    const apiPayload = {
+      to: normalizedPhone,
+      variables: {
+        phoneNumber: normalizedPhone,
+        timestamp: new Date().toISOString(),
+        source: "narra-app"
+      }
     };
     
     console.log(`Using API endpoint with campaign ID: ${SYNTHFLOW_CAMPAIGN_ID}`);
+    console.log(`With payload: ${JSON.stringify(apiPayload)}`);
     
     const response = await fetch(`https://api.synthflow.ai/api/v1/campaigns/${SYNTHFLOW_CAMPAIGN_ID}/call`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        to: normalizedPhone,
-        variables: webhookPayload
-      }),
+      body: JSON.stringify(apiPayload),
     });
     
     console.log(`API response status: ${response.status}`);
@@ -143,12 +146,12 @@ async function tryAPIMethod(normalizedPhone: string, corsHeaders: HeadersInit) {
       const errorText = await response.text();
       console.error('API error:', errorText);
       
-      // If both methods fail, return direct form submission details for client-side fallback
+      // Return client-side fallback instructions
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'All server-side methods failed. Use client-side direct submission.',
-          useDirectSubmission: true,
+          error: 'All server-side methods failed. Will use client-side fallback.',
+          useClientFallback: true,
           formUrl: SYNTHFLOW_WEBHOOK_URL,
           phoneNumber: normalizedPhone
         }),
@@ -158,12 +161,12 @@ async function tryAPIMethod(normalizedPhone: string, corsHeaders: HeadersInit) {
   } catch (error) {
     console.error('API method error:', error);
     
-    // If both methods fail, return direct form submission details for client-side fallback
+    // Return client-side fallback instructions
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: 'All server-side methods failed. Use client-side direct submission.',
-        useDirectSubmission: true,
+        error: 'All server-side methods failed. Will use client-side fallback.',
+        useClientFallback: true,
         formUrl: SYNTHFLOW_WEBHOOK_URL,
         phoneNumber: normalizedPhone
       }),
