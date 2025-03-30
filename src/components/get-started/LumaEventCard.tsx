@@ -26,7 +26,7 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
   };
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col rounded-[15px] border-0 bg-gradient-to-b from-[#F8E3C8] to-[#FBEFE1] hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden h-full flex flex-col rounded-[7px] border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] hover:shadow-lg transition-shadow">
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
