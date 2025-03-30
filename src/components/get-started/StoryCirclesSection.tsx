@@ -17,7 +17,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
     <section 
       ref={storyCirclesRef as React.RefObject<HTMLElement>}
       id="join-story-circle"
-      className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24"
+      className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24 bg-transparent"
     >
       <div className="max-w-5xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 text-center">
@@ -29,7 +29,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* Left Column - Collapsible Events */}
-          <div className="bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white rounded-[2px] overflow-hidden border border-[#E5E7EB] shadow-sm">
             <div className="flex items-center p-4 border-b border-[#E5E7EB]">
               <Calendar className="h-5 w-5 text-[#A33D29] mr-2" />
               <h3 className="text-lg md:text-xl font-medium text-[#242F3F]">
@@ -72,7 +72,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
               <div className="p-4 text-center border-t border-[#E5E7EB]">
                 <Button 
                   variant="outline"
-                  onClick={() => window.open("https://lu.ma/narra", "_blank")}
+                  onClick={() => window.open("https://lu.ma/calendar/cal-Z2lF71wpLrO7F5C", "_blank")}
                   className="w-full md:w-auto text-sm"
                 >
                   View All Events
@@ -83,7 +83,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           
           {/* Right Column - About Story Circles */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 border border-[#E5E7EB] shadow-sm">
+            <div className="bg-white rounded-[2px] p-6 border border-[#E5E7EB] shadow-sm">
               <h3 className="text-xl font-medium mb-4 text-[#242F3F]">What are Story Circles?</h3>
               <p className="text-[#403E43] mb-4">
                 Story Circles are intimate gatherings where people come together to share and preserve 
@@ -118,7 +118,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
               </Button>
             </div>
             
-            <div className="bg-white rounded-xl p-6 border border-[#E5E7EB] shadow-sm">
+            <div className="bg-white rounded-[2px] p-6 border border-[#E5E7EB] shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-medium text-[#242F3F]">Create Your Own Circle</h3>
                 <div className="bg-[#F6F8FA] text-[#A33D29] text-xs font-medium py-1 px-2 rounded">Coming Soon</div>
@@ -142,3 +142,4 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
 };
 
 export default StoryCirclesSection;
+

@@ -22,8 +22,8 @@ const LumaEventAccordionItem: React.FC<LumaEventAccordionItemProps> = ({ event, 
   };
   
   return (
-    <AccordionItem value={`item-${index}`} className="border-b last:border-0">
-      <AccordionTrigger className="py-4 px-4 hover:no-underline hover:bg-[#F9F5F2]/50">
+    <AccordionItem value={`item-${index}`} className="border-b last:border-0 bg-white">
+      <AccordionTrigger className="py-4 px-4 hover:no-underline hover:bg-[#F9F5F2]/50 rounded-[2px]">
         <div className="flex items-center text-left">
           <div className="bg-white border border-[#E5E7EB] rounded-lg p-2 mr-3 text-center w-14">
             <div className="text-[#A33D29] text-xs font-medium">
@@ -39,7 +39,7 @@ const LumaEventAccordionItem: React.FC<LumaEventAccordionItemProps> = ({ event, 
           </div>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="px-4 pb-4 pt-0">
+      <AccordionContent className="px-4 pb-4 pt-0 bg-white rounded-[2px]">
         <div className="ml-[70px]">
           <p className="text-sm text-gray-600 mb-3">{event.description}</p>
           
@@ -99,3 +99,4 @@ const LumaEventAccordionItem: React.FC<LumaEventAccordionItemProps> = ({ event, 
 };
 
 export default LumaEventAccordionItem;
+
