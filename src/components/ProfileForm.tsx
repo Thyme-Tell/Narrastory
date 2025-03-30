@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -327,7 +328,7 @@ const ProfileForm = () => {
               className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
             />
             <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
-              Remember me for 1 year
+              Remember me
             </Label>
           </div>
           <div className="text-sm">

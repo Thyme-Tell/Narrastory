@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -50,7 +49,6 @@ const SignIn = () => {
     console.log("Attempting login with phone:", normalizedPhoneNumber);
 
     try {
-      // Directly query the profiles table
       const { data: profiles, error: searchError } = await supabase
         .from("profiles")
         .select("id, password, first_name, last_name, phone_number")
@@ -69,7 +67,6 @@ const SignIn = () => {
         return;
       }
 
-      // Use the first profile if multiple are found
       const profile = profiles[0];
       console.log("Found profile:", profile.id);
       
@@ -80,15 +77,12 @@ const SignIn = () => {
         return;
       }
 
-      // Set cookie expiration based on Remember Me preference
-      const expirationDays = rememberMe ? 365 : 7; // 1 year vs 1 week
-      
+      const expirationDays = rememberMe ? 365 : 7;
       console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
       Cookies.set('profile_authorized', 'true', { expires: expirationDays });
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
       Cookies.set('profile_id', profile.id, { expires: expirationDays });
 
-      // Get the redirect path from URL params or location state
       const redirectTo = searchParams.get('redirectTo') || 
                         (location.state as { redirectTo?: string })?.redirectTo || 
                         `/profile/${profile.id}`;
@@ -110,7 +104,6 @@ const SignIn = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Clear error when user starts typing
     if (error) setError(null);
     
     setFormData((prev) => ({
@@ -171,13 +164,17 @@ const SignIn = () => {
                 className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
               />
               <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
-                Remember me for 1 year
+                Remember me
               </Label>
             </div>
           </div>
 
           <div className="space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full py-2.5 rounded-[7px] bg-gradient-to-r from-[#A33D29] to-[#B65644] hover:from-[#933629] hover:to-[#A34C3D] text-white"
+              disabled={loading}
+            >
               {loading ? "Signing in..." : "Sign In"}
             </Button>
 
