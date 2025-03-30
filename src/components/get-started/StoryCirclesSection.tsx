@@ -87,15 +87,15 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           {/* Create Your Own Circle card */}
           <div className="bg-gradient-to-b from-[#F8E3C8] to-[#FBEFE1] rounded-[15px] p-6 shadow-sm col-span-1 md:col-span-2">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-[32px] font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
+              <h3 className="text-[28px] md:text-[32px] font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
               <div className="bg-white text-[#674019] text-sm font-medium py-1 px-3 rounded-full">Coming Soon</div>
             </div>
-            <p className="text-[#674019]/80 mb-4 text-lg">
+            <p className="text-[#674019]/80 mb-4 text-base md:text-lg">
               Start your own Story Circle with family, friends, or colleagues. 
               Choose your topics, invite participants, and build a collection of stories that matter to you.
             </p>
             <Button
-              className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-lg py-6"
+              className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-base md:text-lg py-5"
               disabled
             >
               Create a Circle
