@@ -90,28 +90,32 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
-      <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
-        <div className="w-full flex md:flex lg:w-auto lg:flex-shrink-0">
-          {/* Mobile dropdown - visible below 640px */}
-          <MobileNavigation 
-            navItems={navItems}
-            activeItem={activeItem}
-            isDropdownOpen={isDropdownOpen}
-            setIsDropdownOpen={setIsDropdownOpen}
-            handleNavItemClick={handleNavItemClick}
-            scrolled={scrolled}
-            activeNavItem={activeNavItem}
-            displayNavItems={displayNavItems}
-            pastHowItWorks={pastHowItWorks}
-            handleLogoClick={handleLogoClick}
-          />
+      <nav className="flex items-center justify-between bg-transparent py-1.5 sm:py-2">
+        <div className="flex items-center">
+          {/* Mobile navigation - visible below 860px */}
+          <div className="block sm:hidden">
+            <MobileNavigation 
+              navItems={navItems}
+              activeItem={activeItem}
+              isDropdownOpen={isDropdownOpen}
+              setIsDropdownOpen={setIsDropdownOpen}
+              handleNavItemClick={handleNavItemClick}
+              scrolled={scrolled}
+              activeNavItem={activeNavItem}
+              displayNavItems={displayNavItems}
+              pastHowItWorks={pastHowItWorks}
+              handleLogoClick={handleLogoClick}
+            />
+          </div>
 
-          {/* Tablet/desktop logo - hide when scrolled */}
-          {!scrolled && <DesktopLogo scrolled={scrolled} />}
+          {/* Desktop logo - hide when scrolled on mobile */}
+          <div className="hidden sm:block">
+            {!scrolled && <DesktopLogo scrolled={scrolled} />}
+          </div>
         </div>
 
-        {/* Navigation menu */}
-        <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
+        {/* Navigation menu - always inline with logo */}
+        <div className="hidden sm:block">
           <DesktopNavigation 
             displayNavItems={displayNavItems} 
             activeItem={activeItem} 

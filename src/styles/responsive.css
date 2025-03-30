@@ -110,30 +110,23 @@
   }
 }
 
-/* New breakpoint-specific styles */
-@media (min-width: 920px) {
-  .navbar-below-logo {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
-@media (min-width: 640px) and (max-width: 919px) {
-  .navbar-below-logo {
-    flex-direction: column;
-    align-items: center;
+/* Update mobile/tablet breakpoint to 860px */
+@media (max-width: 860px) {
+  .navbar-desktop {
+    display: none;
   }
   
-  .navbar-menu {
-    margin-top: 1rem;
-    width: 100%;
-    max-width: 600px;
+  .navbar-mobile {
+    display: block;
   }
 }
 
-@media (max-width: 639px) {
-  .navbar-menu {
-    margin-top: 0.75rem;
+@media (min-width: 861px) {
+  .navbar-desktop {
+    display: flex;
+  }
+  
+  .navbar-mobile {
+    display: none;
   }
 }
