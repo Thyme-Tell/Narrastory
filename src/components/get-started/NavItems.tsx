@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Home, Book, Users, ArrowRight } from "lucide-react";
+import { Book, Users, ArrowRight } from "lucide-react";
 
 export type NavItem = {
   name: string;
@@ -18,14 +18,6 @@ export const getNavItems = (
   storyCirclesRef: React.RefObject<HTMLElement>,
   signUpRef: React.RefObject<HTMLElement>
 ): NavItem[] => [
-  { 
-    name: "home", 
-    label: "Home", 
-    path: "/get-started#home",
-    icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: homeRef,
-    anchorId: "home"
-  },
   { 
     name: "how-it-works", 
     label: "How It Works", 

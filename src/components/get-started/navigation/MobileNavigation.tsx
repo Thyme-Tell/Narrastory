@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { 
   DropdownMenu,
@@ -31,22 +30,12 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   activeNavItem,
   displayNavItems
 }) => {
-  const handleLogoClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    window.location.hash = 'home';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Find home item
-  const homeItem = displayNavItems.find(item => item.name === "home");
-
   return (
     <div className="w-full flex sm:hidden justify-between items-center">
       {/* Only show logo when not scrolled */}
       {!scrolled ? (
         <a 
           href="#home"
-          onClick={handleLogoClick}
           className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
           style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
         >
@@ -72,30 +61,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
-            {/* Render home as icon in dropdown */}
-            {homeItem && (
-              <DropdownMenuItem key={homeItem.name} asChild>
-                <a
-                  href={`#${homeItem.anchorId}`}
-                  onClick={(e) => handleNavItemClick(e, homeItem)}
-                  className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] ${
-                    activeItem === homeItem.name
-                      ? "bg-[#17342C]"
-                      : "hover:bg-[#17342C]/30"
-                  }`}
-                >
-                  <img 
-                    src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-                    alt="Narra" 
-                    className="w-4 h-4 mr-2"
-                  />
-                  <span className="text-xs">Home</span>
-                </a>
-              </DropdownMenuItem>
-            )}
-            
-            {/* Render other items normally */}
-            {displayNavItems.filter(item => item.name !== "home").map((item) => (
+            {/* Render all menu items */}
+            {displayNavItems.map((item) => (
               item.isButton ? (
                 <a
                   key={item.name}
@@ -118,7 +85,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     }`}
                   >
                     {item.icon}
-                    <span className="text-xs">{item.label}</span>
+                    <span className="ml-2 text-xs">{item.label}</span>
                   </a>
                 </DropdownMenuItem>
               )

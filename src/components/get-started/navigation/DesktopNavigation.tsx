@@ -15,34 +15,12 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   handleNavItemClick,
   scrolled
 }) => {
-  // Create a modified version of navItems where the first item is replaced with logo
-  const homeItem = displayNavItems.find(item => item.name === "home");
-  
   return (
     <div className="hidden sm:flex bg-[#333333]/60 backdrop-blur-md rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
       style={{ padding: "3px 2px" }}>
-      {/* Render home item as Narra logo */}
-      {homeItem && (
-        <a
-          key={homeItem.name}
-          href={`#${homeItem.anchorId}`}
-          onClick={(e) => handleNavItemClick(e, homeItem)}
-          className={`flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap m-[2px] my-auto ${
-            activeItem === homeItem.name
-              ? "bg-[#17342C]"
-              : "hover:bg-[#17342C]/10"
-          } transition-colors w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
-        >
-          <img 
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-            alt="Narra" 
-            className="w-5 h-5"
-          />
-        </a>
-      )}
       
-      {/* Render the rest of the items */}
-      {displayNavItems.filter(item => item.name !== "home").map((item) => (
+      {/* Render all navigation items */}
+      {displayNavItems.map((item) => (
         item.isButton ? (
           <a
             key={item.name}
