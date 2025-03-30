@@ -4,7 +4,6 @@ import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
 import DesktopNavigation from "./navigation/DesktopNavigation";
-import useHeaderScroll from "./navigation/useHeaderScroll";
 
 interface HeaderProps {
   navItems: NavItem[];
@@ -18,19 +17,14 @@ const Header: React.FC<HeaderProps> = ({
   handleMenuItemClick 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { scrolled, activeSection, scrollToSection, scrollToTop } = useHeaderScroll({ 
-    navItems, 
-    activeItem, 
-    handleMenuItemClick 
-  });
-  const activeNavItem = navItems.find(item => item.name === activeSection) || navItems[0];
+  const scrolled = false; // Always set to false since we're removing scroll functionality
+  
+  // Simplify to just use activeItem directly
+  const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
 
-  // Handle navigation when clicking on a nav item
+  // Simplified handler without scrolling
   const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
     e.preventDefault();
-    
-    // Scroll to the section
-    scrollToSection(item);
     
     // Call the handleMenuItemClick function to update the active item
     handleMenuItemClick(item);
@@ -39,29 +33,17 @@ const Header: React.FC<HeaderProps> = ({
     setIsDropdownOpen(false);
   };
 
-  // Modify nav items to show Narra icon instead of Home icon when scrolled
-  const displayNavItems = navItems.map(item => {
-    if (scrolled && item.name === 'home') {
-      return {
-        ...item,
-        icon: <img 
-          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
-          alt="Narra Icon" 
-          className="h-4 w-4 mr-2"
-        />
-      };
-    }
-    return item;
-  });
+  // Display nav items without scroll modifications
+  const displayNavItems = navItems;
 
   return (
-    <header className={`py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all ${scrolled ? 'bg-transparent' : 'bg-transparent'}`}>
+    <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
       <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
         <div className="w-full flex md:flex lg:w-auto lg:flex-shrink-0">
           {/* Mobile dropdown - visible below 640px */}
           <MobileNavigation 
             navItems={navItems}
-            activeItem={activeSection}
+            activeItem={activeItem}
             isDropdownOpen={isDropdownOpen}
             setIsDropdownOpen={setIsDropdownOpen}
             handleNavItemClick={handleNavItemClick}
@@ -70,15 +52,15 @@ const Header: React.FC<HeaderProps> = ({
             displayNavItems={displayNavItems}
           />
 
-          {/* Tablet/desktop logo - only visible when not scrolled */}
-          <DesktopLogo scrolled={scrolled} scrollToTop={scrollToTop} />
+          {/* Tablet/desktop logo */}
+          <DesktopLogo scrolled={scrolled} scrollToTop={() => {}} />
         </div>
 
         {/* Navigation menu */}
         <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
           <DesktopNavigation 
             displayNavItems={displayNavItems} 
-            activeItem={activeSection} 
+            activeItem={activeItem} 
             handleNavItemClick={handleNavItemClick} 
           />
         </div>

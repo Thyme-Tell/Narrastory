@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,7 +16,7 @@ const GetStarted = () => {
   const [activeItem, setActiveItem] = useState("home");
   const isMobile = useIsMobile();
   
-  // References for sections
+  // References for sections (keeping refs but not using them for scrolling)
   const homeRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
   const storyCirclesRef = useRef<HTMLElement>(null);
@@ -28,31 +27,7 @@ const GetStarted = () => {
   
   useEffect(() => {
     document.title = "Narra Story | Get Started";
-    
-    // Handle direct access via URL hash
-    const handleAnchorNavigation = () => {
-      const hash = location.hash.substring(1); // Remove the # character
-      if (hash) {
-        const targetItem = navItems.find(item => item.anchorId === hash);
-        if (targetItem) {
-          setActiveItem(targetItem.name);
-          // Scroll will be handled by useHeaderScroll
-        }
-      } else {
-        setActiveItem("home");
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    };
-    
-    handleAnchorNavigation();
-    
-    // Listen for hashchange events
-    window.addEventListener('hashchange', handleAnchorNavigation);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleAnchorNavigation);
-    };
-  }, [location, navItems]);
+  }, []);
 
   const handleMenuItemClick = (item: any) => {
     setActiveItem(item.name);
@@ -67,7 +42,7 @@ const GetStarted = () => {
           handleMenuItemClick={handleMenuItemClick} 
         />
 
-        {/* Add id attributes to each section for direct anchor links */}
+        {/* Keep section IDs for structure but remove scroll functionality */}
         <div id="home">
           <HomeSection homeRef={homeRef} isMobile={isMobile} />
         </div>
