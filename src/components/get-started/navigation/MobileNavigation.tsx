@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { 
@@ -46,7 +45,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <ChevronDown className="ml-2 h-4 w-4 text-white opacity-70" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[200px] bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-[4px] shadow-lg">
+        <DropdownMenuContent 
+          className="w-[200px] bg-[#1A5F4A]/50 backdrop-blur-md border border-white/20 text-white rounded-[4px] shadow-lg"
+        >
           {/* Home menu item */}
           <DropdownMenuItem asChild>
             <a
