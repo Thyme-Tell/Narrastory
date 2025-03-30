@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Video, Users, ChevronDown, ChevronUp } from "lucide-react";
@@ -26,7 +25,7 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
   };
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col rounded-[7px] border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden h-full flex flex-col rounded-[4px] border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] hover:shadow-lg transition-shadow">
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { Video } from "lucide-react";
@@ -27,16 +26,16 @@ const LumaEventAccordionItem: React.FC<LumaEventAccordionItemProps> = ({ event, 
   return (
     <AccordionItem 
       value={`item-${index}`} 
-      className="border-b last:border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[7px] mb-4 overflow-hidden border-0"
+      className="border-b last:border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] mb-4 overflow-hidden border-0"
     >
-      <AccordionTrigger className="py-5 px-6 hover:no-underline hover:bg-[#E4C795]/50 rounded-t-[7px]">
+      <AccordionTrigger className="py-5 px-6 hover:no-underline hover:bg-[#E4C795]/50 rounded-t-[4px]">
         <div className="flex flex-col items-start text-left w-full">
           <h4 className="font-caslon font-normal text-2xl text-[#674019]">{event.title}</h4>
           <div className="text-base text-[#674019]/60 font-medium font-uncut-sans">{timeDisplay}</div>
         </div>
       </AccordionTrigger>
       
-      <AccordionContent className="px-6 pb-6 pt-0 bg-transparent rounded-b-[7px]">
+      <AccordionContent className="px-6 pb-6 pt-0 bg-transparent rounded-b-[4px]">
         <div className="space-y-4">
           <p className="text-[#674019] mb-4 text-base">{event.description}</p>
           
