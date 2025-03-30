@@ -15,7 +15,7 @@ const NarraLogo: React.FC<NarraLogoProps> = ({ handleLogoClick }) => {
       <img 
         src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
         alt="Narra Icon" 
-        className="h-4 w-4 sm:h-5 sm:w-5"
+        className="h-5 w-5 sm:h-5 sm:w-5"  // Increased from h-4 w-4 to h-5 w-5
       />
     </a>
   );
