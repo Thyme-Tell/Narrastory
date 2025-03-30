@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUp } from "lucide-react";
 
 const ScrollToTopButton = () => {
-  // Always hide the button
+  // Always hide the button by setting isVisible to false
   const [isVisible] = useState(false);
 
   // Empty scroll function (no-op)
