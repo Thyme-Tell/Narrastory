@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { 
@@ -8,6 +7,7 @@ import {
   DropdownMenuItem
 } from "@/components/ui/dropdown-menu";
 import { NavItem } from "../NavItems";
+import NarraLogo from "./NarraLogo";
 
 interface MobileNavigationProps {
   navItems: NavItem[];
@@ -18,6 +18,8 @@ interface MobileNavigationProps {
   scrolled: boolean;
   activeNavItem: NavItem;
   displayNavItems: NavItem[];
+  pastHowItWorks?: boolean;
+  handleLogoClick?: (e: React.MouseEvent) => void;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -28,25 +30,31 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   handleNavItemClick,
   scrolled,
   activeNavItem,
-  displayNavItems
+  displayNavItems,
+  pastHowItWorks = false,
+  handleLogoClick = () => {}
 }) => {
   return (
     <div className="w-full flex sm:hidden justify-between items-center">
-      {/* Only show logo when not scrolled */}
-      {!scrolled ? (
-        <a 
-          href="#home"
-          className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
-          style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
-        >
-          <img 
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
-            alt="Narra Logo" 
-            className="w-[100px] h-auto"
-          />
-        </a>
+      {/* Show Narra logo when past How It Works section */}
+      {pastHowItWorks ? (
+        <NarraLogo handleLogoClick={handleLogoClick} />
       ) : (
-        <div className="w-[100px]"></div> // Empty space to maintain layout
+        !scrolled ? (
+          <a 
+            href="#home"
+            className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
+            style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+          >
+            <img 
+              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
+              alt="Narra Logo" 
+              className="w-[100px] h-auto"
+            />
+          </a>
+        ) : (
+          <div className="w-[100px]"></div> // Empty space to maintain layout
+        )
       )}
 
       <div className="ml-2">

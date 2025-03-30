@@ -24,8 +24,8 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
     <div className="hidden sm:flex bg-[#333333]/60 backdrop-blur-md rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
       style={{ padding: "3px 2px" }}>
       
-      {/* Show Narra logo when past How It Works section */}
-      {pastHowItWorks && handleLogoClick && (
+      {/* Always show Narra logo when past How It Works section */}
+      {pastHowItWorks && (
         <NarraLogo handleLogoClick={handleLogoClick} />
       )}
       

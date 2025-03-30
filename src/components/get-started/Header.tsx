@@ -102,6 +102,8 @@ const Header: React.FC<HeaderProps> = ({
             scrolled={scrolled}
             activeNavItem={activeNavItem}
             displayNavItems={displayNavItems}
+            pastHowItWorks={pastHowItWorks}
+            handleLogoClick={handleLogoClick}
           />
 
           {/* Tablet/desktop logo - hide when scrolled */}
