@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Instagram, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -18,7 +19,6 @@ const Footer = () => {
                 alt="Narra Logo" 
                 className="h-10 mr-3"
               />
-              {/* Removed "Narra" text after logo */}
             </div>
             <p className="text-gray-300 mb-4">
               Narrate your story in a way only you can.
@@ -59,40 +59,22 @@ const Footer = () => {
             </ul>
           </div>
           
-          {/* Resources section - temporarily commented out
+          {/* Restored Resources section with T&C and Privacy Policy links */}
           <div>
             <h3 className="text-xl font-caslon mb-4">Resources</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/faq" className="text-gray-300 hover:text-white transition-colors">
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/support" className="text-gray-300 hover:text-white transition-colors">
-                  Support
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-gray-300 hover:text-white transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors">
+                <Link to="/terms-and-conditions" className="text-gray-300 hover:text-white transition-colors">
                   Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="text-gray-300 hover:text-white transition-colors">
+                  Privacy Policy
                 </Link>
               </li>
             </ul>
           </div>
-          */}
-          
-          {/* Newsletter/Stay Updated section removed */}
         </div>
         
         {/* Bottom section */}
