@@ -79,15 +79,18 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                     <div className="flex flex-col">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
+                        
+                        {/* Circular chevron button */}
+                        <CollapsibleTrigger asChild>
+                          <button 
+                            className="flex items-center justify-center bg-white rounded-full h-7 w-7 text-[#674019] hover:bg-white/90 transition-colors focus:outline-none"
+                            aria-label={isOwnCircleOpen ? "Hide details" : "Show details"}
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </button>
+                        </CollapsibleTrigger>
                       </div>
                       <div className="bg-white text-[#674019] text-xs font-medium py-1 px-3 rounded-full w-fit mb-6">Coming Soon</div>
-                      
-                      <CollapsibleTrigger asChild>
-                        <button className="w-fit flex items-center text-[#674019] hover:text-[#674019]/80 transition-colors">
-                          <span className="text-xs mr-1">Show more</span>
-                          <ChevronDown className="h-3 w-3" />
-                        </button>
-                      </CollapsibleTrigger>
                     </div>
 
                     <CollapsibleContent className="pt-4">

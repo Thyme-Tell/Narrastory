@@ -33,29 +33,29 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
         className="w-full flex flex-col h-full"
       >
         <CardContent className="p-6 pb-3 flex-grow">
-          <h3 className="text-xl font-caslon font-normal mb-2 text-[#674019]">
-            {event.title}
-          </h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-xl font-caslon font-normal text-[#674019]">
+              {event.title}
+            </h3>
+            
+            {/* Circular chevron button */}
+            <CollapsibleTrigger asChild>
+              <button 
+                className="flex items-center justify-center bg-white rounded-full h-7 w-7 text-[#674019] hover:bg-white/90 transition-colors focus:outline-none"
+                aria-label={isOpen ? "Hide details" : "Show details"}
+              >
+                {isOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </button>
+            </CollapsibleTrigger>
+          </div>
           
           <p className="text-sm text-[#674019]/60 font-medium font-uncut-sans mb-4">
             {timeDisplay}
           </p>
-          
-          <CollapsibleTrigger asChild>
-            <button className="w-full flex items-center justify-center mt-1 text-[#674019] hover:text-[#674019]/80 transition-colors">
-              {isOpen ? (
-                <>
-                  <span className="text-xs mr-1">Show less</span>
-                  <ChevronUp className="h-3 w-3" />
-                </>
-              ) : (
-                <>
-                  <span className="text-xs mr-1">Show more</span>
-                  <ChevronDown className="h-3 w-3" />
-                </>
-              )}
-            </button>
-          </CollapsibleTrigger>
         </CardContent>
         
         <CollapsibleContent className="px-6 pt-0">
