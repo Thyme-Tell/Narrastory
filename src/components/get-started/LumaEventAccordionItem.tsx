@@ -29,30 +29,30 @@ const LumaEventAccordionItem: React.FC<LumaEventAccordionItemProps> = ({ event, 
       value={`item-${index}`} 
       className="border-b last:border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] mb-4 overflow-hidden border-0"
     >
-      <AccordionTrigger className="py-5 px-6 hover:no-underline hover:bg-[#E4C795]/50 rounded-t-[4px]">
+      <AccordionTrigger className="py-4 px-6 hover:no-underline hover:bg-[#E4C795]/50 rounded-t-[4px]">
         <div className="flex flex-col items-start text-left w-full">
-          <h3 className="font-caslon font-normal text-xl text-[#674019]">{event.title}</h3>
-          <div className="text-sm text-[#674019]/60 font-medium font-uncut-sans">{timeDisplay}</div>
+          <h3 className="font-caslon font-normal text-lg text-[#674019]">{event.title}</h3>
+          <div className="text-xs text-[#674019]/60 font-medium font-uncut-sans">{timeDisplay}</div>
         </div>
       </AccordionTrigger>
       
-      <AccordionContent className="px-6 pb-6 pt-0 bg-transparent rounded-b-[4px]">
+      <AccordionContent className="px-6 pb-6 pt-2 bg-transparent rounded-b-[4px]">
         <div className="space-y-4">
           <p className="text-[#674019] mb-4 text-sm">{event.description}</p>
           
           <div className="bg-white rounded-[50px] py-2 px-4 inline-flex items-center">
             <div className="flex -space-x-4">
-              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+              <Avatar className="w-[30px] h-[30px] border-3 border-white bg-[#FAE6CB]">
                 <AvatarFallback className="text-xs">A</AvatarFallback>
               </Avatar>
-              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+              <Avatar className="w-[30px] h-[30px] border-3 border-white bg-[#FAE6CB]">
                 <AvatarFallback className="text-xs">B</AvatarFallback>
               </Avatar>
-              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+              <Avatar className="w-[30px] h-[30px] border-3 border-white bg-[#FAE6CB]">
                 <AvatarFallback className="text-xs">C</AvatarFallback>
               </Avatar>
-              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB] flex items-center justify-center">
-                <span className="text-[16px] text-[#5D310E]">+{Math.max(4, event.capacity - 3)}</span>
+              <Avatar className="w-[30px] h-[30px] border-3 border-white bg-[#FAE6CB] flex items-center justify-center">
+                <span className="text-[14px] text-[#5D310E]">+{Math.max(4, event.capacity - 3)}</span>
               </Avatar>
             </div>
           </div>
