@@ -31,10 +31,17 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   activeNavItem,
   displayNavItems
 }) => {
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.hash = 'home';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="w-full flex sm:hidden justify-between items-center">
-      <Link 
-        to="/get-started" 
+      <a 
+        href="#home"
+        onClick={handleLogoClick}
         className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
         style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
       >
@@ -51,7 +58,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             className="w-[100px] h-auto"
           />
         )}
-      </Link>
+      </a>
 
       <div className="ml-2">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
@@ -67,20 +74,20 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
           <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
             {displayNavItems.map((item) => (
               item.isButton ? (
-                <Link
+                <a
                   key={item.name}
-                  to={item.path}
+                  href={`#${item.anchorId}`}
                   onClick={(e) => handleNavItemClick(e, item)}
                   className="flex items-center w-full px-4 py-2 text-xs font-medium bg-atlantic hover:bg-atlantic/90 text-white mr-[5px] rounded-[4px]"
                 >
                   {item.icon}
                   <span className="ml-2 text-xs">Sign Up</span>
                   <ArrowRight className="ml-auto h-3 w-3 text-white" />
-                </Link>
+                </a>
               ) : (
                 <DropdownMenuItem key={item.name} asChild>
-                  <Link
-                    to={item.path}
+                  <a
+                    href={`#${item.anchorId}`}
                     onClick={(e) => handleNavItemClick(e, item)}
                     className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] ${
                       activeItem === item.name
@@ -90,7 +97,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   >
                     {item.icon}
                     <span className="text-xs">{item.label}</span>
-                  </Link>
+                  </a>
                 </DropdownMenuItem>
               )
             ))}

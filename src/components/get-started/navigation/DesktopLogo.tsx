@@ -4,14 +4,20 @@ import { Link } from "react-router-dom";
 
 interface DesktopLogoProps {
   scrolled: boolean;
-  scrollToTop: () => void; // Keeping the prop for compatibility but not using it
 }
 
 const DesktopLogo: React.FC<DesktopLogoProps> = ({ scrolled }) => {
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.hash = 'home';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="hidden sm:block">
-      <Link 
-        to="/get-started"
+      <a 
+        href="#home"
+        onClick={handleLogoClick}
         className="bg-[#EFF1E9]/50 rounded-[100px] p-2 block"
         style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
       >
@@ -28,7 +34,7 @@ const DesktopLogo: React.FC<DesktopLogoProps> = ({ scrolled }) => {
             className="w-[130px] h-auto"
           />
         )}
-      </Link>
+      </a>
     </div>
   );
 };

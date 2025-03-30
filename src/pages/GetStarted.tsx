@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -27,7 +28,24 @@ const GetStarted = () => {
   
   useEffect(() => {
     document.title = "Narra Story | Get Started";
-  }, []);
+    
+    // Check for hash in URL on initial load and scroll to that section
+    if (location.hash) {
+      const id = location.hash.substring(1);
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        
+        // Set active item based on hash
+        const matchingItem = navItems.find(item => item.anchorId === id);
+        if (matchingItem) {
+          setActiveItem(matchingItem.name);
+        }
+      }
+    }
+  }, [location]);
 
   const handleMenuItemClick = (item: any) => {
     setActiveItem(item.name);
@@ -42,17 +60,17 @@ const GetStarted = () => {
           handleMenuItemClick={handleMenuItemClick} 
         />
 
-        {/* Keep section IDs for structure but remove scroll functionality */}
-        <div id="home">
+        {/* Add appropriate scroll-margin-top to each section */}
+        <div id="home" className="scroll-mt-24">
           <HomeSection homeRef={homeRef} isMobile={isMobile} />
         </div>
-        <section id="how-it-works">
+        <section id="how-it-works" className="scroll-mt-24">
           <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
         </section>
-        <section id="join-story-circle">
+        <section id="join-story-circle" className="scroll-mt-24">
           <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
         </section>
-        <section id="sign-up">
+        <section id="sign-up" className="scroll-mt-24">
           <SignUpSection signUpRef={signUpRef} />
         </section>
       </div>

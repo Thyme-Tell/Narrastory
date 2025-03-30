@@ -22,12 +22,24 @@ const Header: React.FC<HeaderProps> = ({
   // Simplify to just use activeItem directly
   const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
 
-  // Simplified handler without scrolling
+  // Handle nav item click with anchor navigation
   const handleNavItemClick = (e: React.MouseEvent, item: NavItem) => {
     e.preventDefault();
     
     // Call the handleMenuItemClick function to update the active item
     handleMenuItemClick(item);
+    
+    // Simple anchor navigation
+    if (item.anchorId) {
+      const element = document.getElementById(item.anchorId);
+      if (element) {
+        // Update URL with hash
+        window.location.hash = item.anchorId;
+        
+        // Scroll to element
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
     
     // Close mobile dropdown if open
     setIsDropdownOpen(false);
@@ -53,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({
           />
 
           {/* Tablet/desktop logo */}
-          <DesktopLogo scrolled={scrolled} scrollToTop={() => {}} />
+          <DesktopLogo scrolled={scrolled} />
         </div>
 
         {/* Navigation menu */}
