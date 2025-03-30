@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
 import { Home, Book, Users, ArrowRight } from "lucide-react";
 
 export type NavItem = {
@@ -10,6 +9,7 @@ export type NavItem = {
   icon: React.ReactNode;
   ref: React.RefObject<HTMLElement | HTMLDivElement> | null;
   isButton?: boolean;
+  anchorId?: string; // Add anchor ID property
 };
 
 export const getNavItems = (
@@ -21,23 +21,26 @@ export const getNavItems = (
   { 
     name: "home", 
     label: "Home", 
-    path: "/get-started",
+    path: "/get-started#home",
     icon: <Home className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: homeRef
+    ref: homeRef,
+    anchorId: "home"
   },
   { 
     name: "how-it-works", 
     label: "How It Works", 
     path: "/get-started#how-it-works",
     icon: <Book className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: howItWorksRef
+    ref: howItWorksRef,
+    anchorId: "how-it-works"
   },
   { 
     name: "join-story-circle", 
     label: "Join a Story Circle", 
     path: "/get-started#join-story-circle",
     icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
-    ref: storyCirclesRef
+    ref: storyCirclesRef,
+    anchorId: "join-story-circle"
   },
   {
     name: "sign-up",
@@ -45,6 +48,7 @@ export const getNavItems = (
     path: "/get-started#sign-up",
     icon: <ArrowRight className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
     ref: signUpRef,
-    isButton: true
+    isButton: true,
+    anchorId: "sign-up"
   }
 ];

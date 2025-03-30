@@ -1,46 +1,136 @@
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchLumaEvents } from "@/services/lumaEvents";
-import LumaEventCard from "./LumaEventCard";
+import { useLumaEvents } from "@/hooks/useLumaEvents";
+import { format, parseISO } from "date-fns";
+import { Calendar, Users, Video, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const LumaEventsSection = () => {
-  const { data: events, isLoading, error } = useQuery({
-    queryKey: ['lumaEvents'],
-    queryFn: fetchLumaEvents,
-  });
+  const { events, isLoading, error } = useLumaEvents();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A33D29]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 px-4">
+        <p className="text-[#A33D29] mb-2">Unable to load upcoming events</p>
+        <Button 
+          variant="outline"
+          onClick={() => window.location.reload()}
+          size="sm"
+        >
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
+  if (!events || events.length === 0) {
+    return (
+      <div className="text-center py-12 px-4">
+        <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+        <p className="text-gray-500 mb-2">No upcoming events at the moment</p>
+        <p className="text-sm text-gray-400 mb-4">Check back soon for new story circles</p>
+        <Button 
+          onClick={() => window.open("https://lu.ma/narra", "_blank")}
+          variant="outline"
+        >
+          Visit Luma Calendar
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-16 bg-[#F6F6F7] rounded-xl p-6 md:p-8">
-      <h3 className="text-xl md:text-2xl font-caslon font-thin mb-4 text-[#242F3F] text-center">
-        Upcoming Story Circles
-      </h3>
-      
-      {isLoading ? (
-        <div className="text-center py-8">Loading events...</div>
-      ) : error ? (
-        <div className="text-center py-8 text-[#A33D29]">
-          Unable to load events. Please try again later.
-        </div>
-      ) : events && events.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 mt-4">
-          {events.slice(0, 3).map((event) => (
-            <LumaEventCard key={event.id} event={event} />
-          ))}
-          
-          <div className="text-center mt-6">
-            <Button 
-              className="bg-[#242F3F] hover:bg-[#242F3F]/90 text-white"
-              onClick={() => window.open("https://lu.ma/narra", "_blank")}
-            >
-              View All Events
-            </Button>
+    <div className="divide-y divide-[#E5E7EB]">
+      {events.slice(0, 3).map((event) => {
+        const eventDate = parseISO(event.startDate);
+        const formattedDate = format(eventDate, "EEE, MMM d");
+        const formattedTime = format(eventDate, "h:mm a");
+        
+        return (
+          <div key={event.id} className="p-4 hover:bg-[#F9F5F2] transition-colors">
+            <div className="flex flex-col md:flex-row md:items-center">
+              {/* Date column */}
+              <div className="md:w-1/5 mb-3 md:mb-0">
+                <div className="bg-white p-2 rounded-lg border border-[#E5E7EB] inline-block text-center min-w-[80px]">
+                  <div className="text-[#A33D29] font-medium">
+                    {format(eventDate, "MMM")}
+                  </div>
+                  <div className="text-2xl font-bold text-[#242F3F]">
+                    {format(eventDate, "dd")}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Event details */}
+              <div className="md:w-3/5 mb-3 md:mb-0">
+                <h4 className="font-medium text-[#242F3F] text-lg">{event.title}</h4>
+                <div className="text-sm text-gray-500 mt-1 flex items-center">
+                  <Calendar className="inline h-4 w-4 mr-1 text-[#A33D29]" /> 
+                  {formattedDate} • {formattedTime}
+                </div>
+                <div className="text-sm text-gray-500 mt-1 flex items-center">
+                  <Video className="inline h-4 w-4 mr-1 text-[#A33D29]" /> 
+                  {event.location}
+                </div>
+                
+                {/* Attendees preview (mock data) */}
+                <div className="flex items-center mt-2">
+                  <div className="flex -space-x-2 mr-2">
+                    <Avatar className="h-6 w-6 border-2 border-white">
+                      <AvatarFallback>A</AvatarFallback>
+                    </Avatar>
+                    <Avatar className="h-6 w-6 border-2 border-white">
+                      <AvatarFallback>B</AvatarFallback>
+                    </Avatar>
+                    <Avatar className="h-6 w-6 border-2 border-white">
+                      <AvatarFallback>C</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {event.spotsRemaining > 0 ? (
+                      <span className="text-[#A33D29]">{event.spotsRemaining} spots left</span>
+                    ) : (
+                      "Sold out"
+                    )}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Action button */}
+              <div className="md:w-1/5 flex justify-start md:justify-end">
+                <Button 
+                  onClick={() => window.open(event.registrationUrl, "_blank")}
+                  disabled={event.spotsRemaining <= 0}
+                  className={event.spotsRemaining > 0 ? "bg-[#242F3F]" : "bg-gray-300"}
+                  size="sm"
+                >
+                  {event.spotsRemaining > 0 ? "Register" : "Sold Out"}
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          No upcoming events at the moment. Check back soon!
+        );
+      })}
+      
+      {events.length > 0 && (
+        <div className="p-4 text-center">
+          <Button 
+            variant="outline"
+            onClick={() => window.open("https://lu.ma/narra", "_blank")}
+            className="w-full md:w-auto"
+          >
+            View All Events <Link className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>
