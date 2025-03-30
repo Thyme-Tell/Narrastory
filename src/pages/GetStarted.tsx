@@ -2,14 +2,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import useHeaderScroll from "@/components/get-started/navigation/useHeaderScroll";
 
-// Import our new components
+// Import our components
 import Header from "@/components/get-started/Header";
 import HomeSection from "@/components/get-started/HomeSection";
 import HowItWorksSection from "@/components/get-started/HowItWorksSection";
 import StoryCirclesSection from "@/components/get-started/StoryCirclesSection";
 import SignUpSection from "@/components/get-started/SignUpSection";
-// Removed WelcomeSection import
 import Footer from "@/components/get-started/Footer";
 import { getNavItems } from "@/components/get-started/NavItems";
 
@@ -18,7 +18,7 @@ const GetStarted = () => {
   const [activeItem, setActiveItem] = useState("home");
   const isMobile = useIsMobile();
   
-  // References for scrolling to sections
+  // References for sections (keeping refs but not using them for scrolling)
   const homeRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
   const storyCirclesRef = useRef<HTMLElement>(null);
@@ -27,35 +27,33 @@ const GetStarted = () => {
   // Get navigation items with references
   const navItems = getNavItems(homeRef, howItWorksRef, storyCirclesRef, signUpRef);
   
+  // Use our scroll hook to detect active section
+  useHeaderScroll({ 
+    navItems, 
+    activeItem, 
+    setActiveItem: (item) => setActiveItem(item) 
+  });
+
   useEffect(() => {
     document.title = "Narra Story | Get Started";
     
-    const path = location.pathname;
-    const hash = location.hash;
-
-    // Handle initial navigation based on URL hash
-    if (hash) {
-      const targetSection = hash.substring(1); // Remove the # character
-      const selectedItem = navItems.find(item => item.name === targetSection);
-      
-      if (selectedItem) {
-        setActiveItem(selectedItem.name);
-        
-        // Add a small delay to ensure the DOM is fully loaded
+    // Check for hash in URL on initial load and scroll to that section
+    if (location.hash) {
+      const id = location.hash.substring(1);
+      const element = document.getElementById(id);
+      if (element) {
         setTimeout(() => {
-          if (selectedItem.ref && selectedItem.ref.current) {
-            const sectionTop = selectedItem.ref.current.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({
-              top: sectionTop - 100, // Offset for header
-              behavior: 'smooth'
-            });
-          }
+          element.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+        
+        // Set active item based on hash
+        const matchingItem = navItems.find(item => item.anchorId === id);
+        if (matchingItem) {
+          setActiveItem(matchingItem.name);
+        }
       }
-    } else if (path === "/get-started") {
-      setActiveItem("home");
     }
-  }, [location, navItems]);
+  }, [location]);
 
   const handleMenuItemClick = (item: any) => {
     setActiveItem(item.name);
@@ -70,11 +68,19 @@ const GetStarted = () => {
           handleMenuItemClick={handleMenuItemClick} 
         />
 
-        <HomeSection homeRef={homeRef} isMobile={isMobile} />
-        <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
-        <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
-        <SignUpSection signUpRef={signUpRef} />
-        {/* Removed WelcomeSection */}
+        {/* Add appropriate scroll-margin-top to each section */}
+        <div id="home" className="scroll-mt-24">
+          <HomeSection homeRef={homeRef} isMobile={isMobile} />
+        </div>
+        <section id="how-it-works" className="scroll-mt-24">
+          <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
+        </section>
+        <section id="join-story-circle" className="scroll-mt-24 bg-transparent">
+          <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
+        </section>
+        <section id="sign-up" className="scroll-mt-24">
+          <SignUpSection signUpRef={signUpRef} />
+        </section>
       </div>
       <Footer />
     </div>

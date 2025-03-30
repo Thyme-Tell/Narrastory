@@ -12,6 +12,8 @@ import PasswordResetConfirm from "./components/PasswordResetConfirm";
 import { AuthProvider } from "./contexts/AuthContext";
 import BookPreviewPage from "./pages/BookPreviewPage";
 import GetStarted from "./pages/GetStarted";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Wrapper component to pass the storyBookId from URL params
 const StoryBookSettingsWrapper = () => {
@@ -36,6 +38,8 @@ function App() {
           <Route path="/reset-password/confirm" element={<PasswordResetConfirm />} />
           <Route path="/book-preview/:profileId" element={<BookPreviewPage />} />
           <Route path="/get-started" element={<GetStarted />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

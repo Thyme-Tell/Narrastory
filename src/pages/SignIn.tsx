@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,6 +8,8 @@ import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import Cookies from "js-cookie";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const SignIn = () => {
   useEffect(() => {
@@ -21,6 +22,7 @@ const SignIn = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: "",
     password: "",
@@ -47,7 +49,6 @@ const SignIn = () => {
     console.log("Attempting login with phone:", normalizedPhoneNumber);
 
     try {
-      // Directly query the profiles table
       const { data: profiles, error: searchError } = await supabase
         .from("profiles")
         .select("id, password, first_name, last_name, phone_number")
@@ -66,7 +67,6 @@ const SignIn = () => {
         return;
       }
 
-      // Use the first profile if multiple are found
       const profile = profiles[0];
       console.log("Found profile:", profile.id);
       
@@ -77,13 +77,12 @@ const SignIn = () => {
         return;
       }
 
-      // Set cookies to expire in 365 days
-      console.log("Setting auth cookies for profile:", profile.id);
-      Cookies.set('profile_authorized', 'true', { expires: 365 });
-      Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
-      Cookies.set('profile_id', profile.id, { expires: 365 });
+      const expirationDays = rememberMe ? 365 : 7;
+      console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
+      Cookies.set('profile_authorized', 'true', { expires: expirationDays });
+      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
+      Cookies.set('profile_id', profile.id, { expires: expirationDays });
 
-      // Get the redirect path from URL params or location state
       const redirectTo = searchParams.get('redirectTo') || 
                         (location.state as { redirectTo?: string })?.redirectTo || 
                         `/profile/${profile.id}`;
@@ -105,7 +104,6 @@ const SignIn = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Clear error when user starts typing
     if (error) setError(null);
     
     setFormData((prev) => ({
@@ -157,10 +155,26 @@ const SignIn = () => {
               required
               placeholder="Enter your password"
             />
+            
+            <div className="flex items-center">
+              <Checkbox 
+                id="remember-me" 
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
+              />
+              <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
+                Remember me
+              </Label>
+            </div>
           </div>
 
           <div className="space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full py-2.5 rounded-[7px] bg-gradient-to-r from-[#A33D29] to-[#B65644] hover:from-[#933629] hover:to-[#A34C3D] text-white"
+              disabled={loading}
+            >
               {loading ? "Signing in..." : "Sign In"}
             </Button>
 
