@@ -19,25 +19,19 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [atHeroSection, setAtHeroSection] = useState(true);
   
-  // Track scroll position for logo visibility and hero section detection
+  // Track scroll position for logo visibility
   useEffect(() => {
     const handleScroll = () => {
       const position = window.scrollY;
       if (position > 50) {
         setScrolled(true);
-        setAtHeroSection(false);
       } else {
         setScrolled(false);
-        setAtHeroSection(true);
       }
     };
     
     window.addEventListener('scroll', handleScroll);
-    // Initial check
-    handleScroll();
-    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -69,8 +63,7 @@ const Header: React.FC<HeaderProps> = ({
     setIsDropdownOpen(false);
   };
 
-  // Instead of filtering out home completely, include it in all nav items
-  // The display logic will be handled in the DesktopNavigation component
+  // Display nav items without scroll modifications
   const displayNavItems = navItems;
 
   return (
@@ -87,7 +80,6 @@ const Header: React.FC<HeaderProps> = ({
             scrolled={scrolled}
             activeNavItem={activeNavItem}
             displayNavItems={displayNavItems}
-            atHeroSection={atHeroSection}
           />
 
           {/* Tablet/desktop logo - hide when scrolled */}
@@ -101,7 +93,6 @@ const Header: React.FC<HeaderProps> = ({
             activeItem={activeItem} 
             handleNavItemClick={handleNavItemClick}
             scrolled={scrolled}
-            atHeroSection={atHeroSection}
           />
         </div>
       </nav>
