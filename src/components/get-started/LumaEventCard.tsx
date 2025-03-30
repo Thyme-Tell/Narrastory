@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Video, Users, ChevronDown, ChevronUp } from "lucide-react";
@@ -32,49 +33,49 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
         className="w-full flex flex-col h-full"
       >
         <CardContent className="p-6 pb-3 flex-grow">
-          <h4 className="text-2xl md:text-[32px] font-caslon font-normal mb-2 text-[#674019]">
+          <h3 className="text-xl md:text-2xl font-caslon font-normal mb-2 text-[#674019]">
             {event.title}
-          </h4>
+          </h3>
           
-          <p className="text-lg md:text-xl text-[#674019]/60 font-medium font-uncut-sans mb-4">
+          <p className="text-base text-[#674019]/60 font-medium font-uncut-sans mb-4">
             {timeDisplay}
           </p>
           
           <div className="mb-4">
             <div className="bg-white rounded-[50px] py-2 px-4 inline-flex items-center">
               <div className="flex -space-x-4">
-                <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB]">
-                  <AvatarFallback>A</AvatarFallback>
+                <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+                  <AvatarFallback className="text-xs">A</AvatarFallback>
                 </Avatar>
-                <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB]">
-                  <AvatarFallback>B</AvatarFallback>
+                <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+                  <AvatarFallback className="text-xs">B</AvatarFallback>
                 </Avatar>
-                <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB]">
-                  <AvatarFallback>C</AvatarFallback>
+                <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+                  <AvatarFallback className="text-xs">C</AvatarFallback>
                 </Avatar>
-                <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB] flex items-center justify-center">
-                  <span className="text-[20px] text-[#5D310E]">+{Math.max(4, event.capacity - 3)}</span>
+                <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB] flex items-center justify-center">
+                  <span className="text-[16px] text-[#5D310E]">+{Math.max(4, event.capacity - 3)}</span>
                 </Avatar>
               </div>
             </div>
           </div>
           
           <div className="flex items-center gap-2 text-[#674019]/60 font-medium font-uncut-sans">
-            <Video className="h-5 w-5 text-[#674019]" />
-            <span className="text-lg">{event.location}</span>
+            <Video className="h-4 w-4 text-[#674019]" />
+            <span className="text-sm">{event.location}</span>
           </div>
           
           <CollapsibleTrigger asChild>
             <button className="w-full flex items-center justify-center mt-3 text-[#674019] hover:text-[#674019]/80 transition-colors">
               {isOpen ? (
                 <>
-                  <span className="text-sm mr-1">Show less</span>
-                  <ChevronUp className="h-4 w-4" />
+                  <span className="text-xs mr-1">Show less</span>
+                  <ChevronUp className="h-3 w-3" />
                 </>
               ) : (
                 <>
-                  <span className="text-sm mr-1">Show more</span>
-                  <ChevronDown className="h-4 w-4" />
+                  <span className="text-xs mr-1">Show more</span>
+                  <ChevronDown className="h-3 w-3" />
                 </>
               )}
             </button>
@@ -82,14 +83,14 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
         </CardContent>
         
         <CollapsibleContent className="px-6">
-          <div className="text-[#674019] mb-4 text-base">
+          <div className="text-[#674019] mb-4 text-sm">
             {event.description}
           </div>
         </CollapsibleContent>
         
         <CardFooter className="p-6 pt-3">
           <Button 
-            className="w-full bg-[#674019] hover:bg-[#5D310E] text-white rounded-[50px] text-base py-5"
+            className="w-full bg-[#674019] hover:bg-[#5D310E] text-white rounded-[50px] text-sm py-5"
             onClick={handleRegister}
             disabled={event.spotsRemaining <= 0}
           >

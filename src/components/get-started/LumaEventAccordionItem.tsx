@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format, parseISO } from "date-fns";
 import { Video } from "lucide-react";
@@ -30,41 +31,41 @@ const LumaEventAccordionItem: React.FC<LumaEventAccordionItemProps> = ({ event, 
     >
       <AccordionTrigger className="py-5 px-6 hover:no-underline hover:bg-[#E4C795]/50 rounded-t-[4px]">
         <div className="flex flex-col items-start text-left w-full">
-          <h4 className="font-caslon font-normal text-2xl text-[#674019]">{event.title}</h4>
-          <div className="text-base text-[#674019]/60 font-medium font-uncut-sans">{timeDisplay}</div>
+          <h3 className="font-caslon font-normal text-xl text-[#674019]">{event.title}</h3>
+          <div className="text-sm text-[#674019]/60 font-medium font-uncut-sans">{timeDisplay}</div>
         </div>
       </AccordionTrigger>
       
       <AccordionContent className="px-6 pb-6 pt-0 bg-transparent rounded-b-[4px]">
         <div className="space-y-4">
-          <p className="text-[#674019] mb-4 text-base">{event.description}</p>
+          <p className="text-[#674019] mb-4 text-sm">{event.description}</p>
           
           <div className="bg-white rounded-[50px] py-2 px-4 inline-flex items-center">
             <div className="flex -space-x-4">
-              <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB]">
-                <AvatarFallback>A</AvatarFallback>
+              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+                <AvatarFallback className="text-xs">A</AvatarFallback>
               </Avatar>
-              <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB]">
-                <AvatarFallback>B</AvatarFallback>
+              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+                <AvatarFallback className="text-xs">B</AvatarFallback>
               </Avatar>
-              <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB]">
-                <AvatarFallback>C</AvatarFallback>
+              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB]">
+                <AvatarFallback className="text-xs">C</AvatarFallback>
               </Avatar>
-              <Avatar className="w-[45px] h-[45px] border-3 border-white bg-[#FAE6CB] flex items-center justify-center">
-                <span className="text-[20px] text-[#5D310E]">+{Math.max(4, event.capacity - 3)}</span>
+              <Avatar className="w-[35px] h-[35px] border-3 border-white bg-[#FAE6CB] flex items-center justify-center">
+                <span className="text-[16px] text-[#5D310E]">+{Math.max(4, event.capacity - 3)}</span>
               </Avatar>
             </div>
           </div>
           
           <div className="flex items-center gap-2 text-[#674019]/60 font-medium font-uncut-sans">
-            <Video className="h-5 w-5 text-[#674019]" />
-            <span className="text-base">{event.location}</span>
+            <Video className="h-4 w-4 text-[#674019]" />
+            <span className="text-sm">{event.location}</span>
           </div>
           
           <Button 
             onClick={handleRegister}
             disabled={event.spotsRemaining <= 0}
-            className="bg-[#674019] hover:bg-[#5D310E] text-white rounded-[50px] text-base py-5 px-8 mt-4"
+            className="bg-[#674019] hover:bg-[#5D310E] text-white rounded-[50px] text-sm py-5 px-8 mt-4"
           >
             {event.spotsRemaining > 0 ? "Register Now" : "Sold Out"}
           </Button>

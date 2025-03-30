@@ -22,10 +22,10 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
       className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24 bg-transparent"
     >
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 text-center">
+        <h2 className="text-2xl md:text-3xl font-caslon font-thin text-[#242F3F] mb-6 text-center">
           Narra Story Circles
         </h2>
-        <p className="text-center text-[#403E43] mb-12 max-w-2xl mx-auto">
+        <p className="text-center text-[#403E43] mb-12 max-w-2xl mx-auto text-sm md:text-base">
           Narra Story Circles are laid-back virtual meetups where we swap stories. Drop by, speak up, and connect. Simple as that. Facilitated by Richard Squires, author of 60+ memoirs who knows how to get good stories flowing.
         </p>
         
@@ -38,7 +38,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
               </div>
             ) : error ? (
               <div className="text-center py-8 px-4 rounded-[4px] bg-white/50">
-                <p className="text-[#674019] mb-2">Unable to load upcoming events</p>
+                <p className="text-[#674019] mb-2 text-sm">Unable to load upcoming events</p>
                 <Button 
                   variant="outline"
                   onClick={() => window.location.reload()}
@@ -68,9 +68,9 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
               </>
             ) : (
               <div className="text-center py-12 px-4 rounded-[4px] bg-gradient-to-b from-[#F8E3C8] to-[#FBEFE1]">
-                <Calendar className="h-12 w-12 text-[#674019]/50 mx-auto mb-4" />
-                <p className="text-[#674019] mb-2 font-caslon text-2xl">No upcoming events at the moment</p>
-                <p className="text-[#674019]/60 mb-4">Check back soon for new story circles</p>
+                <Calendar className="h-8 w-8 text-[#674019]/50 mx-auto mb-4" />
+                <p className="text-[#674019] mb-2 font-caslon text-xl">No upcoming events at the moment</p>
+                <p className="text-[#674019]/60 mb-4 text-sm">Check back soon for new story circles</p>
               </div>
             )}
             
@@ -79,7 +79,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                 <Button 
                   variant="outline"
                   onClick={() => window.open("https://lu.ma/calendar/cal-Z2lF71wpLrO7F5C", "_blank")}
-                  className="border-[#674019] text-[#674019] hover:bg-[#674019]/10 rounded-full"
+                  className="border-[#674019] text-[#674019] hover:bg-[#674019]/10 rounded-full text-sm"
                 >
                   View All Upcoming Events
                 </Button>
@@ -92,16 +92,16 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
             <Card className="bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-[28px] md:text-[32px] font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
-                  <div className="bg-white text-[#674019] text-sm font-medium py-1 px-3 rounded-full">Coming Soon</div>
+                  <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
+                  <div className="bg-white text-[#674019] text-xs font-medium py-1 px-3 rounded-full">Coming Soon</div>
                 </div>
-                <p className="text-[#674019]/80 mb-4 text-base md:text-lg">
+                <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
                   Start your own Story Circle with family, friends, or colleagues. 
                   Choose your topics, invite participants, and build a collection of stories that matter to you.
                 </p>
               </div>
               <Button
-                className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-base md:text-lg py-5 mt-auto"
+                className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-sm md:text-base py-5 mt-auto"
                 disabled
               >
                 Create a Circle
