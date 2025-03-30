@@ -150,3 +150,39 @@
     margin-top: 0;
   }
 }
+
+@media (min-width: 920px) {
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar-menu {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 919px) {
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar-menu {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
