@@ -26,7 +26,7 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
   };
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col rounded-[4px] border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden flex flex-col rounded-[4px] border-0 bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] hover:shadow-lg transition-shadow h-full">
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
@@ -88,7 +88,7 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
           </div>
         </CollapsibleContent>
         
-        <CardFooter className="p-6 pt-3">
+        <CardFooter className="p-6 pt-3 mt-auto">
           <Button 
             className="w-full bg-[#674019] hover:bg-[#5D310E] text-white rounded-[50px] text-sm py-5"
             onClick={handleRegister}
