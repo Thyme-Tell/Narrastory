@@ -2,7 +2,7 @@
 import React from "react";
 import { Calendar, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Accordion } from "@/components/ui/accordion";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
 import LumaEventAccordionItem from "./LumaEventAccordionItem";
 
@@ -31,7 +31,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           {/* Left Column - Collapsible Events */}
           <div className="bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-sm">
             <div className="flex items-center p-4 border-b border-[#E5E7EB]">
-              <Calendar className="h-5 w-5 text-[#A33D29] mr-2" />
+              <Calendar className="h-5 w-5 text-[#6366F1] mr-2" />
               <h3 className="text-lg md:text-xl font-medium text-[#242F3F]">
                 Upcoming Story Circles
               </h3>
@@ -40,11 +40,11 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
             <div className="p-0">
               {isLoading ? (
                 <div className="flex justify-center items-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A33D29]"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6366F1]"></div>
                 </div>
               ) : error ? (
                 <div className="text-center py-8 px-4">
-                  <p className="text-[#A33D29] mb-2">Unable to load upcoming events</p>
+                  <p className="text-red-500 mb-2">Unable to load upcoming events</p>
                   <Button 
                     variant="outline"
                     onClick={() => window.location.reload()}
@@ -92,8 +92,8 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div className="flex items-start">
-                  <div className="bg-[#F9F5F2] rounded-full p-2 mr-3 mt-1">
-                    <Users className="h-4 w-4 text-[#A33D29]" />
+                  <div className="bg-[#EEF1FF] rounded-full p-2 mr-3 mt-1">
+                    <Users className="h-4 w-4 text-[#6366F1]" />
                   </div>
                   <div>
                     <h4 className="font-medium text-[#242F3F] text-sm">Community</h4>
@@ -101,8 +101,8 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <div className="bg-[#F9F5F2] rounded-full p-2 mr-3 mt-1">
-                    <MessageSquare className="h-4 w-4 text-[#A33D29]" />
+                  <div className="bg-[#EEF1FF] rounded-full p-2 mr-3 mt-1">
+                    <MessageSquare className="h-4 w-4 text-[#6366F1]" />
                   </div>
                   <div>
                     <h4 className="font-medium text-[#242F3F] text-sm">Preservation</h4>
@@ -111,17 +111,17 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                 </div>
               </div>
               <Button 
-                className="w-full bg-[#242F3F] hover:bg-[#242F3F]/90 text-white"
+                className="w-full bg-[#6366F1] hover:bg-[#6366F1]/90 text-white"
                 onClick={() => window.open("https://lu.ma/narra", "_blank")}
               >
                 Join a Circle
               </Button>
             </div>
             
-            <div className="bg-white rounded-xl p-6 border border-[#E5E7EB] shadow-sm">
+            <div className="bg-[#F7F9FF] rounded-xl p-6 border border-[#E5E7EB] shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-medium text-[#242F3F]">Create Your Own Circle</h3>
-                <div className="bg-[#F6F8FA] text-[#A33D29] text-xs font-medium py-1 px-2 rounded">Coming Soon</div>
+                <div className="bg-[#EEF1FF] text-[#6366F1] text-xs font-medium py-1 px-2 rounded">Coming Soon</div>
               </div>
               <p className="text-[#403E43] mb-4">
                 Start your own Story Circle with family, friends, or colleagues. 
