@@ -46,7 +46,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <ChevronDown className="ml-2 h-4 w-4 text-white opacity-70" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border border-white/10 shadow-lg rounded-[4px] overflow-hidden">
+        <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
           {/* Home menu item */}
           <DropdownMenuItem asChild>
             <a
