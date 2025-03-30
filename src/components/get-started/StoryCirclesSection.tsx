@@ -1,10 +1,11 @@
 
 import React from "react";
-import { Calendar, Users } from "lucide-react";
+import { Calendar, Users, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
 import LumaEventCard from "./LumaEventCard";
 import { Card } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface StoryCirclesSectionProps {
   storyCirclesRef: React.RefObject<HTMLElement>;
@@ -12,6 +13,7 @@ interface StoryCirclesSectionProps {
 
 const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesRef }) => {
   const { events, isLoading, error } = useLumaEvents();
+  const [isOwnCircleOpen, setIsOwnCircleOpen] = React.useState(false);
 
   return (
     <section 
@@ -69,22 +71,41 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
               {/* Create Your Own Circle card - always show in the grid */}
               {events && events.length > 0 && (
                 <Card className="bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
-                      <div className="bg-white text-[#674019] text-xs font-medium py-1 px-3 rounded-full">Coming Soon</div>
-                    </div>
-                    <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
-                      Start your own Story Circle with family, friends, or colleagues. 
-                      Choose your topics, invite participants, and build a collection of stories that matter to you.
-                    </p>
-                  </div>
-                  <Button
-                    className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-sm md:text-base py-5 mt-auto"
-                    disabled
+                  <Collapsible
+                    open={isOwnCircleOpen}
+                    onOpenChange={setIsOwnCircleOpen}
+                    className="w-full flex flex-col h-full"
                   >
-                    Create a Circle
-                  </Button>
+                    <div className="flex flex-col">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
+                      </div>
+                      <div className="bg-white text-[#674019] text-xs font-medium py-1 px-3 rounded-full w-fit mb-6">Coming Soon</div>
+                      
+                      <CollapsibleTrigger asChild>
+                        <button className="w-fit flex items-center text-[#674019] hover:text-[#674019]/80 transition-colors">
+                          <span className="text-xs mr-1">Show more</span>
+                          <ChevronDown className="h-3 w-3" />
+                        </button>
+                      </CollapsibleTrigger>
+                    </div>
+
+                    <CollapsibleContent className="pt-4">
+                      <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
+                        Start your own Story Circle with family, friends, or colleagues. 
+                        Choose your topics, invite participants, and build a collection of stories that matter to you.
+                      </p>
+                    </CollapsibleContent>
+                    
+                    <div className="mt-auto pt-6">
+                      <Button
+                        className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-sm md:text-base py-5"
+                        disabled
+                      >
+                        Create a Circle
+                      </Button>
+                    </div>
+                  </Collapsible>
                 </Card>
               )}
             </>
