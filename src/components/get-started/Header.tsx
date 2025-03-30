@@ -20,6 +20,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pastHowItWorks, setPastHowItWorks] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(false);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -34,7 +35,9 @@ const Header: React.FC<HeaderProps> = ({
       const howItWorksSection = document.getElementById("how-it-works");
       if (howItWorksSection) {
         const howItWorksPosition = howItWorksSection.getBoundingClientRect().top;
-        setPastHowItWorks(howItWorksPosition <= 100);
+        const isPastHowItWorks = howItWorksPosition <= 100;
+        setPastHowItWorks(isPastHowItWorks);
+        setShowMobileNav(isPastHowItWorks);
       }
     };
     
@@ -77,18 +80,20 @@ const Header: React.FC<HeaderProps> = ({
     <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
       <nav className="navbar-container flex items-center justify-between bg-transparent py-1.5 sm:py-2">
         <div className="navbar-logo">
-          <MobileNavigation 
-            navItems={navItems}
-            activeItem={activeItem}
-            isDropdownOpen={isDropdownOpen}
-            setIsDropdownOpen={setIsDropdownOpen}
-            handleNavItemClick={handleNavItemClick}
-            scrolled={scrolled}
-            activeNavItem={activeNavItem}
-            displayNavItems={displayNavItems}
-            pastHowItWorks={false} // Always set to false for mobile to prevent scroll-based changes
-            handleLogoClick={handleLogoClick}
-          />
+          {showMobileNav && (
+            <MobileNavigation 
+              navItems={navItems}
+              activeItem={activeItem}
+              isDropdownOpen={isDropdownOpen}
+              setIsDropdownOpen={setIsDropdownOpen}
+              handleNavItemClick={handleNavItemClick}
+              scrolled={scrolled}
+              activeNavItem={activeNavItem}
+              displayNavItems={displayNavItems}
+              pastHowItWorks={false} // Always set to false for mobile to prevent scroll-based changes
+              handleLogoClick={handleLogoClick}
+            />
+          )}
 
           {!scrolled && <DesktopLogo scrolled={scrolled} />}
         </div>
