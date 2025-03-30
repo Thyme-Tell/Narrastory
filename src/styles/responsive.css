@@ -108,6 +108,13 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
   }
+  
+  /* Mobile navbar frosted glass effect */
+  .mobile-frosted-glass {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background-color: rgba(239, 241, 233, 0.7);
+  }
 }
 
 /* Navbar breakpoint-specific styles */

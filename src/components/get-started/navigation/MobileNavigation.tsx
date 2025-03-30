@@ -38,7 +38,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
     <div className="w-full flex sm:hidden justify-end items-center">
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/70 rounded-[4px] text-white">
+          <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/70 backdrop-blur-sm rounded-[4px] text-white">
             <div className="flex items-center">
               {activeNavItem.icon}
               <span className="ml-2 text-xs">{activeNavItem.label}</span>
