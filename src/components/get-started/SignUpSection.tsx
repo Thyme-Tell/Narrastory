@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
           <div className="p-8 md:p-12 flex flex-col justify-center">
             <div className="max-w-md mx-auto w-full">
               <div className="mb-8">
-                <h2 className="text-2xl font-caslon font-medium text-[#242F3F] mb-3">
+                <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 md:mb-16 text-center">
                   Join Narra
                 </h2>
                 <p className="text-sm text-[#403E43]/80">
