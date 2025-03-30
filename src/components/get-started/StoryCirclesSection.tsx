@@ -2,9 +2,8 @@
 import React from "react";
 import { Calendar, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
-import LumaEventAccordionItem from "./LumaEventAccordionItem";
+import LumaEventCard from "./LumaEventCard";
 
 interface StoryCirclesSectionProps {
   storyCirclesRef: React.RefObject<HTMLElement>;
@@ -28,55 +27,52 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* Left Column - Collapsible Events */}
-          <div className="bg-white rounded-[2px] overflow-hidden border border-[#E5E7EB] shadow-sm">
-            <div className="flex items-center p-4 border-b border-[#E5E7EB]">
+          {/* Left Column - Event Cards */}
+          <div className="space-y-4">
+            <div className="flex items-center mb-4">
               <Calendar className="h-5 w-5 text-[#A33D29] mr-2" />
               <h3 className="text-lg md:text-xl font-medium text-[#242F3F]">
                 Upcoming Story Circles
               </h3>
             </div>
             
-            <div className="p-0">
-              {isLoading ? (
-                <div className="flex justify-center items-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A33D29]"></div>
-                </div>
-              ) : error ? (
-                <div className="text-center py-8 px-4">
-                  <p className="text-[#A33D29] mb-2">Unable to load upcoming events</p>
-                  <Button 
-                    variant="outline"
-                    onClick={() => window.location.reload()}
-                    size="sm"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              ) : events && events.length > 0 ? (
-                <Accordion type="single" collapsible>
-                  {events.slice(0, 3).map((event, index) => (
-                    <LumaEventAccordionItem key={event.id} event={event} index={index} />
-                  ))}
-                </Accordion>
-              ) : (
-                <div className="text-center py-12 px-4">
-                  <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-2">No upcoming events at the moment</p>
-                  <p className="text-sm text-gray-400 mb-4">Check back soon for new story circles</p>
-                </div>
-              )}
-            </div>
-            
-            {events && events.length > 0 && (
-              <div className="p-4 text-center border-t border-[#E5E7EB]">
+            {isLoading ? (
+              <div className="flex justify-center items-center p-8 bg-white rounded-[2px] border border-[#E5E7EB]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A33D29]"></div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8 px-4 bg-white rounded-[2px] border border-[#E5E7EB]">
+                <p className="text-[#A33D29] mb-2">Unable to load upcoming events</p>
                 <Button 
                   variant="outline"
-                  onClick={() => window.open("https://lu.ma/calendar/cal-Z2lF71wpLrO7F5C", "_blank")}
-                  className="w-full md:w-auto text-sm"
+                  onClick={() => window.location.reload()}
+                  size="sm"
                 >
-                  View All Events
+                  Try Again
                 </Button>
+              </div>
+            ) : events && events.length > 0 ? (
+              <>
+                <div className="space-y-4">
+                  {events.slice(0, 3).map((event, index) => (
+                    <LumaEventCard key={event.id} event={event} />
+                  ))}
+                </div>
+                <div className="text-center mt-4">
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.open("https://lu.ma/calendar/cal-Z2lF71wpLrO7F5C", "_blank")}
+                    className="w-full md:w-auto text-sm"
+                  >
+                    View All Events
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 px-4 bg-white rounded-[2px] border border-[#E5E7EB]">
+                <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 mb-2">No upcoming events at the moment</p>
+                <p className="text-sm text-gray-400 mb-4">Check back soon for new story circles</p>
               </div>
             )}
           </div>
@@ -142,4 +138,3 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
 };
 
 export default StoryCirclesSection;
-
