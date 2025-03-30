@@ -94,7 +94,9 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
             onClick={handleRegister}
             disabled={event.spotsRemaining <= 0}
           >
-            {event.spotsRemaining > 0 ? "Register Now" : "Sold Out"}
+            {event.spotsRemaining > 0 
+              ? `Save Your Spot (${event.spotsRemaining} available)` 
+              : "Sold Out"}
           </Button>
         </CardFooter>
       </Collapsible>

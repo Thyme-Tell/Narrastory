@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
@@ -18,7 +18,24 @@ const Header: React.FC<HeaderProps> = ({
   handleMenuItemClick 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const scrolled = false; // Always set to false since we're removing scroll functionality
+  const [scrolled, setScrolled] = useState(false);
+  
+  // Track scroll position for logo visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const position = window.scrollY;
+      if (position > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   
   // Simplify to just use activeItem directly
   const activeNavItem = navItems.find(item => item.name === activeItem) || navItems[0];
@@ -65,8 +82,8 @@ const Header: React.FC<HeaderProps> = ({
             displayNavItems={displayNavItems}
           />
 
-          {/* Tablet/desktop logo */}
-          <DesktopLogo scrolled={scrolled} />
+          {/* Tablet/desktop logo - hide when scrolled */}
+          {!scrolled && <DesktopLogo scrolled={scrolled} />}
         </div>
 
         {/* Navigation menu */}
@@ -74,7 +91,8 @@ const Header: React.FC<HeaderProps> = ({
           <DesktopNavigation 
             displayNavItems={displayNavItems} 
             activeItem={activeItem} 
-            handleNavItemClick={handleNavItemClick} 
+            handleNavItemClick={handleNavItemClick}
+            scrolled={scrolled}
           />
         </div>
       </nav>

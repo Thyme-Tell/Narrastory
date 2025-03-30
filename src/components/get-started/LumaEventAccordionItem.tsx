@@ -67,7 +67,9 @@ const LumaEventAccordionItem: React.FC<LumaEventAccordionItemProps> = ({ event, 
             disabled={event.spotsRemaining <= 0}
             className="bg-[#674019] hover:bg-[#5D310E] text-white rounded-[50px] text-sm py-5 px-8 mt-4"
           >
-            {event.spotsRemaining > 0 ? "Register Now" : "Sold Out"}
+            {event.spotsRemaining > 0 
+              ? `Save Your Spot (${event.spotsRemaining} available)` 
+              : "Sold Out"}
           </Button>
         </div>
       </AccordionContent>
