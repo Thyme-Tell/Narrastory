@@ -9,6 +9,8 @@ import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import Cookies from "js-cookie";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const SignIn = () => {
   useEffect(() => {
@@ -21,6 +23,7 @@ const SignIn = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: "",
     password: "",
@@ -77,11 +80,13 @@ const SignIn = () => {
         return;
       }
 
-      // Set cookies to expire in 365 days
-      console.log("Setting auth cookies for profile:", profile.id);
-      Cookies.set('profile_authorized', 'true', { expires: 365 });
-      Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
-      Cookies.set('profile_id', profile.id, { expires: 365 });
+      // Set cookie expiration based on Remember Me preference
+      const expirationDays = rememberMe ? 365 : 7; // 1 year vs 1 week
+      
+      console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
+      Cookies.set('profile_authorized', 'true', { expires: expirationDays });
+      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
+      Cookies.set('profile_id', profile.id, { expires: expirationDays });
 
       // Get the redirect path from URL params or location state
       const redirectTo = searchParams.get('redirectTo') || 
@@ -157,6 +162,18 @@ const SignIn = () => {
               required
               placeholder="Enter your password"
             />
+            
+            <div className="flex items-center">
+              <Checkbox 
+                id="remember-me" 
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
+              />
+              <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
+                Remember me for 1 year
+              </Label>
+            </div>
           </div>
 
           <div className="space-y-4">

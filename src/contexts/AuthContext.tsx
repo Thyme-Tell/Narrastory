@@ -9,6 +9,8 @@ interface AuthContextType {
   profileId: string | null;
   checkAuth: () => Promise<boolean>;
   logout: () => void;
+  setRememberMe: (remember: boolean) => void;
+  rememberMe: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,7 +18,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+
+  // Load remember me preference from cookies on initial load
+  useEffect(() => {
+    const cookieExpiry = Cookies.get('cookie_expiry');
+    setRememberMe(cookieExpiry === 'long');
+  }, []);
 
   const checkAuth = async () => {
     const storedProfileId = Cookies.get('profile_id');
@@ -50,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         Cookies.remove('profile_id');
         Cookies.remove('profile_authorized');
         Cookies.remove('phone_number');
+        Cookies.remove('cookie_expiry');
         setIsAuthenticated(false);
         setProfileId(null);
         return false;
@@ -67,11 +77,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateRememberMe = (remember: boolean) => {
+    setRememberMe(remember);
+    
+    // Store the preference in a cookie
+    if (remember) {
+      Cookies.set('cookie_expiry', 'long', { expires: 365 });
+    } else {
+      Cookies.set('cookie_expiry', 'short', { expires: 7 });
+      
+      // Also update existing auth cookies if they exist
+      const profileId = Cookies.get('profile_id');
+      const isAuthorized = Cookies.get('profile_authorized');
+      const phoneNumber = Cookies.get('phone_number');
+      
+      if (profileId) Cookies.set('profile_id', profileId, { expires: 7 });
+      if (isAuthorized) Cookies.set('profile_authorized', isAuthorized, { expires: 7 });
+      if (phoneNumber) Cookies.set('phone_number', phoneNumber, { expires: 7 });
+    }
+  };
+
   const logout = () => {
     console.log('Logging out user');
     Cookies.remove('profile_id');
     Cookies.remove('profile_authorized');
     Cookies.remove('phone_number');
+    // Don't remove cookie_expiry on logout to remember user preference
     setIsAuthenticated(false);
     setProfileId(null);
     navigate('/sign-in', { replace: true });
@@ -92,7 +123,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, profileId, checkAuth, logout }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      profileId, 
+      checkAuth, 
+      logout,
+      setRememberMe: updateRememberMe,
+      rememberMe
+    }}>
       {children}
     </AuthContext.Provider>
   );

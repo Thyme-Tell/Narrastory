@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,6 +11,7 @@ import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { encryptText } from "@/utils/encryptionUtils";
+import Cookies from "js-cookie";
 
 const ProfileForm = () => {
   const navigate = useNavigate();
@@ -138,6 +138,14 @@ const ProfileForm = () => {
         }
         throw error;
       }
+
+      // Set the cookie expiration based on Remember Me preference
+      const expirationDays = rememberMe ? 365 : 7; // 1 year vs 1 week
+      
+      // Set cookies with the chosen expiration
+      Cookies.set('profile_authorized', 'true', { expires: expirationDays });
+      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
+      Cookies.set('profile_id', data.id, { expires: expirationDays });
 
       toast({
         title: "Account created!",
@@ -319,7 +327,7 @@ const ProfileForm = () => {
               className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
             />
             <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
-              Remember me
+              Remember me for 1 year
             </Label>
           </div>
           <div className="text-sm">
