@@ -22,7 +22,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
       className="container mx-auto px-4 py-16 md:py-24 scroll-mt-24 bg-transparent"
     >
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-12 md:mb-16 text-center">
+        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 md:mb-6 text-center">
           Narra Story Circles
         </h2>
         <p className="text-center text-[#403E43] mb-12 max-w-2xl mx-auto text-sm md:text-base">
