@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -82,7 +82,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 >
                   {item.icon}
                   <span className="ml-2 text-xs">Sign Up</span>
-                  <ArrowRight className="ml-auto h-3 w-3 text-white" />
                 </a>
               ) : (
                 <DropdownMenuItem key={item.name} asChild>

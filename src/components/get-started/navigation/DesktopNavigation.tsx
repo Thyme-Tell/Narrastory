@@ -1,6 +1,5 @@
 
 import React from "react";
-import { ArrowRight } from "lucide-react";
 import { NavItem } from "../NavItems";
 
 interface DesktopNavigationProps {
@@ -25,7 +24,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
             onClick={(e) => handleNavItemClick(e, item)}
             className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
           >
-            Sign Up <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 text-white" />
+            Sign Up
           </a>
         ) : (
           <a
