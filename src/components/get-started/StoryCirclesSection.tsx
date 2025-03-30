@@ -24,7 +24,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           Narra Story Circles
         </h2>
         <p className="text-center text-[#403E43] mb-12 max-w-2xl mx-auto">
-          Join a community where stories flourish. Share, connect, and preserve memories together.
+          Narra Story Circles are laid-back virtual meetups where we swap stories. Drop by, speak up, and connect. Simple as that.
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
