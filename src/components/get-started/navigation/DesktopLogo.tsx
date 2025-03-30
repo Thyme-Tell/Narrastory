@@ -18,8 +18,8 @@ const DesktopLogo: React.FC<DesktopLogoProps> = ({ scrolled }) => {
       <a 
         href="#home"
         onClick={handleLogoClick}
-        className="bg-white/20 backdrop-blur-md border border-white/20 rounded-[100px] p-2 block"
-        style={{ boxShadow: "0 0 20px rgba(255, 255, 255, 0.2)" }}
+        className="bg-[#EFF1E9]/50 rounded-[100px] p-2 block"
+        style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
       >
         {scrolled ? (
           <img 

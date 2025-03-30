@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { 
@@ -37,7 +38,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
     <div className="w-full flex sm:hidden justify-end items-center">
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center justify-between px-4 py-2 bg-white/20 backdrop-blur-md border border-white/20 rounded-[4px] text-white">
+          <button className="flex items-center justify-between px-4 py-2 bg-[#17342C]/70 rounded-[4px] text-white">
             <div className="flex items-center">
               {activeNavItem.icon}
               <span className="ml-2 text-xs">{activeNavItem.label}</span>
@@ -45,9 +46,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <ChevronDown className="ml-2 h-4 w-4 text-white opacity-70" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          className="w-[200px] bg-[#1A5F4A]/50 backdrop-blur-md border border-white/20 text-white rounded-[4px] shadow-lg"
-        >
+        <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
           {/* Home menu item */}
           <DropdownMenuItem asChild>
             <a
@@ -57,7 +56,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 setIsDropdownOpen(false);
               }}
-              className="flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] hover:bg-white/10"
+              className="flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] hover:bg-[#17342C]/30"
             >
               <img 
                 src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
@@ -87,8 +86,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   onClick={(e) => handleNavItemClick(e, item)}
                   className={`flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] ${
                     activeItem === item.name
-                      ? "bg-white/30"
-                      : "hover:bg-white/10"
+                      ? "bg-[#17342C]"
+                      : "hover:bg-[#17342C]/30"
                   }`}
                 >
                   {item.icon}

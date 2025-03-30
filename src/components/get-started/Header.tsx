@@ -80,12 +80,12 @@ const Header: React.FC<HeaderProps> = ({
     <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
       <nav className="navbar-container flex items-center justify-between bg-transparent py-1.5 sm:py-2">
         <div className={`navbar-logo flex ${!showMobileNav ? 'w-full justify-center sm:justify-start sm:w-auto' : 'items-center'}`}>
-          {/* Always show logo on mobile with frosted glass effect */}
+          {/* Always show logo on mobile */}
           <a 
             href="#home"
-            className="bg-white/20 backdrop-blur-md border border-white/20 rounded-[100px] p-2 sm:hidden"
+            className="bg-[#EFF1E9]/50 rounded-[100px] p-2 sm:hidden"
             onClick={handleLogoClick}
-            style={{ boxShadow: "0 0 20px rgba(255, 255, 255, 0.2)" }}
+            style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
           >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
