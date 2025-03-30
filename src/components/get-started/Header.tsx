@@ -79,7 +79,20 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
       <nav className="navbar-container flex items-center justify-between bg-transparent py-1.5 sm:py-2">
-        <div className="navbar-logo">
+        <div className="navbar-logo flex items-center">
+          {/* Always show logo on mobile */}
+          <a 
+            href="#home"
+            className="bg-[#EFF1E9]/50 rounded-[100px] p-2 sm:hidden"
+            style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+          >
+            <img 
+              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
+              alt="Narra Logo" 
+              className="w-[100px] h-auto"
+            />
+          </a>
+
           {showMobileNav && (
             <MobileNavigation 
               navItems={navItems}
@@ -90,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({
               scrolled={scrolled}
               activeNavItem={activeNavItem}
               displayNavItems={displayNavItems}
-              pastHowItWorks={false} // Always set to false for mobile to prevent scroll-based changes
+              pastHowItWorks={false}
               handleLogoClick={handleLogoClick}
             />
           )}
