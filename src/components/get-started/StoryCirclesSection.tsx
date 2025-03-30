@@ -70,33 +70,31 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
         
         {/* Second row - Create Your Own Circle */}
         {events && events.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <div className="col-span-1 md:col-span-2 lg:col-span-3 max-w-md mx-auto lg:max-w-none">
-              <Card className="bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between">
-                <div className="flex flex-col h-full">
-                  <div className="flex-grow">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
-                    </div>
-                    <div className="bg-white text-[#674019] text-xs font-medium py-1 px-3 rounded-full w-fit mb-6">Coming Soon</div>
-                    
-                    <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
-                      Start your own Story Circle with family, friends, or colleagues. 
-                      Choose your topics, invite participants, and build a collection of stories that matter to you.
-                    </p>
+          <div className="mb-8">
+            <Card className="bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between">
+              <div className="flex flex-col h-full">
+                <div className="flex-grow">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
                   </div>
+                  <div className="bg-white text-[#674019] text-xs font-medium py-1 px-3 rounded-full w-fit mb-6">Coming Soon</div>
                   
-                  <div className="mt-auto pt-6">
-                    <Button
-                      className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-sm md:text-base py-5"
-                      disabled
-                    >
-                      Create a Circle
-                    </Button>
-                  </div>
+                  <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
+                    Start your own Story Circle with family, friends, or colleagues. 
+                    Choose your topics, invite participants, and build a collection of stories that matter to you.
+                  </p>
                 </div>
-              </Card>
-            </div>
+                
+                <div className="mt-auto pt-6">
+                  <Button
+                    className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-sm md:text-base py-5"
+                    disabled
+                  >
+                    Create a Circle
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
         
