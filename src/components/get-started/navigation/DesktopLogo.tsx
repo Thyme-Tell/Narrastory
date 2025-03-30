@@ -14,7 +14,7 @@ const DesktopLogo: React.FC<DesktopLogoProps> = ({ scrolled }) => {
   };
 
   return (
-    <div className="hidden sm:block">
+    <div className="hidden sm:block mr-4">
       <a 
         href="#home"
         onClick={handleLogoClick}

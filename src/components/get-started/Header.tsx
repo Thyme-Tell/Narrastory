@@ -90,9 +90,9 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
-      <nav className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-transparent py-1.5 sm:py-2 navbar-below-logo">
-        <div className="w-full flex md:flex lg:w-auto lg:flex-shrink-0">
-          {/* Mobile dropdown - visible below 640px */}
+      <nav className="navbar-container flex bg-transparent py-1.5 sm:py-2">
+        {/* Mobile dropdown - visible below 640px */}
+        <div className="navbar-logo">
           <MobileNavigation 
             navItems={navItems}
             activeItem={activeItem}
@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Navigation menu */}
-        <div className="flex w-full justify-center mt-4 lg:mt-0 lg:w-auto navbar-menu">
+        <div className="navbar-menu">
           <DesktopNavigation 
             displayNavItems={displayNavItems} 
             activeItem={activeItem} 
