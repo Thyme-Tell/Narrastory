@@ -7,13 +7,15 @@ interface DesktopNavigationProps {
   activeItem: string;
   handleNavItemClick: (e: React.MouseEvent, item: NavItem) => void;
   scrolled: boolean;
+  atHeroSection: boolean;
 }
 
 const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   displayNavItems,
   activeItem,
   handleNavItemClick,
-  scrolled
+  scrolled,
+  atHeroSection
 }) => {
   // Create a modified version of navItems where the first item is replaced with logo
   const homeItem = displayNavItems.find(item => item.name === "home");
@@ -21,8 +23,8 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   return (
     <div className="hidden sm:flex bg-[#333333]/60 backdrop-blur-md rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
       style={{ padding: "3px 2px" }}>
-      {/* Render home item as Narra logo */}
-      {homeItem && (
+      {/* Render home item as Narra logo only when not at hero section */}
+      {homeItem && !atHeroSection && (
         <a
           key={homeItem.name}
           href={`#${homeItem.anchorId}`}

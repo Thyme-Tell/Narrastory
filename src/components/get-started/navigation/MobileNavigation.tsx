@@ -19,6 +19,7 @@ interface MobileNavigationProps {
   scrolled: boolean;
   activeNavItem: NavItem;
   displayNavItems: NavItem[];
+  atHeroSection: boolean;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -29,7 +30,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   handleNavItemClick,
   scrolled,
   activeNavItem,
-  displayNavItems
+  displayNavItems,
+  atHeroSection
 }) => {
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -38,7 +40,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   };
 
   // Find home item
-  const homeItem = displayNavItems.find(item => item.name === "home");
+  const homeItem = navItems.find(item => item.name === "home");
 
   return (
     <div className="w-full flex sm:hidden justify-between items-center">
@@ -72,8 +74,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
-            {/* Render home as icon in dropdown */}
-            {homeItem && (
+            {/* Render home as icon in dropdown only when not at hero section */}
+            {homeItem && !atHeroSection && (
               <DropdownMenuItem key={homeItem.name} asChild>
                 <a
                   href={`#${homeItem.anchorId}`}
