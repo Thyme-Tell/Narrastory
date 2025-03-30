@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Calendar, Users, MessageSquare } from "lucide-react";
+import { Calendar, Users, MessageSquare, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
@@ -27,71 +27,68 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           Narra Story Circles are laid-back virtual meetups where we swap stories. Drop by, speak up, and connect. Simple as that. Facilitated by Richard Squires, author of 60+ memoirs who knows how to get good stories flowing.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* Left Column - Collapsible Events */}
-          <div className="bg-white rounded-[2px] overflow-hidden border border-[#E5E7EB] shadow-sm">
-            <div className="p-0">
-              {isLoading ? (
-                <div className="flex justify-center items-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A33D29]"></div>
-                </div>
-              ) : error ? (
-                <div className="text-center py-8 px-4">
-                  <p className="text-[#A33D29] mb-2">Unable to load upcoming events</p>
-                  <Button 
-                    variant="outline"
-                    onClick={() => window.location.reload()}
-                    size="sm"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              ) : events && events.length > 0 ? (
-                <Accordion type="single" collapsible>
-                  {events.slice(0, 3).map((event, index) => (
-                    <LumaEventAccordionItem key={event.id} event={event} index={index} />
-                  ))}
-                </Accordion>
-              ) : (
-                <div className="text-center py-12 px-4">
-                  <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-2">No upcoming events at the moment</p>
-                  <p className="text-sm text-gray-400 mb-4">Check back soon for new story circles</p>
-                </div>
-              )}
-            </div>
+        <div className="grid grid-cols-1 gap-8 mb-8">
+          {/* Event Cards */}
+          <div className="space-y-6">
+            {isLoading ? (
+              <div className="flex justify-center items-center p-8 rounded-[15px] bg-white/50">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#674019]"></div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8 px-4 rounded-[15px] bg-white/50">
+                <p className="text-[#674019] mb-2">Unable to load upcoming events</p>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                  size="sm"
+                  className="border-[#674019] text-[#674019]"
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : events && events.length > 0 ? (
+              <Accordion type="single" collapsible className="w-full">
+                {events.slice(0, 3).map((event, index) => (
+                  <LumaEventAccordionItem key={event.id} event={event} index={index} />
+                ))}
+              </Accordion>
+            ) : (
+              <div className="text-center py-12 px-4 rounded-[15px] bg-gradient-to-b from-[#F8E3C8] to-[#FBEFE1]">
+                <Calendar className="h-12 w-12 text-[#674019]/50 mx-auto mb-4" />
+                <p className="text-[#674019] mb-2 font-caslon text-2xl">No upcoming events at the moment</p>
+                <p className="text-[#674019]/60 mb-4">Check back soon for new story circles</p>
+              </div>
+            )}
             
             {events && events.length > 0 && (
-              <div className="p-4 text-center border-t border-[#E5E7EB]">
+              <div className="text-center mt-6">
                 <Button 
                   variant="outline"
                   onClick={() => window.open("https://lu.ma/calendar/cal-Z2lF71wpLrO7F5C", "_blank")}
-                  className="w-full md:w-auto text-sm"
+                  className="border-[#674019] text-[#674019] hover:bg-[#674019]/10 rounded-full"
                 >
-                  View All Events
+                  View All Upcoming Events
                 </Button>
               </div>
             )}
           </div>
           
-          {/* Right Column - Only Create Your Own Circle card now */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-[2px] p-6 border border-[#E5E7EB] shadow-sm">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-medium text-[#242F3F]">Create Your Own Circle</h3>
-                <div className="bg-[#F6F8FA] text-[#A33D29] text-xs font-medium py-1 px-2 rounded">Coming Soon</div>
-              </div>
-              <p className="text-[#403E43] mb-4">
-                Start your own Story Circle with family, friends, or colleagues. 
-                Choose your topics, invite participants, and build a collection of stories that matter to you.
-              </p>
-              <Button
-                className="w-full bg-gray-200 text-gray-500 cursor-not-allowed"
-                disabled
-              >
-                Create a Circle
-              </Button>
+          {/* Create Your Own Circle card */}
+          <div className="bg-gradient-to-b from-[#F8E3C8] to-[#FBEFE1] rounded-[15px] p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-[32px] font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
+              <div className="bg-white text-[#674019] text-sm font-medium py-1 px-3 rounded-full">Coming Soon</div>
             </div>
+            <p className="text-[#674019]/80 mb-4 text-lg">
+              Start your own Story Circle with family, friends, or colleagues. 
+              Choose your topics, invite participants, and build a collection of stories that matter to you.
+            </p>
+            <Button
+              className="w-full bg-white/80 text-[#674019]/40 cursor-not-allowed rounded-[50px] text-lg py-6"
+              disabled
+            >
+              Create a Circle
+            </Button>
           </div>
         </div>
       </div>
