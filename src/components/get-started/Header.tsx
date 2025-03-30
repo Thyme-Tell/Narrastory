@@ -79,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
       <nav className="navbar-container flex items-center justify-between bg-transparent py-1.5 sm:py-2">
-        <div className={`navbar-logo flex ${!showMobileNav ? 'w-full justify-center sm:justify-start sm:w-auto' : 'items-center'}`}>
+        <div className={`navbar-logo flex ${!showMobileNav ? 'w-full justify-center sm:justify-center sm:w-auto' : 'items-center'}`}>
           {/* Always show logo on mobile */}
           <a 
             href="#home"
