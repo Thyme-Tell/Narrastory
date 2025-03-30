@@ -113,7 +113,7 @@ const TermsAndConditionsContent: React.FC = () => {
       </TermsSection>
       
       <TermsSection title="8. DISCLAIMERS AND LIMITATIONS OF LIABILITY">
-        <SubSection title="8.1 \"As Is\" Service">
+        <SubSection title='8.1 "As Is" Service'>
           <p>
             THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.
           </p>
