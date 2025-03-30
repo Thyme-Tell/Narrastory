@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import useHeaderScroll from "@/components/get-started/navigation/useHeaderScroll";
 
 // Import our components
 import Header from "@/components/get-started/Header";
@@ -26,6 +27,13 @@ const GetStarted = () => {
   // Get navigation items with references
   const navItems = getNavItems(homeRef, howItWorksRef, storyCirclesRef, signUpRef);
   
+  // Use our scroll hook to detect active section
+  useHeaderScroll({ 
+    navItems, 
+    activeItem, 
+    setActiveItem: (item) => setActiveItem(item) 
+  });
+
   useEffect(() => {
     document.title = "Narra Story | Get Started";
     

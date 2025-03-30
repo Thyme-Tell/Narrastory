@@ -4,6 +4,7 @@ import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
 import DesktopNavigation from "./navigation/DesktopNavigation";
+import useHeaderScroll from "./navigation/useHeaderScroll";
 
 interface HeaderProps {
   navItems: NavItem[];
