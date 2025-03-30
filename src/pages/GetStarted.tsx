@@ -75,7 +75,7 @@ const GetStarted = () => {
         <section id="how-it-works" className="scroll-mt-24">
           <HowItWorksSection howItWorksRef={howItWorksRef} isMobile={isMobile} />
         </section>
-        <section id="join-story-circle" className="scroll-mt-24">
+        <section id="join-story-circle" className="scroll-mt-24 bg-transparent">
           <StoryCirclesSection storyCirclesRef={storyCirclesRef} />
         </section>
         <section id="sign-up" className="scroll-mt-24">
