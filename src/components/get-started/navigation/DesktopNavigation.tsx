@@ -21,7 +21,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   handleLogoClick = () => {}
 }) => {
   return (
-    <div className="hidden sm:flex bg-[#333333]/60 backdrop-blur-md rounded-[4px] p-0.5 items-center ml-auto whitespace-nowrap overflow-x-auto" 
+    <div className="hidden sm:flex bg-white/20 backdrop-blur-md border border-white/20 rounded-[4px] p-0.5 items-center ml-auto whitespace-nowrap overflow-x-auto" 
       style={{ padding: "3px 2px" }}>
       
       {/* Always show Narra logo when past How It Works section */}
@@ -47,8 +47,8 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
             onClick={(e) => handleNavItemClick(e, item)}
             className={`flex items-center px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap text-white m-[2px] my-auto ${
               activeItem === item.name
-                ? "bg-[#17342C]"
-                : "hover:bg-[#17342C]/10"
+                ? "bg-white/30"
+                : "hover:bg-white/10"
             } transition-colors w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
           >
             {item.icon}
