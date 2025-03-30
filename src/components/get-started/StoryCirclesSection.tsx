@@ -1,11 +1,10 @@
 
 import React from "react";
-import { Calendar, Users, ChevronDown } from "lucide-react";
+import { Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
 import LumaEventCard from "./LumaEventCard";
 import { Card } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface StoryCirclesSectionProps {
   storyCirclesRef: React.RefObject<HTMLElement>;
@@ -13,7 +12,6 @@ interface StoryCirclesSectionProps {
 
 const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesRef }) => {
   const { events, isLoading, error } = useLumaEvents();
-  const [isOwnCircleOpen, setIsOwnCircleOpen] = React.useState(false);
 
   return (
     <section 
@@ -68,37 +66,21 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                 </div>
               )}
               
-              {/* Create Your Own Circle card - always show in the grid */}
+              {/* Create Your Own Circle card - always expanded, no toggle */}
               {events && events.length > 0 && (
                 <Card className="bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between">
-                  <Collapsible
-                    open={isOwnCircleOpen}
-                    onOpenChange={setIsOwnCircleOpen}
-                    className="w-full flex flex-col h-full"
-                  >
-                    <div className="flex flex-col">
+                  <div className="flex flex-col h-full">
+                    <div className="flex-grow">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">Create Your Own Circle</h3>
-                        
-                        {/* Circular chevron button */}
-                        <CollapsibleTrigger asChild>
-                          <button 
-                            className="flex items-center justify-center bg-white rounded-full h-7 w-7 text-[#674019] hover:bg-white/90 transition-colors focus:outline-none"
-                            aria-label={isOwnCircleOpen ? "Hide details" : "Show details"}
-                          >
-                            <ChevronDown className="h-4 w-4" />
-                          </button>
-                        </CollapsibleTrigger>
                       </div>
                       <div className="bg-white text-[#674019] text-xs font-medium py-1 px-3 rounded-full w-fit mb-6">Coming Soon</div>
-                    </div>
-
-                    <CollapsibleContent className="pt-4">
+                      
                       <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
                         Start your own Story Circle with family, friends, or colleagues. 
                         Choose your topics, invite participants, and build a collection of stories that matter to you.
                       </p>
-                    </CollapsibleContent>
+                    </div>
                     
                     <div className="mt-auto pt-6">
                       <Button
@@ -108,7 +90,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                         Create a Circle
                       </Button>
                     </div>
-                  </Collapsible>
+                  </div>
                 </Card>
               )}
             </>
