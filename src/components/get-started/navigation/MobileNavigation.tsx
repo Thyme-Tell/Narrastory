@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { 
@@ -36,7 +35,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   handleLogoClick = () => {}
 }) => {
   return (
-    <div className="w-full flex justify-between items-center">
+    <div className="w-full flex sm:hidden justify-between items-center">
       {/* Show Narra logo when past How It Works section */}
       {pastHowItWorks ? (
         <NarraLogo handleLogoClick={handleLogoClick} />
