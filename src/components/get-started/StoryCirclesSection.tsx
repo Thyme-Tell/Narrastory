@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Calendar, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,13 +29,6 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* Left Column - Collapsible Events */}
           <div className="bg-white rounded-[2px] overflow-hidden border border-[#E5E7EB] shadow-sm">
-            <div className="flex items-center p-4 border-b border-[#E5E7EB]">
-              <Calendar className="h-5 w-5 text-[#A33D29] mr-2" />
-              <h3 className="text-lg md:text-xl font-medium text-[#242F3F]">
-                Upcoming Story Circles
-              </h3>
-            </div>
-            
             <div className="p-0">
               {isLoading ? (
                 <div className="flex justify-center items-center p-8">
@@ -142,4 +134,3 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
 };
 
 export default StoryCirclesSection;
-
