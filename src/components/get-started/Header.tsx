@@ -69,10 +69,9 @@ const Header: React.FC<HeaderProps> = ({
     setIsDropdownOpen(false);
   };
 
-  // Filter nav items when at hero section
-  const displayNavItems = atHeroSection 
-    ? navItems.filter(item => item.name !== "home") 
-    : navItems;
+  // Instead of filtering out home completely, include it in all nav items
+  // The display logic will be handled in the DesktopNavigation component
+  const displayNavItems = navItems;
 
   return (
     <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">

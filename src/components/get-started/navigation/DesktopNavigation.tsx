@@ -17,7 +17,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   scrolled,
   atHeroSection
 }) => {
-  // Create a modified version of navItems where the first item is replaced with logo
+  // Find the home item from the navigation items
   const homeItem = displayNavItems.find(item => item.name === "home");
   
   return (
@@ -33,7 +33,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
             activeItem === homeItem.name
               ? "bg-[#17342C]"
               : "hover:bg-[#17342C]/10"
-          } transition-colors w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
+          } transition-colors w-auto sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
         >
           <img 
             src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
@@ -44,32 +44,35 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
       )}
       
       {/* Render the rest of the items */}
-      {displayNavItems.filter(item => item.name !== "home").map((item) => (
-        item.isButton ? (
-          <a
-            key={item.name}
-            href={`#${item.anchorId}`}
-            onClick={(e) => handleNavItemClick(e, item)}
-            className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
-          >
-            Sign Up
-          </a>
-        ) : (
-          <a
-            key={item.name}
-            href={`#${item.anchorId}`}
-            onClick={(e) => handleNavItemClick(e, item)}
-            className={`flex items-center px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap text-white m-[2px] my-auto ${
-              activeItem === item.name
-                ? "bg-[#17342C]"
-                : "hover:bg-[#17342C]/10"
-            } transition-colors w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
-          >
-            {item.icon}
-            {item.label}
-          </a>
-        )
-      ))}
+      {displayNavItems
+        .filter(item => item.name !== "home" || atHeroSection)
+        .map((item) => (
+          item.isButton ? (
+            <a
+              key={item.name}
+              href={`#${item.anchorId}`}
+              onClick={(e) => handleNavItemClick(e, item)}
+              className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap bg-atlantic text-white hover:bg-atlantic/90 transition-colors w-full sm:w-auto justify-center m-[2px] mr-[3px] my-auto`}
+            >
+              Save Your Spot (x available)
+            </a>
+          ) : (
+            <a
+              key={item.name}
+              href={`#${item.anchorId}`}
+              onClick={(e) => handleNavItemClick(e, item)}
+              className={`flex items-center px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-[4px] text-sm font-medium whitespace-nowrap text-white m-[2px] my-auto ${
+                activeItem === item.name
+                  ? "bg-[#17342C]"
+                  : "hover:bg-[#17342C]/10"
+              } transition-colors w-full sm:w-auto mb-0 sm:mb-0 sm:mr-0.5`}
+            >
+              {item.icon}
+              {item.label}
+            </a>
+          )
+        ))
+      }
     </div>
   );
 };
