@@ -37,26 +37,18 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 }) => {
   return (
     <div className="w-full flex sm:hidden justify-between items-center">
-      {/* Show Narra logo when past How It Works section */}
-      {pastHowItWorks ? (
-        <NarraLogo handleLogoClick={handleLogoClick} />
-      ) : (
-        !scrolled ? (
-          <a 
-            href="#home"
-            className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
-            style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
-          >
-            <img 
-              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
-              alt="Narra Logo" 
-              className="w-[100px] h-auto"
-            />
-          </a>
-        ) : (
-          <div className="w-[100px]"></div> // Empty space to maintain layout
-        )
-      )}
+      {/* Always show Narra logo on mobile regardless of scroll position */}
+      <a 
+        href="#home"
+        className="bg-[#EFF1E9]/50 rounded-[100px] p-2"
+        style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
+      >
+        <img 
+          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
+          alt="Narra Logo" 
+          className="w-[100px] h-auto"
+        />
+      </a>
 
       <div className="ml-2">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
@@ -85,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({
             scrolled={scrolled}
             activeNavItem={activeNavItem}
             displayNavItems={displayNavItems}
-            pastHowItWorks={pastHowItWorks}
+            pastHowItWorks={false} // Always set to false for mobile to prevent scroll-based changes
             handleLogoClick={handleLogoClick}
           />
 
