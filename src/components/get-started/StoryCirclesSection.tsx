@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Calendar, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -73,43 +74,8 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
             )}
           </div>
           
-          {/* Right Column - About Story Circles */}
+          {/* Right Column - Only Create Your Own Circle card now */}
           <div className="space-y-6">
-            <div className="bg-white rounded-[2px] p-6 border border-[#E5E7EB] shadow-sm">
-              <h3 className="text-xl font-medium mb-4 text-[#242F3F]">What are Story Circles?</h3>
-              <p className="text-[#403E43] mb-4">
-                Story Circles are intimate gatherings where people come together to share and preserve 
-                their stories. These guided sessions create a supportive environment for storytelling, 
-                memory sharing, and connection.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div className="flex items-start">
-                  <div className="bg-[#F9F5F2] rounded-full p-2 mr-3 mt-1">
-                    <Users className="h-4 w-4 text-[#A33D29]" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-[#242F3F] text-sm">Community</h4>
-                    <p className="text-xs text-gray-600">Connect with people who share your experiences</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-[#F9F5F2] rounded-full p-2 mr-3 mt-1">
-                    <MessageSquare className="h-4 w-4 text-[#A33D29]" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-[#242F3F] text-sm">Preservation</h4>
-                    <p className="text-xs text-gray-600">Create lasting records of shared memories</p>
-                  </div>
-                </div>
-              </div>
-              <Button 
-                className="w-full bg-[#242F3F] hover:bg-[#242F3F]/90 text-white"
-                onClick={() => window.open("https://lu.ma/narra", "_blank")}
-              >
-                Join a Circle
-              </Button>
-            </div>
-            
             <div className="bg-white rounded-[2px] p-6 border border-[#E5E7EB] shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-medium text-[#242F3F]">Create Your Own Circle</h3>
