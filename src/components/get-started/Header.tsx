@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({
       const howItWorksSection = document.getElementById("how-it-works");
       if (howItWorksSection) {
         const howItWorksPosition = howItWorksSection.getBoundingClientRect().top;
-        setPastHowItWorks(howItWorksPosition <= 0);
+        setPastHowItWorks(howItWorksPosition <= 100);
       }
     };
     
@@ -106,8 +106,8 @@ const Header: React.FC<HeaderProps> = ({
             handleLogoClick={handleLogoClick}
           />
 
-          {/* Tablet/desktop logo - hide when scrolled past How It Works */}
-          {!pastHowItWorks && <DesktopLogo scrolled={scrolled} />}
+          {/* Tablet/desktop logo - hide when scrolled */}
+          {!scrolled && <DesktopLogo scrolled={scrolled} />}
         </div>
 
         {/* Navigation menu */}
