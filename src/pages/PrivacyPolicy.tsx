@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import LegalPageHeader from "@/components/legal/LegalPageHeader";
 import { Link } from "react-router-dom";
@@ -15,7 +14,7 @@ const PrivacyPolicy: React.FC = () => {
       <LegalPageHeader />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-atlantic">NARRA PRIVACY POLICY</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-atlantic">PRIVACY POLICY</h1>
         
         <div className="prose prose-lg max-w-none bg-white rounded-lg p-6 sm:p-8 shadow-sm">
           <p className="text-muted-foreground mb-6">Last Updated: March 30, 2025</p>
