@@ -95,7 +95,11 @@ const LumaEventCard: React.FC<EventCardProps> = ({ event }) => {
             disabled={event.spotsRemaining <= 0}
           >
             {event.spotsRemaining > 0 
-              ? `Save Your Spot (${event.spotsRemaining} available)` 
+              ? (
+                <>
+                  Save Your Spot <span className="hidden sm:inline-block md:hidden lg:inline-block">({event.spotsRemaining} available)</span><span className="inline-block sm:hidden md:inline-block lg:hidden">({event.spotsRemaining})</span>
+                </>
+              ) 
               : "Sold Out"}
           </Button>
         </CardFooter>
