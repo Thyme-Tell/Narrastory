@@ -60,7 +60,7 @@ const GetStarted = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FF]">
+    <div className="min-h-screen bg-[#EFF1E9]">
       <div className="px-[7%]">
         <Header 
           navItems={navItems} 
