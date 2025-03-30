@@ -61,6 +61,26 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[200px] bg-[#333333]/80 backdrop-blur-md border-0 text-white rounded-[4px]">
+            {/* Home menu item */}
+            <DropdownMenuItem asChild>
+              <a
+                href="#home"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setIsDropdownOpen(false);
+                }}
+                className="flex items-center w-full px-4 py-1.5 text-xs text-white rounded-[4px] hover:bg-[#17342C]/30"
+              >
+                <img 
+                  src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
+                  alt="Narra Icon" 
+                  className="h-4 w-4 mr-2"
+                />
+                <span className="text-xs">Home</span>
+              </a>
+            </DropdownMenuItem>
+            
             {/* Render all menu items */}
             {displayNavItems.map((item) => (
               item.isButton ? (

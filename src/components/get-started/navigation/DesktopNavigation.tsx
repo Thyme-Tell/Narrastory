@@ -1,23 +1,33 @@
 
 import React from "react";
 import { NavItem } from "../NavItems";
+import NarraLogo from "./NarraLogo";
 
 interface DesktopNavigationProps {
   displayNavItems: NavItem[];
   activeItem: string;
   handleNavItemClick: (e: React.MouseEvent, item: NavItem) => void;
   scrolled: boolean;
+  pastHowItWorks?: boolean;
+  handleLogoClick?: (e: React.MouseEvent) => void;
 }
 
 const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   displayNavItems,
   activeItem,
   handleNavItemClick,
-  scrolled
+  scrolled,
+  pastHowItWorks = false,
+  handleLogoClick = () => {}
 }) => {
   return (
     <div className="hidden sm:flex bg-[#333333]/60 backdrop-blur-md rounded-[4px] p-0.5 items-center mx-auto lg:mx-0 shadow-sm whitespace-nowrap overflow-x-auto" 
       style={{ padding: "3px 2px" }}>
+      
+      {/* Show Narra logo when past How It Works section */}
+      {pastHowItWorks && handleLogoClick && (
+        <NarraLogo handleLogoClick={handleLogoClick} />
+      )}
       
       {/* Render all navigation items */}
       {displayNavItems.map((item) => (

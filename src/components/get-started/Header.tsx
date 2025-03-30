@@ -4,6 +4,7 @@ import { NavItem } from "./NavItems";
 import MobileNavigation from "./navigation/MobileNavigation";
 import DesktopLogo from "./navigation/DesktopLogo";
 import DesktopNavigation from "./navigation/DesktopNavigation";
+import NarraLogo from "./navigation/NarraLogo";
 import useHeaderScroll from "./navigation/useHeaderScroll";
 
 interface HeaderProps {
@@ -19,19 +20,33 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [pastHowItWorks, setPastHowItWorks] = useState(false);
   
-  // Track scroll position for logo visibility
+  // Track scroll position for logo visibility and section detection
   useEffect(() => {
     const handleScroll = () => {
       const position = window.scrollY;
+      
+      // Set scrolled state for header styling
       if (position > 50) {
         setScrolled(true);
       } else {
         setScrolled(false);
       }
+      
+      // Check if we've scrolled past "How It Works" section
+      const howItWorksSection = document.getElementById("how-it-works");
+      if (howItWorksSection) {
+        const howItWorksPosition = howItWorksSection.getBoundingClientRect().top;
+        setPastHowItWorks(howItWorksPosition <= 100);
+      }
     };
     
     window.addEventListener('scroll', handleScroll);
+    
+    // Initial check
+    handleScroll();
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -61,6 +76,13 @@ const Header: React.FC<HeaderProps> = ({
     
     // Close mobile dropdown if open
     setIsDropdownOpen(false);
+  };
+
+  // Handle logo click to scroll to top
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.location.hash = '';
   };
 
   // Display nav items without scroll modifications
@@ -93,6 +115,8 @@ const Header: React.FC<HeaderProps> = ({
             activeItem={activeItem} 
             handleNavItemClick={handleNavItemClick}
             scrolled={scrolled}
+            pastHowItWorks={pastHowItWorks}
+            handleLogoClick={handleLogoClick}
           />
         </div>
       </nav>
