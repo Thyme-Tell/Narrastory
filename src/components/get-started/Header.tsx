@@ -77,7 +77,7 @@ const Header: React.FC<HeaderProps> = ({
   const displayNavItems = navItems;
 
   return (
-    <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all backdrop-blur-md bg-[#EFF1E9]/70">
+    <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all">
       <nav className="navbar-container flex items-center justify-between bg-transparent py-1.5 sm:py-2">
         <div className={`navbar-logo flex ${!showMobileNav ? 'w-full justify-center sm:justify-center sm:w-auto' : 'items-center'}`}>
           {/* Always show logo on mobile */}
