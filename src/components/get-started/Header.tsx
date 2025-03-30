@@ -77,36 +77,38 @@ const Header: React.FC<HeaderProps> = ({
   const displayNavItems = navItems;
 
   return (
-    <header className="py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all bg-transparent">
+    <header className={`py-4 px-4 sm:px-8 sticky top-0 z-50 transition-all navbar-frosted-glass`}>
       <nav className="navbar-container flex items-center justify-between bg-transparent py-1.5 sm:py-2">
         <div className={`navbar-logo flex ${!showMobileNav ? 'w-full justify-center sm:justify-center sm:w-auto' : 'items-center'}`}>
-          {/* Always show logo on mobile */}
+          {/* Always show logo on mobile with 25% larger size */}
           <a 
             href="#home"
-            className="bg-[#EFF1E9]/50 rounded-[100px] p-2 sm:hidden"
+            className="bg-[#EFF1E9]/50 rounded-[100px] p-2 sm:hidden navbar-mobile-logo"
             onClick={handleLogoClick}
             style={{ boxShadow: "0 0 20px rgba(239, 241, 233, 0.8)" }}
           >
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-horizontal.svg" 
               alt="Narra Logo" 
-              className="w-[100px] h-auto"
+              className="w-[125px] h-auto" // Increased size from 100px to 125px
             />
           </a>
 
           {showMobileNav && (
-            <MobileNavigation 
-              navItems={navItems}
-              activeItem={activeItem}
-              isDropdownOpen={isDropdownOpen}
-              setIsDropdownOpen={setIsDropdownOpen}
-              handleNavItemClick={handleNavItemClick}
-              scrolled={scrolled}
-              activeNavItem={activeNavItem}
-              displayNavItems={displayNavItems}
-              pastHowItWorks={false}
-              handleLogoClick={handleLogoClick}
-            />
+            <div className="navbar-mobile-controls">
+              <MobileNavigation 
+                navItems={navItems}
+                activeItem={activeItem}
+                isDropdownOpen={isDropdownOpen}
+                setIsDropdownOpen={setIsDropdownOpen}
+                handleNavItemClick={handleNavItemClick}
+                scrolled={scrolled}
+                activeNavItem={activeNavItem}
+                displayNavItems={displayNavItems}
+                pastHowItWorks={false}
+                handleLogoClick={handleLogoClick}
+              />
+            </div>
           )}
 
           {!scrolled && <DesktopLogo scrolled={scrolled} />}
