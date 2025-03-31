@@ -61,6 +61,20 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
         </DialogHeader>
         
         <div className="space-y-6">
+          {/* For Senior Living Communities section */}
+          <div className="bg-[#FBF7F1] rounded-xl p-6 border border-[#F8E3C8]">
+            <h3 className="text-lg font-semibold text-[#242F3F] mb-3">For Senior Living Communities</h3>
+            <p className="text-[#403E43] mb-4">
+              Enable your residents to write their memoirs without the hurdles of using technology. With Narra, their voice is all they need.
+            </p>
+            <Button 
+              className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+              onClick={() => window.open("mailto:richard@narrastory.com?subject=Senior%20Living%20Inquiry", "_blank")}
+            >
+              Learn More
+            </Button>
+          </div>
+          
           <div>
             <h3 className="text-lg font-semibold text-[#242F3F] mb-3">Get Started:</h3>
             <div className="space-y-4">
