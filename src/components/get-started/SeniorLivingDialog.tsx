@@ -61,14 +61,6 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
         </DialogHeader>
         
         <div className="space-y-6">
-          <div className="border-t border-[#F8E3C8] pt-4">
-            <h3 className="text-lg font-semibold text-[#242F3F] mb-3">For Senior Living Communities:</h3>
-            <p className="text-[#403E43] text-sm mb-4">
-              Enhance resident engagement with storytelling programs designed specifically for senior living communities. 
-              Preserve memories and build connections through shared narratives.
-            </p>
-          </div>
-          
           <div>
             <h3 className="text-lg font-semibold text-[#242F3F] mb-3">Get Started:</h3>
             <div className="space-y-4">
