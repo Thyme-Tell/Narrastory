@@ -28,7 +28,8 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
             Narra: Preserving Family Memories for Generations
           </DialogTitle>
           <DialogDescription className="text-[#403E43]">
-            Empower your community with Narra's storytelling platform. Our mission is to connect generations by transforming personal stories into lasting narratives.
+            You care about your residents and their stories. 
+            Our storytelling platform empowers senior communities to celebrate each resident's narrative, making it easy and accessible without the hurdles of technology.
           </DialogDescription>
         </DialogHeader>
         
@@ -40,25 +41,25 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
                 <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
                   <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
                 </div>
-                <span><span className="font-medium">Personalized Storytelling:</span> Utilize AI to convert spoken memories into written formats, creating eBooks and printed memory books.</span>
+                <span><span className="font-medium">AI Storytelling:</span> Convert spoken memories into eBooks and keepsakes.</span>
               </li>
               <li className="flex items-start">
                 <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
                   <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
                 </div>
-                <span><span className="font-medium">Engagement Tools:</span> Encourage residents to share their stories, fostering connection and engagement within your community.</span>
+                <span><span className="font-medium">Engagement:</span> Encourage residents to share their stories.</span>
               </li>
               <li className="flex items-start">
                 <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
                   <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
                 </div>
-                <span><span className="font-medium">Easy Onboarding:</span> Our user-friendly platform ensures seamless integration for communities, with dedicated support available.</span>
+                <span><span className="font-medium">Easy Integration:</span> Quick setup with dedicated support.</span>
               </li>
               <li className="flex items-start">
                 <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
                   <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
                 </div>
-                <span><span className="font-medium">Marketing Resources:</span> Access promotional materials to highlight the value of preserving family stories.</span>
+                <span><span className="font-medium">Promotional Materials:</span> Resources to highlight family legacies.</span>
               </li>
             </ul>
           </div>
@@ -73,18 +74,18 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
                 Book a Demo
               </Button>
               <p className="text-center text-[#403E43] text-sm">
-                Experience how Narra can enhance your community's storytelling initiatives.
+                Discover how Narra can enrich your community's storytelling efforts.
               </p>
               <div className="border border-[#F8E3C8] rounded-xl p-4 bg-[#FBF7F1]">
                 <p className="text-[#674019] font-medium mb-1">Free Trial Available</p>
-                <p className="text-[#674019]/80 text-sm">Explore our platform with no commitment.</p>
+                <p className="text-[#674019]/80 text-sm">Explore our platform with no obligation.</p>
               </div>
             </div>
           </div>
           
           <div className="border-t border-[#F8E3C8] pt-4">
             <h3 className="text-lg font-semibold text-[#242F3F] mb-2">Contact Us:</h3>
-            <p className="text-[#403E43] mb-2">For inquiries or support, reach out at:</p>
+            <p className="text-[#403E43] mb-2">For inquiries, reach out at:</p>
             <div className="flex items-center space-x-2">
               <Mail className="h-5 w-5 text-[#A33D29]" />
               <a href="mailto:richard@narrastory.com" className="text-[#A33D29] hover:underline">
@@ -94,7 +95,7 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
           </div>
           
           <div className="bg-[#F8F8F8] p-3 rounded-lg text-xs text-[#777777] italic">
-            Disclaimer: Narra is dedicated to preserving memories and enhancing connections. It is not intended to replace professional therapeutic services.
+            Disclaimer: Narra is dedicated to preserving memories and enhancing connections, not a substitute for professional therapeutic services.
           </div>
         </div>
         
