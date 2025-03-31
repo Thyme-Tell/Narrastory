@@ -62,36 +62,6 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
         
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-[#242F3F] mb-3">Features & Benefits:</h3>
-            <ul className="space-y-3 text-[#403E43]">
-              <li className="flex items-start">
-                <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
-                  <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
-                </div>
-                <span><span className="font-medium">AI Storytelling:</span> Convert spoken memories into eBooks and keepsakes.</span>
-              </li>
-              <li className="flex items-start">
-                <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
-                  <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
-                </div>
-                <span><span className="font-medium">Engagement:</span> Encourage residents to share their stories.</span>
-              </li>
-              <li className="flex items-start">
-                <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
-                  <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
-                </div>
-                <span><span className="font-medium">Easy Integration:</span> Quick setup with dedicated support.</span>
-              </li>
-              <li className="flex items-start">
-                <div className="bg-[#F8E3C8] rounded-full p-1 mr-2 mt-0.5">
-                  <div className="w-2 h-2 bg-[#674019] rounded-full"></div>
-                </div>
-                <span><span className="font-medium">Promotional Materials:</span> Resources to highlight family legacies.</span>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
             <h3 className="text-lg font-semibold text-[#242F3F] mb-3">Get Started:</h3>
             <div className="space-y-4">
               <Button 
