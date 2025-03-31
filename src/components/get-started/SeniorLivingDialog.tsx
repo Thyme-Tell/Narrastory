@@ -1,7 +1,9 @@
 
-import React from "react";
-import { Mail } from "lucide-react";
+import React, { useState } from "react";
+import { Mail, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -20,16 +22,41 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
   open,
   onOpenChange,
 }) => {
+  const [email, setEmail] = useState("");
+  const { toast } = useToast();
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast({
+        title: "Email is required",
+        description: "Please enter your email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Email submission logic
+    window.location.href = `mailto:richard@narrastory.com?subject=Senior%20Living%20Inquiry&body=Email:%20${email}`;
+    
+    toast({
+      title: "Thank you for your interest",
+      description: "We'll be in touch soon.",
+    });
+    
+    setEmail("");
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl rounded-xl bg-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-caslon font-thin text-[#242F3F] mb-2">
-            Narra: Preserving Family Memories for Generations
+            You care about your residents and their stories.
           </DialogTitle>
           <DialogDescription className="text-[#403E43]">
-            You care about your residents and their stories. 
-            Our storytelling platform empowers senior communities to celebrate each resident's narrative, making it easy and accessible without the hurdles of technology.
+            Enable your residents to write their memoirs without the hurdles of using technology. With Narra, their voice is all they need.
           </DialogDescription>
         </DialogHeader>
         
@@ -84,14 +111,30 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
           </div>
           
           <div className="border-t border-[#F8E3C8] pt-4">
-            <h3 className="text-lg font-semibold text-[#242F3F] mb-2">Contact Us:</h3>
-            <p className="text-[#403E43] mb-2">For inquiries, reach out at:</p>
-            <div className="flex items-center space-x-2">
-              <Mail className="h-5 w-5 text-[#A33D29]" />
-              <a href="mailto:richard@narrastory.com" className="text-[#A33D29] hover:underline">
-                richard@narrastory.com
-              </a>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <h3 className="text-lg font-semibold text-[#242F3F] mb-2">Contact Us:</h3>
+              <div className="flex space-x-2">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="border-[#F8E3C8] focus-visible:ring-[#A33D29]"
+                />
+                <Button 
+                  type="submit"
+                  className="bg-[#A33D29] hover:bg-[#A33D29]/90"
+                >
+                  Submit
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2 mt-2">
+                <Mail className="h-5 w-5 text-[#A33D29]" />
+                <a href="mailto:richard@narrastory.com" className="text-[#A33D29] hover:underline">
+                  richard@narrastory.com
+                </a>
+              </div>
+            </form>
           </div>
           
           <div className="bg-[#F8F8F8] p-3 rounded-lg text-xs text-[#777777] italic">
