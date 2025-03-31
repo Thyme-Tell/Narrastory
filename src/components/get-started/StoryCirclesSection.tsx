@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
 import LumaEventCard from "./LumaEventCard";
 import { Card } from "@/components/ui/card";
+import SeniorLivingDialog from "./SeniorLivingDialog";
 
 interface StoryCirclesSectionProps {
   storyCirclesRef: React.RefObject<HTMLElement>;
@@ -12,6 +13,7 @@ interface StoryCirclesSectionProps {
 
 const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesRef }) => {
   const { events, isLoading, error } = useLumaEvents();
+  const [isSeniorLivingDialogOpen, setSeniorLivingDialogOpen] = useState(false);
 
   return (
     <section 
@@ -68,9 +70,10 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           )}
         </div>
         
-        {/* Second row - Create Your Own Circle */}
+        {/* Second row - Create Your Own Circle and Senior Living */}
         {events && events.length > 0 && (
-          <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Create Your Own Circle */}
             <Card className="bg-gradient-to-b from-[#E4C795] to-[#EBE5D3] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between">
               <div className="flex flex-col h-full">
                 <div className="flex-grow">
@@ -95,6 +98,39 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                 </div>
               </div>
             </Card>
+            
+            {/* For Senior Living Communities */}
+            <Card 
+              className="bg-gradient-to-b from-[#F8E3C8] to-[#FBEFE1] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all"
+              onClick={() => setSeniorLivingDialogOpen(true)}
+            >
+              <div className="flex flex-col h-full">
+                <div className="flex-grow">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl md:text-2xl font-caslon font-normal text-[#674019]">For Senior Living Communities</h3>
+                  </div>
+                  <div className="bg-white text-[#A33D29] text-xs font-medium py-1 px-3 rounded-full w-fit mb-6">Special Programs</div>
+                  
+                  <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
+                    Enhance resident engagement with storytelling programs designed specifically for senior living communities. 
+                    Preserve memories and build connections through shared narratives.
+                  </p>
+                </div>
+                
+                <div className="mt-auto pt-6">
+                  <Button
+                    className="w-full bg-white text-[#A33D29] hover:bg-white/90 rounded-[50px] text-sm md:text-base py-5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSeniorLivingDialogOpen(true);
+                    }}
+                  >
+                    <Users className="mr-2 h-5 w-5" />
+                    Learn More
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
         
@@ -111,6 +147,12 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           </div>
         )}
       </div>
+      
+      {/* Senior Living Dialog */}
+      <SeniorLivingDialog 
+        open={isSeniorLivingDialogOpen} 
+        onOpenChange={setSeniorLivingDialogOpen} 
+      />
     </section>
   );
 };
