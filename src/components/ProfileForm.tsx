@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -319,23 +318,33 @@ const ProfileForm = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Checkbox 
-              id="remember-me" 
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-              className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
-            />
-            <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
-              Remember me
-            </Label>
-          </div>
-          <div className="text-sm">
-            <a href="#" className="text-[#A33D29] hover:text-[#A33D29]/80">
-              Forgot password?
-            </a>
-          </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="remember-me" 
+            checked={rememberMe}
+            onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+            className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
+          />
+          <Label htmlFor="remember-me" className="text-sm text-gray-600">
+            Remember me
+          </Label>
+        </div>
+
+        <div className="text-xs text-gray-500 mt-2">
+          <p>
+            By signing up, you agree to our{" "}
+            <Link to="/terms-and-conditions" className="text-[#A33D29] hover:underline">
+              Terms and Conditions
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy-policy" className="text-[#A33D29] hover:underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+          <p className="mt-1">
+            We respect your privacy and will never share your information with third parties.
+          </p>
         </div>
       </div>
 
