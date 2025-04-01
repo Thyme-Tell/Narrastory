@@ -112,8 +112,8 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                   <div className="bg-white text-[#A33D29] text-xs font-medium py-1 px-3 rounded-full w-fit mb-6">Special Programs</div>
                   
                   <p className="text-[#674019]/80 mb-4 text-sm md:text-base">
-                    Enhance resident engagement with storytelling programs designed specifically for senior living communities. 
-                    Preserve memories and build connections through shared narratives.
+                    Enable your residents to write their memoirs without the hurdles of using technology. 
+                    With Narra, their voice is all they need.
                   </p>
                 </div>
                 
