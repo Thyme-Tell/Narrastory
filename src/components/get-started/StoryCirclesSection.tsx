@@ -71,14 +71,15 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           )}
         </div> */}
         
-        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 md:mb-6 text-center">
+        {/* Commented out Join a Story Circle heading */}
+        {/* <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 md:mb-6 text-center">
           Join a Story Circle
-        </h2>
+        </h2> */}
         
         {/* Content for Join a Story Circle section */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
-          {/* For Senior Living Communities */}
-          <Card 
+          {/* Commented out For Senior Living Communities card */}
+          {/* <Card 
             className="bg-gradient-to-b from-[#F8E3C8] to-[#FBEFE1] rounded-[4px] p-6 shadow-sm h-full border-0 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all"
             onClick={() => setSeniorLivingDialogOpen(true)}
           >
@@ -108,7 +109,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
                 </Button>
               </div>
             </div>
-          </Card>
+          </Card> */}
         </div>
       </div>
       
