@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Calendar, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -73,11 +72,10 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
       // First close the dialog
       onOpenChange(false);
       
-      // Then show the toast that stays until manually closed
+      // Then show the toast with auto-dismiss after 10 seconds (default behavior now)
       toast({
         title: "Workshop request submitted",
-        description: "We'll get back to you within 1 business day to discuss workshop details and scheduling.",
-        duration: 0, // Duration of 0 means the toast stays until manually closed
+        description: "We'll get back to you within 1 business day to discuss workshop details and scheduling."
       });
       
       // Reset form for next time
