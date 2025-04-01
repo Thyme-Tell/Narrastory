@@ -71,7 +71,11 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           )}
         </div> */}
         
-        {/* Second row - For Senior Living Communities */}
+        <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 md:mb-6 text-center">
+          Join a Story Circle
+        </h2>
+        
+        {/* Content for Join a Story Circle section */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
           {/* For Senior Living Communities */}
           <Card 
