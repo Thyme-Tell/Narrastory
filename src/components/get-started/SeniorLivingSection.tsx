@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Building, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import SeniorLivingDialog from "./SeniorLivingDialog";
@@ -37,20 +37,12 @@ const SeniorLivingSection: React.FC<SeniorLivingSectionProps> = ({
               Enable your residents to write their memoirs without the hurdles of using technology. With Narra, their voice is all they need.
             </p>
             
-            <div className="bg-[#F8E3C8]/50 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-              <Building className="h-8 w-8 text-[#A33D29]" />
-            </div>
-            
-            <h4 className="text-lg font-medium text-[#242F3F] mb-4">
-              Benefits for Senior Communities
-            </h4>
-            
             <ul className="space-y-3 text-sm md:text-base text-[#403E43] mb-6">
               <li className="flex items-start">
                 <span className="rounded-full bg-[#A33D29]/10 p-1 mr-3 mt-0.5">
                   <ArrowRight className="h-3 w-3 text-[#A33D29]" />
                 </span>
-                <span>Residents can tell their life stories with just their voice</span>
+                <span>A meaningful activity that deepens relationships between the community and family members</span>
               </li>
               <li className="flex items-start">
                 <span className="rounded-full bg-[#A33D29]/10 p-1 mr-3 mt-0.5">
@@ -62,7 +54,7 @@ const SeniorLivingSection: React.FC<SeniorLivingSectionProps> = ({
                 <span className="rounded-full bg-[#A33D29]/10 p-1 mr-3 mt-0.5">
                   <ArrowRight className="h-3 w-3 text-[#A33D29]" />
                 </span>
-                <span>Create meaningful activities that preserve memories</span>
+                <span>Residents can tell their life stories with just their voice</span>
               </li>
             </ul>
             
