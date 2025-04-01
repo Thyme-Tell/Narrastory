@@ -117,17 +117,10 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
         
         {isSubmitted ? (
           <div className="space-y-6 py-4">
-            <div className="bg-[#F8E3C8]/30 rounded-xl p-6 text-center">
-              <h3 className="text-xl font-caslon text-[#A33D29] mb-3">Thank You!</h3>
-              <p className="text-[#403E43] mb-4">
-                Your workshop request has been submitted. We'll get back to you within 1 business day.
+            <div className="text-center py-8">
+              <p className="text-[#403E43] text-lg">
+                We got your message! We'll get back to you within 1 business day to discuss workshop details and scheduling.
               </p>
-              <Button 
-                onClick={resetForm}
-                className="mt-2 bg-[#A33D29] hover:bg-[#A33D29]/90"
-              >
-                Schedule Another Workshop
-              </Button>
             </div>
           </div>
         ) : (
