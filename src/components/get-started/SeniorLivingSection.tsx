@@ -63,7 +63,7 @@ const SeniorLivingSection: React.FC<SeniorLivingSectionProps> = ({
                 onClick={() => setSeniorLivingDialogOpen(true)}
                 className="rounded-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
               >
-                Learn More
+                Schedule a Workshop
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>

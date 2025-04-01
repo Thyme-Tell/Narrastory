@@ -1,9 +1,12 @@
 
 import React, { useState } from "react";
-import { Mail, Copy } from "lucide-react";
+import { Calendar, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import FormField from "@/components/FormField";
 import {
   Dialog,
   DialogContent,
@@ -18,11 +21,19 @@ interface SeniorLivingDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June", 
+  "July", "August", "September", "October", "November", "December"
+];
+
 const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
   open,
   onOpenChange,
 }) => {
   const [email, setEmail] = useState("");
+  const [month, setMonth] = useState("");
+  const [note, setNote] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -38,101 +49,130 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
     }
     
     // Email submission logic
-    window.location.href = `mailto:richard@narrastory.com?subject=Senior%20Living%20Inquiry&body=Email:%20${email}`;
+    const subject = "Workshop Request";
+    const body = `
+Email: ${email}
+Preferred Month: ${month}
+Note: ${note}
+    `;
+    
+    window.location.href = `mailto:richard@narrastory.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
     toast({
-      title: "Thank you for your interest",
-      description: "We'll be in touch soon.",
+      title: "Workshop request submitted",
+      description: "We'll get back to you within 1 business day.",
     });
     
+    setIsSubmitted(true);
+  };
+  
+  const resetForm = () => {
     setEmail("");
+    setMonth("");
+    setNote("");
+    setIsSubmitted(false);
+  };
+  
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      resetForm();
+    }
+    onOpenChange(open);
   };
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-2xl rounded-xl bg-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-caslon font-thin text-[#242F3F] mb-2">
-            You care about your residents and their stories.
+            Schedule a Workshop
           </DialogTitle>
           <DialogDescription className="text-[#403E43]">
-            Enable your residents to write their memoirs without the hurdles of using technology. With Narra, their voice is all they need.
+            Fill out the form below to schedule a Narra workshop for your senior living community.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6">
-          {/* For Senior Living Communities section */}
-          <div className="bg-[#FBF7F1] rounded-xl p-6 border border-[#F8E3C8]">
-            <h3 className="text-lg font-semibold text-[#242F3F] mb-3">For Senior Living Communities</h3>
-            <p className="text-[#403E43] mb-4">
-              Enable your residents to write their memoirs without the hurdles of using technology. With Narra, their voice is all they need.
-            </p>
-            <Button 
-              className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
-              onClick={() => window.open("mailto:richard@narrastory.com?subject=Senior%20Living%20Inquiry", "_blank")}
-            >
-              Learn More
-            </Button>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold text-[#242F3F] mb-3">Get Started:</h3>
-            <div className="space-y-4">
-              <Button 
-                className="w-full bg-gradient-to-r from-[#A33D29] to-[#C26E3F] text-white"
-                onClick={() => window.open("mailto:richard@narrastory.com?subject=Book%20a%20Demo%20Request", "_blank")}
-              >
-                Book a Demo
-              </Button>
-              <p className="text-center text-[#403E43] text-sm">
-                Discover how Narra can enrich your community's storytelling efforts.
+        {isSubmitted ? (
+          <div className="space-y-6 py-4">
+            <div className="bg-[#F8E3C8]/30 rounded-xl p-6 text-center">
+              <h3 className="text-xl font-caslon text-[#A33D29] mb-3">Thank You!</h3>
+              <p className="text-[#403E43] mb-4">
+                Your workshop request has been submitted. We'll get back to you within 1 business day.
               </p>
-              <div className="border border-[#F8E3C8] rounded-xl p-4 bg-[#FBF7F1]">
-                <p className="text-[#674019] font-medium mb-1">Free Trial Available</p>
-                <p className="text-[#674019]/80 text-sm">Explore our platform with no obligation.</p>
-              </div>
+              <Button 
+                onClick={resetForm}
+                className="mt-2 bg-[#A33D29] hover:bg-[#A33D29]/90"
+              >
+                Schedule Another Workshop
+              </Button>
             </div>
           </div>
-          
-          <div className="border-t border-[#F8E3C8] pt-4">
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <h3 className="text-lg font-semibold text-[#242F3F] mb-2">Contact Us:</h3>
-              <div className="flex space-x-2">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="border-[#F8E3C8] focus-visible:ring-[#A33D29]"
-                />
-                <Button 
-                  type="submit"
-                  className="bg-[#A33D29] hover:bg-[#A33D29]/90"
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6 py-4">
+            <div className="space-y-4">
+              <FormField
+                label="Email Address"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required={true}
+                placeholder="Enter your email"
+              />
+              
+              <div className="space-y-2 text-left">
+                <Label htmlFor="month" className="block text-left">
+                  Preferred Month for Workshop *
+                </Label>
+                <select
+                  id="month"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  className="flex h-10 w-full rounded-[7px] border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground placeholder:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  required
                 >
-                  Submit
+                  <option value="" disabled>Select a month</option>
+                  {MONTHS.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="space-y-2 text-left">
+                <Label htmlFor="note" className="block text-left">
+                  Note to Narra Team
+                </Label>
+                <Textarea
+                  id="note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Any additional information or questions..."
+                  className="min-h-[120px]"
+                />
+              </div>
+            </div>
+            
+            <div className="bg-[#FBF7F1] rounded-xl p-4 border border-[#F8E3C8] text-[#674019]">
+              <p className="text-sm mb-1 font-medium">What happens next?</p>
+              <p className="text-xs">After submitting this form, we'll get back to you within 1 business day to discuss workshop details and scheduling.</p>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <DialogClose asChild>
+                <Button variant="outline" type="button" className="border-[#242F3F]/20 text-[#242F3F]">
+                  Cancel
                 </Button>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <Mail className="h-5 w-5 text-[#A33D29]" />
-                <a href="mailto:richard@narrastory.com" className="text-[#A33D29] hover:underline">
-                  richard@narrastory.com
-                </a>
-              </div>
-            </form>
-          </div>
-          
-          <div className="bg-[#F8F8F8] p-3 rounded-lg text-xs text-[#777777] italic">
-            Disclaimer: Narra is dedicated to preserving memories and enhancing connections, not a substitute for professional therapeutic services.
-          </div>
-        </div>
-        
-        <div className="flex justify-end mt-4">
-          <DialogClose asChild>
-            <Button variant="outline" className="border-[#242F3F]/20 text-[#242F3F]">
-              Close
-            </Button>
-          </DialogClose>
-        </div>
+              </DialogClose>
+              <Button 
+                type="submit"
+                className="bg-[#A33D29] hover:bg-[#A33D29]/90"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                Submit Request
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
