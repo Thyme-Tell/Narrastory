@@ -162,7 +162,7 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
                   id="note"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Any additional information or questions..."
+                  placeholder="Any additional information or questions, including specific dates or goals you have in mind for an activity with Narra..."
                   className="min-h-[120px]"
                 />
               </div>
