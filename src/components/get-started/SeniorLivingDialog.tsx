@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,17 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+  
+  // Automatically close dialog after successful submission
+  useEffect(() => {
+    if (isSubmitted) {
+      const timer = setTimeout(() => {
+        onOpenChange(false);
+      }, 3000); // Close after 3 seconds
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isSubmitted, onOpenChange]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +92,7 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
       console.error("Error submitting form:", error);
       toast({
         title: "Something went wrong",
-        description: "Please try again or contact us directly.",
+        description: "Please try again or contact us directly",
         variant: "destructive"
       });
     } finally {
@@ -138,7 +149,7 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
               
               <div className="space-y-2 text-left">
                 <Label htmlFor="month" className="block text-left">
-                  Preferred Month for Workshop *
+                  Preferred Month for Workshop
                 </Label>
                 <select
                   id="month"
