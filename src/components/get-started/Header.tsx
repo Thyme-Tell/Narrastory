@@ -109,8 +109,7 @@ const Header: React.FC<HeaderProps> = ({
             />
           )}
 
-          {/* Always show DesktopLogo */}
-          <DesktopLogo scrolled={scrolled} />
+          {!scrolled && <DesktopLogo scrolled={scrolled} />}
         </div>
 
         <div className="navbar-menu flex-grow-0">
@@ -129,4 +128,3 @@ const Header: React.FC<HeaderProps> = ({
 };
 
 export default Header;
-
