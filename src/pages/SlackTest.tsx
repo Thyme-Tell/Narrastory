@@ -33,23 +33,44 @@ const SlackTest = () => {
   const { toast } = useToast();
 
   // Check if the SLACK_BOT_TOKEN environment variable is configured
-  const checkConfig = async () => {
+  const checkConfig = async (forceRefresh: boolean = true) => {
     try {
       setConfigStatus(prev => ({ ...prev, checking: true }));
       setIsRefreshing(true);
-      const response = await testSlackConnection();
+      
+      // Use force refresh to ensure we get the latest configuration
+      const response = await testSlackConnection(forceRefresh);
+      console.log("Configuration check response:", response);
       
       setConfigStatus({
         checking: false,
-        hasBotToken: response?.slack_bot_token_present === true,
+        hasBotToken: response?.slack_bot_token_present === true || response?.slack_bot_token_configured === true,
         error: null
       });
+      
+      if (response?.slack_bot_token_present === true || response?.slack_bot_token_configured === true) {
+        toast({
+          title: "Token Configured",
+          description: "Slack Bot Token is properly configured.",
+        });
+      } else {
+        toast({
+          title: "Token Missing",
+          description: "Slack Bot Token is not configured.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error checking Slack configuration:", error);
       setConfigStatus({
         checking: false,
         hasBotToken: false,
         error: error instanceof Error ? error.message : "Unknown error checking configuration"
+      });
+      toast({
+        title: "Configuration Error",
+        description: error instanceof Error ? error.message : "Failed to check configuration",
+        variant: "destructive",
       });
     } finally {
       setIsRefreshing(false);
@@ -58,14 +79,14 @@ const SlackTest = () => {
 
   // Initial config check on component mount
   useEffect(() => {
-    checkConfig();
+    checkConfig(false); // Initial load without force
   }, []);
 
   const handleTestConnection = async () => {
     setIsTestingConnection(true);
     setResult(null);
     try {
-      const response = await testSlackConnection();
+      const response = await testSlackConnection(true); // Force refresh on manual test
       setResult(response);
       toast({
         title: response.success ? "Success" : "Error",
@@ -135,7 +156,7 @@ const SlackTest = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={checkConfig} 
+              onClick={() => checkConfig(true)} 
               disabled={isRefreshing}
               className="h-8"
             >
@@ -190,7 +211,7 @@ const SlackTest = () => {
                   <InfoIcon className="h-4 w-4" />
                   <AlertTitle>Missing Slack Bot Token</AlertTitle>
                   <AlertDescription>
-                    The SLACK_BOT_TOKEN environment variable is not configured. Please add it to your Supabase project secrets.
+                    The SLACK_BOT_TOKEN environment variable is not properly loaded. You may need to restart the Edge Function.
                     <div className="mt-2">
                       <a
                         href="https://supabase.com/dashboard/project/pohnhzxqorelllbfnqyj/settings/functions"

@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { corsHeaders } from '../_shared/cors.ts';
 
 // Get environment variables
-const SLACK_BOT_TOKEN = Deno.env.get('SLACK_BOT_TOKEN')!;
+const SLACK_BOT_TOKEN = Deno.env.get('SLACK_BOT_TOKEN');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -254,6 +254,10 @@ function formatSlackMessage(
 async function sendToSlack(channel: string, payload: any): Promise<any> {
   console.log(`Sending message to Slack channel: ${channel}`);
   
+  if (!SLACK_BOT_TOKEN) {
+    throw new Error('SLACK_BOT_TOKEN environment variable is not configured');
+  }
+  
   try {
     const response = await fetch('https://slack.com/api/chat.postMessage', {
       method: 'POST',
@@ -308,15 +312,31 @@ Deno.serve(async (req) => {
     // Add a test route for easier debugging
     if (activity_type === 'test_connection') {
       console.log('Test connection request received');
+      console.log('SLACK_BOT_TOKEN present:', Boolean(SLACK_BOT_TOKEN));
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: 'Slack notification function is working correctly!',
-          slack_bot_token_present: !!SLACK_BOT_TOKEN
+          slack_bot_token_present: Boolean(SLACK_BOT_TOKEN),
+          slack_bot_token_configured: Boolean(SLACK_BOT_TOKEN)
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200 
+        }
+      );
+    }
+    
+    // Check if SLACK_BOT_TOKEN is configured
+    if (!SLACK_BOT_TOKEN) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'SLACK_BOT_TOKEN environment variable is not configured' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
         }
       );
     }
