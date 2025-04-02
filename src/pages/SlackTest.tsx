@@ -13,11 +13,12 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { InfoIcon, AlertCircleIcon, CheckCircleIcon } from "lucide-react";
+import { InfoIcon, AlertCircleIcon, CheckCircleIcon, RefreshCw } from "lucide-react";
 
 const SlackTest = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [testMessage, setTestMessage] = useState("");
   const [result, setResult] = useState<any>(null);
   const [configStatus, setConfigStatus] = useState<{
@@ -32,27 +33,31 @@ const SlackTest = () => {
   const { toast } = useToast();
 
   // Check if the SLACK_BOT_TOKEN environment variable is configured
-  useEffect(() => {
-    const checkConfig = async () => {
-      try {
-        setConfigStatus(prev => ({ ...prev, checking: true }));
-        const response = await testSlackConnection();
-        
-        setConfigStatus({
-          checking: false,
-          hasBotToken: response?.slack_bot_token_present === true,
-          error: null
-        });
-      } catch (error) {
-        console.error("Error checking Slack configuration:", error);
-        setConfigStatus({
-          checking: false,
-          hasBotToken: false,
-          error: error instanceof Error ? error.message : "Unknown error checking configuration"
-        });
-      }
-    };
+  const checkConfig = async () => {
+    try {
+      setConfigStatus(prev => ({ ...prev, checking: true }));
+      setIsRefreshing(true);
+      const response = await testSlackConnection();
+      
+      setConfigStatus({
+        checking: false,
+        hasBotToken: response?.slack_bot_token_present === true,
+        error: null
+      });
+    } catch (error) {
+      console.error("Error checking Slack configuration:", error);
+      setConfigStatus({
+        checking: false,
+        hasBotToken: false,
+        error: error instanceof Error ? error.message : "Unknown error checking configuration"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
+  // Initial config check on component mount
+  useEffect(() => {
     checkConfig();
   }, []);
 
@@ -125,7 +130,19 @@ const SlackTest = () => {
       {/* Configuration Status */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Configuration Status</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Configuration Status</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={checkConfig} 
+              disabled={isRefreshing}
+              className="h-8"
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </CardTitle>
           <CardDescription>
             Check if your Slack integration is correctly configured
           </CardDescription>
@@ -174,6 +191,16 @@ const SlackTest = () => {
                   <AlertTitle>Missing Slack Bot Token</AlertTitle>
                   <AlertDescription>
                     The SLACK_BOT_TOKEN environment variable is not configured. Please add it to your Supabase project secrets.
+                    <div className="mt-2">
+                      <a
+                        href="https://supabase.com/dashboard/project/pohnhzxqorelllbfnqyj/settings/functions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Go to Supabase Project Secrets
+                      </a>
+                    </div>
                   </AlertDescription>
                 </Alert>
               )}
@@ -192,7 +219,7 @@ const SlackTest = () => {
         <CardContent>
           <Button 
             onClick={handleTestConnection} 
-            disabled={isTestingConnection}
+            disabled={isTestingConnection || configStatus.checking}
             className="w-full md:w-auto"
           >
             {isTestingConnection ? "Testing..." : "Test Connection"}
@@ -214,10 +241,11 @@ const SlackTest = () => {
               onChange={(e) => setTestMessage(e.target.value)}
               placeholder="Enter test message"
               className="flex-1"
+              disabled={!configStatus.hasBotToken}
             />
             <Button 
               onClick={handleSendTestMessage} 
-              disabled={isSendingMessage || !testMessage.trim()}
+              disabled={isSendingMessage || !testMessage.trim() || !configStatus.hasBotToken}
               className="w-full md:w-auto"
             >
               {isSendingMessage ? "Sending..." : "Send Message"}
