@@ -1,7 +1,9 @@
+
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { encryptText, encryptStoryContent } from "@/utils/encryptionUtils";
+import { notifyStoryCreated, notifyStoryShared } from "@/utils/slackNotification";
 
 interface StoryOperations {
   storyId: string;
@@ -60,7 +62,7 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
     try {
       const { data: storyData, error: storyError } = await supabase
         .from("stories")
-        .select("*, profiles(id)")
+        .select("*, profiles(id, first_name, last_name)")
         .eq("id", storyId)
         .single();
 
@@ -128,11 +130,12 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
     // Generate a share token if one doesn't exist
     if (!story.share_token) {
       try {
+        const shareToken = crypto.randomUUID();
         const { data, error } = await supabase
           .from("stories")
-          .update({ share_token: crypto.randomUUID() })
+          .update({ share_token: shareToken })
           .eq("id", storyId)
-          .select('share_token')
+          .select('share_token, title, profiles(first_name, last_name)')
           .single();
 
         if (error) {
@@ -142,6 +145,23 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
             variant: "destructive",
           });
           return false;
+        }
+        
+        // Get user info for the notification
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("first_name, last_name")
+          .eq("id", data.profile_id)
+          .single();
+          
+        if (profileData) {
+          const authorName = `${profileData.first_name} ${profileData.last_name}`;
+          // Send notification to Slack about story being shared
+          notifyStoryShared(
+            story.title || 'Untitled Story', 
+            authorName,
+            shareToken
+          ).catch(err => console.error('Failed to send share notification:', err));
         }
         
         onUpdate();
