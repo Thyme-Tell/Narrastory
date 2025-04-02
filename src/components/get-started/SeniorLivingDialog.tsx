@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import FormField from "@/components/FormField";
+import { useSlackNotify } from "@/hooks/useSlackNotify";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { sendNotification } = useSlackNotify();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +52,6 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Email submission to mia@narrastory.com
       const response = await fetch("https://formsubmit.co/ajax/mia@narrastory.com", {
         method: "POST",
         headers: {
@@ -69,17 +70,24 @@ const SeniorLivingDialog: React.FC<SeniorLivingDialogProps> = ({
         throw new Error("Failed to submit form");
       }
       
-      // First close the dialog
       onOpenChange(false);
       
-      // Then show the toast with auto-dismiss after 10 seconds (default behavior now)
       toast({
         title: "Workshop request submitted",
         description: "We'll get back to you within 1 business day to discuss workshop details and scheduling."
       });
       
-      // Reset form for next time
       resetForm();
+      
+      await sendNotification({
+        eventType: 'workshop_request',
+        title: 'New Workshop Request',
+        data: {
+          email,
+          month,
+          note: note || 'No additional notes provided'
+        }
+      });
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({

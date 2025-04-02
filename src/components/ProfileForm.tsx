@@ -12,10 +12,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { encryptText } from "@/utils/encryptionUtils";
 import Cookies from "js-cookie";
+import { useSlackNotify } from "@/hooks/useSlackNotify";
 
 const ProfileForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { sendNotification } = useSlackNotify();
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -138,6 +140,18 @@ const ProfileForm = () => {
         }
         throw error;
       }
+
+      // Notify Slack about new user signup
+      await sendNotification({
+        eventType: 'user_signup',
+        title: 'New User Signup',
+        data: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phoneNumber: normalizedPhoneNumber,
+          email: formData.email || 'Not provided'
+        }
+      });
 
       // Set the cookie expiration based on Remember Me preference
       const expirationDays = rememberMe ? 365 : 7; // 1 year vs 1 week

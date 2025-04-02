@@ -54,3 +54,6 @@ verify_jwt = false
 
 [functions.start-narra-call]
 verify_jwt = false
+
+[functions.slack-notify]
+verify_jwt = false

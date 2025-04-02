@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -11,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useSlackNotify } from "@/hooks/useSlackNotify";
 
 const SignIn = () => {
   useEffect(() => {
@@ -21,6 +21,7 @@ const SignIn = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { toast } = useToast();
+  const { sendNotification } = useSlackNotify();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
@@ -96,6 +97,22 @@ const SignIn = () => {
       });
       
       navigate(redirectTo, { replace: true });
+
+      if (profile) {
+        console.log("Login successful, redirecting to:", redirectTo);
+        
+        // Notify Slack about user sign in
+        await sendNotification({
+          eventType: 'user_signup',
+          title: 'User Sign In',
+          data: {
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            phoneNumber: normalizedPhoneNumber,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
     } catch (error) {
       console.error("Error during sign in:", error);
       setError("Something went wrong while signing in. Please try again later.");
