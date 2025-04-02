@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -5,7 +6,6 @@ import { corsHeaders } from '../_shared/cors.ts';
 const RETELL_API_KEY = Deno.env.get('RETELL_API_KEY')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const SLACK_WEBHOOK_URL = Deno.env.get('SLACK_WEBHOOK_URL');
 
 // Create a Supabase client with the service role key
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -151,47 +151,6 @@ Deno.serve(async (req) => {
     }
     
     console.log('Successfully stored story:', story.id);
-    
-    // Notify Slack about the new story if webhook URL is configured
-    if (SLACK_WEBHOOK_URL) {
-      try {
-        // Fetch user profile information
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', finalProfileId)
-          .single();
-          
-        const userName = profileData ? 
-          `${profileData.first_name} ${profileData.last_name}` : 
-          'Unknown User';
-        
-        // Send notification to Slack
-        await fetch('https://pohnhzxqorelllbfnqyj.supabase.co/functions/v1/slack-notify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
-          },
-          body: JSON.stringify({
-            eventType: 'story_created',
-            title: 'New Story Created',
-            data: {
-              title: title,
-              creatorName: userName,
-              createdAt: new Date().toISOString(),
-              storyId: story.id,
-              contentPreview: content.length > 100 ? content.substring(0, 100) + '...' : content
-            }
-          })
-        });
-        
-        console.log('Slack notification sent for new story');
-      } catch (slackError) {
-        console.error('Error sending Slack notification:', slackError);
-        // Non-blocking - don't throw error, just log it
-      }
-    }
     
     return new Response(
       JSON.stringify({ 
