@@ -1,4 +1,5 @@
 
+// Import necessary modules
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -187,6 +188,35 @@ function formatSlackMessage(
           }
         ]
       };
+    case 'test_message':
+      return {
+        blocks: [
+          {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: '🧪 Test Message',
+              emoji: true
+            }
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: message
+            }
+          },
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `🕒 ${timestamp} | Source: ${metadata.source || 'Test'}`
+              }
+            ]
+          }
+        ]
+      };
     default:
       // Generic activity format
       return {
@@ -222,26 +252,33 @@ function formatSlackMessage(
 
 // Function to send message to Slack
 async function sendToSlack(channel: string, payload: any): Promise<any> {
-  const response = await fetch('https://slack.com/api/chat.postMessage', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Authorization': `Bearer ${SLACK_BOT_TOKEN}`
-    },
-    body: JSON.stringify({
-      channel: channel,
-      ...payload
-    })
-  });
-
-  const data = await response.json();
+  console.log(`Sending message to Slack channel: ${channel}`);
   
-  if (!data.ok) {
-    console.error('Error sending message to Slack:', data.error);
-    throw new Error(`Slack API Error: ${data.error}`);
+  try {
+    const response = await fetch('https://slack.com/api/chat.postMessage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': `Bearer ${SLACK_BOT_TOKEN}`
+      },
+      body: JSON.stringify({
+        channel: channel,
+        ...payload
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!data.ok) {
+      console.error('Error sending message to Slack:', data.error);
+      throw new Error(`Slack API Error: ${data.error}`);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in sendToSlack function:', error);
+    throw error;
   }
-  
-  return data;
 }
 
 // Main server function
@@ -321,7 +358,10 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error processing slack notification:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message 
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
