@@ -24,10 +24,8 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
     <div className="hidden sm:flex bg-[#333333]/60 backdrop-blur-md rounded-[4px] p-0.5 items-center ml-auto whitespace-nowrap overflow-x-auto" 
       style={{ padding: "3px 2px" }}>
       
-      {/* Always show Narra logo when past How It Works section */}
-      {pastHowItWorks && (
-        <NarraLogo handleLogoClick={handleLogoClick} />
-      )}
+      {/* Always show Narra logo */}
+      <NarraLogo handleLogoClick={handleLogoClick} />
       
       {/* Render all navigation items */}
       {displayNavItems.map((item) => (
@@ -61,3 +59,4 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
 };
 
 export default DesktopNavigation;
+
