@@ -257,7 +257,7 @@ Deno.serve(async (req) => {
   try {
     // Parse request body
     const payload = await req.json();
-    console.log('Request payload:', payload);
+    console.log('Full request payload:', JSON.stringify(payload, null, 2));
     
     // Extract necessary data from payload
     const { 
@@ -268,12 +268,18 @@ Deno.serve(async (req) => {
       metadata = {}
     } = payload;
     
-    if (!message || !activity_type) {
+    // Add a test route for easier debugging
+    if (activity_type === 'test_connection') {
+      console.log('Test connection request received');
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: message and activity_type are required' }),
+        JSON.stringify({ 
+          success: true, 
+          message: 'Slack notification function is working correctly!',
+          slack_bot_token_present: !!SLACK_BOT_TOKEN
+        }),
         { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
         }
       );
     }
@@ -323,3 +329,4 @@ Deno.serve(async (req) => {
     );
   }
 });
+
