@@ -1,4 +1,3 @@
-
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -135,7 +134,7 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
           .from("stories")
           .update({ share_token: shareToken })
           .eq("id", storyId)
-          .select('share_token, title, profiles(first_name, last_name)')
+          .select('share_token, title, profile_id')
           .single();
 
         if (error) {
