@@ -2,7 +2,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { encryptText, encryptStoryContent } from "@/utils/encryptionUtils";
-import { notifyStoryCreated, notifyStoryShared } from "@/utils/slackNotification";
 
 interface StoryOperations {
   storyId: string;
@@ -144,23 +143,6 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
             variant: "destructive",
           });
           return false;
-        }
-        
-        // Get user info for the notification
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("first_name, last_name")
-          .eq("id", data.profile_id)
-          .single();
-          
-        if (profileData) {
-          const authorName = `${profileData.first_name} ${profileData.last_name}`;
-          // Send notification to Slack about story being shared
-          notifyStoryShared(
-            story.title || 'Untitled Story', 
-            authorName,
-            shareToken
-          ).catch(err => console.error('Failed to send share notification:', err));
         }
         
         onUpdate();

@@ -34,9 +34,6 @@ enable_signup = true
 [realtime]
 enabled = true
 
-[functions.slack-notification]
-verify_jwt = false
-
 [functions.story-tts]
 verify_jwt = false
 
