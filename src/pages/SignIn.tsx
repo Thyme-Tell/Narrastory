@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -188,6 +189,22 @@ const SignIn = () => {
                 <Link to="/" className="text-primary hover:underline">
                   Sign up for Narra
                 </Link>
+              </p>
+            </div>
+            
+            <div className="text-xs text-gray-500 mt-2 text-center">
+              <p>
+                By signing in, you agree to our{" "}
+                <Link to="/terms-and-conditions" className="text-[#A33D29] hover:underline">
+                  Terms and Conditions
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy-policy" className="text-[#A33D29] hover:underline">
+                  Privacy Policy
+                </Link>
+              </p>
+              <p className="mt-1">
+                We respect your privacy and will never share your information with third parties.
               </p>
             </div>
           </div>

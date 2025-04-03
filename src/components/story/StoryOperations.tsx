@@ -60,7 +60,7 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
     try {
       const { data: storyData, error: storyError } = await supabase
         .from("stories")
-        .select("*, profiles(id)")
+        .select("*, profiles(id, first_name, last_name)")
         .eq("id", storyId)
         .single();
 
@@ -128,11 +128,12 @@ export const useStoryOperations = ({ storyId, onUpdate }: StoryOperations) => {
     // Generate a share token if one doesn't exist
     if (!story.share_token) {
       try {
+        const shareToken = crypto.randomUUID();
         const { data, error } = await supabase
           .from("stories")
-          .update({ share_token: crypto.randomUUID() })
+          .update({ share_token: shareToken })
           .eq("id", storyId)
-          .select('share_token')
+          .select('share_token, title, profile_id')
           .single();
 
         if (error) {

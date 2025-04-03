@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Book, Users, ArrowRight } from "lucide-react";
+import { Book, Users, ArrowRight, Building } from "lucide-react";
 
 export type NavItem = {
   name: string;
@@ -16,6 +16,7 @@ export const getNavItems = (
   homeRef: React.RefObject<HTMLDivElement>,
   howItWorksRef: React.RefObject<HTMLElement>,
   storyCirclesRef: React.RefObject<HTMLElement>,
+  seniorLivingRef: React.RefObject<HTMLElement>,
   signUpRef: React.RefObject<HTMLElement>
 ): NavItem[] => [
   { 
@@ -33,6 +34,14 @@ export const getNavItems = (
     icon: <Users className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
     ref: storyCirclesRef,
     anchorId: "join-story-circle"
+  },
+  { 
+    name: "senior-living", 
+    label: "For Senior Living", 
+    path: "/get-started#senior-living",
+    icon: <Building className="mr-1 h-4 w-4 sm:h-4 sm:w-4 text-white" />,
+    ref: seniorLivingRef,
+    anchorId: "senior-living"
   },
   {
     name: "sign-up",

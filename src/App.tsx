@@ -14,6 +14,7 @@ import BookPreviewPage from "./pages/BookPreviewPage";
 import GetStarted from "./pages/GetStarted";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { Toaster } from "@/components/ui/toaster";
 
 // Wrapper component to pass the storyBookId from URL params
 const StoryBookSettingsWrapper = () => {
@@ -41,6 +42,7 @@ function App() {
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
+        <Toaster />
       </AuthProvider>
     </BrowserRouter>
   );

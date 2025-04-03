@@ -85,10 +85,10 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
   };
 
   return (
-    <div className={className}>
+    <div className={`${className} max-w-[300px] mx-auto`}>
       <Button 
         onClick={handleCallNarra}
-        className={`w-full rounded-full h-12 text-white text-base flex items-center justify-center gap-2 font-light ${buttonClassName}`}
+        className={`w-full max-w-[300px] rounded-full h-12 text-white text-base flex items-center justify-center gap-1 font-light ${buttonClassName}`}
         style={{
           background: "linear-gradient(284.53deg, #101629 30.93%, #2F3546 97.11%)",
         }}
@@ -96,7 +96,7 @@ export const CallNarraForm: React.FC<CallNarraFormProps> = ({
       >
         {isLoading ? "Calling..." : buttonText || (
           <>
-            <Phone className="mr-2 h-5 w-5" />
+            <Phone className="mr-1 h-5 w-5" />
             Talk with 
             <img 
               src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets//narra-icon-white.svg" 
