@@ -1,9 +1,17 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchLumaEvents, LumaEvent } from "@/services/lumaEvents";
 import { toast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export function useLumaEvents() {
+  const queryClient = useQueryClient();
+  
+  // Force a cache invalidation when the component mounts
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["lumaEvents"] });
+  }, [queryClient]);
+  
   const { 
     data: events, 
     isLoading, 
@@ -14,6 +22,7 @@ export function useLumaEvents() {
     queryKey: ["lumaEvents"],
     queryFn: async () => {
       try {
+        console.log("Executing Luma events query function");
         const result = await fetchLumaEvents();
         console.log("Events fetched successfully:", result);
         return result;
@@ -23,8 +32,7 @@ export function useLumaEvents() {
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-    retryDelay: (attempt) => Math.min(attempt > 1 ? 2000 : 1000, 30 * 1000),
+    retry: 1, // Reduced retries for faster feedback during debugging
     meta: {
       onError: (error: Error) => {
         console.error("Failed to fetch Luma events:", error);

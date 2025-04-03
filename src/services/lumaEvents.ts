@@ -57,16 +57,18 @@ import { LUMA_API_KEY } from "@/config/constants";
 // This function fetches events from the Luma API
 export async function fetchLumaEvents(): Promise<LumaEvent[]> {
   try {
-    console.log("Attempting to fetch Luma events with API key present:", !!LUMA_API_KEY);
+    console.log("Attempting to fetch Luma events");
+    console.log("API Key present:", !!LUMA_API_KEY);
+    console.log("API Key value:", LUMA_API_KEY ? LUMA_API_KEY.substring(0, 3) + "..." : "not set");
     
-    // Check if we're in development mode (no API key)
-    if (!LUMA_API_KEY) {
-      console.log("No Luma API key found, returning mock data");
+    // Check if we have a valid API key
+    if (!LUMA_API_KEY || LUMA_API_KEY.trim() === '') {
+      console.log("No valid Luma API key found, returning mock data");
       return getMockEvents();
     }
     
-    // Make the API request with proper CORS headers
-    // According to Luma docs, this endpoint requires just an API key in the Authorization header
+    console.log("Making API request to Luma");
+    // Make the API request with proper headers
     const response = await fetch('https://api.lu.ma/public/v1/calendar/upcoming-events', {
       method: 'GET',
       headers: {
@@ -78,14 +80,18 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
 
     console.log("Luma API response status:", response.status);
 
+    // Log the raw response for debugging
+    const responseText = await response.text();
+    console.log("Raw API response:", responseText);
+    
+    // Parse the response
+    const data: LumaApiResponse = JSON.parse(responseText);
+    console.log("Parsed Luma API response:", data);
+    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Luma API error (${response.status}):`, errorText);
+      console.error(`Luma API error (${response.status}):`, responseText);
       throw new Error(`Luma API responded with status: ${response.status}`);
     }
-
-    const data: LumaApiResponse = await response.json();
-    console.log("Luma API response data:", data);
     
     if (!data.events || !Array.isArray(data.events)) {
       console.error('Invalid response format from Luma API:', data);
@@ -96,6 +102,8 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
       console.log("No events returned from Luma API, using mock data");
       return getMockEvents();
     }
+    
+    console.log(`Successfully retrieved ${data.events.length} events from Luma API`);
     
     // Map Luma API events to our internal event format
     return data.events.map((event: LumaApiEvent) => ({
