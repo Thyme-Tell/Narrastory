@@ -2,9 +2,8 @@
 import React, { useState } from "react";
 import { Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import SeniorLivingDialog from "./SeniorLivingDialog";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface StoryCirclesSectionProps {
   storyCirclesRef: React.RefObject<HTMLElement>;
@@ -46,14 +45,13 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
         {/* Upcoming events section */}
         <div className="mb-12">
           <h3 className="text-xl md:text-2xl font-medium text-[#242F3F] mb-4 text-center">Upcoming Story Circles</h3>
-          {/* Add a border and background to make the events more visible */}
           <div className="bg-white/50 rounded-lg p-4 border border-gray-200 shadow-sm">
             <iframe 
-              src="https://lu.ma/embed-checkout/evt-INrDDt3J3xL0xrB" 
+              src="https://lu.ma/embed/calendar/cal-Z2lF71wpLrO7F5C/events"
               width="100%" 
-              height="800px" 
+              height="600px" 
               frameBorder="0" 
-              style={{ borderRadius: '4px' }}
+              style={{ border: '1px solid #bfcbda88', borderRadius: '4px' }}
               allowFullScreen
             ></iframe>
           </div>
