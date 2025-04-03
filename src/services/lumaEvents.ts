@@ -1,6 +1,4 @@
 
-import { LUMA_API_KEY } from "@/config/constants";
-
 // Define our event types
 export interface LumaEvent {
   id: string;
@@ -25,13 +23,36 @@ interface LumaApiEvent {
   location: {
     name: string;
     type: string;
+    online_meeting_link?: string;
+    address?: {
+      street_address?: string;
+      city?: string;
+      postal_code?: string;
+      country?: string;
+    };
   };
   cover_url?: string;
   api_url: string;
   url: string;
   capacity?: number;
   num_remaining_spots?: number;
+  host?: {
+    name: string;
+    avatar_url?: string;
+  };
+  geo_address_info?: {
+    formatted_address: string;
+    lat: number;
+    lng: number;
+  };
+  timezone: string;
 }
+
+interface LumaApiResponse {
+  events: LumaApiEvent[];
+}
+
+import { LUMA_API_KEY } from "@/config/constants";
 
 // This function fetches events from the Luma API
 export async function fetchLumaEvents(): Promise<LumaEvent[]> {
@@ -45,6 +66,7 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
     }
     
     // Make the API request with proper CORS headers
+    // According to Luma docs, this endpoint requires just an API key in the Authorization header
     const response = await fetch('https://api.lu.ma/public/v1/calendar/upcoming-events', {
       method: 'GET',
       headers: {
@@ -62,7 +84,7 @@ export async function fetchLumaEvents(): Promise<LumaEvent[]> {
       throw new Error(`Luma API responded with status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: LumaApiResponse = await response.json();
     console.log("Luma API response data:", data);
     
     if (!data.events || !Array.isArray(data.events)) {
