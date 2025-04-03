@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,10 @@ interface StoryCirclesSectionProps {
 
 const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesRef }) => {
   const [isSeniorLivingDialogOpen, setSeniorLivingDialogOpen] = useState(false);
+
+  const handleRegisterClick = () => {
+    window.open("https://lu.ma/calendar/cal-Z2lF71wpLrO7F5C", "_blank");
+  };
 
   return (
     <section 
@@ -33,7 +36,7 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           
           <div className="mt-4">
             <Button 
-              onClick={() => window.open("https://lu.ma/narra", "_blank")}
+              onClick={handleRegisterClick}
               className="bg-[#242F3F] hover:bg-[#354658]"
             >
               <Calendar className="mr-2 h-4 w-4" />
