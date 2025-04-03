@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useLumaEvents } from "@/hooks/useLumaEvents";
 import { format, parseISO } from "date-fns";
 import { Calendar, Users, Video, Link } from "lucide-react";
@@ -9,6 +9,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const LumaEventsSection = () => {
   const { events, isLoading, error } = useLumaEvents();
+
+  // Add more detailed logging
+  useEffect(() => {
+    console.log('Luma Events:', {
+      events,
+      isLoading,
+      error
+    });
+  }, [events, isLoading, error]);
 
   if (isLoading) {
     return (
@@ -22,6 +31,7 @@ const LumaEventsSection = () => {
     return (
       <div className="text-center py-8 px-4">
         <p className="text-[#A33D29] mb-2">Unable to load upcoming events</p>
+        <p className="text-sm text-gray-600 mb-4">{error.toString()}</p>
         <Button 
           variant="outline"
           onClick={() => window.location.reload()}
