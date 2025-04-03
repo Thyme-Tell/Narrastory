@@ -50,7 +50,8 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
         {/* Upcoming events section */}
         <div className="mb-12">
           <h3 className="text-xl md:text-2xl font-medium text-[#242F3F] mb-4 text-center">Upcoming Story Circles</h3>
-          <div className="bg-white/50 rounded-lg p-4">
+          {/* Add a border and background to make the events more visible */}
+          <div className="bg-white/50 rounded-lg p-4 border border-gray-200 shadow-sm">
             <LumaEventsSection />
           </div>
         </div>
