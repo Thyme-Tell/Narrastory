@@ -1,4 +1,3 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchLumaEvents, LumaEvent } from "@/services/lumaEvents";
 import { toast } from "@/hooks/use-toast";

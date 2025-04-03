@@ -2,11 +2,8 @@
 import React, { useState } from "react";
 import { Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLumaEvents } from "@/hooks/useLumaEvents";
-import LumaEventCard from "./LumaEventCard";
 import { Card } from "@/components/ui/card";
 import SeniorLivingDialog from "./SeniorLivingDialog";
-import LumaEventsSection from "./LumaEventsSection";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface StoryCirclesSectionProps {
@@ -14,7 +11,6 @@ interface StoryCirclesSectionProps {
 }
 
 const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesRef }) => {
-  const { events, isLoading, error } = useLumaEvents();
   const [isSeniorLivingDialogOpen, setSeniorLivingDialogOpen] = useState(false);
 
   return (
@@ -52,7 +48,14 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           <h3 className="text-xl md:text-2xl font-medium text-[#242F3F] mb-4 text-center">Upcoming Story Circles</h3>
           {/* Add a border and background to make the events more visible */}
           <div className="bg-white/50 rounded-lg p-4 border border-gray-200 shadow-sm">
-            <LumaEventsSection />
+            <iframe 
+              src="https://lu.ma/embed-checkout/evt-INrDDt3J3xL0xrB" 
+              width="100%" 
+              height="800px" 
+              frameBorder="0" 
+              style={{ borderRadius: '4px' }}
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
         
