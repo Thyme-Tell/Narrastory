@@ -3,6 +3,7 @@ import React from 'react'
 import * as ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import posthog from 'posthog-js'
+import Cookies from 'js-cookie'
 import App from './App.tsx'
 import './index.css'
 
