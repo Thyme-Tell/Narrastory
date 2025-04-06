@@ -1,38 +1,28 @@
 
 import React from 'react';
 import { useBookPurchase } from '@/contexts/BookPurchaseContext';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreditCard, Wallet } from 'lucide-react';
 
 interface PaymentMethodSelectorProps {
-  onContinue: () => void;
-  onCancel: () => void;
+  canUseCredits: boolean;
+  isUsingCredits: boolean;
+  onToggle: () => void;
 }
 
 export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
-  onContinue,
-  onCancel
+  canUseCredits,
+  isUsingCredits,
+  onToggle
 }) => {
-  const { isUsingCredits, setUsingCredits, remainingCredits } = useBookPurchase();
-
-  const hasCredits = remainingCredits > 0;
-  
-  // If user has no credits, automatically select the payment option
-  React.useEffect(() => {
-    if (!hasCredits) {
-      setUsingCredits(false);
-    }
-  }, [hasCredits, setUsingCredits]);
-
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Choose Payment Method</h3>
       
       {/* Credit Option */}
       <Card 
-        className={`border-2 cursor-pointer transition-all ${isUsingCredits ? 'border-[#6E59A5]' : 'border-gray-200'} ${!hasCredits ? 'opacity-50 cursor-not-allowed' : ''}`}
-        onClick={() => hasCredits && setUsingCredits(true)}
+        className={`border-2 cursor-pointer transition-all ${isUsingCredits ? 'border-[#6E59A5]' : 'border-gray-200'} ${!canUseCredits ? 'opacity-50 cursor-not-allowed' : ''}`}
+        onClick={() => canUseCredits && onToggle()}
       >
         <CardContent className="p-4 flex items-center">
           <div className={`p-2 rounded-full mr-3 ${isUsingCredits ? 'bg-[#6E59A5] text-white' : 'bg-gray-100'}`}>
@@ -41,8 +31,8 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           <div className="flex-grow">
             <p className="font-medium">Use Book Credit</p>
             <p className="text-sm text-gray-500">
-              {hasCredits 
-                ? `You have ${remainingCredits} credit${remainingCredits !== 1 ? 's' : ''} available` 
+              {canUseCredits 
+                ? `You have credits available` 
                 : 'No credits available'}
             </p>
           </div>
@@ -57,7 +47,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       {/* Payment Option */}
       <Card 
         className={`border-2 cursor-pointer transition-all ${!isUsingCredits ? 'border-[#6E59A5]' : 'border-gray-200'}`}
-        onClick={() => setUsingCredits(false)}
+        onClick={onToggle}
       >
         <CardContent className="p-4 flex items-center">
           <div className={`p-2 rounded-full mr-3 ${!isUsingCredits ? 'bg-[#6E59A5] text-white' : 'bg-gray-100'}`}>
@@ -74,18 +64,6 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           </div>
         </CardContent>
       </Card>
-      
-      <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button 
-          className="bg-[#6E59A5] hover:bg-[#5d4a8a]"
-          onClick={onContinue}
-        >
-          Continue
-        </Button>
-      </div>
     </div>
   );
 };

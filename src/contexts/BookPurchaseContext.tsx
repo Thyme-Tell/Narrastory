@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { CreditResult } from '@/types/subscription';
 
 interface BookPurchaseContextType {
   isUsingCredits: boolean;
@@ -55,7 +56,7 @@ export const BookPurchaseProvider: React.FC<BookPurchaseProviderProps> = ({
           throw new Error('Insufficient book credits');
         }
         
-        const result = await useBookCredits({
+        const result: CreditResult = await useBookCredits({
           profileId,
           bookId,
           amount: 1
