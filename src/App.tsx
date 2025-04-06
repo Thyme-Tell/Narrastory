@@ -20,6 +20,7 @@ import SubscriptionPage from "./pages/SubscriptionPage";
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCanceledPage from './pages/PaymentCanceledPage';
 import BookPurchasePage from './pages/BookPurchasePage';
+import AdminPage from './pages/AdminPage';
 import { Toaster } from "@/components/ui/toaster";
 
 const StoryBookSettingsWrapper = () => {
@@ -54,6 +55,7 @@ function App() {
           <Route path="/subscription/:id" element={<SubscriptionPage />} />
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/payment-canceled" element={<PaymentCanceledPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
         <Toaster />
       </AuthProvider>
