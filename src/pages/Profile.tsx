@@ -150,8 +150,8 @@ const Profile = () => {
         </DropdownMenu>
       </div>
       <div className="p-4">
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* Book Preview Section with conditional height */}
+        <div className="max-w-2xl mx-auto space-y-0">
+          {/* Book Preview Section with conditional height - removed space-y-6 from parent div and mb-8 will be removed from BookProgress */}
           <div 
             className={`overflow-hidden transition-all duration-300 ease-in-out ${isBookExpanded ? '' : 'max-h-[30vh]'}`} 
             style={{ 

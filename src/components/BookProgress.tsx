@@ -13,8 +13,9 @@ import BookProgressInfo from "./book-progress/BookProgressInfo";
 import BookProgressStats from "./book-progress/BookProgressStats";
 import BookProgressActions from "./book-progress/BookProgressActions";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { calculateTotalPages } from "@/utils/bookPagination";
 
 interface BookProgressProps {
   profileId: string;
@@ -117,9 +118,12 @@ export function BookProgress({ profileId, onExpandToggle }: BookProgressProps) {
   if (!stories?.length) {
     return <BookProgressHeader setIsHidden={setIsHidden} />;
   }
+  
+  // Calculate total page count
+  const totalPageCount = calculateTotalPages(stories);
 
   return (
-    <div className="mb-8">
+    <div className="mb-0"> {/* Removed mb-8 to eliminate space */}
       <Collapsible 
         open={isExpanded} 
         onOpenChange={handleExpansionChange}
@@ -137,7 +141,12 @@ export function BookProgress({ profileId, onExpandToggle }: BookProgressProps) {
             <div>
               <h3 className="font-serif text-lg leading-tight">{coverData.titleText || "My Stories"}</h3>
               <p className="text-sm text-muted-foreground">
-                {profile?.first_name} {profile?.last_name} • {stories.length} {stories.length === 1 ? 'story' : 'stories'}
+                {profile?.first_name} {profile?.last_name} • {stories.length} {stories.length === 1 ? 'story' : 'stories'} 
+                {/* Added page count to collapsed view */}
+                <span className="ml-1 inline-flex items-center">
+                  <BookOpen className="h-3.5 w-3.5 mr-1 text-[#155B4A]" />
+                  {totalPageCount} pages
+                </span>
               </p>
             </div>
           </div>
