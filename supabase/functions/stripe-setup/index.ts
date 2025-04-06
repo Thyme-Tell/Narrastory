@@ -28,10 +28,10 @@ serve(async (req) => {
       },
     });
 
-    // Annual Plus price
+    // Annual Plus price - Updated to $249/year
     const annualPlusPrice = await stripe.prices.create({
       product: annualPlusProduct.id,
-      unit_amount: 9900, // $99.00
+      unit_amount: 24900, // $249.00
       currency: 'usd',
       recurring: {
         interval: 'year',
@@ -51,10 +51,10 @@ serve(async (req) => {
       },
     });
 
-    // Lifetime price
+    // Lifetime price - Updated to $399 one-time
     const lifetimePrice = await stripe.prices.create({
       product: lifetimeProduct.id,
-      unit_amount: 29900, // $299.00
+      unit_amount: 39900, // $399.00
       currency: 'usd',
       metadata: {
         planType: 'lifetime',
@@ -71,10 +71,10 @@ serve(async (req) => {
       },
     });
 
-    // First Book price
+    // First Book price - Updated to $79
     const firstBookPrice = await stripe.prices.create({
       product: firstBookProduct.id,
-      unit_amount: 4900, // $49.00
+      unit_amount: 7900, // $79.00
       currency: 'usd',
       metadata: {
         bookType: 'first',
@@ -91,7 +91,7 @@ serve(async (req) => {
       },
     });
 
-    // Additional Book price
+    // Additional Book price - Updated to $29
     const additionalBookPrice = await stripe.prices.create({
       product: additionalBookProduct.id,
       unit_amount: 2900, // $29.00
