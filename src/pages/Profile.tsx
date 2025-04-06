@@ -23,6 +23,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [isBookExpanded, setIsBookExpanded] = useState(false);
 
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
@@ -93,6 +94,10 @@ const Profile = () => {
     navigate('/');
   };
 
+  const handleBookExpandToggle = (expanded: boolean) => {
+    setIsBookExpanded(expanded);
+  };
+
   if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -146,9 +151,17 @@ const Profile = () => {
       </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* Book Preview Section with explicit max-height */}
-          <div className="overflow-hidden" style={{ maxHeight: "30vh", minHeight: "200px" }}>
-            <BookProgress profileId={id} />
+          {/* Book Preview Section with conditional height */}
+          <div 
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${isBookExpanded ? '' : 'max-h-[30vh]'}`} 
+            style={{ 
+              minHeight: isBookExpanded ? "auto" : "200px" 
+            }}
+          >
+            <BookProgress 
+              profileId={id} 
+              onExpandToggle={handleBookExpandToggle}
+            />
           </div>
           
           {/* Story Creation Section */}

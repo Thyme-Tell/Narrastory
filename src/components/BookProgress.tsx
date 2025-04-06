@@ -16,7 +16,12 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-export function BookProgress({ profileId }: { profileId: string }) {
+interface BookProgressProps {
+  profileId: string;
+  onExpandToggle?: (expanded: boolean) => void;
+}
+
+export function BookProgress({ profileId, onExpandToggle }: BookProgressProps) {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -71,6 +76,14 @@ export function BookProgress({ profileId }: { profileId: string }) {
     }
   }, [profileId, refreshCoverData]);
 
+  // Handle expansion state change and propagate to parent
+  const handleExpansionChange = (open: boolean) => {
+    setIsExpanded(open);
+    if (onExpandToggle) {
+      onExpandToggle(open);
+    }
+  };
+
   const handleOpenCoverEditor = () => {
     refreshCoverData();
     setIsEditorOpen(true);
@@ -109,7 +122,7 @@ export function BookProgress({ profileId }: { profileId: string }) {
     <div className="mb-8">
       <Collapsible 
         open={isExpanded} 
-        onOpenChange={setIsExpanded}
+        onOpenChange={handleExpansionChange}
         className="w-full border rounded-lg bg-white/90 shadow overflow-hidden transition-all duration-300 ease-in-out"
       >
         <div className="p-4 flex items-center justify-between">
