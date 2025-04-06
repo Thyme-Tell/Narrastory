@@ -11,7 +11,8 @@ import {
   CreditResult,
   UsageResult,
   SubscriptionChangeResult,
-  SubscriptionStatusResult
+  SubscriptionStatusResult,
+  SubscriptionStatus
 } from "@/types/subscription";
 import { SubscriptionData } from "@/hooks/useSubscription";
 
@@ -65,8 +66,8 @@ class SubscriptionService {
       // Credits information
       const bookCredits = subscriptionData?.book_credits || 0;
       
-      // Status information
-      const status = subscriptionData?.status || null;
+      // Status information - Fix for the TypeScript error
+      const status = subscriptionData?.status as SubscriptionStatus | null;
       const planType = subscriptionData?.plan_type || 'free';
 
       return {
