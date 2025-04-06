@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -151,11 +150,10 @@ const Profile = () => {
       </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-0">
-          {/* Book Preview Section with conditional height - removed space-y-6 from parent div and mb-8 will be removed from BookProgress */}
           <div 
             className={`overflow-hidden transition-all duration-300 ease-in-out ${isBookExpanded ? '' : 'max-h-[30vh]'}`} 
             style={{ 
-              minHeight: isBookExpanded ? "auto" : "200px" 
+              minHeight: isBookExpanded ? "auto" : "120px" 
             }}
           >
             <BookProgress 
@@ -164,7 +162,6 @@ const Profile = () => {
             />
           </div>
           
-          {/* Story Creation Section */}
           <ProfileHeader 
             firstName={profile.first_name} 
             lastName={profile.last_name}
@@ -174,7 +171,6 @@ const Profile = () => {
             onSortChange={setSortOrder}
           />
           
-          {/* Stories List */}
           <StoriesList 
             stories={stories || []}
             isLoading={isLoadingStories}
