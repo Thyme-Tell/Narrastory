@@ -1,15 +1,32 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders } from "../_shared/cors.ts";
+import { 
+  getSupabaseClient, 
+  errorResponse, 
+  successResponse 
+} from "../_shared/stripe-utils.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
+/**
+ * Check Subscription Edge Function
+ * 
+ * Checks a user's subscription status in the database.
+ * 
+ * Request:
+ * - profileId: string (user profile ID) - via query param or request body
+ * 
+ * Response:
+ * - hasSubscription: boolean (whether user has active subscription)
+ * - isPremium: boolean (whether user has premium status)
+ * - isLifetime: boolean (whether user has lifetime subscription)
+ * - subscriptionData: object (full subscription data if available)
+ */
 serve(async (req) => {
+  console.log("Check subscription function called");
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Handling CORS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -17,28 +34,28 @@ serve(async (req) => {
     // Parse the request body or query parameters
     const url = new URL(req.url);
     let profileId = url.searchParams.get('profileId');
+    console.log(`Profile ID from query: ${profileId}`);
 
     // If profile ID not in query params, try to get from request body
     if (!profileId) {
       try {
         const body = await req.json();
         profileId = body.profileId;
+        console.log(`Profile ID from body: ${profileId}`);
       } catch (e) {
-        // No body or invalid JSON
+        console.log("No request body or invalid JSON");
       }
     }
 
     if (!profileId) {
-      throw new Error('Profile ID is required');
+      return errorResponse('Profile ID is required', 400);
     }
 
     // Initialize Supabase client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
+    const supabase = getSupabaseClient();
 
     // Query the subscriptions table
+    console.log(`Checking subscription for profile ID: ${profileId}`);
     const { data, error } = await supabase
       .from('subscriptions')
       .select('*')
@@ -46,22 +63,15 @@ serve(async (req) => {
       .single();
 
     if (error) {
-      console.error('Error checking subscription:', error);
-      return new Response(
-        JSON.stringify({ 
-          hasSubscription: false,
-          isPremium: false,
-          subscriptionData: null,
-          message: 'No subscription found' 
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders,
-          },
-        }
-      );
+      console.log(`No subscription found: ${error.message}`);
+      // No subscription found, but this isn't an error
+      return successResponse({ 
+        hasSubscription: false,
+        isPremium: false,
+        isLifetime: false,
+        subscriptionData: null,
+        message: 'No subscription found' 
+      });
     }
 
     // Determine if user has an active premium subscription
@@ -72,33 +82,17 @@ serve(async (req) => {
     
     const isPremium = hasActiveSubscription || isLifetime;
 
+    console.log(`Subscription status for ${profileId}: hasActive=${hasActiveSubscription}, isLifetime=${isLifetime}, isPremium=${isPremium}`);
+
     // Return subscription status
-    return new Response(
-      JSON.stringify({
-        hasSubscription: hasActiveSubscription,
-        isPremium: isPremium,
-        isLifetime: isLifetime,
-        subscriptionData: data || null,
-      }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
+    return successResponse({
+      hasSubscription: hasActiveSubscription,
+      isPremium: isPremium,
+      isLifetime: isLifetime,
+      subscriptionData: data || null,
+    });
   } catch (error) {
-    console.error('Error in check-subscription:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
+    console.error(`Error in check-subscription: ${error.message}`);
+    return errorResponse(`Error checking subscription: ${error.message}`, 500);
   }
 });

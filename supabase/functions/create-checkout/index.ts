@@ -1,123 +1,130 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0?dts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders } from "../_shared/cors.ts";
+import { 
+  getStripeClient, 
+  getSupabaseClient, 
+  errorResponse, 
+  successResponse,
+  PRICE_IDS 
+} from "../_shared/stripe-utils.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-// Price IDs for different products
-const PRICE_IDS = {
-  ANNUAL_PLUS: Deno.env.get('STRIPE_ANNUAL_PLUS_PRICE_ID') || 'price_placeholder',
-  LIFETIME: Deno.env.get('STRIPE_LIFETIME_PRICE_ID') || 'price_placeholder',
-  FIRST_BOOK: Deno.env.get('STRIPE_FIRST_BOOK_PRICE_ID') || 'price_placeholder',
-  ADDITIONAL_BOOK: Deno.env.get('STRIPE_ADDITIONAL_BOOK_PRICE_ID') || 'price_placeholder',
-};
-
-interface CheckoutRequest {
-  priceId: string;
-  successUrl: string;
-  cancelUrl: string;
-  email?: string;
-  profileId?: string;
-}
-
+/**
+ * Create Checkout Edge Function
+ * 
+ * Creates a Stripe checkout session for various product types:
+ * - Annual Plus subscription ($249/year)
+ * - Lifetime Access ($399 one-time)
+ * - First Book Publishing ($79)
+ * - Additional Book Publishing ($29)
+ * 
+ * Request body:
+ * - priceId: string (Stripe price ID)
+ * - profileId: string (optional, user profile ID)
+ * - email: string (optional, user email)
+ * - successUrl: string (redirect URL on success)
+ * - cancelUrl: string (redirect URL on cancel)
+ * 
+ * Response:
+ * - sessionId: string (Stripe session ID)
+ * - url: string (Checkout URL)
+ */
 serve(async (req) => {
+  console.log("Create checkout function called");
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Handling CORS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     // Parse the request body
-    const { priceId, successUrl, cancelUrl, email, profileId }: CheckoutRequest = await req.json();
+    const reqBody = await req.json();
+    const { priceId, successUrl, cancelUrl, email, profileId } = reqBody;
 
+    console.log(`Request received with priceId: ${priceId}`);
+    console.log(`Profile ID: ${profileId}, Email: ${email}`);
+
+    // Validate required fields
     if (!priceId) {
-      throw new Error('Price ID is required');
+      return errorResponse('Price ID is required', 400);
     }
 
     if (!successUrl || !cancelUrl) {
-      throw new Error('Success and cancel URLs are required');
+      return errorResponse('Success and cancel URLs are required', 400);
     }
 
-    // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2023-10-16',
-    });
-
-    // Initialize Supabase client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
+    // Initialize clients
+    const stripe = getStripeClient();
+    const supabase = getSupabaseClient();
 
     // If profileId is provided, get user email
     let userEmail = email;
     if (profileId && !userEmail) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', profileId)
-        .single();
+      console.log(`Looking up email for profile ID: ${profileId}`);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', profileId)
+          .single();
 
-      if (error || !data?.email) {
-        throw new Error(`Could not find email for profile ID: ${profileId}`);
+        if (error || !data?.email) {
+          console.error(`Error fetching email: ${error?.message}`);
+          return errorResponse(`Could not find email for profile ID: ${profileId}`, 404);
+        }
+
+        userEmail = data.email;
+        console.log(`Found email: ${userEmail}`);
+      } catch (err) {
+        console.error(`Error in profile lookup: ${err.message}`);
+        return errorResponse(`Error retrieving user profile: ${err.message}`, 500);
       }
-
-      userEmail = data.email;
     }
 
     // Determine if this is a subscription or one-time payment
     let mode: 'payment' | 'subscription' = 'payment';
     if (priceId === PRICE_IDS.ANNUAL_PLUS) {
       mode = 'subscription';
+      console.log("Creating subscription checkout");
+    } else {
+      console.log("Creating one-time payment checkout");
     }
 
     // Create checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
+    try {
+      console.log("Creating Stripe checkout session");
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode: mode,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: userEmail,
+        metadata: {
+          profileId: profileId || '',
         },
-      ],
-      mode: mode,
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      customer_email: userEmail,
-      metadata: {
-        profileId: profileId || '',
-      },
-    });
+      });
 
-    // Return the session ID and URL
-    return new Response(
-      JSON.stringify({
+      console.log(`Checkout session created: ${session.id}`);
+      
+      // Return the session ID and URL
+      return successResponse({
         sessionId: session.id,
         url: session.url,
-      }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
+      });
+    } catch (stripeErr) {
+      console.error(`Stripe error: ${stripeErr.message}`);
+      return errorResponse(`Error creating checkout session: ${stripeErr.message}`, 500);
+    }
   } catch (error) {
-    console.error('Error creating checkout session:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
+    console.error(`Unhandled error: ${error.message}`);
+    return errorResponse(`Internal server error: ${error.message}`, 500);
   }
 });
