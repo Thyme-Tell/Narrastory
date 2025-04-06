@@ -41,6 +41,48 @@ export type Database = {
           },
         ]
       }
+      book_purchases: {
+        Row: {
+          amount_paid: number | null
+          book_id: string | null
+          created_at: string | null
+          id: string
+          is_from_credits: boolean | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          book_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_from_credits?: boolean | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          book_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_from_credits?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_purchases_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "storybooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deleted_stories: {
         Row: {
           content: string
@@ -535,6 +577,91 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          book_credits: number | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          is_lifetime: boolean | null
+          lifetime_purchase_date: string | null
+          minutes_used: number | null
+          plan_type: string
+          status: string
+          stripe_subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          book_credits?: number | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          is_lifetime?: boolean | null
+          lifetime_purchase_date?: string | null
+          minutes_used?: number | null
+          plan_type: string
+          status: string
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          book_credits?: number | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          is_lifetime?: boolean | null
+          lifetime_purchase_date?: string | null
+          minutes_used?: number | null
+          plan_type?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_tracking: {
+        Row: {
+          call_duration: number
+          call_timestamp: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          call_duration: number
+          call_timestamp?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          call_duration?: number
+          call_timestamp?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_tracking_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
