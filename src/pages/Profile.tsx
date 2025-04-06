@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
-import { Menu, Crown, ChevronRight } from "lucide-react";
+import { Menu, Crown, ChevronRight, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -22,6 +22,11 @@ import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 import { toast } from "sonner";
 import { PlanType } from "@/types/subscription";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 const Profile = () => {
   const { id } = useParams();
@@ -144,6 +149,42 @@ const Profile = () => {
         return 'Free Plan';
     }
   };
+  
+  const renderPlanFeatures = () => {
+    const features = subscriptionStatus.features;
+    if (!features) return null;
+    
+    return (
+      <div className="space-y-2 text-sm">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <p className="font-semibold">Storage:</p>
+            <p>{features.storageLimit} MB</p>
+          </div>
+          <div>
+            <p className="font-semibold">Books:</p>
+            <p>{features.booksLimit}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Collaborators:</p>
+            <p>{features.collaboratorsLimit}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Priority Support:</p>
+            <p>{features.prioritySupport ? 'Yes' : 'No'}</p>
+          </div>
+        </div>
+        <div className="pt-1">
+          <p className="font-semibold">Additional Features:</p>
+          <ul className="list-disc pl-5 mt-1">
+            {features.aiGeneration && <li>AI Generation</li>}
+            {features.customTTS && <li>Custom Text-to-Speech</li>}
+            {features.advancedEditing && <li>Advanced Editing</li>}
+          </ul>
+        </div>
+      </div>
+    );
+  };
 
   if (isLoadingProfile) {
     return (
@@ -183,25 +224,49 @@ const Profile = () => {
           className="h-11"
         />
         <div className="flex items-center gap-3">
-          {/* Subscription Status Badge */}
+          {/* Subscription Status Badge with HoverCard */}
           {!isStatusLoading && (
             <div className="flex items-center">
               {subscriptionStatus.isPremium ? (
-                <div className="bg-[#EDF6FF] text-[#4B88DD] border border-[#D0E4FA] px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <Crown className="h-3.5 w-3.5" />
-                  <span className="text-sm font-medium">{getPlanLabel(subscriptionStatus.planType)}</span>
-                </div>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <div className="bg-[#EDF6FF] text-[#4B88DD] border border-[#D0E4FA] px-3 py-1 rounded-full flex items-center gap-1.5 cursor-help">
+                      <Crown className="h-3.5 w-3.5" />
+                      <span className="text-sm font-medium">{getPlanLabel(subscriptionStatus.planType)}</span>
+                      <Info className="h-3.5 w-3.5 ml-0.5 opacity-70" />
+                    </div>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80 p-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Your {getPlanLabel(subscriptionStatus.planType)} Benefits</h4>
+                      {renderPlanFeatures()}
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               ) : (
-                <Button 
-                  size="sm" 
-                  className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white rounded-full flex items-center gap-1"
-                  asChild
-                >
-                  <Link to={`/subscribe/${id}`}>
-                    Upgrade
-                    <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Button 
+                      size="sm" 
+                      className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white rounded-full flex items-center gap-1 pr-1.5"
+                      asChild
+                    >
+                      <Link to={`/subscribe/${id}`}>
+                        Upgrade
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80 p-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Free Plan Limitations</h4>
+                      {renderPlanFeatures()}
+                      <div className="pt-2">
+                        <p className="text-xs text-muted-foreground">Upgrade for additional features and higher limits</p>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               )}
             </div>
           )}
