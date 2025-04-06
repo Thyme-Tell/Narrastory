@@ -25,6 +25,7 @@ import {
  * - successUrl: string (redirect URL on success)
  * - cancelUrl: string (redirect URL on cancel)
  * - mode: string (optional, 'payment' or 'subscription')
+ * - couponCode: string (optional, discount coupon code)
  * 
  * Response:
  * - sessionId: string (Stripe session ID)
@@ -42,10 +43,21 @@ serve(async (req) => {
   try {
     // Parse the request body
     const reqBody = await req.json();
-    const { priceId, successUrl, cancelUrl, email, profileId, mode: requestedMode } = reqBody;
+    const { 
+      priceId, 
+      successUrl, 
+      cancelUrl, 
+      email, 
+      profileId, 
+      mode: requestedMode,
+      couponCode 
+    } = reqBody;
 
     console.log(`Request received with priceId: ${priceId}`);
     console.log(`Profile ID: ${profileId}, Email: ${email}, Mode: ${requestedMode || 'not specified'}`);
+    if (couponCode) {
+      console.log(`Coupon code provided: ${couponCode}`);
+    }
 
     // Validate required fields
     if (!priceId) {
@@ -103,7 +115,9 @@ serve(async (req) => {
     // Create checkout session
     try {
       console.log(`Creating Stripe checkout session with mode: ${mode}`);
-      const session = await stripe.checkout.sessions.create({
+      
+      // Prepare session parameters
+      const sessionParams: any = {
         payment_method_types: ['card'],
         line_items: [
           {
@@ -118,7 +132,19 @@ serve(async (req) => {
         metadata: {
           profileId: profileId || '',
         },
-      });
+      };
+      
+      // Add discount coupon if provided
+      if (couponCode && couponCode.trim()) {
+        console.log(`Applying coupon code: ${couponCode}`);
+        sessionParams.discounts = [
+          {
+            coupon: couponCode.trim(),
+          },
+        ];
+      }
+      
+      const session = await stripe.checkout.sessions.create(sessionParams);
 
       console.log(`Checkout session created: ${session.id}`);
       
@@ -129,6 +155,12 @@ serve(async (req) => {
       });
     } catch (stripeErr) {
       console.error(`Stripe error: ${stripeErr.message}`);
+      
+      // Check if the error is related to an invalid coupon code
+      if (stripeErr.message && stripeErr.message.includes('coupon')) {
+        return errorResponse(`Invalid coupon code: ${stripeErr.message}`, 400);
+      }
+      
       return errorResponse(`Error creating checkout session: ${stripeErr.message}`, 500);
     }
   } catch (error) {

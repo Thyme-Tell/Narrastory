@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, X, Clock, ArrowLeft, AlertCircle, Info } from 'lucide-react';
+import { Check, X, Clock, ArrowLeft, AlertCircle, Info, Ticket } from 'lucide-react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
 import LifetimeTimer from './LifetimeTimer';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,6 +20,7 @@ const PlanSelectionScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [productsLoaded, setProductsLoaded] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
   const [availablePlans, setAvailablePlans] = useState<{
     plus: boolean;
     lifetime: boolean;
@@ -28,6 +30,7 @@ const PlanSelectionScreen: React.FC = () => {
   const { 
     createAnnualCheckout, 
     createLifetimeCheckout,
+    createCheckout,
     isLoading: isCheckoutLoading,
   } = useStripeCheckout();
   
@@ -89,13 +92,25 @@ const PlanSelectionScreen: React.FC = () => {
           title: "Creating Checkout",
           description: "Setting up your subscription checkout...",
         });
-        await createAnnualCheckout(profileId);
+        
+        // Use direct checkout to pass coupon code
+        await createCheckout({
+          priceId: 'ANNUAL_PLUS',
+          profileId,
+          couponCode: couponCode.trim() || undefined
+        });
       } else {
         toast({
           title: "Creating Checkout",
           description: "Setting up your lifetime access checkout...",
         });
-        await createLifetimeCheckout(profileId);
+        
+        // Use direct checkout to pass coupon code
+        await createCheckout({
+          priceId: 'LIFETIME',
+          profileId,
+          couponCode: couponCode.trim() || undefined
+        });
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -278,6 +293,27 @@ const PlanSelectionScreen: React.FC = () => {
             )}
           </CardContent>
         </Card>
+      </div>
+      
+      {/* Coupon code input */}
+      <div className="mt-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          <div className="relative flex-grow">
+            <Input
+              type="text"
+              placeholder="Enter coupon code (if available)"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              className="pl-10"
+            />
+            <Ticket className="h-4 w-4 text-gray-400 absolute left-3 top-3" />
+          </div>
+        </div>
+        {couponCode.trim() && (
+          <p className="text-xs text-gray-500 mt-1">
+            Coupon "{couponCode}" will be applied at checkout
+          </p>
+        )}
       </div>
       
       <div className="mt-8 flex flex-col md:flex-row md:justify-between gap-4">
