@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -18,6 +19,7 @@ import LifetimeCheckoutPage from "./pages/LifetimeCheckoutPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCanceledPage from './pages/PaymentCanceledPage';
+import BookPurchasePage from './pages/BookPurchasePage';
 import { Toaster } from "@/components/ui/toaster";
 
 const StoryBookSettingsWrapper = () => {
@@ -41,6 +43,7 @@ function App() {
           <Route path="/reset-password" element={<PasswordResetRequest />} />
           <Route path="/reset-password/confirm" element={<PasswordResetConfirm />} />
           <Route path="/book-preview/:profileId" element={<BookPreviewPage />} />
+          <Route path="/book-purchase/:profileId" element={<BookPurchasePage />} />
           <Route path="/get-started" element={<GetStarted />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
