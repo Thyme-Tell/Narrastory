@@ -137,7 +137,7 @@ const Profile = () => {
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-48 bg-white">
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
             </DropdownMenuItem>
@@ -146,8 +146,8 @@ const Profile = () => {
       </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* Collapsible Book Preview Section */}
-          <div className="max-h-[30vh] overflow-hidden">
+          {/* Book Preview Section with explicit max-height */}
+          <div className="overflow-hidden" style={{ maxHeight: "30vh", minHeight: "200px" }}>
             <BookProgress profileId={id} />
           </div>
           

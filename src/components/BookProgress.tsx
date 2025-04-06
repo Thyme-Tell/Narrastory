@@ -114,7 +114,7 @@ export function BookProgress({ profileId }: { profileId: string }) {
       >
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-16 overflow-hidden rounded">
+            <div className="w-12 h-16 overflow-hidden rounded flex-shrink-0">
               <BookCoverPreview 
                 coverData={coverData}
                 isLoading={isCoverLoading}
@@ -130,7 +130,7 @@ export function BookProgress({ profileId }: { profileId: string }) {
           </div>
           
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
               {isExpanded ? 
                 <ChevronUp className="h-4 w-4" /> : 
                 <ChevronDown className="h-4 w-4" />
@@ -158,7 +158,7 @@ export function BookProgress({ profileId }: { profileId: string }) {
               </div>
 
               <div className="space-y-4">
-                <div className="bg-muted/30 rounded-lg p-4">
+                <div className="bg-muted/30 rounded-lg p-4 flex items-center justify-center" style={{ minHeight: "320px" }}>
                   <BookCoverPreview 
                     coverData={coverData}
                     isLoading={isCoverLoading}

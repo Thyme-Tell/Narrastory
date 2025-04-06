@@ -15,12 +15,13 @@ const BookCoverPreview = ({ coverData, isLoading, compact = false }: BookCoverPr
   }
 
   return (
-    <div className={`w-full h-full flex items-center justify-center ${compact ? 'p-0' : 'p-4'}`}>
+    <div className={`w-full h-full flex items-center justify-center ${compact ? 'p-0' : 'p-2'}`}>
       <div 
         className={`relative ${compact ? 'w-full h-full' : 'max-w-[240px] mx-auto'}`}
         style={{ 
           aspectRatio: !compact ? "5/8" : undefined,
-          height: "auto"
+          height: compact ? "100%" : "auto",
+          maxHeight: "100%"
         }}
       >
         <CoverCanvas 
