@@ -41,6 +41,7 @@ export const useStripeCheckout = () => {
         console.log(`Creating checkout with priceId: ${options.priceId}`);
         
         // First, retrieve the actual Stripe price IDs from the setup function
+        console.log("Fetching Stripe products data...");
         const { data: setupData, error: setupError } = await supabase.functions.invoke('get-stripe-products', {});
         
         if (setupError) {
@@ -49,20 +50,27 @@ export const useStripeCheckout = () => {
         }
         
         if (!setupData) {
+          console.error('No setup data returned from get-stripe-products function');
           throw new Error('No product data returned from setup function');
         }
+        
+        console.log('Retrieved Stripe products data:', JSON.stringify(setupData));
         
         // Map the product key to the actual Stripe price ID
         let actualPriceId = options.priceId;
         
         if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus?.priceId) {
           actualPriceId = setupData.annualPlus.priceId;
+          console.log(`Mapped ANNUAL_PLUS to Stripe priceId: ${actualPriceId}`);
         } else if (options.priceId === 'LIFETIME' && setupData.lifetime?.priceId) {
           actualPriceId = setupData.lifetime.priceId;
+          console.log(`Mapped LIFETIME to Stripe priceId: ${actualPriceId}`);
         } else if (options.priceId === 'FIRST_BOOK' && setupData.firstBook?.priceId) {
           actualPriceId = setupData.firstBook.priceId;
+          console.log(`Mapped FIRST_BOOK to Stripe priceId: ${actualPriceId}`);
         } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook?.priceId) {
           actualPriceId = setupData.additionalBook.priceId;
+          console.log(`Mapped ADDITIONAL_BOOK to Stripe priceId: ${actualPriceId}`);
         } else {
           // If we don't have a mapping, throw a helpful error
           console.error(`No Stripe price ID found for product: ${options.priceId}`);
@@ -70,7 +78,7 @@ export const useStripeCheckout = () => {
           throw new Error(`The selected product is not available for purchase. Please try again later.`);
         }
         
-        console.log(`Mapped priceId from ${options.priceId} to actual Stripe priceId: ${actualPriceId}`);
+        console.log(`Creating checkout with actual Stripe priceId: ${actualPriceId}`);
         
         // Now create the checkout with the actual price ID
         const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -88,6 +96,7 @@ export const useStripeCheckout = () => {
           throw error;
         }
         
+        console.log('Checkout created successfully:', JSON.stringify(data));
         return data;
       } catch (err) {
         console.error('Error creating checkout:', err);

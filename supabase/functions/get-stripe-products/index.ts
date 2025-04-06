@@ -48,6 +48,12 @@ serve(async (req) => {
     const products = await stripe.products.list({ active: true });
     console.log(`Found ${products.data.length} active products`);
     
+    // Log all product data for debugging
+    products.data.forEach((product, index) => {
+      console.log(`Product ${index + 1}: ID=${product.id}, Name=${product.name}, Type=${product.metadata?.productType}`);
+      console.log(`Features: ${product.metadata?.features}`);
+    });
+    
     if (products.data.length === 0) {
       console.warn("No active products found in Stripe");
       // Return empty but valid result object
@@ -66,6 +72,12 @@ serve(async (req) => {
     // Get all active prices
     const prices = await stripe.prices.list({ active: true });
     console.log(`Found ${prices.data.length} active prices`);
+    
+    // Log all price data for debugging
+    prices.data.forEach((price, index) => {
+      console.log(`Price ${index + 1}: ID=${price.id}, ProductID=${price.product}, Type=${price.metadata?.planType}`);
+      console.log(`Amount: ${price.unit_amount}, Currency: ${price.currency}`);
+    });
     
     if (prices.data.length === 0) {
       console.warn("No active prices found in Stripe");
@@ -91,6 +103,7 @@ serve(async (req) => {
     );
     
     if (annualPlusProduct) {
+      console.log(`Found annual plus product: ${annualPlusProduct.id}`);
       const annualPlusPrice = prices.data.find(p => 
         p.product === annualPlusProduct.id && p.metadata?.planType === 'plus'
       );
@@ -101,7 +114,11 @@ serve(async (req) => {
           priceId: annualPlusPrice.id
         };
         console.log(`Annual Plus Price ID: ${annualPlusPrice.id}`);
+      } else {
+        console.warn(`No price found for annual plus product: ${annualPlusProduct.id}`);
       }
+    } else {
+      console.warn("No annual plus product found in Stripe");
     }
     
     // Find lifetime product
@@ -110,6 +127,7 @@ serve(async (req) => {
     );
     
     if (lifetimeProduct) {
+      console.log(`Found lifetime product: ${lifetimeProduct.id}`);
       const lifetimePrice = prices.data.find(p => 
         p.product === lifetimeProduct.id && p.metadata?.planType === 'lifetime'
       );
@@ -120,7 +138,11 @@ serve(async (req) => {
           priceId: lifetimePrice.id
         };
         console.log(`Lifetime Price ID: ${lifetimePrice.id}`);
+      } else {
+        console.warn(`No price found for lifetime product: ${lifetimeProduct.id}`);
       }
+    } else {
+      console.warn("No lifetime product found in Stripe");
     }
     
     // Find book products
@@ -129,6 +151,7 @@ serve(async (req) => {
     );
     
     if (firstBookProduct) {
+      console.log(`Found first book product: ${firstBookProduct.id}`);
       const firstBookPrice = prices.data.find(p => 
         p.product === firstBookProduct.id && p.metadata?.bookType === 'first'
       );
@@ -139,7 +162,11 @@ serve(async (req) => {
           priceId: firstBookPrice.id
         };
         console.log(`First Book Price ID: ${firstBookPrice.id}`);
+      } else {
+        console.warn(`No price found for first book product: ${firstBookProduct.id}`);
       }
+    } else {
+      console.warn("No first book product found in Stripe");
     }
     
     const additionalBookProduct = products.data.find(p => 
@@ -147,6 +174,7 @@ serve(async (req) => {
     );
     
     if (additionalBookProduct) {
+      console.log(`Found additional book product: ${additionalBookProduct.id}`);
       const additionalBookPrice = prices.data.find(p => 
         p.product === additionalBookProduct.id && p.metadata?.bookType === 'additional'
       );
@@ -157,7 +185,11 @@ serve(async (req) => {
           priceId: additionalBookPrice.id
         };
         console.log(`Additional Book Price ID: ${additionalBookPrice.id}`);
+      } else {
+        console.warn(`No price found for additional book product: ${additionalBookProduct.id}`);
       }
+    } else {
+      console.warn("No additional book product found in Stripe");
     }
     
     // Log the complete result for debugging
