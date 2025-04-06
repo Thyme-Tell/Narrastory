@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,12 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
-  ArrowDown, 
-  ArrowUp,
   Phone,
   Pencil, 
-  SortAsc,
-  SortDesc
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,13 +46,11 @@ const ProfileHeader = ({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
 
   const handleCreateStory = async () => {
     try {
       setIsSubmitting(true);
 
-      // Save to Supabase
       const { data, error } = await supabase
         .from("stories")
         .insert([
@@ -101,69 +96,6 @@ const ProfileHeader = ({
     }
   };
 
-  // Test function to verify the Synthflow endpoint is working
-  const testSynthflowEndpoint = async () => {
-    try {
-      setIsTesting(true);
-      
-      const testContent = "Test Story Title\nThis is a test story content to verify the Synthflow endpoint is working correctly.";
-      
-      console.log("Testing Synthflow endpoint with payload:", {
-        profile_id: profileId,
-        story_content: testContent,
-        metadata: {
-          user_id: profileId,
-          first_name: firstName,
-          last_name: lastName
-        }
-      });
-      
-      const { data, error } = await supabase.functions.invoke('synthflow-story-save', {
-        method: 'POST',
-        body: JSON.stringify({
-          profile_id: profileId,
-          story_content: testContent,
-          metadata: {
-            user_id: profileId,
-            first_name: firstName,
-            last_name: lastName
-          }
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (error) {
-        console.error('Error in test call to Synthflow endpoint:', error);
-        toast({
-          title: "Test Failed",
-          description: "Error calling Synthflow endpoint: " + error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Synthflow test response:', data);
-      toast({
-        title: "Test Success",
-        description: "Synthflow endpoint working correctly",
-      });
-      
-      // Refresh the stories list
-      onUpdate();
-    } catch (err) {
-      console.error('Exception in Synthflow test:', err);
-      toast({
-        title: "Test Failed",
-        description: "Exception: " + (err instanceof Error ? err.message : String(err)),
-        variant: "destructive",
-      });
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -176,17 +108,7 @@ const ProfileHeader = ({
           onClick={() => onSortChange(sortOrder === 'newest' ? 'oldest' : 'newest')}
           className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
         >
-          {sortOrder === 'newest' ? (
-            <>
-              <SortDesc className="h-4 w-4" />
-              <span className="text-sm">Recent first</span>
-            </>
-          ) : (
-            <>
-              <SortAsc className="h-4 w-4" />
-              <span className="text-sm">Oldest first</span>
-            </>
-          )}
+          {sortOrder === 'newest' ? 'Recent first' : 'Oldest first'}
         </Button>
       </div>
       
@@ -199,9 +121,6 @@ const ProfileHeader = ({
             <Phone className="mr-2 h-5 w-5" />
             Share Your Story by Phone
           </Button>
-          <p className="text-sm text-center text-muted-foreground">
-            Call Narra at <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a>
-          </p>
           
           <Button 
             variant="outline"
@@ -213,18 +132,6 @@ const ProfileHeader = ({
           </Button>
         </div>
       </Card>
-
-      {process.env.NODE_ENV === 'development' && (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={testSynthflowEndpoint}
-          disabled={isTesting}
-          className="mt-2 text-xs"
-        >
-          {isTesting ? 'Testing...' : 'Test Synthflow Endpoint'}
-        </Button>
-      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-white">
