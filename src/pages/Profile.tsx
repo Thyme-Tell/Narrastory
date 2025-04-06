@@ -1,3 +1,4 @@
+
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
+import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
+import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 
 const Profile = () => {
   const { id } = useParams();
@@ -23,6 +26,7 @@ const Profile = () => {
   const { isAuthenticated } = useAuth();
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [isBookExpanded, setIsBookExpanded] = useState(false);
+  const { status: subscriptionStatus } = useSubscriptionService(id);
 
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
@@ -161,6 +165,12 @@ const Profile = () => {
               onExpandToggle={handleBookExpandToggle}
             />
           </div>
+          
+          {!subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
+            <div className="my-4">
+              <LifetimeOfferBanner profileId={id} />
+            </div>
+          )}
           
           <ProfileHeader 
             firstName={profile.first_name} 

@@ -1,5 +1,4 @@
-
-import { BrowserRouter, Routes, Route, useParams, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import SignIn from "./pages/SignIn";
@@ -16,7 +15,6 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { Toaster } from "@/components/ui/toaster";
 
-// Wrapper component to pass the storyBookId from URL params
 const StoryBookSettingsWrapper = () => {
   const params = useParams();
   return <StoryBookSettings storyBookId={params.id!} />;
@@ -24,7 +22,7 @@ const StoryBookSettingsWrapper = () => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -41,10 +39,13 @@ function App() {
           <Route path="/get-started" element={<GetStarted />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/subscribe" element={<SubscribePage />} />
+          <Route path="/subscribe/:id" element={<SubscribePage />} />
+          <Route path="/lifetime-checkout/:id" element={<LifetimeCheckoutPage />} />
         </Routes>
         <Toaster />
       </AuthProvider>
-    </BrowserRouter>
+    </Router>
   );
 }
 
