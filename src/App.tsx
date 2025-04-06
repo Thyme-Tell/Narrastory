@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -17,6 +16,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SubscribePage from "./pages/SubscribePage";
 import LifetimeCheckoutPage from "./pages/LifetimeCheckoutPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCanceledPage from './pages/PaymentCanceledPage';
 import { Toaster } from "@/components/ui/toaster";
 
 const StoryBookSettingsWrapper = () => {
@@ -48,6 +49,8 @@ function App() {
           <Route path="/lifetime-checkout/:id" element={<LifetimeCheckoutPage />} />
           <Route path="/subscription" element={<SubscriptionPage />} />
           <Route path="/subscription/:id" element={<SubscriptionPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-canceled" element={<PaymentCanceledPage />} />
         </Routes>
         <Toaster />
       </AuthProvider>

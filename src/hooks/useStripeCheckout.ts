@@ -60,22 +60,22 @@ export const useStripeCheckout = () => {
         let actualPriceId = options.priceId;
         let foundProduct = false;
         
-        if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus?.priceId) {
+        if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus && setupData.annualPlus.priceId) {
           actualPriceId = setupData.annualPlus.priceId;
           console.log(`Mapped ANNUAL_PLUS to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.annualPlus.productName}, Amount: ${setupData.annualPlus.amount}`);
           foundProduct = true;
-        } else if (options.priceId === 'LIFETIME' && setupData.lifetime?.priceId) {
+        } else if (options.priceId === 'LIFETIME' && setupData.lifetime && setupData.lifetime.priceId) {
           actualPriceId = setupData.lifetime.priceId;
           console.log(`Mapped LIFETIME to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.lifetime.productName}, Amount: ${setupData.lifetime.amount}`);
           foundProduct = true;
-        } else if (options.priceId === 'FIRST_BOOK' && setupData.firstBook?.priceId) {
+        } else if (options.priceId === 'FIRST_BOOK' && setupData.firstBook && setupData.firstBook.priceId) {
           actualPriceId = setupData.firstBook.priceId;
           console.log(`Mapped FIRST_BOOK to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.firstBook.productName}, Amount: ${setupData.firstBook.amount}`);
           foundProduct = true;
-        } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook?.priceId) {
+        } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook && setupData.additionalBook.priceId) {
           actualPriceId = setupData.additionalBook.priceId;
           console.log(`Mapped ADDITIONAL_BOOK to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.additionalBook.productName}, Amount: ${setupData.additionalBook.amount}`);
@@ -84,10 +84,15 @@ export const useStripeCheckout = () => {
         
         // If we didn't find a mapping, check if the input is already a valid price ID
         if (!foundProduct) {
-          if (Object.values(setupData).some(product => product.priceId === options.priceId)) {
-            actualPriceId = options.priceId;
-            console.log(`Using directly provided Stripe priceId: ${actualPriceId}`);
-            foundProduct = true;
+          // Check if this is already a known price ID that exists in our product data
+          const allProducts = Object.values(setupData);
+          for (const product of allProducts) {
+            if (product && typeof product === 'object' && 'priceId' in product && product.priceId === options.priceId) {
+              actualPriceId = options.priceId;
+              console.log(`Using directly provided Stripe priceId: ${actualPriceId}`);
+              foundProduct = true;
+              break;
+            }
           }
         }
         
@@ -124,13 +129,15 @@ export const useStripeCheckout = () => {
       }
     },
     onSuccess: (data) => {
-      // Redirect to Stripe Checkout
+      // Open Stripe Checkout in a new window instead of redirecting
       if (data && data.url) {
         toast({
           title: "Redirecting to Checkout",
-          description: "Taking you to the secure payment page.",
+          description: "Opening secure payment page in a new window.",
         });
-        window.location.href = data.url;
+        
+        // Open in a new tab/window instead of redirecting the current page
+        window.open(data.url, "_blank");
       } else {
         toast({
           title: "Error",
