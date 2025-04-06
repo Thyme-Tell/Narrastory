@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SignIn = () => {
   useEffect(() => {
@@ -21,6 +22,7 @@ const SignIn = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { toast } = useToast();
+  const { setRememberMe: updateRememberMe } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
@@ -87,44 +89,44 @@ const SignIn = () => {
         return;
       }
 
+      // Update rememberMe in the AuthContext
+      updateRememberMe(rememberMe);
+      
       const expirationDays = rememberMe ? 365 : 7;
       
-      // Ensure we clear any existing cookies first
+      // Clear existing cookies first
       Cookies.remove('profile_authorized');
       Cookies.remove('phone_number');
       Cookies.remove('profile_id');
       Cookies.remove('user_email');
       
-      // Set cookies with a small delay to ensure they're properly set
-      setTimeout(() => {
-        console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
-        Cookies.set('profile_authorized', 'true', { expires: expirationDays });
-        Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
-        Cookies.set('profile_id', profile.id, { expires: expirationDays });
-        
-        // Also store email for admin authorization
-        if (profile.email) {
-          Cookies.set('user_email', profile.email, { expires: expirationDays });
-        }
-        
-        // Use the captured redirectTo parameter if available, or fall back to the profile page
-        const destination = redirectTo || `/profile/${profile.id}`;
-        
-        console.log("Login successful, redirecting to:", destination);
-        
-        toast({
-          title: "Welcome back!",
-          description: `You've successfully signed in as ${profile.first_name}`,
-        });
-        
-        // Trigger a storage event to update auth state in other components
-        window.dispatchEvent(new Event('storage'));
-        
-        // Short delay to ensure cookies are set before navigation
-        setTimeout(() => {
-          navigate(destination, { replace: true });
-        }, 100);
-      }, 100);
+      console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
+      
+      // Set cookies immediately (no setTimeout)
+      Cookies.set('profile_authorized', 'true', { expires: expirationDays });
+      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
+      Cookies.set('profile_id', profile.id, { expires: expirationDays });
+      
+      // Also store email for admin authorization
+      if (profile.email) {
+        console.log("Setting email cookie:", profile.email);
+        Cookies.set('user_email', profile.email, { expires: expirationDays });
+      }
+      
+      // Determine redirect destination
+      const destination = redirectTo || `/profile/${profile.id}`;
+      console.log("Login successful, redirecting to:", destination);
+      
+      toast({
+        title: "Welcome back!",
+        description: `You've successfully signed in as ${profile.first_name}`,
+      });
+      
+      // Trigger storage event to update auth state
+      window.dispatchEvent(new Event('storage'));
+      
+      // Navigate to destination
+      navigate(destination, { replace: true });
       
     } catch (error) {
       console.error("Error during sign in:", error);

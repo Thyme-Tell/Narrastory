@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminUtils from '@/components/AdminUtils';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
 
 /**
  * Protected admin page
@@ -15,12 +16,14 @@ const AdminPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     const verifyAuth = async () => {
       setIsLoading(true);
       // Check if user is authenticated
       const isAuthValid = await checkAuth();
+      
       if (!isAuthValid) {
         // Redirect to sign-in if not authenticated, with current path as redirectTo
         console.log("User not authenticated, redirecting to sign-in with return path:", location.pathname);
@@ -40,13 +43,18 @@ const AdminPage: React.FC = () => {
       } else {
         setIsAuthorized(false);
         console.log('Access denied: Only mia@narrastory.com can access the admin page');
+        toast({
+          title: "Access Denied",
+          description: "Only authorized administrators can access this page.",
+          variant: "destructive"
+        });
       }
       
       setIsLoading(false);
     };
 
     verifyAuth();
-  }, [checkAuth, navigate, location.pathname, userEmail]);
+  }, [checkAuth, navigate, location.pathname, userEmail, toast]);
 
   if (isLoading) {
     return (

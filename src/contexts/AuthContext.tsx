@@ -62,23 +62,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const checkAuth = async () => {
-    const storedProfileId = Cookies.get('profile_id');
-    const isAuthorized = Cookies.get('profile_authorized');
-    const storedEmail = Cookies.get('user_email');
-
-    console.log('Checking auth with profile ID:', storedProfileId);
-    console.log('Is authorized from cookie:', isAuthorized);
-    console.log('User email from cookie:', storedEmail);
-
-    if (!storedProfileId || !isAuthorized) {
-      console.log('Missing cookies, user not authenticated');
-      setIsAuthenticated(false);
-      setProfileId(null);
-      setUserEmail(null);
-      return false;
-    }
-
     try {
+      const storedProfileId = Cookies.get('profile_id');
+      const isAuthorized = Cookies.get('profile_authorized');
+      const storedEmail = Cookies.get('user_email');
+
+      console.log('Checking auth with profile ID:', storedProfileId);
+      console.log('Is authorized from cookie:', isAuthorized);
+      console.log('User email from cookie:', storedEmail);
+
+      if (!storedProfileId || !isAuthorized) {
+        console.log('Missing cookies, user not authenticated');
+        setIsAuthenticated(false);
+        setProfileId(null);
+        setUserEmail(null);
+        return false;
+      }
+
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, email')
