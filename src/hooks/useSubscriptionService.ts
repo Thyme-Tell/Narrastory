@@ -17,10 +17,15 @@ import {
  * Hook to interact with the subscription service
  * 
  * @param profileId User profile ID (optional)
+ * @param email User email address (optional, takes precedence over profileId if provided)
  * @param forceRefresh Force a fresh check ignoring the cache (optional)
  * @returns Subscription service operations and status
  */
-export const useSubscriptionService = (profileId?: string, forceRefresh = false) => {
+export const useSubscriptionService = (
+  profileId?: string, 
+  forceRefresh = false, 
+  email?: string
+) => {
   const queryClient = useQueryClient();
   
   // Query subscription status
@@ -30,11 +35,11 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
     error: statusError,
     refetch: refetchStatus
   } = useQuery({
-    queryKey: ['subscription-status', profileId, forceRefresh],
+    queryKey: ['subscription-status', profileId, email, forceRefresh],
     queryFn: async () => {
-      console.log(`Fetching subscription status for profile: ${profileId}, force refresh: ${forceRefresh}`);
+      console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: ${forceRefresh}`);
       try {
-        const result = await subscriptionService.getSubscriptionStatus(profileId, forceRefresh);
+        const result = await subscriptionService.getSubscriptionStatus(profileId, forceRefresh, email);
         console.log('Subscription status fetch result:', result);
         return result;
       } catch (error) {
@@ -42,7 +47,7 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
         throw error;
       }
     },
-    enabled: !!profileId,
+    enabled: !!profileId || !!email,
     staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // 5 minutes if not forcing refresh
     retry: 2, // Retry twice on failure
   });
@@ -56,8 +61,8 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
     onSuccess: () => {
       // Invalidate the subscription status cache
       console.log(`Invalidating cache for profile ${profileId} after plan change`);
-      subscriptionService.invalidateCache(profileId);
-      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId] });
+      subscriptionService.invalidateCache(profileId, email);
+      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId, email] });
     },
     onError: (error) => {
       console.error('Error changing plan:', error);
@@ -73,8 +78,8 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
     onSuccess: () => {
       // Invalidate the subscription status cache
       console.log(`Invalidating cache for profile ${profileId} after using credits`);
-      subscriptionService.invalidateCache(profileId);
-      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId] });
+      subscriptionService.invalidateCache(profileId, email);
+      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId, email] });
     },
     onError: (error) => {
       console.error('Error using book credits:', error);
@@ -94,9 +99,9 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
 
   // Query to check if a user has access to a specific feature
   const checkFeatureAccess = async (featureName: string): Promise<boolean> => {
-    if (!profileId) return false;
-    console.log(`Checking feature access for ${featureName} for profile ${profileId}`);
-    return subscriptionService.hasFeatureAccess(profileId, featureName as any);
+    if (!profileId && !email) return false;
+    console.log(`Checking feature access for ${featureName} for profile ${profileId} or email ${email}`);
+    return subscriptionService.hasFeatureAccess(profileId || '', featureName as any, email);
   };
 
   // Helper function to get formatted status data with defaults
@@ -128,8 +133,8 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
 
   // Fetch subscription status immediately if needed
   const fetchSubscriptionStatus = async () => {
-    if (profileId) {
-      console.log(`Manually fetching subscription status for profile: ${profileId}`);
+    if (profileId || email) {
+      console.log(`Manually fetching subscription status for profile: ${profileId}, email: ${email}`);
       try {
         await refetchStatus();
       } catch (error) {
@@ -170,9 +175,9 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
     
     // Cache control
     invalidateCache: () => {
-      console.log(`Manually invalidating cache for profile ${profileId}`);
-      subscriptionService.invalidateCache(profileId);
-      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId] });
+      console.log(`Manually invalidating cache for profile ${profileId} or email ${email}`);
+      subscriptionService.invalidateCache(profileId, email);
+      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId, email] });
     }
   };
 };

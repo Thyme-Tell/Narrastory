@@ -29,21 +29,47 @@ const Profile = () => {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [isBookExpanded, setIsBookExpanded] = useState(false);
   
+  const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+  // Get profile data to extract email for subscription lookup
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["profile", id],
+    queryFn: async () => {
+      if (!isValidUUID) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email, created_at")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: isValidUUID,
+  });
+  
+  // Now we get subscription status using email when available
   const { 
     status: subscriptionStatus, 
     isStatusLoading, 
     statusError, 
     fetchSubscriptionStatus 
-  } = useSubscriptionService(id, false);
-
-  const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  } = useSubscriptionService(id, false, profile?.email);
 
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
-    if (id) {
+    if (profile?.email) {
+      console.log("Will fetch subscription using email:", profile.email);
+    }
+    if (id || profile?.email) {
       fetchSubscriptionStatus();
     }
-  }, [id]);
+  }, [id, profile?.email]);
 
   useEffect(() => {
     // Log subscription status for debugging
@@ -61,27 +87,6 @@ const Profile = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const { data: profile, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ["profile", id],
-    queryFn: async () => {
-      if (!isValidUUID) return null;
-      
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, created_at")
-        .eq("id", id)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return null;
-      }
-      
-      return data;
-    },
-    enabled: isValidUUID,
-  });
 
   const { data: stories, isLoading: isLoadingStories, refetch: refetchStories } = useQuery({
     queryKey: ["stories", id],

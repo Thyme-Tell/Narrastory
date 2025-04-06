@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,12 +13,42 @@ import { PlanType, PLAN_DETAILS } from '@/types/subscription';
 interface SubscriptionInfoProps {
   profileId?: string;
   showManagement?: boolean;
+  email?: string;
 }
 
 const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ 
   profileId,
-  showManagement = true
+  showManagement = true,
+  email: initialEmail
 }) => {
+  // State to store fetched email if not provided
+  const [userEmail, setUserEmail] = useState<string | undefined>(initialEmail);
+  
+  // Fetch profile email if not provided and we have a profileId
+  useEffect(() => {
+    const fetchEmail = async () => {
+      if (!initialEmail && profileId) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', profileId)
+            .maybeSingle();
+            
+          if (!error && data?.email) {
+            console.log(`Fetched email ${data.email} for profile ${profileId}`);
+            setUserEmail(data.email);
+          }
+        } catch (err) {
+          console.error('Error fetching user email:', err);
+        }
+      }
+    };
+    
+    fetchEmail();
+  }, [profileId, initialEmail]);
+  
+  // Now use both profileId and email for subscription lookup
   const { 
     status, 
     isStatusLoading,
@@ -24,7 +56,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
     isChangingPlan,
     getPlanPrice,
     getPlanDetails
-  } = useSubscriptionService(profileId);
+  } = useSubscriptionService(profileId, false, userEmail);
 
   const handleUpgradeToPlan = (plan: PlanType) => {
     if (profileId) {

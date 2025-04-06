@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_PRODUCTS } from "@/hooks/useStripeCheckout";
 import { toast } from "@/hooks/use-toast";
@@ -43,26 +42,35 @@ class SubscriptionService {
    * 
    * @param profileId User profile ID
    * @param forceRefresh Force a fresh check ignoring the cache
+   * @param email User email (takes precedence over profileId if provided)
    * @returns Subscription status information
    */
-  async getSubscriptionStatus(profileId?: string, forceRefresh = false): Promise<SubscriptionStatusResult> {
-    if (!profileId) {
+  async getSubscriptionStatus(
+    profileId?: string, 
+    forceRefresh = false, 
+    email?: string
+  ): Promise<SubscriptionStatusResult> {
+    // Exit early if no identifiers provided
+    if (!profileId && !email) {
       return this.getDefaultSubscriptionStatus();
     }
 
+    // Create a cache key based on the available identifiers
+    const cacheKey = email ? `email:${email}` : `profile:${profileId}`;
+
     // Check cache first if not forcing a refresh
     if (!forceRefresh) {
-      const cachedStatus = this.statusCache.get(profileId);
+      const cachedStatus = this.statusCache.get(cacheKey);
       if (cachedStatus && Date.now() - cachedStatus.timestamp < this.cacheTtlMs) {
-        console.log(`Using cached subscription status for ${profileId}`);
+        console.log(`Using cached subscription status for ${cacheKey}`);
         return cachedStatus.status;
       }
     }
 
     try {
-      console.log(`Fetching fresh subscription status for ${profileId}`);
+      console.log(`Fetching fresh subscription status for ${cacheKey}`);
       const { data, error } = await supabase.functions.invoke('check-subscription', {
-        body: { profileId },
+        body: { profileId, email },
       });
 
       if (error) {
@@ -118,7 +126,7 @@ class SubscriptionService {
       };
       
       // Cache the result
-      this.statusCache.set(profileId, {
+      this.statusCache.set(cacheKey, {
         status: result,
         timestamp: Date.now()
       });
@@ -139,11 +147,17 @@ class SubscriptionService {
    * Invalidate the subscription status cache for a user
    * 
    * @param profileId User profile ID
+   * @param email User email
    */
-  invalidateCache(profileId?: string): void {
+  invalidateCache(profileId?: string, email?: string): void {
+    if (email) {
+      this.statusCache.delete(`email:${email}`);
+      console.log(`Invalidated subscription cache for email ${email}`);
+    }
+    
     if (profileId) {
-      this.statusCache.delete(profileId);
-      console.log(`Invalidated subscription cache for ${profileId}`);
+      this.statusCache.delete(`profile:${profileId}`);
+      console.log(`Invalidated subscription cache for profile ${profileId}`);
     }
   }
 
@@ -377,11 +391,16 @@ class SubscriptionService {
    * 
    * @param profileId User profile ID
    * @param featureName Name of the feature to check
+   * @param email User email (optional)
    * @returns Whether the user has access to the feature
    */
-  async hasFeatureAccess(profileId: string, featureName: keyof typeof PLAN_FEATURES.free): Promise<boolean> {
+  async hasFeatureAccess(
+    profileId: string, 
+    featureName: keyof typeof PLAN_FEATURES.free,
+    email?: string
+  ): Promise<boolean> {
     try {
-      const status = await this.getSubscriptionStatus(profileId);
+      const status = await this.getSubscriptionStatus(profileId, false, email);
       
       // If features are available in the status, check there
       if (status.features && featureName in status.features) {

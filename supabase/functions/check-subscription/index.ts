@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { 
@@ -6,6 +5,7 @@ import {
   errorResponse, 
   successResponse 
 } from "../_shared/stripe-utils.ts";
+import Stripe from "https://esm.sh/stripe@14.21.0?dts";
 
 /**
  * Check Subscription Edge Function
@@ -14,6 +14,7 @@ import {
  * 
  * Request:
  * - profileId: string (user profile ID) - via query param or request body
+ * - email: string (user email) - via query param or request body (takes precedence over profileId)
  * 
  * Response:
  * - hasSubscription: boolean (whether user has active subscription)
@@ -32,83 +33,77 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize Supabase client and Stripe
+    const supabase = getSupabaseClient();
+    const stripe = getStripeClient();
+
     // Parse the request body or query parameters
     const url = new URL(req.url);
     let profileId = url.searchParams.get('profileId');
-    console.log(`Profile ID from query: ${profileId}`);
+    let email = url.searchParams.get('email');
+    console.log(`Profile ID from query: ${profileId}, Email from query: ${email}`);
 
-    // If profile ID not in query params, try to get from request body
-    if (!profileId) {
+    // If identifiers not in query params, try to get from request body
+    if (!profileId && !email) {
       try {
         const body = await req.json();
         profileId = body.profileId;
-        console.log(`Profile ID from body: ${profileId}`);
+        email = body.email;
+        console.log(`Profile ID from body: ${profileId}, Email from body: ${email}`);
       } catch (e) {
         console.log("No request body or invalid JSON");
       }
     }
 
-    if (!profileId) {
-      return errorResponse('Profile ID is required', 400);
+    // We need either a profileId or email to continue
+    if (!profileId && !email) {
+      return errorResponse('Either Profile ID or Email is required', 400);
     }
 
-    // Initialize Supabase client
-    const supabase = getSupabaseClient();
+    // If we have email but no profileId, try to get profileId from the email
+    if (email && !profileId) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
 
-    // Query the subscriptions table
-    console.log(`Checking subscription for profile ID: ${profileId}`);
-    const { data, error } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', profileId)
-      .single();
-
-    if (error) {
-      console.log(`No subscription found: ${error.message}`);
-      // No subscription found, but this isn't an error
-      return successResponse({ 
-        hasSubscription: false,
-        isPremium: false,
-        isLifetime: false,
-        subscriptionData: null,
-        features: {
-          storageLimit: 100, // MB
-          booksLimit: 0,
-          collaboratorsLimit: 0,
-          aiGeneration: false,
-          customTTS: false,
-          advancedEditing: false,
-          prioritySupport: false
-        },
-        message: 'No subscription found' 
-      });
-    }
-
-    // Special handling for lifetime subscriptions - they are always considered active
-    if (data.is_lifetime) {
-      console.log(`User ${profileId} has a lifetime subscription - marking as active`);
-      
-      // If the status isn't active, update it
-      if (data.status !== 'active') {
-        console.log(`Updating lifetime subscription status from ${data.status} to active`);
-        
-        const { error: updateError } = await supabase
-          .from('subscriptions')
-          .update({ status: 'active' })
-          .eq('user_id', profileId);
-          
-        if (updateError) {
-          console.error(`Error updating lifetime subscription status: ${updateError.message}`);
-        } else {
-          // Update the local data object to reflect the change
-          data.status = 'active';
-        }
+      if (profileError) {
+        console.log(`Error looking up profile by email: ${profileError.message}`);
+      } else if (profileData) {
+        profileId = profileData.id;
+        console.log(`Found profile ID ${profileId} for email ${email}`);
       }
+    }
+
+    // If we have a profileId, try to get any local subscription data
+    let localSubscriptionData = null;
+    let stripeCustomerId = null;
+
+    if (profileId) {
+      const { data: subData, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', profileId)
+        .maybeSingle();
+
+      if (subError) {
+        console.log(`Error querying local subscription: ${subError.message}`);
+      } else if (subData) {
+        localSubscriptionData = subData;
+        stripeCustomerId = subData.stripe_customer_id;
+        console.log(`Found local subscription data for profile ${profileId}`);
+      }
+    }
+
+    // Special handling for lifetime subscriptions in our database
+    if (localSubscriptionData?.is_lifetime) {
+      console.log(`User has a lifetime subscription in our database - returning active status`);
       
       // Determine purchase date
-      const purchaseDate = data.lifetime_purchase_date 
-        ? new Date(data.lifetime_purchase_date) 
-        : (data.created_at ? new Date(data.created_at) : null);
+      const purchaseDate = localSubscriptionData.lifetime_purchase_date 
+        ? new Date(localSubscriptionData.lifetime_purchase_date) 
+        : (localSubscriptionData.created_at ? new Date(localSubscriptionData.created_at) : null);
         
       // Check if we have any payment records for this user
       let orderId = null;
@@ -139,7 +134,6 @@ serve(async (req) => {
         prioritySupport: true
       };
       
-      // Lifetime subscriptions are always active and premium
       return successResponse({
         hasSubscription: true,
         isPremium: true,
@@ -149,21 +143,135 @@ serve(async (req) => {
         purchaseDate: purchaseDate,
         orderId: orderId,
         features: lifetimeFeatures,
-        subscriptionData: data,
+        subscriptionData: localSubscriptionData,
       });
     }
+
+    // If we don't have a Stripe customer ID yet but we have an email, try to find the customer in Stripe
+    if (!stripeCustomerId && email) {
+      try {
+        console.log(`Looking up Stripe customer for email ${email}`);
+        const customers = await stripe.customers.list({ email, limit: 1 });
+        if (customers.data.length > 0) {
+          stripeCustomerId = customers.data[0].id;
+          console.log(`Found Stripe customer ${stripeCustomerId} for email ${email}`);
+        }
+      } catch (stripeError) {
+        console.error(`Error finding Stripe customer: ${stripeError.message}`);
+      }
+    }
+
+    // If we have a Stripe customer ID, check for active subscriptions in Stripe
+    let stripeSubscription = null;
+    if (stripeCustomerId) {
+      try {
+        console.log(`Looking up subscriptions for Stripe customer ${stripeCustomerId}`);
+        const subscriptions = await stripe.subscriptions.list({
+          customer: stripeCustomerId,
+          status: 'active',
+          limit: 1,
+          expand: ['data.items.data.price.product']
+        });
+        
+        if (subscriptions.data.length > 0) {
+          stripeSubscription = subscriptions.data[0];
+          console.log(`Found active Stripe subscription ${stripeSubscription.id}`);
+          
+          // If we have a profileId but the subscription isn't in our database, add it
+          if (profileId && !localSubscriptionData) {
+            const price = stripeSubscription.items.data[0]?.price;
+            let planType = 'monthly'; // Default
+            
+            if (price) {
+              // Try to determine plan type from the price
+              if (price.recurring) {
+                planType = price.recurring.interval === 'month' ? 'monthly' : 'annual';
+              }
+              
+              // Also check the product metadata for more specific plan info
+              const product = price.product;
+              if (typeof product !== 'string' && product?.metadata?.planType) {
+                planType = product.metadata.planType;
+              }
+            }
+            
+            console.log(`Storing Stripe subscription data in our database for profile ${profileId}, plan type: ${planType}`);
+            
+            // Store the subscription in our database
+            const { error: insertError } = await supabase
+              .from('subscriptions')
+              .insert({
+                user_id: profileId,
+                stripe_customer_id: stripeCustomerId,
+                stripe_subscription_id: stripeSubscription.id,
+                plan_type: planType,
+                status: stripeSubscription.status,
+                current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
+                current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+                cancel_at_period_end: stripeSubscription.cancel_at_period_end,
+                book_credits: planType === 'annual' || planType === 'plus' ? 1 : 0,
+                is_lifetime: false
+              });
+              
+            if (insertError) {
+              console.error(`Error saving subscription data: ${insertError.message}`);
+            } else {
+              // Update our local reference to include the newly stored data
+              const { data: freshData } = await supabase
+                .from('subscriptions')
+                .select('*')
+                .eq('user_id', profileId)
+                .single();
+                
+              if (freshData) {
+                localSubscriptionData = freshData;
+                console.log('Updated local subscription data reference');
+              }
+            }
+          }
+        } else {
+          console.log(`No active subscriptions found for customer ${stripeCustomerId}`);
+        }
+      } catch (stripeError) {
+        console.error(`Error checking Stripe subscriptions: ${stripeError.message}`);
+      }
+    }
+
+    // Now we have checked both our database and Stripe, determine the subscription status
+    let hasActiveSubscription = false;
+    let isPremium = false;
+    let isLifetime = false;
+    let planType = 'free';
+    let status = null;
+    let features = null;
+    let cancelAtPeriodEnd = false;
+    let expirationDate = null;
+    let lastPaymentStatus = null;
     
-    // For non-lifetime subscriptions, check status normally
-    const hasActiveSubscription = data && 
-      (data.status === 'active' || data.status === 'trialing');
-    
-    const isLifetime = false; // We already handled lifetime above
-    
-    const isPremium = hasActiveSubscription;
-    
-    // Determine plan type and features
-    const planType = data.plan_type || 'free';
-    let features;
+    // If there's an active Stripe subscription, use that status
+    if (stripeSubscription) {
+      hasActiveSubscription = true;
+      isPremium = true;
+      planType = localSubscriptionData?.plan_type || 'monthly';
+      status = stripeSubscription.status;
+      cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
+      expirationDate = new Date(stripeSubscription.current_period_end * 1000);
+      lastPaymentStatus = 'succeeded'; // Assume success for active subscriptions
+    }
+    // Otherwise, if we have local data, use that
+    else if (localSubscriptionData) {
+      if (localSubscriptionData.status === 'active' || localSubscriptionData.status === 'trialing') {
+        hasActiveSubscription = true;
+        isPremium = true;
+      }
+      planType = localSubscriptionData.plan_type || 'free';
+      status = localSubscriptionData.status;
+      cancelAtPeriodEnd = localSubscriptionData.cancel_at_period_end || false;
+      if (localSubscriptionData.current_period_end) {
+        expirationDate = new Date(localSubscriptionData.current_period_end);
+      }
+      lastPaymentStatus = localSubscriptionData.last_payment_status || 'succeeded';
+    }
     
     // Set features based on plan type
     switch (planType) {
@@ -201,35 +309,36 @@ serve(async (req) => {
           prioritySupport: false
         };
     }
-    
-    // Get additional subscription details
-    const cancelAtPeriodEnd = data.cancel_at_period_end || false;
-    const purchaseDate = data.current_period_start ? new Date(data.current_period_start) : null;
-    
-    // Last payment status - ideally would come from Stripe but can default based on subscription status
-    let lastPaymentStatus = 'succeeded';
-    if (data.status === 'past_due' || data.status === 'unpaid') {
-      lastPaymentStatus = 'failed';
-    } else if (data.status === 'incomplete') {
-      lastPaymentStatus = 'pending';
-    }
 
-    console.log(`Subscription status for ${profileId}: hasActive=${hasActiveSubscription}, isLifetime=${isLifetime}, isPremium=${isPremium}, plan=${planType}`);
+    console.log(`Final subscription status: hasActive=${hasActiveSubscription}, isPremium=${isPremium}, plan=${planType}`);
 
-    // Return subscription status
+    // Return the final subscription status
     return successResponse({
       hasSubscription: hasActiveSubscription,
       isPremium: isPremium,
       isLifetime: isLifetime,
       planType: planType,
+      status: status,
       cancelAtPeriodEnd: cancelAtPeriodEnd,
-      purchaseDate: purchaseDate,
+      expirationDate: expirationDate,
       features: features,
       lastPaymentStatus: lastPaymentStatus,
-      subscriptionData: data || null,
+      subscriptionData: localSubscriptionData || stripeSubscription,
     });
   } catch (error) {
     console.error(`Error in check-subscription: ${error.message}`);
     return errorResponse(`Error checking subscription: ${error.message}`, 500);
   }
 });
+
+// Helper function to get Stripe client
+function getStripeClient() {
+  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+  if (!stripeKey) {
+    throw new Error('Missing Stripe secret key in environment variables');
+  }
+
+  return new Stripe(stripeKey, {
+    apiVersion: '2023-10-16',
+  });
+}
