@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Check, X, Clock, ArrowLeft, AlertCircle, Info } from 'lucide-react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -174,7 +175,7 @@ const PlanSelectionScreen: React.FC = () => {
       )}
       
       {!availablePlans.plus && (
-        <Alert variant="info" className="mb-6">
+        <Alert variant="default" className="mb-6">
           <Info className="h-4 w-4" />
           <AlertTitle>Notice</AlertTitle>
           <AlertDescription>
