@@ -7,7 +7,8 @@ import {
   BookCreditUsage,
   UsageRecord,
   SubscriptionResponse,
-  SubscriptionStatusResult
+  SubscriptionStatusResult,
+  CreditResult
 } from '@/types/subscription';
 
 /**
@@ -42,7 +43,7 @@ export const useSubscriptionService = (profileId?: string) => {
 
   // Mutation for using book credits
   const useBookCreditsMutation = useMutation({
-    mutationFn: (bookUsage: BookCreditUsage) => 
+    mutationFn: (bookUsage: BookCreditUsage): Promise<CreditResult> => 
       subscriptionService.useBookCredits(bookUsage),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId] });
@@ -82,7 +83,7 @@ export const useSubscriptionService = (profileId?: string) => {
     planChangeError: changePlanMutation.error,
     
     // Credit operations
-    useBookCredits: useBookCreditsMutation.mutate,
+    useBookCredits: useBookCreditsMutation.mutateAsync, // Use mutateAsync instead of mutate to get the Promise result
     isUsingCredits: useBookCreditsMutation.isPending,
     creditError: useBookCreditsMutation.error,
     

@@ -56,7 +56,7 @@ export const BookPurchaseProvider: React.FC<BookPurchaseProviderProps> = ({
           throw new Error('Insufficient book credits');
         }
         
-        // Fix: Explicitly handle the returned promise and await it to get the result
+        // Use mutateAsync which returns a Promise with the actual result
         const creditUsageResult = await useBookCredits({
           profileId,
           bookId,
