@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
-import { Menu } from "lucide-react";
+import { Menu, Crown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -21,6 +21,7 @@ import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
 import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 import { toast } from "sonner";
+import { PlanType } from "@/types/subscription";
 
 const Profile = () => {
   const { id } = useParams();
@@ -129,6 +130,20 @@ const Profile = () => {
   const handleBookExpandToggle = (expanded: boolean) => {
     setIsBookExpanded(expanded);
   };
+  
+  const getPlanLabel = (planType: PlanType): string => {
+    switch (planType) {
+      case 'lifetime':
+        return 'Lifetime';
+      case 'annual':
+      case 'plus':
+        return 'Premium Annual';
+      case 'monthly':
+        return 'Premium Monthly';
+      default:
+        return 'Free Plan';
+    }
+  };
 
   if (isLoadingProfile) {
     return (
@@ -167,7 +182,30 @@ const Profile = () => {
           alt="Narra Logo"
           className="h-11"
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Subscription Status Badge */}
+          {!isStatusLoading && (
+            <div className="flex items-center">
+              {subscriptionStatus.isPremium ? (
+                <div className="bg-[#EDF6FF] text-[#4B88DD] border border-[#D0E4FA] px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <Crown className="h-3.5 w-3.5" />
+                  <span className="text-sm font-medium">{getPlanLabel(subscriptionStatus.planType)}</span>
+                </div>
+              ) : (
+                <Button 
+                  size="sm" 
+                  className="bg-[#A33D29] hover:bg-[#A33D29]/90 text-white rounded-full flex items-center gap-1"
+                  asChild
+                >
+                  <Link to={`/subscribe/${id}`}>
+                    Upgrade
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </div>
+          )}
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
