@@ -1,16 +1,16 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminUtils from '@/components/AdminUtils';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Protected admin page
  * Only accessible to user with email: mia@narrastory.com
  */
 const AdminPage: React.FC = () => {
-  const { isAuthenticated, checkAuth } = useAuth();
+  const { isAuthenticated, checkAuth, userEmail } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -31,10 +31,6 @@ const AdminPage: React.FC = () => {
         return;
       }
       
-      // Get the current user's email
-      const { data: { user } } = await supabase.auth.getUser();
-      const userEmail = user?.email;
-      
       console.log("Checking authorization for email:", userEmail);
       
       // Only allow access if the email matches mia@narrastory.com
@@ -50,7 +46,7 @@ const AdminPage: React.FC = () => {
     };
 
     verifyAuth();
-  }, [checkAuth, navigate, location.pathname]);
+  }, [checkAuth, navigate, location.pathname, userEmail]);
 
   if (isLoading) {
     return (

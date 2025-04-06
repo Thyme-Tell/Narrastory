@@ -15,6 +15,7 @@ interface AuthContextType {
   // Authentication state
   isAuthenticated: boolean;
   profileId: string | null;
+  userEmail: string | null;
   
   // Authentication methods
   checkAuth: () => Promise<boolean>;
@@ -42,6 +43,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   
@@ -62,21 +64,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = async () => {
     const storedProfileId = Cookies.get('profile_id');
     const isAuthorized = Cookies.get('profile_authorized');
+    const storedEmail = Cookies.get('user_email');
 
     console.log('Checking auth with profile ID:', storedProfileId);
     console.log('Is authorized from cookie:', isAuthorized);
+    console.log('User email from cookie:', storedEmail);
 
     if (!storedProfileId || !isAuthorized) {
       console.log('Missing cookies, user not authenticated');
       setIsAuthenticated(false);
       setProfileId(null);
+      setUserEmail(null);
       return false;
     }
 
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name')
+        .select('id, first_name, last_name, email')
         .eq('id', storedProfileId)
         .maybeSingle();
 
@@ -91,20 +96,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         Cookies.remove('profile_id');
         Cookies.remove('profile_authorized');
         Cookies.remove('phone_number');
+        Cookies.remove('user_email');
         Cookies.remove('cookie_expiry');
         setIsAuthenticated(false);
         setProfileId(null);
+        setUserEmail(null);
         return false;
       }
 
-      console.log('Auth successful for:', profile.first_name, profile.last_name);
+      console.log('Auth successful for:', profile.first_name, profile.last_name, 'with email:', profile.email);
       setIsAuthenticated(true);
       setProfileId(profile.id);
+      
+      // Set email if found in profile, otherwise use stored email
+      if (profile.email) {
+        setUserEmail(profile.email);
+        // Update the cookie if it's different
+        if (profile.email !== storedEmail) {
+          Cookies.set('user_email', profile.email, { 
+            expires: rememberMe ? 365 : 7 
+          });
+        }
+      } else if (storedEmail) {
+        setUserEmail(storedEmail);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error checking auth:', error);
       setIsAuthenticated(false);
       setProfileId(null);
+      setUserEmail(null);
       return false;
     }
   };
@@ -122,10 +144,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profileId = Cookies.get('profile_id');
       const isAuthorized = Cookies.get('profile_authorized');
       const phoneNumber = Cookies.get('phone_number');
+      const email = Cookies.get('user_email');
       
       if (profileId) Cookies.set('profile_id', profileId, { expires: 7 });
       if (isAuthorized) Cookies.set('profile_authorized', isAuthorized, { expires: 7 });
       if (phoneNumber) Cookies.set('phone_number', phoneNumber, { expires: 7 });
+      if (email) Cookies.set('user_email', email, { expires: 7 });
     }
   };
 
@@ -134,9 +158,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     Cookies.remove('profile_id');
     Cookies.remove('profile_authorized');
     Cookies.remove('phone_number');
+    Cookies.remove('user_email');
     // Don't remove cookie_expiry on logout to remember user preference
     setIsAuthenticated(false);
     setProfileId(null);
+    setUserEmail(null);
     navigate('/sign-in', { replace: true });
   };
   
@@ -202,7 +228,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{ 
       // Authentication state and methods
       isAuthenticated, 
-      profileId, 
+      profileId,
+      userEmail,
       checkAuth, 
       logout,
       setRememberMe: updateRememberMe,

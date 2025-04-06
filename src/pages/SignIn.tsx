@@ -61,7 +61,7 @@ const SignIn = () => {
     try {
       const { data: profiles, error: searchError } = await supabase
         .from("profiles")
-        .select("id, password, first_name, last_name, phone_number")
+        .select("id, password, first_name, last_name, phone_number, email")
         .eq("phone_number", normalizedPhoneNumber);
 
       if (searchError) {
@@ -88,26 +88,47 @@ const SignIn = () => {
       }
 
       const expirationDays = rememberMe ? 365 : 7;
-      console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
-      Cookies.set('profile_authorized', 'true', { expires: expirationDays });
-      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
-      Cookies.set('profile_id', profile.id, { expires: expirationDays });
-
-      // Use the captured redirectTo parameter if available, or fall back to the profile page
-      const destination = redirectTo || `/profile/${profile.id}`;
       
-      console.log("Login successful, redirecting to:", destination);
+      // Ensure we clear any existing cookies first
+      Cookies.remove('profile_authorized');
+      Cookies.remove('phone_number');
+      Cookies.remove('profile_id');
+      Cookies.remove('user_email');
       
-      toast({
-        title: "Welcome back!",
-        description: `You've successfully signed in as ${profile.first_name}`,
-      });
+      // Set cookies with a small delay to ensure they're properly set
+      setTimeout(() => {
+        console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
+        Cookies.set('profile_authorized', 'true', { expires: expirationDays });
+        Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
+        Cookies.set('profile_id', profile.id, { expires: expirationDays });
+        
+        // Also store email for admin authorization
+        if (profile.email) {
+          Cookies.set('user_email', profile.email, { expires: expirationDays });
+        }
+        
+        // Use the captured redirectTo parameter if available, or fall back to the profile page
+        const destination = redirectTo || `/profile/${profile.id}`;
+        
+        console.log("Login successful, redirecting to:", destination);
+        
+        toast({
+          title: "Welcome back!",
+          description: `You've successfully signed in as ${profile.first_name}`,
+        });
+        
+        // Trigger a storage event to update auth state in other components
+        window.dispatchEvent(new Event('storage'));
+        
+        // Short delay to ensure cookies are set before navigation
+        setTimeout(() => {
+          navigate(destination, { replace: true });
+        }, 100);
+      }, 100);
       
-      navigate(destination, { replace: true });
     } catch (error) {
       console.error("Error during sign in:", error);
       setError("Something went wrong while signing in. Please try again later.");
-    } finally {
       setLoading(false);
     }
   };

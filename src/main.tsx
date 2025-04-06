@@ -1,3 +1,4 @@
+
 import React from 'react'
 import * as ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -52,6 +53,15 @@ const initPostHog = () => {
 
 // Initialize PostHog
 initPostHog()
+
+// Fix for cookie storage issues - Trigger storage event on cookie changes
+const originalSet = Cookies.set;
+Cookies.set = function(...args) {
+  const result = originalSet.apply(this, args);
+  // Dispatch storage event to trigger auth state update
+  window.dispatchEvent(new Event('storage'));
+  return result;
+};
 
 const container = document.getElementById('root')
 if (!container) throw new Error('Root element not found')
