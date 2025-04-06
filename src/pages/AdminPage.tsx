@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminUtils from '@/components/AdminUtils';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Protected admin page
- * Only accessible to authenticated users
+ * Only accessible to user with email: mia@narrastory.com
  */
 const AdminPage: React.FC = () => {
   const { isAuthenticated, checkAuth } = useAuth();
@@ -26,10 +27,18 @@ const AdminPage: React.FC = () => {
         return;
       }
       
-      // This is a simple authorization check
-      // In a real app, you would check if the user has admin permissions
-      // For now, we'll assume all authenticated users can access the admin page
-      setIsAuthorized(true);
+      // Get the current user's email
+      const { data: { user } } = await supabase.auth.getUser();
+      const userEmail = user?.email;
+      
+      // Only allow access if the email matches mia@narrastory.com
+      if (userEmail === 'mia@narrastory.com') {
+        setIsAuthorized(true);
+      } else {
+        setIsAuthorized(false);
+        console.log('Access denied: Only mia@narrastory.com can access the admin page');
+      }
+      
       setIsLoading(false);
     };
 
@@ -51,7 +60,7 @@ const AdminPage: React.FC = () => {
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
             <CardDescription>
-              You do not have permission to access this page.
+              This page is only accessible to authorized administrators.
             </CardDescription>
           </CardHeader>
         </Card>
