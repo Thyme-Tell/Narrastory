@@ -16,6 +16,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SubscribePage from "./pages/SubscribePage";
 import LifetimeCheckoutPage from "./pages/LifetimeCheckoutPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 import { Toaster } from "@/components/ui/toaster";
 
 const StoryBookSettingsWrapper = () => {
@@ -45,6 +46,8 @@ function App() {
           <Route path="/subscribe" element={<SubscribePage />} />
           <Route path="/subscribe/:id" element={<SubscribePage />} />
           <Route path="/lifetime-checkout/:id" element={<LifetimeCheckoutPage />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route path="/subscription/:id" element={<SubscriptionPage />} />
         </Routes>
         <Toaster />
       </AuthProvider>

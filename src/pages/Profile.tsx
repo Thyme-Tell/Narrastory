@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
+import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 
 const Profile = () => {
@@ -146,6 +147,11 @@ const Profile = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-white">
+            <DropdownMenuItem asChild>
+              <Link to={`/subscription/${id}`} className="w-full">
+                Subscription Settings
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
               Not {profile.first_name}? Log Out
             </DropdownMenuItem>
@@ -187,8 +193,18 @@ const Profile = () => {
             onUpdate={refetchStories}
             sortOrder={sortOrder}
           />
+          
+          {!subscriptionStatus.isPremium && stories && stories.length > 5 && (
+            <div className="mt-6">
+              <UpgradePrompt profileId={id} variant="card" />
+            </div>
+          )}
         </div>
       </div>
+      
+      {!subscriptionStatus.isPremium && (
+        <UpgradePrompt profileId={id} variant="floating" />
+      )}
       
       <ScrollToTopButton />
     </div>
