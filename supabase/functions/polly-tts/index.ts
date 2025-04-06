@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders } from "../_shared/cors.ts"
-import { uploadAudioFile } from "../story-tts/storage-operations.ts"
+import { uploadAudioFile } from "../_shared/storage-operations.ts"
 
 const AWS_REGION = Deno.env.get('AWS_REGION') || 'us-east-1';
 const AWS_ACCESS_KEY_ID = Deno.env.get('AWS_ACCESS_KEY_ID');

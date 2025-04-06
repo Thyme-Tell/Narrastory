@@ -37,6 +37,9 @@ enabled = true
 [functions.story-tts]
 verify_jwt = false
 
+[functions.polly-tts]
+verify_jwt = false
+
 [functions.synthflow-webhook]
 verify_jwt = false
 

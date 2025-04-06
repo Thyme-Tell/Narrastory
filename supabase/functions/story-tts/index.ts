@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { generateAudio as generateAudioElevenLabs } from "./audio-generator.ts"
 import { saveAudioMetadata } from "./database-operations.ts"
-import { uploadAudioFile } from "./storage-operations.ts"
+import { uploadAudioFile } from "../_shared/storage-operations.ts"
 import { fetchStoryContent } from "./story-operations.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
