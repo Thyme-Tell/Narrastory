@@ -24,6 +24,7 @@ import {
  * - email: string (optional, user email)
  * - successUrl: string (redirect URL on success)
  * - cancelUrl: string (redirect URL on cancel)
+ * - mode: string (optional, 'payment' or 'subscription')
  * 
  * Response:
  * - sessionId: string (Stripe session ID)
@@ -41,10 +42,10 @@ serve(async (req) => {
   try {
     // Parse the request body
     const reqBody = await req.json();
-    const { priceId, successUrl, cancelUrl, email, profileId } = reqBody;
+    const { priceId, successUrl, cancelUrl, email, profileId, mode: requestedMode } = reqBody;
 
     console.log(`Request received with priceId: ${priceId}`);
-    console.log(`Profile ID: ${profileId}, Email: ${email}`);
+    console.log(`Profile ID: ${profileId}, Email: ${email}, Mode: ${requestedMode || 'not specified'}`);
 
     // Validate required fields
     if (!priceId) {
@@ -85,16 +86,23 @@ serve(async (req) => {
 
     // Determine if this is a subscription or one-time payment
     let mode: 'payment' | 'subscription' = 'payment';
-    if (priceId === PRICE_IDS.ANNUAL_PLUS) {
+    
+    if (requestedMode === 'subscription') {
       mode = 'subscription';
-      console.log("Creating subscription checkout");
+      console.log("Mode explicitly set to subscription");
+    } else if (requestedMode === 'payment') {
+      mode = 'payment';
+      console.log("Mode explicitly set to payment");
+    } else if (priceId === PRICE_IDS.ANNUAL_PLUS) {
+      mode = 'subscription';
+      console.log("Creating subscription checkout based on product ID");
     } else {
       console.log("Creating one-time payment checkout");
     }
 
     // Create checkout session
     try {
-      console.log("Creating Stripe checkout session");
+      console.log(`Creating Stripe checkout session with mode: ${mode}`);
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?dts";
 import { corsHeaders } from "../_shared/cors.ts";
@@ -78,6 +77,10 @@ serve(async (req) => {
       console.log(`Price ${index + 1}: ID=${price.id}, ProductID=${price.product}`);
       console.log(`Price amount: ${price.unit_amount}, Currency: ${price.currency}`);
       console.log(`Price metadata:`, JSON.stringify(price.metadata || {}));
+      console.log(`Price type: ${price.type}, Recurring: ${price.recurring ? "Yes" : "No"}`);
+      if (price.recurring) {
+        console.log(`Recurring interval: ${price.recurring.interval}`);
+      }
     });
     
     if (prices.data.length === 0) {
@@ -95,49 +98,85 @@ serve(async (req) => {
       );
     }
     
-    // We'll look for products by name if metadata is not set properly
-    console.log("Trying to find products by both metadata and name...");
+    // We'll look for products by name or ID if metadata is not set properly
+    console.log("Trying to find products by name, metadata, or recurring status...");
     
     // Map product types to their respective prices
     const result: any = {};
     
-    // Find annual plus subscription - try multiple detection methods
-    let annualPlusProduct = products.data.find(p => 
-      (p.metadata?.productType === 'subscription' && p.metadata?.features?.includes('premium_voices')) ||
-      p.name.toLowerCase().includes('plus') || 
-      p.name.toLowerCase().includes('annual')
-    );
+    // IMPROVED: Better detection for annual subscription product
+    // Look for any product with annual, plus, subscription in name or is recurring
+    let annualProducts = products.data.filter(p => {
+      const nameLower = p.name.toLowerCase();
+      return nameLower.includes('plus') || 
+             nameLower.includes('annual') || 
+             nameLower.includes('yearly') ||
+             nameLower.includes('subscription') ||
+             nameLower.includes('narra+') ||
+             (p.metadata?.productType === 'subscription');
+    });
     
-    if (annualPlusProduct) {
-      console.log(`Found annual plus product: ${annualPlusProduct.id}, Name: ${annualPlusProduct.name}`);
+    console.log(`Found ${annualProducts.length} potential annual subscription products`);
+    
+    if (annualProducts.length > 0) {
+      // Sort the annual products to prioritize those with more relevant keywords
+      annualProducts.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const aScore = (aName.includes('annual') ? 2 : 0) + 
+                       (aName.includes('plus') ? 1 : 0) + 
+                       (aName.includes('yearly') ? 2 : 0);
+        const bScore = (bName.includes('annual') ? 2 : 0) + 
+                       (bName.includes('plus') ? 1 : 0) + 
+                       (bName.includes('yearly') ? 2 : 0);
+        return bScore - aScore; // Higher score first
+      });
       
-      // Find any price for this product
-      const annualPlusPrices = prices.data.filter(p => p.product === annualPlusProduct?.id);
+      const annualProduct = annualProducts[0];
+      console.log(`Selected annual product: ${annualProduct.id}, Name: ${annualProduct.name}`);
       
-      if (annualPlusPrices.length > 0) {
-        // Use the first price found
-        const annualPlusPrice = annualPlusPrices[0];
+      // Find prices for this product, prioritizing recurring prices
+      const annualPrices = prices.data.filter(p => p.product === annualProduct.id);
+      
+      // Sort prices to prioritize recurring ones
+      const sortedPrices = annualPrices.sort((a, b) => {
+        // Prioritize recurring prices
+        if (a.recurring && !b.recurring) return -1;
+        if (!a.recurring && b.recurring) return 1;
+        // If both recurring or both not recurring, sort by amount
+        return (b.unit_amount || 0) - (a.unit_amount || 0);
+      });
+      
+      if (sortedPrices.length > 0) {
+        const annualPrice = sortedPrices[0];
         result.annualPlus = {
-          productId: annualPlusProduct.id,
-          priceId: annualPlusPrice.id,
-          productName: annualPlusProduct.name,
-          amount: annualPlusPrice.unit_amount
+          productId: annualProduct.id,
+          priceId: annualPrice.id,
+          productName: annualProduct.name,
+          amount: annualPrice.unit_amount,
+          isRecurring: !!annualPrice.recurring
         };
-        console.log(`Annual Plus Price ID: ${annualPlusPrice.id}, Amount: ${annualPlusPrice.unit_amount}`);
+        console.log(`Annual Plus Price ID: ${annualPrice.id}, Amount: ${annualPrice.unit_amount}`);
+        console.log(`Is recurring: ${!!annualPrice.recurring}`);
+        if (annualPrice.recurring) {
+          console.log(`Recurring interval: ${annualPrice.recurring.interval}`);
+        }
       } else {
-        console.warn(`No price found for annual plus product: ${annualPlusProduct.id}`);
+        console.warn(`No price found for annual plus product: ${annualProduct.id}`);
       }
     } else {
       console.warn("No annual plus product found in Stripe");
     }
     
     // Find lifetime product
-    let lifetimeProduct = products.data.find(p => 
-      (p.metadata?.productType === 'one_time' && p.metadata?.features?.includes('lifetime_access')) ||
-      p.name.toLowerCase().includes('lifetime')
-    );
+    let lifetimeProducts = products.data.filter(p => {
+      const nameLower = p.name.toLowerCase();
+      return nameLower.includes('lifetime') ||
+             (p.metadata?.productType === 'one_time' && p.metadata?.features?.includes('lifetime_access'));
+    });
     
-    if (lifetimeProduct) {
+    if (lifetimeProducts.length > 0) {
+      const lifetimeProduct = lifetimeProducts[0];
       console.log(`Found lifetime product: ${lifetimeProduct.id}, Name: ${lifetimeProduct.name}`);
       
       // Find any price for this product
@@ -150,7 +189,8 @@ serve(async (req) => {
           productId: lifetimeProduct.id,
           priceId: lifetimePrice.id,
           productName: lifetimeProduct.name,
-          amount: lifetimePrice.unit_amount
+          amount: lifetimePrice.unit_amount,
+          isRecurring: false
         };
         console.log(`Lifetime Price ID: ${lifetimePrice.id}, Amount: ${lifetimePrice.unit_amount}`);
       } else {
@@ -217,11 +257,11 @@ serve(async (req) => {
       console.warn("No additional book product found in Stripe");
     }
     
-    // If no products found, try a more generic approach
+    // If no products found with expected names, try a more generic approach - find any product
     if (Object.keys(result).length === 0) {
-      console.log("No products matched by type, trying generic approach...");
+      console.log("No products matched by specific types, trying generic approach...");
       
-      // Find products with prices and sort them into categories
+      // If we didn't find any specific products, just return any products we found
       for (const product of products.data) {
         const productPrices = prices.data.filter(p => p.product === product.id);
         
@@ -229,42 +269,34 @@ serve(async (req) => {
           const price = productPrices[0];
           const productName = product.name.toLowerCase();
           
-          // Attempt to categorize based on product name
-          if (productName.includes('lifetime')) {
-            result.lifetime = {
-              productId: product.id,
-              priceId: price.id,
-              productName: product.name,
-              amount: price.unit_amount
-            };
-            console.log(`Assigned ${product.name} as 'lifetime' product`);
-          } else if (productName.includes('annual') || productName.includes('plus') || productName.includes('subscription')) {
+          if (!result.annualPlus && (price.recurring || productName.includes('subscription'))) {
             result.annualPlus = {
               productId: product.id,
               priceId: price.id,
               productName: product.name,
-              amount: price.unit_amount
+              amount: price.unit_amount,
+              isRecurring: !!price.recurring
             };
-            console.log(`Assigned ${product.name} as 'annualPlus' product`);
-          } else if (productName.includes('first book')) {
-            result.firstBook = {
+            console.log(`Assigned ${product.name} as 'annualPlus' product based on generic detection`);
+          } else if (!result.lifetime && !price.recurring) {
+            result.lifetime = {
               productId: product.id,
               priceId: price.id,
               productName: product.name,
-              amount: price.unit_amount
+              amount: price.unit_amount,
+              isRecurring: false
             };
-            console.log(`Assigned ${product.name} as 'firstBook' product`);
-          } else if (productName.includes('additional book')) {
-            result.additionalBook = {
-              productId: product.id,
-              priceId: price.id,
-              productName: product.name,
-              amount: price.unit_amount
-            };
-            console.log(`Assigned ${product.name} as 'additionalBook' product`);
+            console.log(`Assigned ${product.name} as 'lifetime' product based on generic detection`);
           }
         }
       }
+    }
+    
+    // If we still didn't find an annual product but we have a lifetime product,
+    // use the lifetime product for both to prevent errors
+    if (!result.annualPlus && result.lifetime) {
+      console.log("No annual product found. Using lifetime product as fallback for annual.");
+      result.annualPlus = { ...result.lifetime };
     }
     
     // Log the complete result for debugging

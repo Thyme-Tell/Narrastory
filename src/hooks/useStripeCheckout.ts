@@ -59,24 +59,30 @@ export const useStripeCheckout = () => {
         // Map the product key to the actual Stripe price ID
         let actualPriceId = options.priceId;
         let foundProduct = false;
+        let productDetails = null;
         
+        // IMPROVED: Better detection and mapping for requested product
         if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus && setupData.annualPlus.priceId) {
           actualPriceId = setupData.annualPlus.priceId;
+          productDetails = setupData.annualPlus;
           console.log(`Mapped ANNUAL_PLUS to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.annualPlus.productName}, Amount: ${setupData.annualPlus.amount}`);
           foundProduct = true;
         } else if (options.priceId === 'LIFETIME' && setupData.lifetime && setupData.lifetime.priceId) {
           actualPriceId = setupData.lifetime.priceId;
+          productDetails = setupData.lifetime;
           console.log(`Mapped LIFETIME to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.lifetime.productName}, Amount: ${setupData.lifetime.amount}`);
           foundProduct = true;
         } else if (options.priceId === 'FIRST_BOOK' && setupData.firstBook && setupData.firstBook.priceId) {
           actualPriceId = setupData.firstBook.priceId;
+          productDetails = setupData.firstBook;
           console.log(`Mapped FIRST_BOOK to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.firstBook.productName}, Amount: ${setupData.firstBook.amount}`);
           foundProduct = true;
         } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook && setupData.additionalBook.priceId) {
           actualPriceId = setupData.additionalBook.priceId;
+          productDetails = setupData.additionalBook;
           console.log(`Mapped ADDITIONAL_BOOK to Stripe priceId: ${actualPriceId}`);
           console.log(`Product details: ${setupData.additionalBook.productName}, Amount: ${setupData.additionalBook.amount}`);
           foundProduct = true;
@@ -89,6 +95,7 @@ export const useStripeCheckout = () => {
           for (const product of allProducts) {
             if (product && typeof product === 'object' && 'priceId' in product && product.priceId === options.priceId) {
               actualPriceId = options.priceId;
+              productDetails = product;
               console.log(`Using directly provided Stripe priceId: ${actualPriceId}`);
               foundProduct = true;
               break;
@@ -96,14 +103,24 @@ export const useStripeCheckout = () => {
           }
         }
         
-        // If we don't have a mapping, throw a helpful error
+        // Provide better error handling for missing products
         if (!foundProduct) {
           console.error(`No Stripe price ID found for product: ${options.priceId}`);
           console.error('Available price IDs:', JSON.stringify(setupData));
-          throw new Error(`The selected product is not available for purchase. Please try again later.`);
+          
+          // Special case for ANNUAL_PLUS: if missing but we have lifetime, suggest using that
+          if (options.priceId === 'ANNUAL_PLUS' && setupData.lifetime) {
+            throw new Error(`The Annual subscription is not available at this time. Please try the Lifetime option instead.`);
+          } else {
+            throw new Error(`The selected product is not available for purchase. Please try again later.`);
+          }
         }
         
         console.log(`Creating checkout with actual Stripe priceId: ${actualPriceId}`);
+        
+        // IMPROVED: Determine mode based on product type
+        const mode = productDetails?.isRecurring ? 'subscription' : 'payment';
+        console.log(`Checkout mode: ${mode} (based on product type)`);
         
         // Now create the checkout with the actual price ID
         const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -113,6 +130,7 @@ export const useStripeCheckout = () => {
             email: options.email,
             successUrl,
             cancelUrl,
+            mode: mode // Pass the mode to the API
           },
         });
 
@@ -158,6 +176,8 @@ export const useStripeCheckout = () => {
         } else if (error.message.includes("No such price")) {
           errorMessage = "The selected payment plan is currently unavailable. Please contact support.";
         } else if (error.message.includes("not available for purchase")) {
+          errorMessage = error.message;
+        } else if (error.message.includes("Annual subscription is not available")) {
           errorMessage = error.message;
         }
       }
