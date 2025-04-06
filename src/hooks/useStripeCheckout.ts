@@ -58,21 +58,41 @@ export const useStripeCheckout = () => {
         
         // Map the product key to the actual Stripe price ID
         let actualPriceId = options.priceId;
+        let foundProduct = false;
         
         if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus?.priceId) {
           actualPriceId = setupData.annualPlus.priceId;
           console.log(`Mapped ANNUAL_PLUS to Stripe priceId: ${actualPriceId}`);
+          console.log(`Product details: ${setupData.annualPlus.productName}, Amount: ${setupData.annualPlus.amount}`);
+          foundProduct = true;
         } else if (options.priceId === 'LIFETIME' && setupData.lifetime?.priceId) {
           actualPriceId = setupData.lifetime.priceId;
           console.log(`Mapped LIFETIME to Stripe priceId: ${actualPriceId}`);
+          console.log(`Product details: ${setupData.lifetime.productName}, Amount: ${setupData.lifetime.amount}`);
+          foundProduct = true;
         } else if (options.priceId === 'FIRST_BOOK' && setupData.firstBook?.priceId) {
           actualPriceId = setupData.firstBook.priceId;
           console.log(`Mapped FIRST_BOOK to Stripe priceId: ${actualPriceId}`);
+          console.log(`Product details: ${setupData.firstBook.productName}, Amount: ${setupData.firstBook.amount}`);
+          foundProduct = true;
         } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook?.priceId) {
           actualPriceId = setupData.additionalBook.priceId;
           console.log(`Mapped ADDITIONAL_BOOK to Stripe priceId: ${actualPriceId}`);
-        } else {
-          // If we don't have a mapping, throw a helpful error
+          console.log(`Product details: ${setupData.additionalBook.productName}, Amount: ${setupData.additionalBook.amount}`);
+          foundProduct = true;
+        }
+        
+        // If we didn't find a mapping, check if the input is already a valid price ID
+        if (!foundProduct) {
+          if (Object.values(setupData).some(product => product.priceId === options.priceId)) {
+            actualPriceId = options.priceId;
+            console.log(`Using directly provided Stripe priceId: ${actualPriceId}`);
+            foundProduct = true;
+          }
+        }
+        
+        // If we don't have a mapping, throw a helpful error
+        if (!foundProduct) {
           console.error(`No Stripe price ID found for product: ${options.priceId}`);
           console.error('Available price IDs:', JSON.stringify(setupData));
           throw new Error(`The selected product is not available for purchase. Please try again later.`);

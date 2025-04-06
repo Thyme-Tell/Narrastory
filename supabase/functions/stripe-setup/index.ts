@@ -47,197 +47,143 @@ serve(async (req) => {
 
     console.log("Creating Stripe products and prices");
     
-    // Create or update the annual plus subscription product and price
-    let annualPlusProduct;
-    const existingProducts = await stripe.products.list({ active: true });
+    // Get all existing products
+    const existingProducts = await stripe.products.list({ 
+      active: true,
+      limit: 100,
+    });
+    console.log(`Found ${existingProducts.data.length} existing active products`);
     
-    // Find annual plus product or create it
-    annualPlusProduct = existingProducts.data.find(p => 
-      p.metadata?.productType === 'subscription' && p.metadata?.features?.includes('premium_voices')
+    // Get all existing prices
+    const existingPrices = await stripe.prices.list({ 
+      active: true,
+      limit: 100,
+    });
+    console.log(`Found ${existingPrices.data.length} existing active prices`);
+    
+    // Log existing products and prices
+    existingProducts.data.forEach(product => {
+      console.log(`Product: ${product.id}, Name: ${product.name}`);
+      console.log(`  Metadata: ${JSON.stringify(product.metadata || {})}`);
+      
+      // Log associated prices
+      const productPrices = existingPrices.data.filter(p => p.product === product.id);
+      productPrices.forEach(price => {
+        console.log(`  Price: ${price.id}, Amount: ${price.unit_amount}, Currency: ${price.currency}`);
+        console.log(`    Metadata: ${JSON.stringify(price.metadata || {})}`);
+      });
+    });
+    
+    // SKIP CREATE LOGIC FOR NOW - We'll rely on manually created products
+    // Just map what we've found for the response
+    
+    // Map existing products to our product types
+    const result: any = {};
+    
+    // Try to find annual plus product
+    const annualProducts = existingProducts.data.filter(p => 
+      p.name.toLowerCase().includes('plus') || 
+      p.name.toLowerCase().includes('annual') ||
+      p.name.toLowerCase().includes('subscription') ||
+      (p.metadata?.productType === 'subscription')
     );
     
-    if (!annualPlusProduct) {
-      console.log("Creating annual plus subscription product");
-      annualPlusProduct = await stripe.products.create({
-        name: 'Narra Plus Annual Subscription',
-        description: 'Access to premium voices and 2 book credits per year',
-        metadata: {
-          productType: 'subscription',
-          features: 'premium_voices,book_credits'
-        }
-      });
-    } else {
-      console.log(`Found existing annual plus product: ${annualPlusProduct.id}`);
+    if (annualProducts.length > 0) {
+      const annualProduct = annualProducts[0];
+      console.log(`Found annual product: ${annualProduct.id}, ${annualProduct.name}`);
+      
+      // Get the associated prices
+      const annualPrices = existingPrices.data.filter(p => p.product === annualProduct.id);
+      
+      if (annualPrices.length > 0) {
+        result.annualPlus = {
+          productId: annualProduct.id,
+          priceId: annualPrices[0].id,
+          productName: annualProduct.name,
+          amount: annualPrices[0].unit_amount
+        };
+        console.log(`Mapped annual product: ${annualProduct.name} with price: ${annualPrices[0].id}`);
+      }
     }
     
-    // Create or retrieve annual plus price
-    let annualPlusPrice;
-    const existingPrices = await stripe.prices.list({ active: true, product: annualPlusProduct.id });
-    
-    annualPlusPrice = existingPrices.data.find(p => p.metadata?.planType === 'plus');
-    
-    if (!annualPlusPrice) {
-      console.log("Creating annual plus subscription price");
-      annualPlusPrice = await stripe.prices.create({
-        product: annualPlusProduct.id,
-        unit_amount: 24900, // $249.00
-        currency: 'usd',
-        recurring: {
-          interval: 'year',
-        },
-        metadata: {
-          planType: 'plus'
-        }
-      });
-    } else {
-      console.log(`Found existing annual plus price: ${annualPlusPrice.id}`);
-    }
-    
-    // Create or update the lifetime access product and price
-    let lifetimeProduct;
-    
-    // Find lifetime product or create it
-    lifetimeProduct = existingProducts.data.find(p => 
-      p.metadata?.productType === 'one_time' && p.metadata?.features?.includes('lifetime_access')
+    // Try to find lifetime product
+    const lifetimeProducts = existingProducts.data.filter(p => 
+      p.name.toLowerCase().includes('lifetime') ||
+      (p.metadata?.productType === 'one_time')
     );
     
-    if (!lifetimeProduct) {
-      console.log("Creating lifetime access product");
-      lifetimeProduct = await stripe.products.create({
-        name: 'Narra Lifetime Access',
-        description: 'Lifetime access to premium features',
-        metadata: {
-          productType: 'one_time',
-          features: 'lifetime_access,premium_voices,unlimited_books'
-        }
-      });
-    } else {
-      console.log(`Found existing lifetime product: ${lifetimeProduct.id}`);
-    }
-    
-    // Create or retrieve lifetime price
-    let lifetimePrice;
-    const lifetimePrices = await stripe.prices.list({ active: true, product: lifetimeProduct.id });
-    
-    lifetimePrice = lifetimePrices.data.find(p => p.metadata?.planType === 'lifetime');
-    
-    if (!lifetimePrice) {
-      console.log("Creating lifetime access price");
-      lifetimePrice = await stripe.prices.create({
-        product: lifetimeProduct.id,
-        unit_amount: 39900, // $399.00
-        currency: 'usd',
-        metadata: {
-          planType: 'lifetime'
-        }
-      });
-    } else {
-      console.log(`Found existing lifetime price: ${lifetimePrice.id}`);
-    }
-    
-    // Create or update the book products
-    let firstBookProduct;
-    
-    // Find first book product or create it
-    firstBookProduct = existingProducts.data.find(p => 
-      p.metadata?.productType === 'book' && p.metadata?.bookType === 'first'
-    );
-    
-    if (!firstBookProduct) {
-      console.log("Creating first book product");
-      firstBookProduct = await stripe.products.create({
-        name: 'First Book Publishing',
-        description: 'Publish your first printed book',
-        metadata: {
-          productType: 'book',
-          bookType: 'first'
-        }
-      });
-    } else {
-      console.log(`Found existing first book product: ${firstBookProduct.id}`);
-    }
-    
-    // Create or retrieve first book price
-    let firstBookPrice;
-    const firstBookPrices = await stripe.prices.list({ active: true, product: firstBookProduct.id });
-    
-    firstBookPrice = firstBookPrices.data.find(p => p.metadata?.bookType === 'first');
-    
-    if (!firstBookPrice) {
-      console.log("Creating first book price");
-      firstBookPrice = await stripe.prices.create({
-        product: firstBookProduct.id,
-        unit_amount: 7900, // $79.00
-        currency: 'usd',
-        metadata: {
-          bookType: 'first'
-        }
-      });
-    } else {
-      console.log(`Found existing first book price: ${firstBookPrice.id}`);
-    }
-    
-    let additionalBookProduct;
-    
-    // Find additional book product or create it
-    additionalBookProduct = existingProducts.data.find(p => 
-      p.metadata?.productType === 'book' && p.metadata?.bookType === 'additional'
-    );
-    
-    if (!additionalBookProduct) {
-      console.log("Creating additional book product");
-      additionalBookProduct = await stripe.products.create({
-        name: 'Additional Book Publishing',
-        description: 'Publish additional printed books',
-        metadata: {
-          productType: 'book',
-          bookType: 'additional'
-        }
-      });
-    } else {
-      console.log(`Found existing additional book product: ${additionalBookProduct.id}`);
-    }
-    
-    // Create or retrieve additional book price
-    let additionalBookPrice;
-    const additionalBookPrices = await stripe.prices.list({ active: true, product: additionalBookProduct.id });
-    
-    additionalBookPrice = additionalBookPrices.data.find(p => p.metadata?.bookType === 'additional');
-    
-    if (!additionalBookPrice) {
-      console.log("Creating additional book price");
-      additionalBookPrice = await stripe.prices.create({
-        product: additionalBookProduct.id,
-        unit_amount: 2900, // $29.00
-        currency: 'usd',
-        metadata: {
-          bookType: 'additional'
-        }
-      });
-    } else {
-      console.log(`Found existing additional book price: ${additionalBookPrice.id}`);
-    }
-    
-    // Return all the created products and prices
-    return new Response(
-      JSON.stringify({
-        annualPlus: {
-          productId: annualPlusProduct.id,
-          priceId: annualPlusPrice.id
-        },
-        lifetime: {
+    if (lifetimeProducts.length > 0) {
+      const lifetimeProduct = lifetimeProducts[0];
+      console.log(`Found lifetime product: ${lifetimeProduct.id}, ${lifetimeProduct.name}`);
+      
+      // Get the associated prices
+      const lifetimePrices = existingPrices.data.filter(p => p.product === lifetimeProduct.id);
+      
+      if (lifetimePrices.length > 0) {
+        result.lifetime = {
           productId: lifetimeProduct.id,
-          priceId: lifetimePrice.id
-        },
-        firstBook: {
+          priceId: lifetimePrices[0].id,
+          productName: lifetimeProduct.name,
+          amount: lifetimePrices[0].unit_amount
+        };
+        console.log(`Mapped lifetime product: ${lifetimeProduct.name} with price: ${lifetimePrices[0].id}`);
+      }
+    }
+    
+    // Try to find first book product
+    const firstBookProducts = existingProducts.data.filter(p => 
+      p.name.toLowerCase().includes('first book') ||
+      (p.metadata?.productType === 'book' && p.metadata?.bookType === 'first')
+    );
+    
+    if (firstBookProducts.length > 0) {
+      const firstBookProduct = firstBookProducts[0];
+      console.log(`Found first book product: ${firstBookProduct.id}, ${firstBookProduct.name}`);
+      
+      // Get the associated prices
+      const firstBookPrices = existingPrices.data.filter(p => p.product === firstBookProduct.id);
+      
+      if (firstBookPrices.length > 0) {
+        result.firstBook = {
           productId: firstBookProduct.id,
-          priceId: firstBookPrice.id
-        },
-        additionalBook: {
+          priceId: firstBookPrices[0].id,
+          productName: firstBookProduct.name,
+          amount: firstBookPrices[0].unit_amount
+        };
+        console.log(`Mapped first book product: ${firstBookProduct.name} with price: ${firstBookPrices[0].id}`);
+      }
+    }
+    
+    // Try to find additional book product
+    const additionalBookProducts = existingProducts.data.filter(p => 
+      p.name.toLowerCase().includes('additional book') ||
+      (p.metadata?.productType === 'book' && p.metadata?.bookType === 'additional')
+    );
+    
+    if (additionalBookProducts.length > 0) {
+      const additionalBookProduct = additionalBookProducts[0];
+      console.log(`Found additional book product: ${additionalBookProduct.id}, ${additionalBookProduct.name}`);
+      
+      // Get the associated prices
+      const additionalBookPrices = existingPrices.data.filter(p => p.product === additionalBookProduct.id);
+      
+      if (additionalBookPrices.length > 0) {
+        result.additionalBook = {
           productId: additionalBookProduct.id,
-          priceId: additionalBookPrice.id
-        }
-      }),
+          priceId: additionalBookPrices[0].id,
+          productName: additionalBookProduct.name,
+          amount: additionalBookPrices[0].unit_amount
+        };
+        console.log(`Mapped additional book product: ${additionalBookProduct.name} with price: ${additionalBookPrices[0].id}`);
+      }
+    }
+    
+    // Display what we found
+    console.log("Products and prices mapped:", JSON.stringify(result));
+    
+    // Return all the mapped products and prices
+    return new Response(
+      JSON.stringify(result),
       {
         status: 200,
         headers: {
