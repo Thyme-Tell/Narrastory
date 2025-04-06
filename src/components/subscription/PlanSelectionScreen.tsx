@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, X, Clock, ArrowLeft } from 'lucide-react';
+import { Check, X, Clock, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import LifetimeTimer from './LifetimeTimer';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,6 +16,7 @@ const PlanSelectionScreen: React.FC = () => {
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<'plus' | 'lifetime'>('lifetime');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const { getPlanPrice } = useSubscriptionService(profileId);
   const { 
@@ -32,19 +34,17 @@ const PlanSelectionScreen: React.FC = () => {
   
   const handlePlanSelection = (plan: 'plus' | 'lifetime') => {
     setSelectedPlan(plan);
+    setError(null); // Clear any previous errors
   };
   
   const handleContinue = async () => {
     if (!profileId) {
-      toast({
-        title: "Error",
-        description: "User profile not found. Please sign in and try again.",
-        variant: "destructive",
-      });
+      setError("User profile not found. Please sign in and try again.");
       return;
     }
     
     setIsLoading(true);
+    setError(null);
     
     try {
       if (selectedPlan === 'plus') {
@@ -54,11 +54,7 @@ const PlanSelectionScreen: React.FC = () => {
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      toast({
-        title: "Checkout Error",
-        description: "Could not initialize checkout. Please try again.",
-        variant: "destructive",
-      });
+      setError("Could not process payment request. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +90,14 @@ const PlanSelectionScreen: React.FC = () => {
         </Button>
         <h1 className="text-2xl font-bold font-serif">Choose Your Plan</h1>
       </div>
+      
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Plus Plan */}

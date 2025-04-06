@@ -60,7 +60,7 @@ const LifetimeCheckout: React.FC = () => {
       console.error('Checkout error:', error);
       setCheckoutState({ 
         status: 'error', 
-        error: "Could not initialize checkout. Please try again." 
+        error: "Payment processing is currently unavailable. Please try again later." 
       });
     }
   };

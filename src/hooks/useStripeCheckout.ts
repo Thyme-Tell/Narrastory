@@ -49,28 +49,18 @@ export const useStripeCheckout = () => {
 
         if (error) {
           console.error('Checkout creation error:', error);
-          toast({
-            title: "Checkout Error",
-            description: error.message || "Failed to create checkout session",
-            variant: "destructive",
-          });
           throw error;
         }
         
         return data;
       } catch (err) {
         console.error('Error creating checkout:', err);
-        toast({
-          title: "Checkout Error",
-          description: "Could not create checkout session. Please try again.",
-          variant: "destructive",
-        });
         throw err;
       }
     },
     onSuccess: (data) => {
       // Redirect to Stripe Checkout
-      if (data.url) {
+      if (data && data.url) {
         toast({
           title: "Redirecting to Checkout",
           description: "Taking you to the secure payment page.",
@@ -79,16 +69,24 @@ export const useStripeCheckout = () => {
       } else {
         toast({
           title: "Error",
-          description: "Could not create checkout session",
+          description: "Could not create checkout session. Missing redirect URL.",
           variant: "destructive",
         });
       }
     },
     onError: (error: any) => {
       console.error('Error creating checkout session:', error);
+      
+      // Provide more specific error messages based on error type
+      let errorMessage = "Failed to create checkout session. Please try again later.";
+      
+      if (error.message && error.message.includes("API Key")) {
+        errorMessage = "Payment system is not properly configured. Please contact support.";
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to create checkout session",
+        title: "Payment Error",
+        description: errorMessage,
         variant: "destructive",
       });
     },
