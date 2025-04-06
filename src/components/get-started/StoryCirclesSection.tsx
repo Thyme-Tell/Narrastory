@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -60,34 +61,30 @@ const StoryCirclesSection: React.FC<StoryCirclesSectionProps> = ({ storyCirclesR
           </div>
         </div>
         
-        {/* Themed Story Circles - Coming Soon */}
+        {/* Themed Story Circles - Coming Soon - Redesigned without a card */}
         <div className="mb-12">
           <h3 className="text-xl md:text-2xl font-medium text-[#242F3F] mb-2 text-center">Themed Story Circles</h3>
           <p className="text-center text-[#A33D29] font-medium mb-4">Coming Soon</p>
           
-          <Alert className="bg-[#F8F9F5] border-[#E5E7EB] mb-8">
-            <AlertDescription className="text-center text-[#403E43]">
-              Join a themed Story Circle for deeper inspiration and connection. Each circle focuses on a specific topic, bringing together storytellers who are creating similar types of keepsakes. Themes include Cultural Heritage & Ancestry, Homes & Neighborhoods, Travel & Adventure, Hobbies & Passions, Resilience & Courage, and more.
-            </AlertDescription>
-          </Alert>
+          <div className="text-center text-[#403E43] max-w-3xl mx-auto mb-8">
+            Join a themed Story Circle for deeper inspiration and connection. Each circle focuses on a specific topic, bringing together storytellers who are creating similar types of keepsakes. Themes include Cultural Heritage & Ancestry, Homes & Neighborhoods, Travel & Adventure, Hobbies & Passions, Resilience & Courage, and more.
+          </div>
         </div>
         
-        {/* Create Your Own Circle */}
-        <div className="bg-gradient-to-r from-[#F0F4E9] to-[#E9EFE0] rounded-lg p-6 mb-8">
-          <h3 className="text-xl md:text-2xl font-medium text-[#242F3F] mb-4 text-center">Create Your Own Circle</h3>
-          <p className="text-center text-[#403E43] mb-6">
+        {/* Create Your Own Circle - Redesigned without a card */}
+        <div className="mb-8 max-w-3xl mx-auto text-center">
+          <h3 className="text-xl md:text-2xl font-medium text-[#242F3F] mb-4">Create Your Own Circle</h3>
+          <p className="text-[#403E43] mb-6">
             Want to start a Story Circle with your family, friends, or community? We can help you set up and facilitate a private circle.
           </p>
-          <div className="text-center">
-            <Button 
-              onClick={() => window.open("mailto:hello@narrastory.com?subject=Private%20Story%20Circle%20Request", "_blank")}
-              variant="outline"
-              className="border-[#242F3F] text-[#242F3F] hover:bg-[#242F3F] hover:text-white"
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Contact Us to Get Started
-            </Button>
-          </div>
+          <Button 
+            onClick={() => window.open("mailto:hello@narrastory.com?subject=Private%20Story%20Circle%20Request", "_blank")}
+            variant="outline"
+            className="border-[#242F3F] text-[#242F3F] hover:bg-[#242F3F] hover:text-white"
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Contact Us to Get Started
+          </Button>
         </div>
       </div>
       
