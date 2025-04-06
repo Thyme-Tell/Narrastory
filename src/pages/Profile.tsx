@@ -1,3 +1,4 @@
+
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
-import { Menu, RefreshCw } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -20,7 +21,6 @@ import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
 import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 import { toast } from "sonner";
-import { setUserToLifetime } from "@/utils/subscriptionUtils";
 
 const Profile = () => {
   const { id } = useParams();
@@ -28,7 +28,6 @@ const Profile = () => {
   const { isAuthenticated } = useAuth();
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [isBookExpanded, setIsBookExpanded] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
@@ -80,45 +79,6 @@ const Profile = () => {
       toast.error("There was an issue loading subscription details");
     }
   }, [subscriptionStatus, statusError]);
-  
-  const handleRefreshSubscription = async () => {
-    if (!profile?.email) return;
-    
-    setIsRefreshing(true);
-    try {
-      await fetchSubscriptionStatus(true);
-      toast.success("Subscription status refreshed");
-    } catch (error) {
-      console.error("Error refreshing subscription:", error);
-      toast.error("Failed to refresh subscription status");
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-  
-  // Dev feature to manually set a user to lifetime for testing
-  const handleSetToLifetime = async () => {
-    if (!profile?.email) return;
-    
-    const confirmed = window.confirm(
-      `Are you sure you want to set ${profile.email} to a lifetime subscription? This is for testing only.`
-    );
-    
-    if (confirmed) {
-      try {
-        const success = await setUserToLifetime(profile.email);
-        if (success) {
-          toast.success(`Set ${profile.email} to lifetime subscription`);
-          await fetchSubscriptionStatus(true);
-        } else {
-          toast.error("Failed to set lifetime subscription");
-        }
-      } catch (error) {
-        console.error("Error setting lifetime subscription:", error);
-        toast.error("An error occurred while setting lifetime subscription");
-      }
-    }
-  };
 
   if (!isValidUUID && !window.location.pathname.includes('/sign-in')) {
     return <Navigate to="/sign-in" replace />;
@@ -208,28 +168,6 @@ const Profile = () => {
           className="h-11"
         />
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefreshSubscription}
-            disabled={isRefreshing}
-            className="flex items-center gap-1"
-          >
-            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">Refresh Subscription</span>
-          </Button>
-          
-          {process.env.NODE_ENV === 'development' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSetToLifetime}
-              className="bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
-            >
-              Set to Lifetime
-            </Button>
-          )}
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
