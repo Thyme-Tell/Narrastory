@@ -12,12 +12,13 @@ export interface CheckoutOptions {
   cancelUrl?: string;
 }
 
-// Define product IDs
+// Define product IDs - these should match price IDs from Stripe
+// Note: These will be replaced with actual Stripe price IDs during checkout
 export const STRIPE_PRODUCTS = {
-  ANNUAL_PLUS: 'ANNUAL_PLUS',
-  LIFETIME: 'LIFETIME',
-  FIRST_BOOK: 'FIRST_BOOK',
-  ADDITIONAL_BOOK: 'ADDITIONAL_BOOK',
+  ANNUAL_PLUS: 'price_annual_plus',
+  LIFETIME: 'price_lifetime',
+  FIRST_BOOK: 'price_first_book',
+  ADDITIONAL_BOOK: 'price_additional_book',
 };
 
 /**
@@ -37,9 +38,39 @@ export const useStripeCheckout = () => {
       const cancelUrl = options.cancelUrl || `${origin}/payment-canceled`;
 
       try {
+        console.log(`Creating checkout with priceId: ${options.priceId}`);
+        
+        // First, retrieve the actual Stripe price IDs from the setup function
+        const { data: setupData, error: setupError } = await supabase.functions.invoke('get-stripe-products', {});
+        
+        if (setupError) {
+          console.error('Error fetching Stripe products:', setupError);
+          throw setupError;
+        }
+        
+        if (!setupData) {
+          throw new Error('No product data returned from setup function');
+        }
+        
+        // Map the product key to the actual Stripe price ID
+        let actualPriceId = options.priceId;
+        
+        if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus?.priceId) {
+          actualPriceId = setupData.annualPlus.priceId;
+        } else if (options.priceId === 'LIFETIME' && setupData.lifetime?.priceId) {
+          actualPriceId = setupData.lifetime.priceId;
+        } else if (options.priceId === 'FIRST_BOOK' && setupData.firstBook?.priceId) {
+          actualPriceId = setupData.firstBook.priceId;
+        } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook?.priceId) {
+          actualPriceId = setupData.additionalBook.priceId;
+        }
+        
+        console.log(`Mapped priceId from ${options.priceId} to actual Stripe priceId: ${actualPriceId}`);
+        
+        // Now create the checkout with the actual price ID
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: {
-            priceId: options.priceId,
+            priceId: actualPriceId,
             profileId: options.profileId,
             email: options.email,
             successUrl,
@@ -82,6 +113,8 @@ export const useStripeCheckout = () => {
       
       if (error.message && error.message.includes("API Key")) {
         errorMessage = "Payment system is not properly configured. Please contact support.";
+      } else if (error.message && error.message.includes("No such price")) {
+        errorMessage = "The selected payment plan is currently unavailable. Please contact support.";
       }
       
       toast({

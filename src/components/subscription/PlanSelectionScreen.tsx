@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check, X, Clock, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
@@ -48,13 +48,32 @@ const PlanSelectionScreen: React.FC = () => {
     
     try {
       if (selectedPlan === 'plus') {
+        toast({
+          title: "Creating Checkout",
+          description: "Setting up your subscription checkout...",
+        });
         await createAnnualCheckout(profileId);
       } else {
+        toast({
+          title: "Creating Checkout",
+          description: "Setting up your lifetime access checkout...",
+        });
         await createLifetimeCheckout(profileId);
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      setError("Could not process payment request. Please try again later.");
+      let errorMessage = "Could not process payment request. Please try again later.";
+      
+      if (error instanceof Error) {
+        // Check for specific error types
+        if (error.message.includes("No such price")) {
+          errorMessage = "Payment plans are being updated. Please try again in a few minutes.";
+        } else if (error.message.includes("API Key")) {
+          errorMessage = "Payment system is currently unavailable. Please contact support.";
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

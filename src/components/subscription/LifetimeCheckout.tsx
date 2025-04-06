@@ -54,13 +54,29 @@ const LifetimeCheckout: React.FC = () => {
     setCheckoutState({ status: 'loading' });
     
     try {
+      toast({
+        title: "Creating Checkout",
+        description: "Setting up your lifetime access checkout...",
+      });
+      
       await createLifetimeCheckout(profileId);
       // Note: The redirect happens in the useStripeCheckout hook
     } catch (error) {
       console.error('Checkout error:', error);
+      let errorMessage = "Payment processing is currently unavailable. Please try again later.";
+      
+      if (error instanceof Error) {
+        // Check for specific error types
+        if (error.message.includes("No such price")) {
+          errorMessage = "Payment plans are being updated. Please try again in a few minutes.";
+        } else if (error.message.includes("API Key")) {
+          errorMessage = "Payment system is currently unavailable. Please contact support.";
+        }
+      }
+      
       setCheckoutState({ 
         status: 'error', 
-        error: "Payment processing is currently unavailable. Please try again later." 
+        error: errorMessage
       });
     }
   };
