@@ -29,6 +29,15 @@ const SignIn = () => {
     password: "",
   });
 
+  // Capture the redirectTo parameter from URL or location state
+  const redirectTo = searchParams.get('redirectTo') || 
+                    (location.state as { redirectTo?: string })?.redirectTo || 
+                    null;
+  
+  useEffect(() => {
+    console.log("Redirect destination after login:", redirectTo);
+  }, [redirectTo]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -84,18 +93,17 @@ const SignIn = () => {
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
       Cookies.set('profile_id', profile.id, { expires: expirationDays });
 
-      const redirectTo = searchParams.get('redirectTo') || 
-                        (location.state as { redirectTo?: string })?.redirectTo || 
-                        `/profile/${profile.id}`;
+      // Use the captured redirectTo parameter if available, or fall back to the profile page
+      const destination = redirectTo || `/profile/${profile.id}`;
       
-      console.log("Login successful, redirecting to:", redirectTo);
+      console.log("Login successful, redirecting to:", destination);
       
       toast({
         title: "Welcome back!",
         description: `You've successfully signed in as ${profile.first_name}`,
       });
       
-      navigate(redirectTo, { replace: true });
+      navigate(destination, { replace: true });
     } catch (error) {
       console.error("Error during sign in:", error);
       setError("Something went wrong while signing in. Please try again later.");

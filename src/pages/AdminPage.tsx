@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminUtils from '@/components/AdminUtils';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,6 +14,7 @@ const AdminPage: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -22,8 +22,12 @@ const AdminPage: React.FC = () => {
       // Check if user is authenticated
       const isAuthValid = await checkAuth();
       if (!isAuthValid) {
-        // Redirect to sign-in if not authenticated
-        navigate('/sign-in', { replace: true });
+        // Redirect to sign-in if not authenticated, with current path as redirectTo
+        console.log("User not authenticated, redirecting to sign-in with return path:", location.pathname);
+        navigate('/sign-in', { 
+          replace: true,
+          state: { redirectTo: location.pathname }
+        });
         return;
       }
       
@@ -31,9 +35,12 @@ const AdminPage: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       const userEmail = user?.email;
       
+      console.log("Checking authorization for email:", userEmail);
+      
       // Only allow access if the email matches mia@narrastory.com
       if (userEmail === 'mia@narrastory.com') {
         setIsAuthorized(true);
+        console.log("Access granted: Admin authorization confirmed");
       } else {
         setIsAuthorized(false);
         console.log('Access denied: Only mia@narrastory.com can access the admin page');
@@ -43,7 +50,7 @@ const AdminPage: React.FC = () => {
     };
 
     verifyAuth();
-  }, [checkAuth, navigate]);
+  }, [checkAuth, navigate, location.pathname]);
 
   if (isLoading) {
     return (
