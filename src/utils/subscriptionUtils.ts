@@ -37,6 +37,7 @@ export const findProfileIdByEmail = async (email: string): Promise<string | null
  */
 export const checkSubscriptionByEmail = async (email: string): Promise<SubscriptionStatusResult | null> => {
   try {
+    console.log(`Checking subscription for email: ${email}`);
     const profileId = await findProfileIdByEmail(email);
     
     if (!profileId) {
@@ -44,7 +45,27 @@ export const checkSubscriptionByEmail = async (email: string): Promise<Subscript
       return null;
     }
     
+    console.log(`Found profile ID for ${email}: ${profileId}`);
+    
+    // Directly query the subscriptions table for this user first
+    const { data: subscriptionData, error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', profileId)
+      .maybeSingle();
+    
+    if (subscriptionError) {
+      console.error('Error fetching subscription data directly:', subscriptionError);
+    }
+    
+    if (subscriptionData) {
+      console.log('Raw subscription data from database:', subscriptionData);
+    }
+    
+    // Get the subscription status through the service
     const subscriptionStatus = await subscriptionService.getSubscriptionStatus(profileId);
+    console.log('Subscription status from service:', subscriptionStatus);
+    
     return subscriptionStatus;
   } catch (err) {
     console.error('Error checking subscription by email:', err);
@@ -69,6 +90,20 @@ export const logUserSubscriptionDetails = async (email: string): Promise<void> =
   
   console.log(`✅ Found user with profile ID: ${profileId}`);
   
+  // First, log the raw database entry
+  const { data: rawSubscription, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', profileId)
+    .maybeSingle();
+    
+  if (error) {
+    console.error('Error fetching raw subscription data:', error);
+  } else {
+    console.log('Raw subscription data from database:', rawSubscription);
+  }
+  
+  // Then get formatted subscription data
   const subscription = await subscriptionService.getSubscriptionStatus(profileId);
   
   console.log('Subscription details:');
@@ -87,3 +122,41 @@ export const logUserSubscriptionDetails = async (email: string): Promise<void> =
   
   console.log(`- Raw data: `, subscription.subscription);
 };
+
+// Function to manually set a user to have a lifetime subscription
+// This is an admin utility function
+export const setUserToLifetime = async (email: string): Promise<boolean> => {
+  try {
+    const profileId = await findProfileIdByEmail(email);
+    if (!profileId) {
+      console.error(`No user found with email: ${email}`);
+      return false;
+    }
+    
+    // Update or create a subscription record with lifetime settings
+    const { error } = await supabase
+      .from('subscriptions')
+      .upsert({
+        user_id: profileId,
+        plan_type: 'lifetime',
+        status: 'active',
+        is_lifetime: true,
+        book_credits: 1, // Give at least one book credit
+        lifetime_purchase_date: new Date().toISOString()
+      }, { 
+        onConflict: 'user_id' 
+      });
+    
+    if (error) {
+      console.error('Error setting lifetime subscription:', error);
+      return false;
+    }
+    
+    console.log(`✅ Successfully set ${email} to lifetime subscription`);
+    return true;
+  } catch (err) {
+    console.error('Error in setUserToLifetime:', err);
+    return false;
+  }
+};
+

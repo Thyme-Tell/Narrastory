@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, XCircle, Search } from 'lucide-react';
-import { logUserSubscriptionDetails, checkSubscriptionByEmail } from '@/utils/subscriptionUtils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CheckCircle, XCircle, Search, Award, RefreshCw } from 'lucide-react';
+import { logUserSubscriptionDetails, checkSubscriptionByEmail, setUserToLifetime } from '@/utils/subscriptionUtils';
 import { useToast } from '@/hooks/use-toast';
 
 /**
@@ -16,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 const AdminUtils: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isChecking, setIsChecking] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [checkResult, setCheckResult] = useState<{
     success: boolean;
     message: string;
@@ -68,58 +70,145 @@ const AdminUtils: React.FC = () => {
     }
   };
   
+  const handleSetLifetime = async () => {
+    if (!email) return;
+    
+    setIsUpdating(true);
+    
+    try {
+      const result = await setUserToLifetime(email);
+      
+      if (result) {
+        toast({
+          title: "Subscription updated",
+          description: `${email} has been set to lifetime subscription`,
+        });
+        
+        // Refresh the subscription details
+        await handleCheckSubscription();
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Update failed",
+          description: "Could not update subscription. See console for details.",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast({
+        variant: "destructive",
+        title: "Error updating subscription",
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Admin Utilities</CardTitle>
-        <CardDescription>Check user subscription status</CardDescription>
+        <CardDescription>Manage user subscriptions</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">User Email</Label>
-            <div className="flex space-x-2">
+        <Tabs defaultValue="check">
+          <TabsList className="w-full mb-4">
+            <TabsTrigger value="check">Check Status</TabsTrigger>
+            <TabsTrigger value="manage">Manage Subscription</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="check" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">User Email</Label>
+              <div className="flex space-x-2">
+                <Input
+                  id="email"
+                  placeholder="user@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            {checkResult && (
+              <Alert variant={checkResult.success ? "default" : "destructive"}>
+                <div className="flex items-center gap-2">
+                  {checkResult.success ? (
+                    <CheckCircle className="h-5 w-5" />
+                  ) : (
+                    <XCircle className="h-5 w-5" />
+                  )}
+                  <AlertDescription>{checkResult.message}</AlertDescription>
+                </div>
+              </Alert>
+            )}
+            
+            <Button 
+              onClick={handleCheckSubscription} 
+              disabled={isChecking || !email}
+              className="w-full"
+            >
+              {isChecking ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Checking...
+                </>
+              ) : (
+                <>
+                  <Search className="mr-2 h-4 w-4" />
+                  Check Subscription
+                </>
+              )}
+            </Button>
+          </TabsContent>
+          
+          <TabsContent value="manage" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="manage-email">User Email</Label>
               <Input
-                id="email"
+                id="manage-email"
                 placeholder="user@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-          </div>
-          
-          {checkResult && (
-            <Alert variant={checkResult.success ? "default" : "destructive"}>
-              <div className="flex items-center gap-2">
-                {checkResult.success ? (
-                  <CheckCircle className="h-5 w-5" />
+            
+            <div className="space-y-2">
+              <Button 
+                onClick={handleSetLifetime} 
+                disabled={isUpdating || !email}
+                className="w-full"
+                variant="default"
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Updating...
+                  </>
                 ) : (
-                  <XCircle className="h-5 w-5" />
+                  <>
+                    <Award className="mr-2 h-4 w-4" />
+                    Set to Lifetime Subscription
+                  </>
                 )}
-                <AlertDescription>{checkResult.message}</AlertDescription>
-              </div>
-            </Alert>
-          )}
-        </div>
+              </Button>
+              
+              <Button
+                onClick={handleCheckSubscription}
+                disabled={isChecking || !email}
+                variant="outline"
+                className="w-full"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh Subscription Info
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
-      <CardFooter>
-        <Button 
-          onClick={handleCheckSubscription} 
-          disabled={isChecking || !email}
-          className="w-full"
-        >
-          {isChecking ? (
-            <>
-              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Checking...
-            </>
-          ) : (
-            <>
-              <Search className="mr-2 h-4 w-4" />
-              Check Subscription
-            </>
-          )}
-        </Button>
+      <CardFooter className="text-xs text-muted-foreground">
+        These admin tools should only be used by authorized personnel.
       </CardFooter>
     </Card>
   );
