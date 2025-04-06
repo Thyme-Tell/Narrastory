@@ -31,47 +31,80 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
     refetch: refetchStatus
   } = useQuery({
     queryKey: ['subscription-status', profileId, forceRefresh],
-    queryFn: () => subscriptionService.getSubscriptionStatus(profileId, forceRefresh),
+    queryFn: async () => {
+      console.log(`Fetching subscription status for profile: ${profileId}, force refresh: ${forceRefresh}`);
+      try {
+        const result = await subscriptionService.getSubscriptionStatus(profileId, forceRefresh);
+        console.log('Subscription status fetch result:', result);
+        return result;
+      } catch (error) {
+        console.error('Error fetching subscription status:', error);
+        throw error;
+      }
+    },
     enabled: !!profileId,
     staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // 5 minutes if not forcing refresh
+    retry: 2, // Retry twice on failure
   });
 
   // Mutation for plan change
   const changePlanMutation = useMutation({
-    mutationFn: (planChange: SubscriptionPlanChange) => 
-      subscriptionService.changePlan(planChange),
+    mutationFn: (planChange: SubscriptionPlanChange) => {
+      console.log('Changing plan:', planChange);
+      return subscriptionService.changePlan(planChange);
+    },
     onSuccess: () => {
       // Invalidate the subscription status cache
+      console.log(`Invalidating cache for profile ${profileId} after plan change`);
       subscriptionService.invalidateCache(profileId);
       queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId] });
     },
+    onError: (error) => {
+      console.error('Error changing plan:', error);
+    }
   });
 
   // Mutation for using book credits
   const useBookCreditsMutation = useMutation({
-    mutationFn: (bookUsage: BookCreditUsage): Promise<CreditResult> => 
-      subscriptionService.useBookCredits(bookUsage),
+    mutationFn: (bookUsage: BookCreditUsage): Promise<CreditResult> => {
+      console.log('Using book credits:', bookUsage);
+      return subscriptionService.useBookCredits(bookUsage);
+    },
     onSuccess: () => {
       // Invalidate the subscription status cache
+      console.log(`Invalidating cache for profile ${profileId} after using credits`);
       subscriptionService.invalidateCache(profileId);
       queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId] });
     },
+    onError: (error) => {
+      console.error('Error using book credits:', error);
+    }
   });
 
   // Mutation for tracking usage
   const trackUsageMutation = useMutation({
-    mutationFn: (usage: UsageRecord) => 
-      subscriptionService.trackUsage(usage),
+    mutationFn: (usage: UsageRecord) => {
+      console.log('Tracking usage:', usage);
+      return subscriptionService.trackUsage(usage);
+    },
+    onError: (error) => {
+      console.error('Error tracking usage:', error);
+    }
   });
 
   // Query to check if a user has access to a specific feature
   const checkFeatureAccess = async (featureName: string): Promise<boolean> => {
     if (!profileId) return false;
+    console.log(`Checking feature access for ${featureName} for profile ${profileId}`);
     return subscriptionService.hasFeatureAccess(profileId, featureName as any);
   };
 
   // Helper function to get formatted status data with defaults
   const getStatus = (): SubscriptionStatusResult => {
+    if (statusError) {
+      console.error('Error in subscription status:', statusError);
+    }
+    
     return subscriptionStatus || {
       isPremium: false,
       isLifetime: false,
@@ -93,12 +126,25 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
     };
   };
 
+  // Fetch subscription status immediately if needed
+  const fetchSubscriptionStatus = async () => {
+    if (profileId) {
+      console.log(`Manually fetching subscription status for profile: ${profileId}`);
+      try {
+        await refetchStatus();
+      } catch (error) {
+        console.error('Error manually fetching subscription status:', error);
+      }
+    }
+  };
+
   return {
     // Status data
     status: getStatus(),
     isStatusLoading,
     statusError,
     refetchStatus,
+    fetchSubscriptionStatus,
     
     // Plan operations
     changePlan: changePlanMutation.mutate,
@@ -124,6 +170,7 @@ export const useSubscriptionService = (profileId?: string, forceRefresh = false)
     
     // Cache control
     invalidateCache: () => {
+      console.log(`Manually invalidating cache for profile ${profileId}`);
       subscriptionService.invalidateCache(profileId);
       queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId] });
     }

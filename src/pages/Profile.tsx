@@ -20,6 +20,7 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
 import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
+import { toast } from "sonner";
 
 const Profile = () => {
   const { id } = useParams();
@@ -27,9 +28,31 @@ const Profile = () => {
   const { isAuthenticated } = useAuth();
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [isBookExpanded, setIsBookExpanded] = useState(false);
-  const { status: subscriptionStatus } = useSubscriptionService(id);
+  
+  const { 
+    status: subscriptionStatus, 
+    isStatusLoading, 
+    statusError, 
+    fetchSubscriptionStatus 
+  } = useSubscriptionService(id, false);
 
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+  useEffect(() => {
+    console.log("Profile component mounted with profileId:", id);
+    if (id) {
+      fetchSubscriptionStatus();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    // Log subscription status for debugging
+    console.log("Current subscription status:", subscriptionStatus);
+    if (statusError) {
+      console.error("Subscription status error:", statusError);
+      toast.error("There was an issue loading subscription details");
+    }
+  }, [subscriptionStatus, statusError]);
 
   if (!isValidUUID && !window.location.pathname.includes('/sign-in')) {
     return <Navigate to="/sign-in" replace />;
@@ -172,7 +195,7 @@ const Profile = () => {
             />
           </div>
           
-          {!subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
+          {!isStatusLoading && !subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
             <div className="my-4">
               <LifetimeOfferBanner profileId={id} />
             </div>
@@ -194,7 +217,7 @@ const Profile = () => {
             sortOrder={sortOrder}
           />
           
-          {!subscriptionStatus.isPremium && stories && stories.length > 5 && (
+          {!isStatusLoading && !subscriptionStatus.isPremium && stories && stories.length > 5 && (
             <div className="mt-6">
               <UpgradePrompt profileId={id} variant="card" />
             </div>
@@ -202,7 +225,7 @@ const Profile = () => {
         </div>
       </div>
       
-      {!subscriptionStatus.isPremium && (
+      {!isStatusLoading && !subscriptionStatus.isPremium && (
         <UpgradePrompt profileId={id} variant="floating" />
       )}
       
