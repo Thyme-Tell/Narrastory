@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { 
@@ -166,11 +167,13 @@ serve(async (req) => {
     if (stripeCustomerId) {
       try {
         console.log(`Looking up subscriptions for Stripe customer ${stripeCustomerId}`);
+        // FIX: Change expand parameter to avoid nesting error
+        // The previous expansion path was too deep (data.items.data.price.product)
         const subscriptions = await stripe.subscriptions.list({
           customer: stripeCustomerId,
           status: 'active',
           limit: 1,
-          expand: ['data.items.data.price.product']
+          expand: ['data.items.data.price']
         });
         
         if (subscriptions.data.length > 0) {
@@ -188,10 +191,13 @@ serve(async (req) => {
                 planType = price.recurring.interval === 'month' ? 'monthly' : 'annual';
               }
               
-              // Also check the product metadata for more specific plan info
-              const product = price.product;
-              if (typeof product !== 'string' && product?.metadata?.planType) {
-                planType = product.metadata.planType;
+              // Also check the product metadata if available
+              if (price.product && typeof price.product !== 'string') {
+                if (price.product.metadata?.planType) {
+                  planType = price.product.metadata.planType;
+                }
+              } else if (price.metadata?.planType) {
+                planType = price.metadata.planType;
               }
             }
             
