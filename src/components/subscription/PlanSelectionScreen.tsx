@@ -1,15 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, X, Clock, ArrowLeft, AlertCircle, Info } from 'lucide-react';
+import { Check, X, Clock, ArrowLeft, AlertCircle, Info, Tag } from 'lucide-react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import LifetimeTimer from './LifetimeTimer';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 const PlanSelectionScreen: React.FC = () => {
   const { id: profileId } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ const PlanSelectionScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [productsLoaded, setProductsLoaded] = useState(false);
+  const [promoCode, setPromoCode] = useState<string>('');
   const [availablePlans, setAvailablePlans] = useState<{
     plus: boolean;
     lifetime: boolean;
@@ -89,13 +91,13 @@ const PlanSelectionScreen: React.FC = () => {
           title: "Creating Checkout",
           description: "Setting up your subscription checkout...",
         });
-        await createAnnualCheckout(profileId);
+        await createAnnualCheckout(profileId, undefined, promoCode);
       } else {
         toast({
           title: "Creating Checkout",
           description: "Setting up your lifetime access checkout...",
         });
-        await createLifetimeCheckout(profileId);
+        await createLifetimeCheckout(profileId, undefined, promoCode);
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -278,6 +280,25 @@ const PlanSelectionScreen: React.FC = () => {
             )}
           </CardContent>
         </Card>
+      </div>
+      
+      {/* Promo Code Field */}
+      <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <div className="flex items-center mb-2">
+          <Tag className="h-4 w-4 mr-2 text-[#6E59A5]" />
+          <h3 className="font-medium">Promo Code</h3>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            placeholder="Enter promo code"
+            className="max-w-xs"
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          If you have a promotional code, enter it above to receive your discount.
+        </p>
       </div>
       
       <div className="mt-8 flex flex-col md:flex-row md:justify-between gap-4">

@@ -25,6 +25,7 @@ import {
  * - successUrl: string (redirect URL on success)
  * - cancelUrl: string (redirect URL on cancel)
  * - mode: string (optional, 'payment' or 'subscription')
+ * - promoCode: string (optional, promotional code for discounts)
  * 
  * Response:
  * - sessionId: string (Stripe session ID)
@@ -42,10 +43,13 @@ serve(async (req) => {
   try {
     // Parse the request body
     const reqBody = await req.json();
-    const { priceId, successUrl, cancelUrl, email, profileId, mode: requestedMode } = reqBody;
+    const { priceId, successUrl, cancelUrl, email, profileId, mode: requestedMode, promoCode } = reqBody;
 
     console.log(`Request received with priceId: ${priceId}`);
     console.log(`Profile ID: ${profileId}, Email: ${email}, Mode: ${requestedMode || 'not specified'}`);
+    if (promoCode) {
+      console.log(`Promo code provided: ${promoCode}`);
+    }
 
     // Validate required fields
     if (!priceId) {
@@ -100,25 +104,34 @@ serve(async (req) => {
       console.log("Creating one-time payment checkout");
     }
 
+    // Prepare checkout session parameters
+    const sessionParams: any = {
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: mode,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      customer_email: userEmail,
+      metadata: {
+        profileId: profileId || '',
+      },
+    };
+    
+    // Add promo code if provided
+    if (promoCode) {
+      console.log(`Adding promo code to checkout: ${promoCode}`);
+      sessionParams.discounts = [{ promotion_code: promoCode }];
+    }
+
     // Create checkout session
     try {
       console.log(`Creating Stripe checkout session with mode: ${mode}`);
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        mode: mode,
-        success_url: successUrl,
-        cancel_url: cancelUrl,
-        customer_email: userEmail,
-        metadata: {
-          profileId: profileId || '',
-        },
-      });
+      const session = await stripe.checkout.sessions.create(sessionParams);
 
       console.log(`Checkout session created: ${session.id}`);
       

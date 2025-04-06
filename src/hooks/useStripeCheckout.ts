@@ -1,7 +1,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 // Define the checkout options type
 export interface CheckoutOptions {
@@ -10,6 +10,7 @@ export interface CheckoutOptions {
   email?: string;
   successUrl?: string;
   cancelUrl?: string;
+  promoCode?: string;
 }
 
 // Define product IDs - these should match price IDs from Stripe
@@ -139,6 +140,11 @@ export const useStripeCheckout = () => {
         const mode = productDetails?.isRecurring ? 'subscription' : 'payment';
         console.log(`Checkout mode: ${mode} (based on product type)`);
         
+        // Log if promo code is being applied
+        if (options.promoCode) {
+          console.log(`Applying promo code: ${options.promoCode}`);
+        }
+        
         // Now create the checkout with the actual price ID
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: {
@@ -147,7 +153,8 @@ export const useStripeCheckout = () => {
             email: options.email,
             successUrl,
             cancelUrl,
-            mode: mode // Pass the mode to the API
+            mode: mode, // Pass the mode to the API
+            promoCode: options.promoCode // Pass the promo code to the API
           },
         });
 
@@ -196,6 +203,8 @@ export const useStripeCheckout = () => {
           errorMessage = error.message;
         } else if (error.message.includes("subscription is not available")) {
           errorMessage = error.message;
+        } else if (error.message.includes("promotion code")) {
+          errorMessage = "The promotion code you entered is invalid or has expired.";
         }
       }
       
@@ -208,47 +217,52 @@ export const useStripeCheckout = () => {
   });
 
   // Helper function to create checkout for monthly subscription
-  const createMonthlyCheckout = (profileId?: string, email?: string) => {
+  const createMonthlyCheckout = (profileId?: string, email?: string, promoCode?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.MONTHLY_PREMIUM,
       profileId,
       email,
+      promoCode,
     });
   };
 
   // Helper function to create checkout for annual subscription
-  const createAnnualCheckout = (profileId?: string, email?: string) => {
+  const createAnnualCheckout = (profileId?: string, email?: string, promoCode?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.ANNUAL_PLUS,
       profileId,
       email,
+      promoCode,
     });
   };
 
   // Helper function to create checkout for lifetime access
-  const createLifetimeCheckout = (profileId?: string, email?: string) => {
+  const createLifetimeCheckout = (profileId?: string, email?: string, promoCode?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.LIFETIME,
       profileId,
       email,
+      promoCode,
     });
   };
 
   // Helper function to create checkout for first book
-  const createFirstBookCheckout = (profileId?: string, email?: string) => {
+  const createFirstBookCheckout = (profileId?: string, email?: string, promoCode?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.FIRST_BOOK,
       profileId,
       email,
+      promoCode,
     });
   };
 
   // Helper function to create checkout for additional book
-  const createAdditionalBookCheckout = (profileId?: string, email?: string) => {
+  const createAdditionalBookCheckout = (profileId?: string, email?: string, promoCode?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.ADDITIONAL_BOOK,
       profileId,
       email,
+      promoCode,
     });
   };
 
