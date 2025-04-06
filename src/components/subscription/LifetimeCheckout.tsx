@@ -67,10 +67,15 @@ const LifetimeCheckout: React.FC = () => {
       
       if (error instanceof Error) {
         // Check for specific error types
-        if (error.message.includes("No such price")) {
+        if (error.message.includes("not available for purchase")) {
+          errorMessage = "The lifetime plan is not available for purchase at this time. Please try again later.";
+        } else if (error.message.includes("No such price")) {
           errorMessage = "Payment plans are being updated. Please try again in a few minutes.";
         } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is currently unavailable. Please contact support.";
+        } else {
+          // If we have a specific error message, use that
+          errorMessage = error.message;
         }
       }
       

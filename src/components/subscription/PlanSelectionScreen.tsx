@@ -66,10 +66,15 @@ const PlanSelectionScreen: React.FC = () => {
       
       if (error instanceof Error) {
         // Check for specific error types
-        if (error.message.includes("No such price")) {
+        if (error.message.includes("not available for purchase")) {
+          errorMessage = "The selected product is not available for purchase. The store may still be setting up.";
+        } else if (error.message.includes("No such price")) {
           errorMessage = "Payment plans are being updated. Please try again in a few minutes.";
         } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is currently unavailable. Please contact support.";
+        } else {
+          // If we have a specific error message, use that
+          errorMessage = error.message;
         }
       }
       

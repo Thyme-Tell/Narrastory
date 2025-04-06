@@ -13,12 +13,12 @@ export interface CheckoutOptions {
 }
 
 // Define product IDs - these should match price IDs from Stripe
-// Note: These will be replaced with actual Stripe price IDs during checkout
+// Note: These are symbolic constants that will be mapped to actual Stripe price IDs
 export const STRIPE_PRODUCTS = {
-  ANNUAL_PLUS: 'price_annual_plus',
-  LIFETIME: 'price_lifetime',
-  FIRST_BOOK: 'price_first_book',
-  ADDITIONAL_BOOK: 'price_additional_book',
+  ANNUAL_PLUS: 'ANNUAL_PLUS',
+  LIFETIME: 'LIFETIME',
+  FIRST_BOOK: 'FIRST_BOOK',
+  ADDITIONAL_BOOK: 'ADDITIONAL_BOOK',
 };
 
 /**
@@ -63,6 +63,11 @@ export const useStripeCheckout = () => {
           actualPriceId = setupData.firstBook.priceId;
         } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook?.priceId) {
           actualPriceId = setupData.additionalBook.priceId;
+        } else {
+          // If we don't have a mapping, throw a helpful error
+          console.error(`No Stripe price ID found for product: ${options.priceId}`);
+          console.error('Available price IDs:', JSON.stringify(setupData));
+          throw new Error(`The selected product is not available for purchase. Please try again later.`);
         }
         
         console.log(`Mapped priceId from ${options.priceId} to actual Stripe priceId: ${actualPriceId}`);
@@ -111,10 +116,14 @@ export const useStripeCheckout = () => {
       // Provide more specific error messages based on error type
       let errorMessage = "Failed to create checkout session. Please try again later.";
       
-      if (error.message && error.message.includes("API Key")) {
-        errorMessage = "Payment system is not properly configured. Please contact support.";
-      } else if (error.message && error.message.includes("No such price")) {
-        errorMessage = "The selected payment plan is currently unavailable. Please contact support.";
+      if (error.message && typeof error.message === 'string') {
+        if (error.message.includes("API Key")) {
+          errorMessage = "Payment system is not properly configured. Please contact support.";
+        } else if (error.message.includes("No such price")) {
+          errorMessage = "The selected payment plan is currently unavailable. Please contact support.";
+        } else if (error.message.includes("not available for purchase")) {
+          errorMessage = error.message;
+        }
       }
       
       toast({
@@ -128,7 +137,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for annual subscription
   const createAnnualCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: 'ANNUAL_PLUS',
+      priceId: STRIPE_PRODUCTS.ANNUAL_PLUS,
       profileId,
       email,
     });
@@ -137,7 +146,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for lifetime access
   const createLifetimeCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: 'LIFETIME',
+      priceId: STRIPE_PRODUCTS.LIFETIME,
       profileId,
       email,
     });
@@ -146,7 +155,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for first book
   const createFirstBookCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: 'FIRST_BOOK',
+      priceId: STRIPE_PRODUCTS.FIRST_BOOK,
       profileId,
       email,
     });
@@ -155,7 +164,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for additional book
   const createAdditionalBookCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: 'ADDITIONAL_BOOK',
+      priceId: STRIPE_PRODUCTS.ADDITIONAL_BOOK,
       profileId,
       email,
     });

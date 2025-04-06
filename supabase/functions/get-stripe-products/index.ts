@@ -23,7 +23,22 @@ serve(async (req) => {
 
   try {
     // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      console.error("Missing Stripe secret key");
+      return new Response(
+        JSON.stringify({ error: "Stripe not properly configured" }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+    
+    const stripe = new Stripe(stripeKey, {
       apiVersion: '2023-10-16',
     });
 
@@ -33,9 +48,39 @@ serve(async (req) => {
     const products = await stripe.products.list({ active: true });
     console.log(`Found ${products.data.length} active products`);
     
+    if (products.data.length === 0) {
+      console.warn("No active products found in Stripe");
+      // Return empty but valid result object
+      return new Response(
+        JSON.stringify({}),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+    
     // Get all active prices
     const prices = await stripe.prices.list({ active: true });
     console.log(`Found ${prices.data.length} active prices`);
+    
+    if (prices.data.length === 0) {
+      console.warn("No active prices found in Stripe");
+      // Return empty but valid result object
+      return new Response(
+        JSON.stringify({}),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
     
     // Map product types to their respective prices
     const result: any = {};
@@ -114,6 +159,9 @@ serve(async (req) => {
         console.log(`Additional Book Price ID: ${additionalBookPrice.id}`);
       }
     }
+    
+    // Log the complete result for debugging
+    console.log("Products and prices retrieved:", JSON.stringify(result));
     
     // Return the mapped products and prices
     return new Response(
