@@ -146,7 +146,12 @@ const Profile = () => {
       </div>
       <div className="p-4">
         <div className="max-w-2xl mx-auto space-y-6">
-          <BookProgress profileId={id} />
+          {/* Collapsible Book Preview Section */}
+          <div className="max-h-[30vh] overflow-hidden">
+            <BookProgress profileId={id} />
+          </div>
+          
+          {/* Story Creation Section */}
           <ProfileHeader 
             firstName={profile.first_name} 
             lastName={profile.last_name}
@@ -156,6 +161,7 @@ const Profile = () => {
             onSortChange={setSortOrder}
           />
           
+          {/* Stories List */}
           <StoriesList 
             stories={stories || []}
             isLoading={isLoadingStories}

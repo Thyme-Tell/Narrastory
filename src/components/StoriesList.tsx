@@ -4,6 +4,7 @@ import StoryCard from "./StoryCard";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Book, Clock, List } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Story {
   id: string;
@@ -54,25 +55,32 @@ const StoriesList = ({ stories, isLoading, onUpdate, sortOrder }: StoriesListPro
 
   return (
     <div className="space-y-4">
-      {/* Your Story List (Previously Table of Contents) */}
-      <div className="border rounded-lg bg-white shadow-sm overflow-hidden" data-toc-container>
-        <Button 
-          variant="ghost" 
-          className="w-full flex justify-between items-center p-4 h-auto"
-          onClick={() => setIsTocOpen(!isTocOpen)}
-        >
-          <div className="flex items-center space-x-2">
-            <List className="h-5 w-5 text-[#A33D29]" />
-            <span className="font-medium">Your Story List</span>
-          </div>
-          {isTocOpen ? (
-            <ChevronUp className="h-5 w-5" />
-          ) : (
-            <ChevronDown className="h-5 w-5" />
-          )}
-        </Button>
+      {/* Table of Contents */}
+      <Collapsible 
+        open={isTocOpen} 
+        onOpenChange={setIsTocOpen}
+        className="border rounded-lg bg-white/90 shadow-sm overflow-hidden" 
+        data-toc-container
+      >
+        <CollapsibleTrigger asChild>
+          <Button 
+            variant="ghost" 
+            className="w-full flex justify-between items-center p-4 h-auto"
+          >
+            <div className="flex items-center space-x-2">
+              <List className="h-5 w-5 text-[#A33D29]" />
+              <span className="font-medium">Your Story List</span>
+              <span className="text-sm text-muted-foreground">({sortedStories.length})</span>
+            </div>
+            {isTocOpen ? (
+              <ChevronUp className="h-5 w-5" />
+            ) : (
+              <ChevronDown className="h-5 w-5" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
         
-        {isTocOpen && (
+        <CollapsibleContent>
           <div className="px-4 pb-4 max-h-96 overflow-y-auto">
             <div className="space-y-2">
               {sortedStories.map((story) => (
@@ -106,8 +114,8 @@ const StoriesList = ({ stories, isLoading, onUpdate, sortOrder }: StoriesListPro
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Story List */}
       <div className="space-y-4">

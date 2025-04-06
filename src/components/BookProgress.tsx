@@ -12,10 +12,14 @@ import BookEditorModals from "./book-progress/BookEditorModals";
 import BookProgressInfo from "./book-progress/BookProgressInfo";
 import BookProgressStats from "./book-progress/BookProgressStats";
 import BookProgressActions from "./book-progress/BookProgressActions";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function BookProgress({ profileId }: { profileId: string }) {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   
   const { 
@@ -103,35 +107,73 @@ export function BookProgress({ profileId }: { profileId: string }) {
 
   return (
     <div className="mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
-        <div>
-          <BookProgressInfo 
-            coverData={coverData}
-            profileFirstName={profile?.first_name}
-            profileLastName={profile?.last_name}
-            onOpenCoverEditor={handleOpenCoverEditor}
-          />
-          
-          <BookProgressStats 
-            stories={stories}
-            scrollToTableOfContents={scrollToTableOfContents}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-muted/30 rounded-lg p-4">
-            <BookCoverPreview 
-              coverData={coverData}
-              isLoading={isCoverLoading}
-            />
+      <Collapsible 
+        open={isExpanded} 
+        onOpenChange={setIsExpanded}
+        className="w-full border rounded-lg bg-white/90 shadow overflow-hidden transition-all duration-300 ease-in-out"
+      >
+        <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-16 overflow-hidden rounded">
+              <BookCoverPreview 
+                coverData={coverData}
+                isLoading={isCoverLoading}
+                compact={true}
+              />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg leading-tight">{coverData.titleText || "My Stories"}</h3>
+              <p className="text-sm text-muted-foreground">
+                {profile?.first_name} {profile?.last_name} • {stories.length} {stories.length === 1 ? 'story' : 'stories'}
+              </p>
+            </div>
           </div>
           
-          <BookProgressActions 
-            onPreviewBook={handlePreviewBook}
-            onOpenCoverEditor={handleOpenCoverEditor}
-          />
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              {isExpanded ? 
+                <ChevronUp className="h-4 w-4" /> : 
+                <ChevronDown className="h-4 w-4" />
+              }
+              <span className="sr-only">Toggle book details</span>
+            </Button>
+          </CollapsibleTrigger>
         </div>
-      </div>
+        
+        <CollapsibleContent>
+          <div className="px-4 pb-4 border-t pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
+              <div>
+                <BookProgressInfo 
+                  coverData={coverData}
+                  profileFirstName={profile?.first_name}
+                  profileLastName={profile?.last_name}
+                  onOpenCoverEditor={handleOpenCoverEditor}
+                />
+                
+                <BookProgressStats 
+                  stories={stories}
+                  scrollToTableOfContents={scrollToTableOfContents}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <BookCoverPreview 
+                    coverData={coverData}
+                    isLoading={isCoverLoading}
+                  />
+                </div>
+                
+                <BookProgressActions 
+                  onPreviewBook={handlePreviewBook}
+                  onOpenCoverEditor={handleOpenCoverEditor}
+                />
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <BookEditorModals
         profileId={profileId}
