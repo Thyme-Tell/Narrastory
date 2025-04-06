@@ -124,8 +124,27 @@ serve(async (req) => {
     
     // Add promo code if provided
     if (promoCode) {
-      console.log(`Adding promo code to checkout: ${promoCode}`);
-      sessionParams.discounts = [{ promotion_code: promoCode }];
+      try {
+        // First, check if the promo code exists
+        console.log(`Validating promo code: ${promoCode}`);
+        const promotionCodes = await stripe.promotionCodes.list({
+          code: promoCode,
+          active: true,
+          limit: 1
+        });
+        
+        if (promotionCodes.data.length > 0) {
+          console.log(`Valid promo code found: ${promoCode}`);
+          // Use the promotion code ID from the retrieved code
+          sessionParams.discounts = [{ promotion_code: promotionCodes.data[0].id }];
+        } else {
+          console.log(`No valid promo code found for: ${promoCode}`);
+          return errorResponse(`Invalid or expired promotion code: ${promoCode}`, 400);
+        }
+      } catch (promoErr) {
+        console.error(`Error validating promo code: ${promoErr.message}`);
+        return errorResponse(`Error validating promotion code: ${promoErr.message}`, 400);
+      }
     }
 
     // Create checkout session

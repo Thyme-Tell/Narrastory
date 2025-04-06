@@ -89,13 +89,17 @@ const PlanSelectionScreen: React.FC = () => {
       if (selectedPlan === 'plus') {
         toast({
           title: "Creating Checkout",
-          description: "Setting up your subscription checkout...",
+          description: promoCode 
+            ? `Setting up your subscription checkout with promo code ${promoCode}...` 
+            : "Setting up your subscription checkout...",
         });
         await createAnnualCheckout(profileId, undefined, promoCode);
       } else {
         toast({
           title: "Creating Checkout",
-          description: "Setting up your lifetime access checkout...",
+          description: promoCode 
+            ? `Setting up your lifetime access checkout with promo code ${promoCode}...` 
+            : "Setting up your lifetime access checkout...",
         });
         await createLifetimeCheckout(profileId, undefined, promoCode);
       }
@@ -105,7 +109,10 @@ const PlanSelectionScreen: React.FC = () => {
       
       if (error instanceof Error) {
         // Check for specific error types
-        if (error.message.includes("not available for purchase")) {
+        if (error.message.includes("Invalid or expired promotion code") || 
+            error.message.includes("promotion code")) {
+          errorMessage = `The promotion code "${promoCode}" is invalid or has expired.`;
+        } else if (error.message.includes("not available for purchase")) {
           errorMessage = "The selected product is not available for purchase. The store may still be setting up.";
         } else if (error.message.includes("Annual subscription is not available")) {
           errorMessage = "Annual subscription is not available at this time. Please select the Lifetime option.";
@@ -294,6 +301,7 @@ const PlanSelectionScreen: React.FC = () => {
             onChange={(e) => setPromoCode(e.target.value)}
             placeholder="Enter promo code"
             className="max-w-xs"
+            disabled={isLoading || isCheckoutLoading}
           />
         </div>
         <p className="text-xs text-gray-500 mt-2">
@@ -315,7 +323,12 @@ const PlanSelectionScreen: React.FC = () => {
                   (selectedPlan === 'lifetime' && !availablePlans.lifetime)}
         >
           {isLoading || isCheckoutLoading ? (
-            <>Processing...</>
+            <>
+              <span className="mr-2">
+                <span className="animate-spin inline-block h-4 w-4 border-b-2 border-white rounded-full"></span>
+              </span>
+              Processing...
+            </>
           ) : (
             <>Continue to Checkout</>
           )}

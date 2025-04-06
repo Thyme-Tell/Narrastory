@@ -1,4 +1,3 @@
-
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -195,7 +194,12 @@ export const useStripeCheckout = () => {
       let errorMessage = "Failed to create checkout session. Please try again later.";
       
       if (error.message && typeof error.message === 'string') {
-        if (error.message.includes("API Key")) {
+        // Improved error handling for promo code issues
+        if (error.message.includes("promotion code")) {
+          errorMessage = "The promotion code you entered is invalid or has expired.";
+        } else if (error.message.includes("Invalid or expired promotion code")) {
+          errorMessage = "The promotion code you entered is invalid or has expired.";
+        } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is not properly configured. Please contact support.";
         } else if (error.message.includes("No such price")) {
           errorMessage = "The selected payment plan is currently unavailable. Please contact support.";
@@ -203,8 +207,6 @@ export const useStripeCheckout = () => {
           errorMessage = error.message;
         } else if (error.message.includes("subscription is not available")) {
           errorMessage = error.message;
-        } else if (error.message.includes("promotion code")) {
-          errorMessage = "The promotion code you entered is invalid or has expired.";
         }
       }
       
