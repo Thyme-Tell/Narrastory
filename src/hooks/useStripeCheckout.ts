@@ -97,7 +97,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for annual subscription
   const createAnnualCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: Deno.env.get('STRIPE_ANNUAL_PLUS_PRICE_ID') || '',
+      priceId: 'ANNUAL_PLUS',
       profileId,
       email,
     });
@@ -106,7 +106,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for lifetime access
   const createLifetimeCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: Deno.env.get('STRIPE_LIFETIME_PRICE_ID') || '',
+      priceId: 'LIFETIME',
       profileId,
       email,
     });
@@ -115,7 +115,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for first book
   const createFirstBookCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: Deno.env.get('STRIPE_FIRST_BOOK_PRICE_ID') || '',
+      priceId: 'FIRST_BOOK',
       profileId,
       email,
     });
@@ -124,7 +124,7 @@ export const useStripeCheckout = () => {
   // Helper function to create checkout for additional book
   const createAdditionalBookCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
-      priceId: Deno.env.get('STRIPE_ADDITIONAL_BOOK_PRICE_ID') || '',
+      priceId: 'ADDITIONAL_BOOK',
       profileId,
       email,
     });
