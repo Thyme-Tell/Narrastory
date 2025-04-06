@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check, X, Clock, ArrowLeft, AlertCircle, Info, Tag } from 'lucide-react';
@@ -10,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import LifetimeTimer from './LifetimeTimer';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const PlanSelectionScreen: React.FC = () => {
   const { id: profileId } = useParams<{ id: string }>();
@@ -36,7 +35,6 @@ const PlanSelectionScreen: React.FC = () => {
   const plusPrice = getPlanPrice('plus');
   const lifetimePrice = getPlanPrice('lifetime');
   
-  // Check available plans
   useEffect(() => {
     const checkAvailablePlans = async () => {
       try {
@@ -50,7 +48,6 @@ const PlanSelectionScreen: React.FC = () => {
           lifetime: hasLifetime
         });
         
-        // If annual isn't available but lifetime is, auto-select lifetime
         if (!hasAnnual && hasLifetime && selectedPlan === 'plus') {
           setSelectedPlan('lifetime');
         }
@@ -58,7 +55,6 @@ const PlanSelectionScreen: React.FC = () => {
         setProductsLoaded(true);
       } catch (error) {
         console.error("Error checking available plans:", error);
-        // Default to assuming both are available
         setAvailablePlans({ plus: true, lifetime: true });
         setProductsLoaded(true);
       }
@@ -73,7 +69,7 @@ const PlanSelectionScreen: React.FC = () => {
   
   const handlePlanSelection = (plan: 'plus' | 'lifetime') => {
     setSelectedPlan(plan);
-    setError(null); // Clear any previous errors
+    setError(null);
   };
   
   const handleContinue = async () => {
@@ -108,7 +104,6 @@ const PlanSelectionScreen: React.FC = () => {
       let errorMessage = "Could not process payment request. Please try again later.";
       
       if (error instanceof Error) {
-        // Check for specific error types
         if (error.message.includes("Invalid or expired promotion code") || 
             error.message.includes("promotion code")) {
           errorMessage = `The promotion code "${promoCode}" is invalid or has expired.`;
@@ -122,7 +117,6 @@ const PlanSelectionScreen: React.FC = () => {
         } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is currently unavailable. Please contact support.";
         } else {
-          // If we have a specific error message, use that
           errorMessage = error.message;
         }
       }
@@ -194,7 +188,6 @@ const PlanSelectionScreen: React.FC = () => {
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Plus Plan */}
         <Card 
           className={`border-2 ${selectedPlan === 'plus' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md ${!availablePlans.plus ? 'opacity-50' : ''}`}
         >
@@ -236,7 +229,6 @@ const PlanSelectionScreen: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Lifetime Plan */}
         <Card className={`border-2 ${selectedPlan === 'lifetime' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md relative overflow-hidden ${!availablePlans.lifetime ? 'opacity-50' : ''}`}>
           <div className="absolute top-0 right-0 bg-[#6E59A5] text-white px-3 py-1 text-xs font-semibold">
             MOST POPULAR
@@ -289,7 +281,6 @@ const PlanSelectionScreen: React.FC = () => {
         </Card>
       </div>
       
-      {/* Promo Code Field */}
       <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
         <div className="flex items-center mb-2">
           <Tag className="h-4 w-4 mr-2 text-[#6E59A5]" />
