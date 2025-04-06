@@ -1,24 +1,124 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { useSubscription } from '@/hooks/useSubscription';
+import React, { createContext, useContext, useState } from 'react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useToast } from '@/hooks/use-toast';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useNavigate } from 'react-router-dom';
 
-interface BookPurchaseContextProps {
-  bookId?: string;
-  bookTitle: string;
-  bookPrice: number;
+interface BookPurchaseContextType {
   isUsingCredits: boolean;
   remainingCredits: number;
-  isPurchasing: boolean;
-  setUsingCredits: (useCredits: boolean) => void;
-  startPurchase: () => Promise<void>;
-  purchaseWithCredits: () => Promise<boolean>;
-  purchaseWithPayment: () => Promise<boolean>;
+  togglePaymentMethod: () => void;
+  completePurchase: () => Promise<void>;
+  isPurchaseInProgress: boolean;
+  purchaseError: string | null;
 }
 
-const BookPurchaseContext = createContext<BookPurchaseContextProps | undefined>(undefined);
+interface BookPurchaseProviderProps {
+  children: React.ReactNode;
+  profileId: string;
+  bookId: string;
+  bookPrice: number;
+  onComplete?: () => void;
+  onCancel?: () => void;
+}
+
+const BookPurchaseContext = createContext<BookPurchaseContextType | null>(null);
+
+export const BookPurchaseProvider: React.FC<BookPurchaseProviderProps> = ({
+  children,
+  profileId,
+  bookId,
+  bookPrice,
+  onComplete,
+  onCancel
+}) => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { status, useBookCredits } = useSubscriptionService(profileId);
+  
+  const [isUsingCredits, setIsUsingCredits] = useState(status.bookCredits > 0);
+  const [isPurchaseInProgress, setIsPurchaseInProgress] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  
+  const togglePaymentMethod = () => {
+    setIsUsingCredits(!isUsingCredits);
+  };
+  
+  const completePurchase = async (): Promise<void> => {
+    setIsPurchaseInProgress(true);
+    setPurchaseError(null);
+    
+    try {
+      if (isUsingCredits) {
+        // Process the purchase using book credits
+        if (status.bookCredits <= 0) {
+          throw new Error('Insufficient book credits');
+        }
+        
+        const result = await useBookCredits({
+          profileId,
+          bookId,
+          amount: 1
+        });
+        
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to use book credits');
+        }
+        
+        // Show success toast
+        toast({
+          title: 'Book Purchase Complete',
+          description: `You've successfully purchased this book using 1 credit. You have ${result.remainingCredits} credit(s) remaining.`,
+          variant: 'default',
+        });
+        
+        // Complete the purchase process
+        if (onComplete) {
+          onComplete();
+        }
+      } else {
+        // Redirect to payment page (this will be implemented later)
+        console.log('Redirecting to payment page...');
+        toast({
+          title: 'Payment Method Coming Soon',
+          description: 'Credit card payment functionality is coming soon. Please use book credits for now.',
+          variant: 'default',
+        });
+        
+        // For now, just simulate success after a delay
+        setTimeout(() => {
+          if (onComplete) {
+            onComplete();
+          }
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      setPurchaseError(error.message || 'An unexpected error occurred');
+      toast({
+        title: 'Purchase Failed',
+        description: error.message || 'An unexpected error occurred during the purchase process.',
+        variant: 'destructive',
+      });
+      return;
+    } finally {
+      setIsPurchaseInProgress(false);
+    }
+  };
+  
+  return (
+    <BookPurchaseContext.Provider value={{
+      isUsingCredits,
+      remainingCredits: status.bookCredits,
+      togglePaymentMethod,
+      completePurchase,
+      isPurchaseInProgress,
+      purchaseError
+    }}>
+      {children}
+    </BookPurchaseContext.Provider>
+  );
+};
 
 export const useBookPurchase = () => {
   const context = useContext(BookPurchaseContext);
@@ -26,123 +126,4 @@ export const useBookPurchase = () => {
     throw new Error('useBookPurchase must be used within a BookPurchaseProvider');
   }
   return context;
-};
-
-interface BookPurchaseProviderProps {
-  children: ReactNode;
-  profileId: string;
-  bookId?: string;
-  bookTitle: string;
-  bookPrice: number;
-}
-
-export const BookPurchaseProvider: React.FC<BookPurchaseProviderProps> = ({
-  children,
-  profileId,
-  bookId,
-  bookTitle,
-  bookPrice
-}) => {
-  const [isUsingCredits, setUsingCredits] = useState(true);
-  const [isPurchasing, setIsPurchasing] = useState(false);
-  
-  const { toast } = useToast();
-  const { bookCredits } = useSubscription(profileId);
-  const { useBookCredits, isUsingCredits: isProcessingCredits } = useSubscriptionService(profileId);
-  const { createFirstBookCheckout, createAdditionalBookCheckout, isLoading: isCheckoutLoading } = useStripeCheckout();
-
-  // Determine if this is a first book or additional book
-  const isFirstBook = !bookId; // If no bookId, assume it's the first book
-
-  const startPurchase = async () => {
-    setIsPurchasing(true);
-    if (isUsingCredits) {
-      return await purchaseWithCredits();
-    } else {
-      return await purchaseWithPayment();
-    }
-  };
-
-  const purchaseWithCredits = async (): Promise<boolean> => {
-    if (bookCredits <= 0) {
-      toast({
-        title: "Insufficient Credits",
-        description: "You don't have enough book credits. Please purchase with payment method.",
-        variant: "destructive",
-      });
-      setUsingCredits(false);
-      return false;
-    }
-
-    try {
-      useBookCredits({
-        profileId,
-        bookId,
-        amount: 1
-      });
-      
-      toast({
-        title: "Book Purchased Successfully",
-        description: `You've used 1 credit to purchase "${bookTitle}".`,
-      });
-      
-      return true;
-    } catch (error) {
-      console.error("Error using book credits:", error);
-      toast({
-        title: "Credit Usage Failed",
-        description: "There was an error using your book credit. Please try again.",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsPurchasing(false);
-    }
-  };
-
-  const purchaseWithPayment = async (): Promise<boolean> => {
-    try {
-      toast({
-        title: "Processing Payment",
-        description: "Setting up checkout...",
-      });
-      
-      if (isFirstBook) {
-        await createFirstBookCheckout(profileId);
-      } else {
-        await createAdditionalBookCheckout(profileId);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Error creating checkout:", error);
-      toast({
-        title: "Checkout Failed",
-        description: "There was an error setting up the payment. Please try again.",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsPurchasing(false);
-    }
-  };
-
-  return (
-    <BookPurchaseContext.Provider
-      value={{
-        bookId,
-        bookTitle,
-        bookPrice,
-        isUsingCredits,
-        remainingCredits: bookCredits,
-        isPurchasing: isPurchasing || isProcessingCredits || isCheckoutLoading,
-        setUsingCredits,
-        startPurchase,
-        purchaseWithCredits,
-        purchaseWithPayment
-      }}
-    >
-      {children}
-    </BookPurchaseContext.Provider>
-  );
 };

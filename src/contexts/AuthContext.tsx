@@ -2,15 +2,39 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useSubscriptionService } from '@/hooks/useSubscriptionService';
+import { SubscriptionStatusResult } from '@/types/subscription';
 import Cookies from 'js-cookie';
 
+/**
+ * AuthContext Type Definition
+ * 
+ * Contains authentication state and methods, as well as subscription information
+ */
 interface AuthContextType {
+  // Authentication state
   isAuthenticated: boolean;
   profileId: string | null;
+  
+  // Authentication methods
   checkAuth: () => Promise<boolean>;
   logout: () => void;
   setRememberMe: (remember: boolean) => void;
   rememberMe: boolean;
+  
+  // Subscription state
+  subscriptionStatus: SubscriptionStatusResult | null;
+  isSubscriptionLoading: boolean;
+  
+  // Subscription methods
+  refreshSubscription: () => Promise<void>;
+  hasActiveSubscription: boolean;
+  isPremium: boolean;
+  hasBookCredits: boolean;
+  bookCredits: number;
+  
+  // Usage tracking
+  trackUsage: (featureType: 'call' | 'book' | 'minutes', amount: number, metadata?: Record<string, unknown>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +44,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  
+  // Add subscription service hook
+  const {
+    status: subscriptionStatus,
+    isStatusLoading: isSubscriptionLoading,
+    refetchStatus: refreshSubscriptionData,
+    trackUsage: trackUsageService
+  } = useSubscriptionService(profileId);
 
   // Load remember me preference from cookies on initial load
   useEffect(() => {
@@ -107,6 +139,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfileId(null);
     navigate('/sign-in', { replace: true });
   };
+  
+  /**
+   * Refreshes subscription data
+   */
+  const refreshSubscription = async (): Promise<void> => {
+    if (profileId) {
+      await refreshSubscriptionData();
+    }
+  };
+  
+  /**
+   * Tracks usage of premium features
+   * 
+   * @param featureType Type of feature being used
+   * @param amount Amount of usage
+   * @param metadata Additional metadata for tracking
+   */
+  const trackUsage = async (
+    featureType: 'call' | 'book' | 'minutes', 
+    amount: number, 
+    metadata?: Record<string, unknown>
+  ): Promise<void> => {
+    if (!profileId) return;
+    
+    await trackUsageService({
+      profileId,
+      featureType,
+      amount,
+      metadata
+    });
+  };
+
+  // Derived subscription states for easier access
+  const hasActiveSubscription = 
+    subscriptionStatus?.hasActiveSubscription || false;
+    
+  const isPremium = 
+    subscriptionStatus?.isPremium || false;
+    
+  const hasBookCredits = 
+    (subscriptionStatus?.bookCredits || 0) > 0;
+    
+  const bookCredits = 
+    subscriptionStatus?.bookCredits || 0;
 
   useEffect(() => {
     console.log('AuthProvider mounted, checking auth');
@@ -124,18 +200,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ 
+      // Authentication state and methods
       isAuthenticated, 
       profileId, 
       checkAuth, 
       logout,
       setRememberMe: updateRememberMe,
-      rememberMe
+      rememberMe,
+      
+      // Subscription state and methods
+      subscriptionStatus,
+      isSubscriptionLoading,
+      refreshSubscription,
+      hasActiveSubscription,
+      isPremium,
+      hasBookCredits,
+      bookCredits,
+      
+      // Usage tracking
+      trackUsage
     }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
+/**
+ * Custom hook to access authentication and subscription context
+ * 
+ * @returns AuthContext with authentication state and subscription information
+ * @throws Error if used outside AuthProvider
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

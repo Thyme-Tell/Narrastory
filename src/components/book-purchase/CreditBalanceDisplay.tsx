@@ -1,11 +1,18 @@
 
 import React from 'react';
 import { useBookPurchase } from '@/contexts/BookPurchaseContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const CreditBalanceDisplay: React.FC = () => {
   const { remainingCredits } = useBookPurchase();
+  const { refreshSubscription } = useAuth();
+  
+  // We could refresh subscription data here if needed
+  // React.useEffect(() => {
+  //   refreshSubscription();
+  // }, [refreshSubscription]);
   
   return (
     <Alert variant="default" className="bg-gray-50">
