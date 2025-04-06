@@ -61,3 +61,31 @@ export interface SubscriptionStatusResult {
   isLifetime: boolean;
   subscription: SubscriptionData | null;
 }
+
+/**
+ * Represents a payment in the user's payment history
+ */
+export interface PaymentHistoryItem {
+  id: string;
+  amount: number;
+  currency: string;
+  status: 'succeeded' | 'failed' | 'pending';
+  date: string;
+  description: string;
+  receiptUrl?: string;
+}
+
+/**
+ * Represents the usage metrics for a user
+ */
+export interface UsageMetrics {
+  storiesCreated: number;
+  booksPublished: number;
+  minutesUsed: number;
+  lastUpdated: string;
+  quotaLimits: {
+    stories: number;
+    books: number;
+    minutes: number;
+  };
+}

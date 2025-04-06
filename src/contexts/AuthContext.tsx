@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
-import { SubscriptionStatusResult } from '@/types/subscription';
+import { SubscriptionStatusResult, PaymentHistoryItem, UsageMetrics } from '@/types/subscription';
 import Cookies from 'js-cookie';
 
 /**
@@ -26,9 +26,13 @@ interface AuthContextType {
   // Subscription state
   subscriptionStatus: SubscriptionStatusResult | null;
   isSubscriptionLoading: boolean;
+  paymentHistory: PaymentHistoryItem[];
+  isPaymentHistoryLoading: boolean;
+  usageMetrics: UsageMetrics | null;
   
   // Subscription methods
   refreshSubscription: () => Promise<void>;
+  refreshPaymentHistory: () => Promise<void>;
   hasActiveSubscription: boolean;
   isPremium: boolean;
   hasBookCredits: boolean;
@@ -36,6 +40,7 @@ interface AuthContextType {
   
   // Usage tracking
   trackUsage: (featureType: 'call' | 'book' | 'minutes', amount: number, metadata?: Record<string, unknown>) => Promise<void>;
+  refreshUsageMetrics: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,6 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryItem[]>([]);
+  const [isPaymentHistoryLoading, setIsPaymentHistoryLoading] = useState(false);
+  const [usageMetrics, setUsageMetrics] = useState<UsageMetrics | null>(null);
   const navigate = useNavigate();
   
   // Add subscription service hook
@@ -174,6 +182,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await refreshSubscriptionData();
     }
   };
+
+  /**
+   * Fetches payment history from Stripe
+   * 
+   * @returns Promise that resolves when payment history is fetched
+   */
+  const refreshPaymentHistory = async (): Promise<void> => {
+    if (!profileId) return;
+    
+    try {
+      setIsPaymentHistoryLoading(true);
+      
+      const { data, error } = await supabase.functions.invoke('get-payment-history', {
+        body: { profileId }
+      });
+      
+      if (error) {
+        console.error('Error fetching payment history:', error);
+        return;
+      }
+      
+      setPaymentHistory(data.payments || []);
+    } catch (err) {
+      console.error('Error in payment history fetch:', err);
+    } finally {
+      setIsPaymentHistoryLoading(false);
+    }
+  };
+  
+  /**
+   * Refreshes usage metrics for the current user
+   * 
+   * @returns Promise that resolves when usage metrics are fetched
+   */
+  const refreshUsageMetrics = async (): Promise<void> => {
+    if (!profileId) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('get-usage-metrics', {
+        body: { profileId }
+      });
+      
+      if (error) {
+        console.error('Error fetching usage metrics:', error);
+        return;
+      }
+      
+      setUsageMetrics(data.metrics || null);
+    } catch (err) {
+      console.error('Error in usage metrics fetch:', err);
+    }
+  };
   
   /**
    * Tracks usage of premium features
@@ -195,6 +255,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       amount,
       metadata
     });
+    
+    // Refresh usage metrics after tracking usage
+    await refreshUsageMetrics();
   };
 
   // Derived subscription states for easier access
@@ -224,6 +287,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('storage', handleCookieChange);
   }, []);
 
+  // Load initial payment history and usage metrics when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && profileId) {
+      refreshPaymentHistory();
+      refreshUsageMetrics();
+    }
+  }, [isAuthenticated, profileId]);
+
   return (
     <AuthContext.Provider value={{ 
       // Authentication state and methods
@@ -244,7 +315,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       hasBookCredits,
       bookCredits,
       
-      // Usage tracking
+      // Payment history
+      paymentHistory,
+      isPaymentHistoryLoading,
+      refreshPaymentHistory,
+      
+      // Usage metrics and tracking
+      usageMetrics,
+      refreshUsageMetrics,
       trackUsage
     }}>
       {children}
