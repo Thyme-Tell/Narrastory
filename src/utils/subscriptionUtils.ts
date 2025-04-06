@@ -60,6 +60,22 @@ export const checkSubscriptionByEmail = async (email: string): Promise<Subscript
     
     if (subscriptionData) {
       console.log('Raw subscription data from database:', subscriptionData);
+      
+      // Special handling for lifetime subscriptions - make sure they are always active
+      if (subscriptionData.is_lifetime) {
+        console.log('User has lifetime subscription - ensuring active status');
+        if (subscriptionData.status !== 'active') {
+          // Update to make sure lifetime subscriptions are always active
+          const { error: updateError } = await supabase
+            .from('subscriptions')
+            .update({ status: 'active' })
+            .eq('user_id', profileId);
+            
+          if (updateError) {
+            console.error('Error updating lifetime subscription status:', updateError);
+          }
+        }
+      }
     }
     
     // Get the subscription status through the service

@@ -109,7 +109,7 @@ export async function handleOneTimePayment(
           {
             user_id: userId,
             plan_type: 'lifetime',
-            status: 'active',
+            status: 'active', // Lifetime subscriptions are always active
             is_lifetime: true,
             lifetime_purchase_date: new Date().toISOString(),
             book_credits: 1 // Give 1 book credit for lifetime plan
@@ -213,7 +213,7 @@ export async function handleSubscriptionCancellation(
   // Find the subscription in our database
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('user_id')
+    .select('user_id, is_lifetime')
     .eq('stripe_subscription_id', subscription.id)
     .limit(1);
     
@@ -223,6 +223,16 @@ export async function handleSubscriptionCancellation(
   }
   
   const userId = data[0].user_id;
+  const isLifetime = data[0].is_lifetime;
+  
+  console.log(`Found subscription for user ${userId}, isLifetime: ${isLifetime}`);
+  
+  // Don't change status for lifetime subscriptions
+  if (isLifetime) {
+    console.log(`User ${userId} has a lifetime subscription - ignoring cancellation`);
+    return;
+  }
+  
   console.log(`Canceling subscription for user ${userId}`);
   
   // Update the subscription status

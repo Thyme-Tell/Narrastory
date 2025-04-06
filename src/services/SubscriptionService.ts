@@ -59,9 +59,9 @@ class SubscriptionService {
       const hasActiveSubscription = data?.hasSubscription || false;
       
       // Expiration date (if applicable)
-      const expirationDate = subscriptionData?.current_period_end 
-        ? new Date(subscriptionData.current_period_end) 
-        : null;
+      // For lifetime subscriptions, there is no expiration
+      const expirationDate = isLifetime ? null : 
+        (subscriptionData?.current_period_end ? new Date(subscriptionData.current_period_end) : null);
       
       // Credits information
       const bookCredits = subscriptionData?.book_credits || 0;

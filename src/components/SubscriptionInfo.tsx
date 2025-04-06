@@ -75,7 +75,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
         <div className="flex justify-between items-center">
           <CardTitle>Subscription</CardTitle>
           {status.isPremium && (
-            <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+            <Badge variant="outline" className={`${status.isLifetime ? 'bg-green-100 text-green-800 border-green-200' : 'bg-amber-100 text-amber-800 border-amber-200'}`}>
               {status.isLifetime ? 'Lifetime' : 'Premium'}
             </Badge>
           )}
@@ -94,7 +94,9 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
             
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">Status</p>
-              <p className="font-medium capitalize">{status.status || 'N/A'}</p>
+              <p className="font-medium capitalize">
+                {status.isLifetime ? 'Active (Lifetime)' : (status.status || 'N/A')}
+              </p>
             </div>
             
             {status.bookCredits > 0 && (
@@ -104,7 +106,12 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
               </div>
             )}
             
-            {formattedExpirationDate && !status.isLifetime && (
+            {status.isLifetime ? (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Expires</p>
+                <p className="font-medium">Never (Lifetime)</p>
+              </div>
+            ) : formattedExpirationDate && (
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Expires</p>
                 <p className="font-medium">{formattedExpirationDate}</p>

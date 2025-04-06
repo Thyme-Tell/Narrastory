@@ -74,13 +74,43 @@ serve(async (req) => {
       });
     }
 
-    // Determine if user has an active premium subscription
+    // Special handling for lifetime subscriptions - they are always considered active
+    if (data.is_lifetime) {
+      console.log(`User ${profileId} has a lifetime subscription - marking as active`);
+      
+      // If the status isn't active, update it
+      if (data.status !== 'active') {
+        console.log(`Updating lifetime subscription status from ${data.status} to active`);
+        
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({ status: 'active' })
+          .eq('user_id', profileId);
+          
+        if (updateError) {
+          console.error(`Error updating lifetime subscription status: ${updateError.message}`);
+        } else {
+          // Update the local data object to reflect the change
+          data.status = 'active';
+        }
+      }
+      
+      // Lifetime subscriptions are always active and premium
+      return successResponse({
+        hasSubscription: true,
+        isPremium: true,
+        isLifetime: true,
+        subscriptionData: data,
+      });
+    }
+    
+    // For non-lifetime subscriptions, check status normally
     const hasActiveSubscription = data && 
       (data.status === 'active' || data.status === 'trialing');
     
-    const isLifetime = data && data.is_lifetime === true;
+    const isLifetime = false; // We already handled lifetime above
     
-    const isPremium = hasActiveSubscription || isLifetime;
+    const isPremium = hasActiveSubscription;
 
     console.log(`Subscription status for ${profileId}: hasActive=${hasActiveSubscription}, isLifetime=${isLifetime}, isPremium=${isPremium}`);
 
