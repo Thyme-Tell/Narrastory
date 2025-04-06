@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?dts";
 
@@ -18,7 +17,9 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    // Set up Annual Plus subscription product
+    console.log('Stripe setup initiated');
+
+    // Create Annual Plus subscription product
     const annualPlusProduct = await stripe.products.create({
       name: 'Narra Plus Annual Subscription',
       description: 'Annual subscription to Narra Plus with premium features',
@@ -28,7 +29,7 @@ serve(async (req) => {
       },
     });
 
-    // Annual Plus price - Updated to $249/year
+    // Annual Plus price - $249/year
     const annualPlusPrice = await stripe.prices.create({
       product: annualPlusProduct.id,
       unit_amount: 24900, // $249.00
@@ -41,7 +42,7 @@ serve(async (req) => {
       },
     });
 
-    // Set up Lifetime product
+    // Create Lifetime product
     const lifetimeProduct = await stripe.products.create({
       name: 'Narra Lifetime Access',
       description: 'One-time payment for lifetime access to Narra Plus',
@@ -51,7 +52,7 @@ serve(async (req) => {
       },
     });
 
-    // Lifetime price - Updated to $399 one-time
+    // Lifetime price - $399 one-time
     const lifetimePrice = await stripe.prices.create({
       product: lifetimeProduct.id,
       unit_amount: 39900, // $399.00
