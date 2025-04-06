@@ -33,9 +33,21 @@ export async function handleSubscriptionCheckout(
   // Get subscription details
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   
-  // Get the plan type from the metadata
+  // Get the plan type from the metadata or try to determine from the price
   const price = await stripe.prices.retrieve(subscription.items.data[0].price.id);
-  const planType = price.metadata?.planType || 'plus';
+  
+  // Try to determine plan type from metadata or interval
+  let planType = price.metadata?.planType;
+  
+  if (!planType) {
+    // If no metadata, try to determine from the interval
+    if (price.recurring) {
+      planType = price.recurring.interval === 'month' ? 'monthly' : 'annual';
+    } else {
+      // Default to plus if we can't determine
+      planType = 'plus';
+    }
+  }
   
   console.log(`User ${userId} subscribed to plan: ${planType}`);
   
@@ -45,12 +57,14 @@ export async function handleSubscriptionCheckout(
     .upsert(
       {
         user_id: userId,
+        stripe_customer_id: customerId,
         stripe_subscription_id: subscriptionId,
         plan_type: planType,
         status: subscription.status,
         current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
         current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        book_credits: planType === 'plus' ? 1 : 0, // Give 1 book credit for Plus plan
+        cancel_at_period_end: subscription.cancel_at_period_end,
+        book_credits: planType === 'plus' || planType === 'annual' ? 1 : 0, // Give 1 book credit for annual plans
         is_lifetime: false
       },
       { onConflict: 'user_id' }
@@ -108,6 +122,7 @@ export async function handleOneTimePayment(
         .upsert(
           {
             user_id: userId,
+            stripe_customer_id: customerId,
             plan_type: 'lifetime',
             status: 'active', // Lifetime subscriptions are always active
             is_lifetime: true,
@@ -176,9 +191,21 @@ export async function updateSubscriptionInDatabase(
   const profile = await getUserProfileByEmail(email, supabase);
   const userId = profile.id;
   
-  // Get the plan type from the metadata
+  // Get the plan type from the metadata or try to determine from the price
   const price = await stripe.prices.retrieve(subscription.items.data[0].price.id);
-  const planType = price.metadata?.planType || 'plus';
+  
+  // Try to determine plan type from metadata or interval
+  let planType = price.metadata?.planType;
+  
+  if (!planType) {
+    // If no metadata, try to determine from the interval
+    if (price.recurring) {
+      planType = price.recurring.interval === 'month' ? 'monthly' : 'annual';
+    } else {
+      // Default to plus if we can't determine
+      planType = 'plus';
+    }
+  }
   
   console.log(`Updating subscription for user ${userId}, plan: ${planType}, status: ${subscription.status}`);
   
@@ -186,11 +213,13 @@ export async function updateSubscriptionInDatabase(
   const { error: updateError } = await supabase
     .from('subscriptions')
     .update({
+      stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
       plan_type: planType,
       status: subscription.status,
       current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
       current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      cancel_at_period_end: subscription.cancel_at_period_end,
       updated_at: new Date().toISOString()
     })
     .eq('user_id', userId);
@@ -271,7 +300,7 @@ export async function handleInvoicePaid(
   // Find the subscription in our database
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('user_id, book_credits')
+    .select('user_id, book_credits, plan_type')
     .eq('stripe_subscription_id', subscription.id)
     .limit(1);
     
@@ -282,10 +311,35 @@ export async function handleInvoicePaid(
   
   const userId = data[0].user_id;
   let bookCredits = data[0].book_credits || 0;
+  const planType = data[0].plan_type;
   
-  // If this is a renewal, add book credits
+  // If this is a renewal, add book credits based on plan type
   if (invoice.billing_reason === 'subscription_cycle') {
-    bookCredits += 1; // Add 1 book credit per billing cycle
+    // Annual plans get more credits than monthly
+    if (planType === 'annual' || planType === 'plus') {
+      bookCredits += 1; // Add 1 book credit per billing cycle for annual plans
+    } else if (planType === 'monthly') {
+      // Monthly plans might get credits less frequently or fewer credits
+      // For now, we'll add 1 credit every 3 months
+      const { data: usageData } = await supabase
+        .from('subscriptions')
+        .select('current_period_start')
+        .eq('user_id', userId)
+        .single();
+        
+      if (usageData && usageData.current_period_start) {
+        const lastPeriodStart = new Date(usageData.current_period_start);
+        const now = new Date();
+        const monthsDiff = (now.getFullYear() - lastPeriodStart.getFullYear()) * 12 + 
+                          now.getMonth() - lastPeriodStart.getMonth();
+                          
+        if (monthsDiff % 3 === 0) {
+          bookCredits += 1;
+          console.log(`Adding book credit for monthly subscription after ${monthsDiff} months, new total: ${bookCredits}`);
+        }
+      }
+    }
+    
     console.log(`Adding book credit for renewal, new total: ${bookCredits}`);
   }
   

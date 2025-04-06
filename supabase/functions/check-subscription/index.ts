@@ -10,7 +10,7 @@ import {
 /**
  * Check Subscription Edge Function
  * 
- * Checks a user's subscription status in the database.
+ * Checks a user's subscription status in the database and Stripe.
  * 
  * Request:
  * - profileId: string (user profile ID) - via query param or request body
@@ -20,6 +20,7 @@ import {
  * - isPremium: boolean (whether user has premium status)
  * - isLifetime: boolean (whether user has lifetime subscription)
  * - subscriptionData: object (full subscription data if available)
+ * - features: object (subscription features based on plan type)
  */
 serve(async (req) => {
   console.log("Check subscription function called");
@@ -70,6 +71,15 @@ serve(async (req) => {
         isPremium: false,
         isLifetime: false,
         subscriptionData: null,
+        features: {
+          storageLimit: 100, // MB
+          booksLimit: 0,
+          collaboratorsLimit: 0,
+          aiGeneration: false,
+          customTTS: false,
+          advancedEditing: false,
+          prioritySupport: false
+        },
         message: 'No subscription found' 
       });
     }
@@ -95,11 +105,50 @@ serve(async (req) => {
         }
       }
       
+      // Determine purchase date
+      const purchaseDate = data.lifetime_purchase_date 
+        ? new Date(data.lifetime_purchase_date) 
+        : (data.created_at ? new Date(data.created_at) : null);
+        
+      // Check if we have any payment records for this user
+      let orderId = null;
+      try {
+        const { data: payments } = await supabase
+          .from('book_purchases')
+          .select('id')
+          .eq('user_id', profileId)
+          .eq('is_from_credits', false)
+          .order('created_at', { ascending: false })
+          .limit(1);
+          
+        if (payments && payments.length > 0) {
+          orderId = payments[0].id;
+        }
+      } catch (paymentError) {
+        console.error(`Error fetching payment records: ${paymentError.message}`);
+      }
+      
+      // Get the features for lifetime plan
+      const lifetimeFeatures = {
+        storageLimit: 10000, // MB
+        booksLimit: 50,
+        collaboratorsLimit: 20,
+        aiGeneration: true,
+        customTTS: true,
+        advancedEditing: true,
+        prioritySupport: true
+      };
+      
       // Lifetime subscriptions are always active and premium
       return successResponse({
         hasSubscription: true,
         isPremium: true,
         isLifetime: true,
+        cancelAtPeriodEnd: false,
+        lastPaymentStatus: 'succeeded',
+        purchaseDate: purchaseDate,
+        orderId: orderId,
+        features: lifetimeFeatures,
         subscriptionData: data,
       });
     }
@@ -111,14 +160,72 @@ serve(async (req) => {
     const isLifetime = false; // We already handled lifetime above
     
     const isPremium = hasActiveSubscription;
+    
+    // Determine plan type and features
+    const planType = data.plan_type || 'free';
+    let features;
+    
+    // Set features based on plan type
+    switch (planType) {
+      case 'monthly':
+        features = {
+          storageLimit: 1000, // MB
+          booksLimit: 5,
+          collaboratorsLimit: 3,
+          aiGeneration: true,
+          customTTS: true,
+          advancedEditing: true,
+          prioritySupport: false
+        };
+        break;
+      case 'annual':
+      case 'plus': // Legacy plan name
+        features = {
+          storageLimit: 5000, // MB
+          booksLimit: 20,
+          collaboratorsLimit: 10,
+          aiGeneration: true,
+          customTTS: true,
+          advancedEditing: true,
+          prioritySupport: true
+        };
+        break;
+      default:
+        features = {
+          storageLimit: 100, // MB
+          booksLimit: 0,
+          collaboratorsLimit: 0,
+          aiGeneration: false,
+          customTTS: false,
+          advancedEditing: false,
+          prioritySupport: false
+        };
+    }
+    
+    // Get additional subscription details
+    const cancelAtPeriodEnd = data.cancel_at_period_end || false;
+    const purchaseDate = data.current_period_start ? new Date(data.current_period_start) : null;
+    
+    // Last payment status - ideally would come from Stripe but can default based on subscription status
+    let lastPaymentStatus = 'succeeded';
+    if (data.status === 'past_due' || data.status === 'unpaid') {
+      lastPaymentStatus = 'failed';
+    } else if (data.status === 'incomplete') {
+      lastPaymentStatus = 'pending';
+    }
 
-    console.log(`Subscription status for ${profileId}: hasActive=${hasActiveSubscription}, isLifetime=${isLifetime}, isPremium=${isPremium}`);
+    console.log(`Subscription status for ${profileId}: hasActive=${hasActiveSubscription}, isLifetime=${isLifetime}, isPremium=${isPremium}, plan=${planType}`);
 
     // Return subscription status
     return successResponse({
       hasSubscription: hasActiveSubscription,
       isPremium: isPremium,
       isLifetime: isLifetime,
+      planType: planType,
+      cancelAtPeriodEnd: cancelAtPeriodEnd,
+      purchaseDate: purchaseDate,
+      features: features,
+      lastPaymentStatus: lastPaymentStatus,
       subscriptionData: data || null,
     });
   } catch (error) {

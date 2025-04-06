@@ -15,6 +15,7 @@ export interface CheckoutOptions {
 // Define product IDs - these should match price IDs from Stripe
 // Note: These are symbolic constants that will be mapped to actual Stripe price IDs
 export const STRIPE_PRODUCTS = {
+  MONTHLY_PREMIUM: 'MONTHLY_PREMIUM',
   ANNUAL_PLUS: 'ANNUAL_PLUS',
   LIFETIME: 'LIFETIME',
   FIRST_BOOK: 'FIRST_BOOK',
@@ -62,7 +63,13 @@ export const useStripeCheckout = () => {
         let productDetails = null;
         
         // IMPROVED: Better detection and mapping for requested product
-        if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus && setupData.annualPlus.priceId) {
+        if (options.priceId === 'MONTHLY_PREMIUM' && setupData.monthlyPremium && setupData.monthlyPremium.priceId) {
+          actualPriceId = setupData.monthlyPremium.priceId;
+          productDetails = setupData.monthlyPremium;
+          console.log(`Mapped MONTHLY_PREMIUM to Stripe priceId: ${actualPriceId}`);
+          console.log(`Product details: ${setupData.monthlyPremium.productName}, Amount: ${setupData.monthlyPremium.amount}`);
+          foundProduct = true;
+        } else if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus && setupData.annualPlus.priceId) {
           actualPriceId = setupData.annualPlus.priceId;
           productDetails = setupData.annualPlus;
           console.log(`Mapped ANNUAL_PLUS to Stripe priceId: ${actualPriceId}`);
@@ -108,9 +115,19 @@ export const useStripeCheckout = () => {
           console.error(`No Stripe price ID found for product: ${options.priceId}`);
           console.error('Available price IDs:', JSON.stringify(setupData));
           
-          // Special case for ANNUAL_PLUS: if missing but we have lifetime, suggest using that
-          if (options.priceId === 'ANNUAL_PLUS' && setupData.lifetime) {
-            throw new Error(`The Annual subscription is not available at this time. Please try the Lifetime option instead.`);
+          // Special case for subscription products
+          if (options.priceId === 'MONTHLY_PREMIUM' && !setupData.monthlyPremium) {
+            if (setupData.lifetime) {
+              throw new Error(`The Monthly subscription is not available at this time. Please try the Lifetime option instead.`);
+            } else if (setupData.annualPlus) {
+              throw new Error(`The Monthly subscription is not available at this time. Please try the Annual option instead.`);
+            }
+          } else if (options.priceId === 'ANNUAL_PLUS' && !setupData.annualPlus) {
+            if (setupData.lifetime) {
+              throw new Error(`The Annual subscription is not available at this time. Please try the Lifetime option instead.`);
+            } else if (setupData.monthlyPremium) {
+              throw new Error(`The Annual subscription is not available at this time. Please try the Monthly option instead.`);
+            }
           } else {
             throw new Error(`The selected product is not available for purchase. Please try again later.`);
           }
@@ -177,7 +194,7 @@ export const useStripeCheckout = () => {
           errorMessage = "The selected payment plan is currently unavailable. Please contact support.";
         } else if (error.message.includes("not available for purchase")) {
           errorMessage = error.message;
-        } else if (error.message.includes("Annual subscription is not available")) {
+        } else if (error.message.includes("subscription is not available")) {
           errorMessage = error.message;
         }
       }
@@ -189,6 +206,15 @@ export const useStripeCheckout = () => {
       });
     },
   });
+
+  // Helper function to create checkout for monthly subscription
+  const createMonthlyCheckout = (profileId?: string, email?: string) => {
+    return createCheckout.mutate({
+      priceId: STRIPE_PRODUCTS.MONTHLY_PREMIUM,
+      profileId,
+      email,
+    });
+  };
 
   // Helper function to create checkout for annual subscription
   const createAnnualCheckout = (profileId?: string, email?: string) => {
@@ -228,6 +254,7 @@ export const useStripeCheckout = () => {
 
   return {
     createCheckout,
+    createMonthlyCheckout,
     createAnnualCheckout,
     createLifetimeCheckout,
     createFirstBookCheckout,

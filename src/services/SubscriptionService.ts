@@ -12,7 +12,9 @@ import {
   UsageResult,
   SubscriptionChangeResult,
   SubscriptionStatusResult,
-  SubscriptionStatus
+  SubscriptionStatus,
+  PLAN_DETAILS,
+  PLAN_FEATURES
 } from "@/types/subscription";
 import { SubscriptionData } from "@/hooks/useSubscription";
 
@@ -24,20 +26,41 @@ import { SubscriptionData } from "@/hooks/useSubscription";
  * - Credit management
  * - Usage tracking
  * - Status verification
+ * - Feature entitlements
  */
 class SubscriptionService {
+  // Cache for subscription status to minimize API calls
+  private statusCache: Map<string, { 
+    status: SubscriptionStatusResult, 
+    timestamp: number
+  }> = new Map();
+  
+  // Cache TTL in milliseconds (5 minutes)
+  private cacheTtlMs = 5 * 60 * 1000;
+  
   /**
    * Get current subscription status for a user
    * 
    * @param profileId User profile ID
+   * @param forceRefresh Force a fresh check ignoring the cache
    * @returns Subscription status information
    */
-  async getSubscriptionStatus(profileId?: string): Promise<SubscriptionStatusResult> {
+  async getSubscriptionStatus(profileId?: string, forceRefresh = false): Promise<SubscriptionStatusResult> {
     if (!profileId) {
       return this.getDefaultSubscriptionStatus();
     }
 
+    // Check cache first if not forcing a refresh
+    if (!forceRefresh) {
+      const cachedStatus = this.statusCache.get(profileId);
+      if (cachedStatus && Date.now() - cachedStatus.timestamp < this.cacheTtlMs) {
+        console.log(`Using cached subscription status for ${profileId}`);
+        return cachedStatus.status;
+      }
+    }
+
     try {
+      console.log(`Fetching fresh subscription status for ${profileId}`);
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         body: { profileId },
       });
@@ -66,11 +89,19 @@ class SubscriptionService {
       // Credits information
       const bookCredits = subscriptionData?.book_credits || 0;
       
-      // Status information - Fix for the TypeScript error
+      // Status information
       const status = subscriptionData?.status as SubscriptionStatus | null;
       const planType = subscriptionData?.plan_type || 'free';
+      
+      // Additional data from the enhanced edge function
+      const features = data?.features || PLAN_FEATURES[planType as PlanType] || PLAN_FEATURES.free;
+      const cancelAtPeriodEnd = data?.cancelAtPeriodEnd || false;
+      const lastPaymentStatus = data?.lastPaymentStatus || null;
+      const purchaseDate = data?.purchaseDate ? new Date(data.purchaseDate) : null;
+      const orderId = data?.orderId || null;
 
-      return {
+      // Create the subscription status result
+      const result: SubscriptionStatusResult = {
         isPremium,
         isLifetime,
         hasActiveSubscription,
@@ -78,8 +109,21 @@ class SubscriptionService {
         bookCredits,
         status,
         planType: planType as PlanType,
+        features,
+        cancelAtPeriodEnd,
+        lastPaymentStatus,
+        purchaseDate,
+        orderId,
         subscription: subscriptionData
       };
+      
+      // Cache the result
+      this.statusCache.set(profileId, {
+        status: result,
+        timestamp: Date.now()
+      });
+
+      return result;
     } catch (err) {
       console.error('Error in subscription status check:', err);
       toast({
@@ -88,6 +132,18 @@ class SubscriptionService {
         variant: "destructive",
       });
       return this.getDefaultSubscriptionStatus();
+    }
+  }
+
+  /**
+   * Invalidate the subscription status cache for a user
+   * 
+   * @param profileId User profile ID
+   */
+  invalidateCache(profileId?: string): void {
+    if (profileId) {
+      this.statusCache.delete(profileId);
+      console.log(`Invalidated subscription cache for ${profileId}`);
     }
   }
 
@@ -111,7 +167,9 @@ class SubscriptionService {
 
       // Get the appropriate price ID for the new plan
       let priceId: string;
-      if (toPlan === 'plus') {
+      if (toPlan === 'monthly') {
+        priceId = 'MONTHLY_PREMIUM';
+      } else if (toPlan === 'annual' || toPlan === 'plus') {
         priceId = 'ANNUAL_PLUS';
       } else if (toPlan === 'lifetime') {
         priceId = 'LIFETIME';
@@ -119,6 +177,9 @@ class SubscriptionService {
         // For downgrades to free plan, we need to cancel the subscription
         return await this.cancelSubscription(userId);
       }
+
+      // Invalidate the cache for this user
+      this.invalidateCache(userId);
 
       // Create a checkout session for the new plan
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -171,10 +232,13 @@ class SubscriptionService {
    */
   async cancelSubscription(userId: string): Promise<SubscriptionChangeResult> {
     try {
-      // Call a function to cancel the subscription (this would need to be implemented)
+      // Call the function to cancel the subscription
       const { data, error } = await supabase.functions.invoke('cancel-subscription', {
         body: { profileId: userId },
       });
+
+      // Invalidate the cache for this user
+      this.invalidateCache(userId);
 
       if (error) {
         console.error('Error canceling subscription:', error);
@@ -211,7 +275,7 @@ class SubscriptionService {
       const { profileId, bookId, amount } = bookUsage;
       
       // Get current subscription status to check available credits
-      const status = await this.getSubscriptionStatus(profileId);
+      const status = await this.getSubscriptionStatus(profileId, true);
       
       if (status.bookCredits < amount) {
         return {
@@ -235,6 +299,9 @@ class SubscriptionService {
           metadata
         },
       });
+
+      // Invalidate the cache for this user
+      this.invalidateCache(profileId);
 
       if (error) {
         console.error('Error using book credits:', error);
@@ -306,21 +373,79 @@ class SubscriptionService {
   }
 
   /**
+   * Verify if a user has access to a specific feature
+   * 
+   * @param profileId User profile ID
+   * @param featureName Name of the feature to check
+   * @returns Whether the user has access to the feature
+   */
+  async hasFeatureAccess(profileId: string, featureName: keyof typeof PLAN_FEATURES.free): Promise<boolean> {
+    try {
+      const status = await this.getSubscriptionStatus(profileId);
+      
+      // If features are available in the status, check there
+      if (status.features && featureName in status.features) {
+        return Boolean(status.features[featureName]);
+      }
+      
+      // Fallback to checking based on plan type
+      const planType = status.planType;
+      const features = PLAN_FEATURES[planType];
+      
+      return Boolean(features[featureName]);
+    } catch (err) {
+      console.error(`Error checking feature access for ${featureName}:`, err);
+      // Default to not having access in case of error
+      return false;
+    }
+  }
+
+  /**
+   * Get usage limits for a user based on their subscription plan
+   * 
+   * @param profileId User profile ID
+   * @param limit Name of the limit to check
+   * @returns The usage limit value
+   */
+  async getUsageLimit(profileId: string, limit: 'storageLimit' | 'booksLimit' | 'collaboratorsLimit'): Promise<number> {
+    try {
+      const status = await this.getSubscriptionStatus(profileId);
+      
+      // If features are available in the status, check there
+      if (status.features && limit in status.features) {
+        return status.features[limit] as number;
+      }
+      
+      // Fallback to checking based on plan type
+      const planType = status.planType;
+      const features = PLAN_FEATURES[planType];
+      
+      return features[limit];
+    } catch (err) {
+      console.error(`Error checking usage limit for ${limit}:`, err);
+      // Return default free tier limit in case of error
+      return PLAN_FEATURES.free[limit];
+    }
+  }
+
+  /**
    * Calculate the price for a plan
    * 
    * @param planType The subscription plan type
-   * @returns Price in USD
+   * @returns Price details object
    */
   getPlanPrice(planType: PlanType): number {
-    switch (planType) {
-      case 'plus':
-        return 249; // $249/year
-      case 'lifetime':
-        return 399; // $399 one-time
-      case 'free':
-      default:
-        return 0;
-    }
+    return PLAN_DETAILS[planType]?.price || 0;
+  }
+
+  /**
+   * Get full details for a plan
+   * 
+   * @param planType The subscription plan type
+   * @returns Plan details object
+   */
+  getPlanDetails(planType: PlanType) {
+    return PLAN_DETAILS[planType] || PLAN_DETAILS.free;
   }
 
   /**
@@ -358,6 +483,7 @@ class SubscriptionService {
       bookCredits: 0,
       status: null,
       planType: 'free',
+      features: PLAN_FEATURES.free,
       subscription: null
     };
   }
