@@ -56,20 +56,22 @@ export const BookPurchaseProvider: React.FC<BookPurchaseProviderProps> = ({
           throw new Error('Insufficient book credits');
         }
         
-        const result: CreditResult = await useBookCredits({
+        // Fix: Explicitly handle the returned promise and await it to get the result
+        const creditUsageResult = await useBookCredits({
           profileId,
           bookId,
           amount: 1
         });
         
-        if (!result.success) {
-          throw new Error(result.message || 'Failed to use book credits');
+        // Now we can check the result properly
+        if (!creditUsageResult.success) {
+          throw new Error(creditUsageResult.message || 'Failed to use book credits');
         }
         
         // Show success toast
         toast({
           title: 'Book Purchase Complete',
-          description: `You've successfully purchased this book using 1 credit. You have ${result.remainingCredits} credit(s) remaining.`,
+          description: `You've successfully purchased this book using 1 credit. You have ${creditUsageResult.remainingCredits} credit(s) remaining.`,
           variant: 'default',
         });
         
