@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check, X, Clock, ArrowLeft, AlertCircle, Info, Ticket } from 'lucide-react';
@@ -28,8 +27,6 @@ const PlanSelectionScreen: React.FC = () => {
   
   const { getPlanPrice } = useSubscriptionService(profileId);
   const { 
-    createAnnualCheckout, 
-    createLifetimeCheckout,
     createCheckout,
     isLoading: isCheckoutLoading,
   } = useStripeCheckout();
@@ -37,7 +34,6 @@ const PlanSelectionScreen: React.FC = () => {
   const plusPrice = getPlanPrice('plus');
   const lifetimePrice = getPlanPrice('lifetime');
   
-  // Check available plans
   useEffect(() => {
     const checkAvailablePlans = async () => {
       try {
@@ -51,7 +47,6 @@ const PlanSelectionScreen: React.FC = () => {
           lifetime: hasLifetime
         });
         
-        // If annual isn't available but lifetime is, auto-select lifetime
         if (!hasAnnual && hasLifetime && selectedPlan === 'plus') {
           setSelectedPlan('lifetime');
         }
@@ -59,7 +54,6 @@ const PlanSelectionScreen: React.FC = () => {
         setProductsLoaded(true);
       } catch (error) {
         console.error("Error checking available plans:", error);
-        // Default to assuming both are available
         setAvailablePlans({ plus: true, lifetime: true });
         setProductsLoaded(true);
       }
@@ -74,7 +68,7 @@ const PlanSelectionScreen: React.FC = () => {
   
   const handlePlanSelection = (plan: 'plus' | 'lifetime') => {
     setSelectedPlan(plan);
-    setError(null); // Clear any previous errors
+    setError(null);
   };
   
   const handleContinue = async () => {
@@ -93,8 +87,7 @@ const PlanSelectionScreen: React.FC = () => {
           description: "Setting up your subscription checkout...",
         });
         
-        // Use direct checkout to pass coupon code
-        await createCheckout({
+        createCheckout.mutate({
           priceId: 'ANNUAL_PLUS',
           profileId,
           couponCode: couponCode.trim() || undefined
@@ -105,8 +98,7 @@ const PlanSelectionScreen: React.FC = () => {
           description: "Setting up your lifetime access checkout...",
         });
         
-        // Use direct checkout to pass coupon code
-        await createCheckout({
+        createCheckout.mutate({
           priceId: 'LIFETIME',
           profileId,
           couponCode: couponCode.trim() || undefined
@@ -117,7 +109,6 @@ const PlanSelectionScreen: React.FC = () => {
       let errorMessage = "Could not process payment request. Please try again later.";
       
       if (error instanceof Error) {
-        // Check for specific error types
         if (error.message.includes("not available for purchase")) {
           errorMessage = "The selected product is not available for purchase. The store may still be setting up.";
         } else if (error.message.includes("Annual subscription is not available")) {
@@ -128,7 +119,6 @@ const PlanSelectionScreen: React.FC = () => {
         } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is currently unavailable. Please contact support.";
         } else {
-          // If we have a specific error message, use that
           errorMessage = error.message;
         }
       }
@@ -200,7 +190,6 @@ const PlanSelectionScreen: React.FC = () => {
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Plus Plan */}
         <Card 
           className={`border-2 ${selectedPlan === 'plus' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md ${!availablePlans.plus ? 'opacity-50' : ''}`}
         >
@@ -242,7 +231,6 @@ const PlanSelectionScreen: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Lifetime Plan */}
         <Card className={`border-2 ${selectedPlan === 'lifetime' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md relative overflow-hidden ${!availablePlans.lifetime ? 'opacity-50' : ''}`}>
           <div className="absolute top-0 right-0 bg-[#6E59A5] text-white px-3 py-1 text-xs font-semibold">
             MOST POPULAR
@@ -295,7 +283,6 @@ const PlanSelectionScreen: React.FC = () => {
         </Card>
       </div>
       
-      {/* Coupon code input */}
       <div className="mt-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
           <div className="relative flex-grow">

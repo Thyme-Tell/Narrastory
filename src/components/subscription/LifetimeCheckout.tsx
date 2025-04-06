@@ -25,7 +25,7 @@ const LifetimeCheckout: React.FC = () => {
   const [couponCode, setCouponCode] = useState('');
   
   const { getPlanPrice, status } = useSubscriptionService(profileId);
-  const { createLifetimeCheckout, createCheckout, isLoading } = useStripeCheckout();
+  const { createCheckout, isLoading } = useStripeCheckout();
   
   const lifetimePrice = getPlanPrice('lifetime');
   
@@ -61,8 +61,8 @@ const LifetimeCheckout: React.FC = () => {
         description: "Setting up your lifetime access checkout...",
       });
       
-      // Use direct checkout to pass coupon code
-      await createCheckout({
+      // Use mutate instead of calling createCheckout directly
+      createCheckout.mutate({
         priceId: 'LIFETIME',
         profileId,
         couponCode: couponCode.trim() || undefined
