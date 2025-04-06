@@ -10,7 +10,6 @@ export interface CheckoutOptions {
   email?: string;
   successUrl?: string;
   cancelUrl?: string;
-  couponCode?: string;  // Add coupon code field
 }
 
 // Define product IDs - these should match price IDs from Stripe
@@ -41,9 +40,6 @@ export const useStripeCheckout = () => {
 
       try {
         console.log(`Creating checkout with priceId: ${options.priceId}`);
-        if (options.couponCode) {
-          console.log(`Applying coupon code: ${options.couponCode}`);
-        }
         
         // First, retrieve the actual Stripe price IDs from the setup function
         console.log("Fetching Stripe products data...");
@@ -143,7 +139,7 @@ export const useStripeCheckout = () => {
         const mode = productDetails?.isRecurring ? 'subscription' : 'payment';
         console.log(`Checkout mode: ${mode} (based on product type)`);
         
-        // Now create the checkout with the actual price ID and coupon code if provided
+        // Now create the checkout with the actual price ID
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: {
             priceId: actualPriceId,
@@ -151,8 +147,7 @@ export const useStripeCheckout = () => {
             email: options.email,
             successUrl,
             cancelUrl,
-            mode: mode, // Pass the mode to the API
-            couponCode: options.couponCode // Pass the coupon code to the API
+            mode: mode // Pass the mode to the API
           },
         });
 
@@ -213,52 +208,47 @@ export const useStripeCheckout = () => {
   });
 
   // Helper function to create checkout for monthly subscription
-  const createMonthlyCheckout = (profileId?: string, email?: string, couponCode?: string) => {
+  const createMonthlyCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.MONTHLY_PREMIUM,
       profileId,
       email,
-      couponCode
     });
   };
 
   // Helper function to create checkout for annual subscription
-  const createAnnualCheckout = (profileId?: string, email?: string, couponCode?: string) => {
+  const createAnnualCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.ANNUAL_PLUS,
       profileId,
       email,
-      couponCode
     });
   };
 
   // Helper function to create checkout for lifetime access
-  const createLifetimeCheckout = (profileId?: string, email?: string, couponCode?: string) => {
+  const createLifetimeCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.LIFETIME,
       profileId,
       email,
-      couponCode
     });
   };
 
   // Helper function to create checkout for first book
-  const createFirstBookCheckout = (profileId?: string, email?: string, couponCode?: string) => {
+  const createFirstBookCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.FIRST_BOOK,
       profileId,
       email,
-      couponCode
     });
   };
 
   // Helper function to create checkout for additional book
-  const createAdditionalBookCheckout = (profileId?: string, email?: string, couponCode?: string) => {
+  const createAdditionalBookCheckout = (profileId?: string, email?: string) => {
     return createCheckout.mutate({
       priceId: STRIPE_PRODUCTS.ADDITIONAL_BOOK,
       profileId,
       email,
-      couponCode
     });
   };
 

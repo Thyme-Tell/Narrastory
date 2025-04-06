@@ -1,5 +1,3 @@
-
-// Import directly from hooks directory to avoid circular dependencies
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,

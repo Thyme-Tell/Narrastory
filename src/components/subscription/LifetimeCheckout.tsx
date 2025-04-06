@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Shield, AlertCircle, Ticket } from 'lucide-react';
+import { ArrowLeft, Check, Shield, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
 import { useToast } from '@/hooks/use-toast';
@@ -22,10 +21,9 @@ const LifetimeCheckout: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({ status: 'idle' });
-  const [couponCode, setCouponCode] = useState('');
   
   const { getPlanPrice, status } = useSubscriptionService(profileId);
-  const { createCheckout, isLoading } = useStripeCheckout();
+  const { createLifetimeCheckout, isLoading } = useStripeCheckout();
   
   const lifetimePrice = getPlanPrice('lifetime');
   
@@ -61,13 +59,7 @@ const LifetimeCheckout: React.FC = () => {
         description: "Setting up your lifetime access checkout...",
       });
       
-      // Use mutate instead of calling createCheckout directly
-      createCheckout.mutate({
-        priceId: 'LIFETIME',
-        profileId,
-        couponCode: couponCode.trim() || undefined
-      });
-      
+      await createLifetimeCheckout(profileId);
       // Note: The redirect happens in the useStripeCheckout hook
     } catch (error) {
       console.error('Checkout error:', error);
@@ -134,18 +126,6 @@ const LifetimeCheckout: React.FC = () => {
                 <div className="flex justify-between items-center py-2">
                   <span className="font-medium">Total (USD)</span>
                   <span className="text-lg font-bold">${lifetimePrice}</span>
-                </div>
-                
-                {/* Coupon code input */}
-                <div className="relative">
-                  <Input
-                    type="text"
-                    placeholder="Enter coupon code (if available)"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="pl-10"
-                  />
-                  <Ticket className="h-4 w-4 text-gray-400 absolute left-3 top-3" />
                 </div>
                 
                 <LifetimeTimer 

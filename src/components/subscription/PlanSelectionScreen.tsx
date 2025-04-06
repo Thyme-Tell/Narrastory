@@ -1,13 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, X, Clock, ArrowLeft, AlertCircle, Info, Ticket } from 'lucide-react';
+import { Check, X, Clock, ArrowLeft, AlertCircle, Info } from 'lucide-react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
 import LifetimeTimer from './LifetimeTimer';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,7 +19,6 @@ const PlanSelectionScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [productsLoaded, setProductsLoaded] = useState(false);
-  const [couponCode, setCouponCode] = useState('');
   const [availablePlans, setAvailablePlans] = useState<{
     plus: boolean;
     lifetime: boolean;
@@ -27,13 +26,15 @@ const PlanSelectionScreen: React.FC = () => {
   
   const { getPlanPrice } = useSubscriptionService(profileId);
   const { 
-    createCheckout,
+    createAnnualCheckout, 
+    createLifetimeCheckout,
     isLoading: isCheckoutLoading,
   } = useStripeCheckout();
   
   const plusPrice = getPlanPrice('plus');
   const lifetimePrice = getPlanPrice('lifetime');
   
+  // Check available plans
   useEffect(() => {
     const checkAvailablePlans = async () => {
       try {
@@ -47,6 +48,7 @@ const PlanSelectionScreen: React.FC = () => {
           lifetime: hasLifetime
         });
         
+        // If annual isn't available but lifetime is, auto-select lifetime
         if (!hasAnnual && hasLifetime && selectedPlan === 'plus') {
           setSelectedPlan('lifetime');
         }
@@ -54,6 +56,7 @@ const PlanSelectionScreen: React.FC = () => {
         setProductsLoaded(true);
       } catch (error) {
         console.error("Error checking available plans:", error);
+        // Default to assuming both are available
         setAvailablePlans({ plus: true, lifetime: true });
         setProductsLoaded(true);
       }
@@ -68,7 +71,7 @@ const PlanSelectionScreen: React.FC = () => {
   
   const handlePlanSelection = (plan: 'plus' | 'lifetime') => {
     setSelectedPlan(plan);
-    setError(null);
+    setError(null); // Clear any previous errors
   };
   
   const handleContinue = async () => {
@@ -86,29 +89,20 @@ const PlanSelectionScreen: React.FC = () => {
           title: "Creating Checkout",
           description: "Setting up your subscription checkout...",
         });
-        
-        createCheckout.mutate({
-          priceId: 'ANNUAL_PLUS',
-          profileId,
-          couponCode: couponCode.trim() || undefined
-        });
+        await createAnnualCheckout(profileId);
       } else {
         toast({
           title: "Creating Checkout",
           description: "Setting up your lifetime access checkout...",
         });
-        
-        createCheckout.mutate({
-          priceId: 'LIFETIME',
-          profileId,
-          couponCode: couponCode.trim() || undefined
-        });
+        await createLifetimeCheckout(profileId);
       }
     } catch (error) {
       console.error('Checkout error:', error);
       let errorMessage = "Could not process payment request. Please try again later.";
       
       if (error instanceof Error) {
+        // Check for specific error types
         if (error.message.includes("not available for purchase")) {
           errorMessage = "The selected product is not available for purchase. The store may still be setting up.";
         } else if (error.message.includes("Annual subscription is not available")) {
@@ -119,6 +113,7 @@ const PlanSelectionScreen: React.FC = () => {
         } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is currently unavailable. Please contact support.";
         } else {
+          // If we have a specific error message, use that
           errorMessage = error.message;
         }
       }
@@ -190,6 +185,7 @@ const PlanSelectionScreen: React.FC = () => {
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Plus Plan */}
         <Card 
           className={`border-2 ${selectedPlan === 'plus' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md ${!availablePlans.plus ? 'opacity-50' : ''}`}
         >
@@ -231,6 +227,7 @@ const PlanSelectionScreen: React.FC = () => {
           </CardContent>
         </Card>
         
+        {/* Lifetime Plan */}
         <Card className={`border-2 ${selectedPlan === 'lifetime' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md relative overflow-hidden ${!availablePlans.lifetime ? 'opacity-50' : ''}`}>
           <div className="absolute top-0 right-0 bg-[#6E59A5] text-white px-3 py-1 text-xs font-semibold">
             MOST POPULAR
@@ -281,26 +278,6 @@ const PlanSelectionScreen: React.FC = () => {
             )}
           </CardContent>
         </Card>
-      </div>
-      
-      <div className="mt-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-          <div className="relative flex-grow">
-            <Input
-              type="text"
-              placeholder="Enter coupon code (if available)"
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              className="pl-10"
-            />
-            <Ticket className="h-4 w-4 text-gray-400 absolute left-3 top-3" />
-          </div>
-        </div>
-        {couponCode.trim() && (
-          <p className="text-xs text-gray-500 mt-1">
-            Coupon "{couponCode}" will be applied at checkout
-          </p>
-        )}
       </div>
       
       <div className="mt-8 flex flex-col md:flex-row md:justify-between gap-4">
