@@ -69,3 +69,6 @@ verify_jwt = true
 
 [functions.track-usage]
 verify_jwt = true
+
+[functions.cancel-subscription]
+verify_jwt = true
