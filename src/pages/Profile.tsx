@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
-import UpgradePrompt from "@/components/subscription/UpgradePrompt";
+// import UpgradePrompt from "@/components/subscription/UpgradePrompt";  // Commented out
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 import { toast } from "sonner";
 
@@ -202,11 +201,12 @@ const Profile = () => {
             />
           </div>
           
-          {!isStatusLoading && !subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
+          {/* Comment out Lifetime Offer Banner */}
+          {/* {!isStatusLoading && !subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
             <div className="my-4">
               <LifetimeOfferBanner profileId={id} />
             </div>
-          )}
+          )} */}
           
           <ProfileHeader 
             firstName={profile.first_name} 
@@ -224,17 +224,19 @@ const Profile = () => {
             sortOrder={sortOrder}
           />
           
-          {!isStatusLoading && !subscriptionStatus.isPremium && stories && stories.length > 5 && (
+          {/* Comment out Upgrade Prompt Card */}
+          {/* {!isStatusLoading && !subscriptionStatus.isPremium && stories && stories.length > 5 && (
             <div className="mt-6">
               <UpgradePrompt profileId={id} variant="card" />
             </div>
-          )}
+          )} */}
         </div>
       </div>
       
-      {!isStatusLoading && !subscriptionStatus.isPremium && (
+      {/* Comment out Floating Upgrade Prompt */}
+      {/* {!isStatusLoading && !subscriptionStatus.isPremium && (
         <UpgradePrompt profileId={id} variant="floating" />
-      )}
+      )} */}
       
       <ScrollToTopButton />
     </div>
