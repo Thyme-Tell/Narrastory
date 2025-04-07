@@ -21,6 +21,13 @@ import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
 import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 import { toast } from "sonner";
+import { fixProfileSubscription } from "@/utils/subscriptionUtils";
+import { 
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { InfoIcon } from "lucide-react";
 
 const Profile = () => {
   const { id } = useParams();
@@ -61,6 +68,10 @@ const Profile = () => {
     fetchSubscriptionStatus 
   } = useSubscriptionService(id, false, profile?.email);
 
+  // For debugging - check for inconsistency in subscription data
+  const [isFixingSubscription, setIsFixingSubscription] = useState(false);
+  const [fixAttempted, setFixAttempted] = useState(false);
+
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
     if (profile?.email) {
@@ -70,6 +81,40 @@ const Profile = () => {
       fetchSubscriptionStatus();
     }
   }, [id, profile?.email]);
+
+  useEffect(() => {
+    // Check for inconsistency in subscription status
+    if (
+      subscriptionStatus && 
+      !isStatusLoading && 
+      subscriptionStatus.isPremium && 
+      subscriptionStatus.planType === 'free' &&
+      !fixAttempted
+    ) {
+      console.log("Detected inconsistency in subscription status - trying to fix automatically");
+      setIsFixingSubscription(true);
+      
+      // Try to fix the subscription data
+      fixProfileSubscription(id!)
+        .then(fixed => {
+          if (fixed) {
+            console.log("Successfully fixed subscription data");
+            toast.success("Fixed subscription data inconsistency");
+            // Refresh subscription status
+            fetchSubscriptionStatus();
+          } else {
+            console.log("No changes needed for subscription data");
+          }
+        })
+        .catch(err => {
+          console.error("Error fixing subscription:", err);
+        })
+        .finally(() => {
+          setIsFixingSubscription(false);
+          setFixAttempted(true);
+        });
+    }
+  }, [subscriptionStatus, isStatusLoading, id]);
 
   useEffect(() => {
     // Log subscription status for debugging
@@ -130,6 +175,30 @@ const Profile = () => {
     setIsBookExpanded(expanded);
   };
 
+  const handleManualFix = async () => {
+    if (!id) return;
+    
+    setIsFixingSubscription(true);
+    try {
+      const fixed = await fixProfileSubscription(id);
+      if (fixed) {
+        toast.success("Subscription data has been fixed");
+        fetchSubscriptionStatus();
+      } else {
+        toast.info("No issues detected with subscription data");
+      }
+    } catch (err) {
+      console.error("Error manually fixing subscription:", err);
+      toast.error("Failed to fix subscription data");
+    } finally {
+      setIsFixingSubscription(false);
+      setFixAttempted(true);
+    }
+  };
+
+  // Display inconsistency indicator
+  const hasInconsistency = subscriptionStatus?.isPremium && subscriptionStatus?.planType === 'free';
+
   if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -168,6 +237,34 @@ const Profile = () => {
           className="h-11"
         />
         <div className="flex items-center gap-2">
+          {hasInconsistency && (
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button 
+                  onClick={handleManualFix} 
+                  variant="outline" 
+                  size="sm" 
+                  className="mr-2 flex items-center"
+                  disabled={isFixingSubscription}
+                >
+                  <InfoIcon className="h-4 w-4 mr-1 text-amber-500" />
+                  Fix Subscription
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="flex justify-between space-x-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">Subscription Inconsistency Detected</h4>
+                    <p className="text-sm">
+                      Your account shows as Premium but has an incorrect plan type.
+                      Click to fix this issue automatically.
+                    </p>
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          )}
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">

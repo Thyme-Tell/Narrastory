@@ -183,7 +183,7 @@ serve(async (req) => {
           // If we have a profileId but the subscription isn't in our database, add it
           if (profileId && !localSubscriptionData) {
             const price = stripeSubscription.items.data[0]?.price;
-            let planType = 'monthly'; // Default
+            let planType = 'monthly'; // Default to monthly instead of free for active subscriptions
             
             if (price) {
               // Try to determine plan type from the price
@@ -258,7 +258,7 @@ serve(async (req) => {
     if (stripeSubscription) {
       hasActiveSubscription = true;
       isPremium = true;
-      planType = localSubscriptionData?.plan_type || 'monthly';
+      planType = localSubscriptionData?.plan_type || 'monthly'; // Default to monthly instead of free
       status = stripeSubscription.status;
       cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
       expirationDate = new Date(stripeSubscription.current_period_end * 1000);
@@ -269,14 +269,39 @@ serve(async (req) => {
       if (localSubscriptionData.status === 'active' || localSubscriptionData.status === 'trialing') {
         hasActiveSubscription = true;
         isPremium = true;
+        
+        // FIX: Ensure plan type is not 'free' if isPremium is true
+        if (localSubscriptionData.plan_type === 'free' && isPremium) {
+          // If we have an active subscription but plan type is 'free', default to 'monthly'
+          planType = 'monthly';
+          
+          // Update the database with the corrected plan type
+          if (profileId) {
+            console.log(`Fixing inconsistent subscription data: updating plan_type from 'free' to 'monthly' for active subscription`);
+            await supabase
+              .from('subscriptions')
+              .update({ plan_type: planType })
+              .eq('user_id', profileId);
+          }
+        } else {
+          planType = localSubscriptionData.plan_type;
+        }
+      } else {
+        planType = localSubscriptionData.plan_type || 'free';
       }
-      planType = localSubscriptionData.plan_type || 'free';
+      
       status = localSubscriptionData.status;
       cancelAtPeriodEnd = localSubscriptionData.cancel_at_period_end || false;
       if (localSubscriptionData.current_period_end) {
         expirationDate = new Date(localSubscriptionData.current_period_end);
       }
       lastPaymentStatus = localSubscriptionData.last_payment_status || 'succeeded';
+    }
+    
+    // FIX: Final consistency check - isPremium should never be true with planType 'free'
+    if (isPremium && planType === 'free') {
+      console.log(`Consistency fix: Premium user has 'free' plan type. Setting to 'monthly' as default.`);
+      planType = 'monthly';
     }
     
     // Set features based on plan type
