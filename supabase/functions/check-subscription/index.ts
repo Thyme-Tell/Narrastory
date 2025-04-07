@@ -172,7 +172,7 @@ serve(async (req) => {
           customer: stripeCustomerId,
           status: 'active',
           limit: 1,
-          expand: ['data.items.data.price']
+          expand: ['data.items.data.price', 'data.items.data.price.product']
         });
         
         if (subscriptions.data.length > 0) {
@@ -216,6 +216,7 @@ serve(async (req) => {
                   current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
                   book_credits: planType === 'annual' || planType === 'plus' ? 1 : 0,
                   is_lifetime: false,
+                  cancel_at_period_end: stripeSubscription.cancel_at_period_end,
                   updated_at: new Date().toISOString()
                 }, {
                   onConflict: 'user_id'
