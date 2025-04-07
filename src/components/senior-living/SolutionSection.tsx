@@ -19,23 +19,27 @@ const SolutionSection = forwardRef<HTMLElement>((props, ref) => {
       
       <Card className="bg-[#F6F6F7] border-none shadow-lg p-2 mt-8">
         <CardContent className="p-4 md:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {solutions.map((solution, index) => (
-              <div key={index} className="flex items-start">
-                <div className="rounded-full bg-[#A33D29]/10 p-1 mr-3 mt-0.5">
-                  <Check className="h-5 w-5 text-[#A33D29]" />
-                </div>
-                <p className="text-lg text-[#242F3F]">{solution}</p>
+          <div className="flex flex-col md:flex-row gap-8 items-center">
+            <div className="md:w-1/2">
+              <div className="grid grid-cols-1 gap-4">
+                {solutions.map((solution, index) => (
+                  <div key={index} className="flex items-start">
+                    <div className="rounded-full bg-[#A33D29]/10 p-1 mr-3 mt-0.5">
+                      <Check className="h-5 w-5 text-[#A33D29]" />
+                    </div>
+                    <p className="text-lg text-[#242F3F]">{solution}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          
-          <div className="mt-10 flex justify-center">
-            <img 
-              src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/conversation-to-book.png" 
-              alt="From conversation to memory book" 
-              className="rounded-lg shadow-md max-w-full md:max-w-2xl"
-            />
+            </div>
+            
+            <div className="md:w-1/2">
+              <img 
+                src="/lovable-uploads/0d7461c6-933e-430a-8d4f-549ec28e118c.png" 
+                alt="Senior resident writing stories" 
+                className="rounded-lg shadow-md w-full"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

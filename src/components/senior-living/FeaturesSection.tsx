@@ -33,11 +33,18 @@ const FeaturesSection = forwardRef<HTMLElement>((props, ref) => {
       </div>
       
       <div className="mt-12 flex justify-center">
-        <img 
-          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/feature-showcase.png" 
-          alt="Narra features showcase" 
-          className="rounded-lg shadow-lg max-w-full"
-        />
+        <div className="relative w-full max-w-4xl overflow-hidden rounded-lg shadow-lg">
+          <img 
+            src="/lovable-uploads/89e9603b-1404-44e3-8aae-a9c186177c3c.png" 
+            alt="Multi-generational storytelling experience" 
+            className="w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+            <div className="p-6 text-white">
+              <p className="text-xl font-caslon">Bringing families together through shared stories</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

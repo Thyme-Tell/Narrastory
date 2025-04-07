@@ -35,8 +35,8 @@ const RiskReversalSection: React.FC = () => {
             
             <div className="md:w-1/2">
               <img 
-                src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/risk-free-trial.png" 
-                alt="Risk-free trial" 
+                src="/lovable-uploads/32990903-8174-4653-a856-722de90c1d06.png" 
+                alt="Senior residents enjoying the Narra experience" 
                 className="rounded-lg shadow-md w-full h-full object-cover"
               />
             </div>

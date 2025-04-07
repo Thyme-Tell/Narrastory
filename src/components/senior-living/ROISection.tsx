@@ -32,11 +32,21 @@ const ROISection: React.FC = () => {
       </div>
       
       <Card className="mt-12 bg-[#242F3F]/5 border-none p-6 rounded-lg">
-        <CardContent className="p-0 text-center text-[#242F3F]">
-          <p className="text-lg">
-            Our customer satisfaction surveys consistently show that Narra's storytelling program 
-            is rated as one of the most valuable resident engagement tools in senior living communities.
-          </p>
+        <CardContent className="p-0 flex flex-col md:flex-row items-center gap-8">
+          <div className="md:w-1/3">
+            <img 
+              src="/lovable-uploads/0a16d5d3-6ff6-4ead-9443-b2b69c15a78c.png" 
+              alt="Family engaging with resident stories" 
+              className="rounded-lg shadow-md w-full"
+            />
+          </div>
+          <div className="md:w-2/3 text-[#242F3F]">
+            <p className="text-lg">
+              Our customer satisfaction surveys consistently show that Narra's storytelling program 
+              is rated as one of the most valuable resident engagement tools in senior living communities.
+              Family members report deeper connections and more meaningful interactions during visits.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </section>

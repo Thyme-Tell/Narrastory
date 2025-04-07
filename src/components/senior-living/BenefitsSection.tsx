@@ -12,7 +12,8 @@ const BenefitsSection = forwardRef<HTMLElement>((props, ref) => {
         "AI-powered conversation guides",
         "Easy-to-implement group activities",
         "Personalized memory prompts"
-      ]
+      ],
+      image: "/lovable-uploads/32990903-8174-4653-a856-722de90c1d06.png"
     },
     {
       title: "Save Time & Effort",
@@ -21,7 +22,8 @@ const BenefitsSection = forwardRef<HTMLElement>((props, ref) => {
         "Simple 15-minute onboarding",
         "Integrates with existing programs",
         "Done-for-you activity materials"
-      ]
+      ],
+      image: "/lovable-uploads/70c3a5dd-a4eb-4759-8aa7-3b26e3b3a147.png"
     },
     {
       title: "Delight Families",
@@ -30,7 +32,8 @@ const BenefitsSection = forwardRef<HTMLElement>((props, ref) => {
         "Professional-quality memory books",
         "Digital story sharing",
         "Cross-generational connection opportunities"
-      ]
+      ],
+      image: "/lovable-uploads/0a16d5d3-6ff6-4ead-9443-b2b69c15a78c.png"
     }
   ];
 
@@ -51,7 +54,7 @@ const BenefitsSection = forwardRef<HTMLElement>((props, ref) => {
                 {benefit.title}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <ul className="space-y-3">
                 {benefit.items.map((item, itemIndex) => (
                   <li key={itemIndex} className="flex items-start">
@@ -62,6 +65,14 @@ const BenefitsSection = forwardRef<HTMLElement>((props, ref) => {
                   </li>
                 ))}
               </ul>
+              
+              <div className="pt-4">
+                <img 
+                  src={benefit.image} 
+                  alt={benefit.title} 
+                  className="rounded-md h-48 w-full object-cover shadow-sm"
+                />
+              </div>
             </CardContent>
           </Card>
         ))}

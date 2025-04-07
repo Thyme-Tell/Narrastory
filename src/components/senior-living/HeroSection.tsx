@@ -46,8 +46,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ heroRef, isMobile }) => {
         <div className="mt-16 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#EFF1E9] z-10"></div>
           <img 
-            src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/senior-living-hero.png" 
-            alt="Senior residents sharing stories" 
+            src="/lovable-uploads/89e9603b-1404-44e3-8aae-a9c186177c3c.png" 
+            alt="Senior residents sharing stories with family" 
             className="max-w-full rounded-lg shadow-lg relative z-0"
           />
         </div>
