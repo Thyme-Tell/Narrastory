@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams } from "react-router-dom";
 import { PlanType } from "@/types/subscription";
@@ -16,17 +17,7 @@ const Profile = () => {
       return 'Free Plan';
     }
     
-    switch (planType) {
-      case 'lifetime':
-        return 'Narra+';
-      case 'annual':
-      case 'plus':
-        return 'Narra+';
-      case 'monthly':
-        return 'Narra+';
-      default:
-        return 'Narra+';
-    }
+    return 'Narra+';
   };
 
   return (
