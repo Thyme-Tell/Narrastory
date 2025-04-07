@@ -12,6 +12,7 @@ import PasswordResetConfirm from "./components/PasswordResetConfirm";
 import { AuthProvider } from "./contexts/AuthContext";
 import BookPreviewPage from "./pages/BookPreviewPage";
 import GetStarted from "./pages/GetStarted";
+import SeniorLiving from "./pages/SeniorLiving"; // Add new import
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SubscribePage from "./pages/SubscribePage";
@@ -46,6 +47,7 @@ function App() {
           <Route path="/book-preview/:profileId" element={<BookPreviewPage />} />
           <Route path="/book-purchase/:profileId" element={<BookPurchasePage />} />
           <Route path="/get-started" element={<GetStarted />} />
+          <Route path="/senior-living" element={<SeniorLiving />} /> {/* Add new route */}
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/subscribe" element={<SubscribePage />} />
