@@ -143,6 +143,7 @@ serve(async (req) => {
         lastPaymentStatus: 'succeeded',
         purchaseDate: purchaseDate,
         orderId: orderId,
+        planType: 'lifetime',
         features: lifetimeFeatures,
         subscriptionData: localSubscriptionData,
       });
@@ -167,8 +168,6 @@ serve(async (req) => {
     if (stripeCustomerId) {
       try {
         console.log(`Looking up subscriptions for Stripe customer ${stripeCustomerId}`);
-        // FIX: Change expand parameter to avoid nesting error
-        // The previous expansion path was too deep (data.items.data.price.product)
         const subscriptions = await stripe.subscriptions.list({
           customer: stripeCustomerId,
           status: 'active',
@@ -180,10 +179,10 @@ serve(async (req) => {
           stripeSubscription = subscriptions.data[0];
           console.log(`Found active Stripe subscription ${stripeSubscription.id}`);
           
-          // If we have a profileId but the subscription isn't in our database, add it
-          if (profileId && !localSubscriptionData) {
+          // If we have a profileId but the subscription isn't in our database or needs updating, add/update it
+          if (profileId) {
             const price = stripeSubscription.items.data[0]?.price;
-            let planType = 'monthly'; // Default to monthly instead of free for active subscriptions
+            let planType = 'monthly'; // Default to monthly for active subscriptions
             
             if (price) {
               // Try to determine plan type from the price
@@ -201,42 +200,46 @@ serve(async (req) => {
               }
             }
             
-            console.log(`Storing Stripe subscription data in our database for profile ${profileId}, plan type: ${planType}`);
+            console.log(`Storing/updating Stripe subscription data for profile ${profileId}, plan type: ${planType}`);
             
-            // Store the subscription in our database
-            const { error: insertError } = await supabase
-              .from('subscriptions')
-              .insert({
-                user_id: profileId,
-                stripe_customer_id: stripeCustomerId,
-                stripe_subscription_id: stripeSubscription.id,
-                plan_type: planType,
-                status: stripeSubscription.status,
-                current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
-                current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
-                cancel_at_period_end: stripeSubscription.cancel_at_period_end,
-                book_credits: planType === 'annual' || planType === 'plus' ? 1 : 0,
-                is_lifetime: false
-              });
-              
-            if (insertError) {
-              console.error(`Error saving subscription data: ${insertError.message}`);
-            } else {
-              // Update our local reference to include the newly stored data
-              const { data: freshData } = await supabase
+            try {
+              // Use upsert to either insert or update the subscription record
+              const { error: upsertError } = await supabase
                 .from('subscriptions')
-                .select('*')
-                .eq('user_id', profileId)
-                .single();
+                .upsert({
+                  user_id: profileId,
+                  stripe_customer_id: stripeCustomerId,
+                  stripe_subscription_id: stripeSubscription.id,
+                  plan_type: planType,
+                  status: stripeSubscription.status,
+                  current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
+                  current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+                  book_credits: planType === 'annual' || planType === 'plus' ? 1 : 0,
+                  is_lifetime: false,
+                  updated_at: new Date().toISOString()
+                }, {
+                  onConflict: 'user_id'
+                });
                 
-              if (freshData) {
-                localSubscriptionData = freshData;
-                console.log('Updated local subscription data reference');
+              if (upsertError) {
+                console.error(`Error saving subscription data: ${upsertError.message}`);
+              } else {
+                // Update our local reference to include the newly stored/updated data
+                const { data: freshData } = await supabase
+                  .from('subscriptions')
+                  .select('*')
+                  .eq('user_id', profileId)
+                  .single();
+                  
+                if (freshData) {
+                  localSubscriptionData = freshData;
+                  console.log('Updated local subscription data reference');
+                }
               }
+            } catch (dbError) {
+              console.error(`Database operation error: ${dbError.message}`);
             }
           }
-        } else {
-          console.log(`No active subscriptions found for customer ${stripeCustomerId}`);
         }
       } catch (stripeError) {
         console.error(`Error checking Stripe subscriptions: ${stripeError.message}`);
@@ -258,7 +261,26 @@ serve(async (req) => {
     if (stripeSubscription) {
       hasActiveSubscription = true;
       isPremium = true;
-      planType = localSubscriptionData?.plan_type || 'monthly'; // Default to monthly instead of free
+      planType = localSubscriptionData?.plan_type || 'monthly'; // Default to monthly for active subscriptions
+      
+      // Critical consistency check: If we have an active subscription but plan type is 'free', set it to 'monthly'
+      if (planType === 'free') {
+        planType = 'monthly';
+        
+        // Update the database to fix the inconsistency
+        if (profileId) {
+          console.log(`Fixing inconsistency: Active subscription has 'free' plan_type. Updating to 'monthly'`);
+          try {
+            await supabase
+              .from('subscriptions')
+              .update({ plan_type: planType, updated_at: new Date().toISOString() })
+              .eq('user_id', profileId);
+          } catch (updateError) {
+            console.error(`Error fixing plan type inconsistency: ${updateError.message}`);
+          }
+        }
+      }
+      
       status = stripeSubscription.status;
       cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
       expirationDate = new Date(stripeSubscription.current_period_end * 1000);
@@ -270,18 +292,22 @@ serve(async (req) => {
         hasActiveSubscription = true;
         isPremium = true;
         
-        // FIX: Ensure plan type is not 'free' if isPremium is true
+        // Fix for inconsistency: ensure plan type is not 'free' if isPremium is true
         if (localSubscriptionData.plan_type === 'free' && isPremium) {
-          // If we have an active subscription but plan type is 'free', default to 'monthly'
+          // If we have an active subscription but plan type is 'free', update to 'monthly'
           planType = 'monthly';
           
           // Update the database with the corrected plan type
           if (profileId) {
-            console.log(`Fixing inconsistent subscription data: updating plan_type from 'free' to 'monthly' for active subscription`);
-            await supabase
-              .from('subscriptions')
-              .update({ plan_type: planType })
-              .eq('user_id', profileId);
+            console.log(`Fixing inconsistency: Active subscription has 'free' plan_type. Updating to 'monthly'`);
+            try {
+              await supabase
+                .from('subscriptions')
+                .update({ plan_type: planType, updated_at: new Date().toISOString() })
+                .eq('user_id', profileId);
+            } catch (updateError) {
+              console.error(`Error fixing plan type inconsistency: ${updateError.message}`);
+            }
           }
         } else {
           planType = localSubscriptionData.plan_type;
@@ -298,10 +324,22 @@ serve(async (req) => {
       lastPaymentStatus = localSubscriptionData.last_payment_status || 'succeeded';
     }
     
-    // FIX: Final consistency check - isPremium should never be true with planType 'free'
+    // Final consistency check - isPremium should never be true with planType 'free'
     if (isPremium && planType === 'free') {
-      console.log(`Consistency fix: Premium user has 'free' plan type. Setting to 'monthly' as default.`);
+      console.log(`Final consistency check: Premium user has 'free' plan type. Setting to 'monthly' as default.`);
       planType = 'monthly';
+      
+      // Update the database if needed
+      if (profileId) {
+        try {
+          await supabase
+            .from('subscriptions')
+            .update({ plan_type: planType, updated_at: new Date().toISOString() })
+            .eq('user_id', profileId);
+        } catch (updateError) {
+          console.error(`Error fixing final plan type inconsistency: ${updateError.message}`);
+        }
+      }
     }
     
     // Set features based on plan type
@@ -323,6 +361,17 @@ serve(async (req) => {
           storageLimit: 5000, // MB
           booksLimit: 20,
           collaboratorsLimit: 10,
+          aiGeneration: true,
+          customTTS: true,
+          advancedEditing: true,
+          prioritySupport: true
+        };
+        break;
+      case 'lifetime':
+        features = {
+          storageLimit: 10000, // MB
+          booksLimit: 50,
+          collaboratorsLimit: 20,
           aiGeneration: true,
           customTTS: true,
           advancedEditing: true,
