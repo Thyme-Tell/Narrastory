@@ -23,7 +23,7 @@ import {
  */
 export const useSubscriptionService = (
   profileId?: string, 
-  forceRefresh = false, 
+  forceRefresh = true, // Default to true to always force refresh
   email?: string
 ) => {
   const queryClient = useQueryClient();
@@ -39,7 +39,8 @@ export const useSubscriptionService = (
     queryFn: async () => {
       console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: ${forceRefresh}`);
       try {
-        const result = await subscriptionService.getSubscriptionStatus(profileId, forceRefresh, email);
+        // Always force a refresh regardless of the parameter to check with Stripe
+        const result = await subscriptionService.getSubscriptionStatus(profileId, true, email);
         console.log('Subscription status fetch result:', result);
         return result;
       } catch (error) {
@@ -48,7 +49,9 @@ export const useSubscriptionService = (
       }
     },
     enabled: !!profileId || !!email,
-    staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // 5 minutes if not forcing refresh
+    staleTime: 0, // Set stale time to 0 to always refetch
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
     retry: 2, // Retry twice on failure
   });
 

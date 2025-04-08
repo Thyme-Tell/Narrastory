@@ -12,10 +12,12 @@ import Stripe from "https://esm.sh/stripe@14.21.0?dts";
  * Check Subscription Edge Function
  * 
  * Checks a user's subscription status in the database and Stripe.
+ * Always checks with Stripe directly, bypassing any local cache.
  * 
  * Request:
  * - profileId: string (user profile ID) - via query param or request body
  * - email: string (user email) - via query param or request body (takes precedence over profileId)
+ * - forceRefresh: boolean (force a fresh check) - defaults to true
  * 
  * Response:
  * - hasSubscription: boolean (whether user has active subscription)
@@ -42,18 +44,26 @@ serve(async (req) => {
     const url = new URL(req.url);
     let profileId = url.searchParams.get('profileId');
     let email = url.searchParams.get('email');
-    console.log(`Profile ID from query: ${profileId}, Email from query: ${email}`);
+    let forceRefresh = url.searchParams.get('forceRefresh') === 'true';
+    console.log(`Profile ID from query: ${profileId}, Email from query: ${email}, Force refresh: ${forceRefresh}`);
 
     // If identifiers not in query params, try to get from request body
-    if (!profileId && !email) {
+    if (!profileId || !email || forceRefresh === undefined) {
       try {
         const body = await req.json();
-        profileId = body.profileId;
-        email = body.email;
-        console.log(`Profile ID from body: ${profileId}, Email from body: ${email}`);
+        profileId = profileId || body.profileId;
+        email = email || body.email;
+        // Always set forceRefresh to true regardless of input
+        forceRefresh = true;
+        console.log(`Profile ID from body: ${profileId}, Email from body: ${email}, Force refresh: ${forceRefresh}`);
       } catch (e) {
         console.log("No request body or invalid JSON");
+        // Still force refresh to true
+        forceRefresh = true;
       }
+    } else {
+      // Always force refresh regardless of query param
+      forceRefresh = true;
     }
 
     // We need either a profileId or email to continue

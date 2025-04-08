@@ -57,7 +57,7 @@ const Profile = () => {
     isStatusLoading, 
     statusError, 
     fetchSubscriptionStatus 
-  } = useSubscriptionService(id, false, profile?.email);
+  } = useSubscriptionService(id, true, profile?.email); // Set forceRefresh to true
 
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
