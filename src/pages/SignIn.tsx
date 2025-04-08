@@ -39,7 +39,6 @@ const SignIn = () => {
   const redirect = searchParams.get('redirect') || 
                    searchParams.get('redirectTo') || 
                    (location.state as { redirectTo?: string })?.redirectTo || 
-                   sessionStorage.getItem('redirectAfterLogin') ||
                    null;
   
   useEffect(() => {
@@ -58,10 +57,6 @@ const SignIn = () => {
         : `/profile/${existingProfileId}`;
         
       console.log("Already authenticated, redirecting to:", destination);
-      
-      // Clear the session storage redirect
-      sessionStorage.removeItem('redirectAfterLogin');
-      
       navigate(destination, { replace: true });
     }
   }, [navigate, redirect, isAuthenticated]);
@@ -144,10 +139,7 @@ const SignIn = () => {
       let destination = '';
       const redirectParam = searchParams.get('redirect') || 
                             searchParams.get('redirectTo') || 
-                            (location.state as { redirectTo?: string })?.redirectTo ||
-                            sessionStorage.getItem('redirectAfterLogin');
-      
-      sessionStorage.removeItem('redirectAfterLogin');
+                            (location.state as { redirectTo?: string })?.redirectTo;
                             
       if (redirectParam) {
         // Handle different redirect formats

@@ -27,16 +27,12 @@ const SubscribePage: React.FC = () => {
       // If no auth cookie or explicitly set to "false", redirect to sign in
       if (isAuthorized !== 'true') {
         console.log("Not authenticated, redirecting to sign in");
-        // Store current location before redirecting
-        sessionStorage.setItem('redirectAfterLogin', '/subscribe');
-        
         toast({
           title: "Authentication Required",
           description: "Please sign in to access subscription options.",
           variant: "destructive",
         });
         navigate('/sign-in?redirect=subscribe', { replace: true });
-        return;
       }
       
       setIsChecking(false);
