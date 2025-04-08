@@ -113,7 +113,8 @@ export const useSubscriptionService = (
       console.error('Error in subscription status:', statusError);
     }
     
-    return subscriptionStatus || {
+    // Ensure we handle null/undefined status properly
+    const status = subscriptionStatus || {
       isPremium: false,
       isLifetime: false,
       hasActiveSubscription: false,
@@ -132,6 +133,13 @@ export const useSubscriptionService = (
         prioritySupport: false
       }
     };
+    
+    // Fix status property if it's undefined
+    if (status.status === undefined) {
+      status.status = null;
+    }
+    
+    return status;
   };
 
   // Fetch subscription status immediately if needed
