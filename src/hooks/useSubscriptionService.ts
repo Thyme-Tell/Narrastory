@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionService } from '@/services/SubscriptionService';
@@ -45,6 +46,10 @@ export const useSubscriptionService = (
       if (cookieEmail) {
         setEffectiveEmail(cookieEmail);
       }
+    } else {
+      // Update if they change
+      setEffectiveProfileId(profileId);
+      setEffectiveEmail(email);
     }
   }, [profileId, email]);
   
@@ -55,7 +60,7 @@ export const useSubscriptionService = (
     error: statusError,
     refetch: refetchStatus
   } = useQuery({
-    queryKey: ['subscription-status', effectiveProfileId, effectiveEmail, forceRefresh],
+    queryKey: ['subscription-status', effectiveProfileId, effectiveEmail, forceRefresh, Date.now()],
     queryFn: async () => {
       console.log(`Fetching subscription status for profile: ${effectiveProfileId}, email: ${effectiveEmail}, force refresh: ${forceRefresh}`);
       try {
@@ -203,6 +208,7 @@ export const useSubscriptionService = (
       console.log(`Manually invalidating cache for profile ${effectiveProfileId} or email ${effectiveEmail}`);
       subscriptionService.invalidateCache(effectiveProfileId, effectiveEmail);
       queryClient.invalidateQueries({ queryKey: ['subscription-status', effectiveProfileId, effectiveEmail] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-status'] }); // Also invalidate all subscription queries
     }
   };
 };

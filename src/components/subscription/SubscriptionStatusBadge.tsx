@@ -31,22 +31,34 @@ const SubscriptionStatusBadge: React.FC<SubscriptionStatusBadgeProps> = ({
   
   console.log(`SubscriptionStatusBadge using profileId=${effectiveProfileId}, email=${effectiveEmail}`);
   
-  const { status, isStatusLoading, refetchStatus } = useSubscriptionService(
+  const { status, isStatusLoading, refetchStatus, invalidateCache } = useSubscriptionService(
     effectiveProfileId, 
-    true, 
+    true, // Always force refresh to get latest data
     effectiveEmail
   );
   
-  // Force refresh on mount
+  // Force refresh on mount and periodically check for updates
   useEffect(() => {
+    console.log("SubscriptionStatusBadge mounted, refreshing status");
+    
+    // Immediately invalidate cache and refresh
+    invalidateCache();
     refetchStatus();
-  }, [refetchStatus]);
+    
+    // Also set up a refresh interval (every 30 seconds)
+    const intervalId = setInterval(() => {
+      console.log("Periodic subscription status refresh");
+      refetchStatus();
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(intervalId);
+  }, [refetchStatus, invalidateCache]);
+  
+  console.log("Subscription status in badge:", status);
   
   const handleUpgradeClick = () => {
     navigate('/subscribe');
   };
-  
-  console.log("Subscription status in badge:", status);
   
   if (isStatusLoading) {
     return (

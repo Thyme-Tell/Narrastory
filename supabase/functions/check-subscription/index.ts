@@ -49,7 +49,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Checking subscription for ${profileId ? `profile: ${profileId}` : `email: ${email}`}`);
+    console.log(`Checking subscription for ${profileId ? `profile: ${profileId}` : `email: ${email}`}, forceRefresh: ${forceRefresh}`);
     
     // Step 1: First try to get subscription from database
     let userId = profileId;
@@ -119,7 +119,7 @@ serve(async (req) => {
     console.log(`Database subscription data:`, subscriptionData);
     
     // If forceRefresh or we need to verify with Stripe
-    if (forceRefresh && subscriptionData && subscriptionData.stripe_subscription_id) {
+    if ((forceRefresh || !subscriptionData) && subscriptionData?.stripe_subscription_id) {
       console.log(`Force refreshing subscription with Stripe for sub ID: ${subscriptionData.stripe_subscription_id}`);
       
       // Initialize Stripe client
