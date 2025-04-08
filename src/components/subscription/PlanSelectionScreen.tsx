@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check, ArrowLeft, AlertCircle, Info, Tag } from 'lucide-react';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useStripeCheckout, STRIPE_PRODUCTS } from '@/hooks/useStripeCheckout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
 const PlanSelectionScreen: React.FC = () => {
+  const { id: profileId } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -34,7 +34,9 @@ const PlanSelectionScreen: React.FC = () => {
   };
   
   const handleContinue = async () => {
-    if (!user?.id) {
+    const userProfileId = profileId || user?.id;
+    
+    if (!userProfileId) {
       setError("Please sign in to continue.");
       return;
     }
@@ -43,22 +45,23 @@ const PlanSelectionScreen: React.FC = () => {
     setError(null);
     
     try {
-      // Determine which product ID to use based on selection
-      const priceId = selectedPlan === 'annual' 
-        ? 'ANNUAL_PLUS'  // This will be mapped to the actual Stripe price ID
-        : 'LIFETIME';    // This will be mapped to the actual Stripe price ID
-      
       toast({
         title: "Creating Checkout",
         description: promoCode 
           ? `Setting up checkout with promo code ${promoCode}...` 
           : "Setting up checkout...",
       });
+
+      if (selectedPlan === 'lifetime') {
+        navigate(`/lifetime-checkout/${userProfileId}`);
+        return;
+      }
+      
+      const priceId = 'ANNUAL_PLUS';
       
       await createCheckout.mutateAsync({
         priceId,
-        profileId: user.id,
-        email: user.email,
+        profileId: userProfileId,
         promoCode: promoCode || undefined
       });
     } catch (error) {
