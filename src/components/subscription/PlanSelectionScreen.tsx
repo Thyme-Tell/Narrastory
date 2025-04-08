@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
@@ -13,18 +14,18 @@ import CheckoutActions from './CheckoutActions';
 // Define plan features for both plans
 const planFeatures = {
   annual: [
-    "One-time payment for lifetime access",
-    "All premium features forever",
-    "Priority customer support",
-    "Unlimited book credits*",
-    "Early access to new features"
-  ],
-  lifetime: [
     "Annual subscription with premium features",
     "Print on-demand books",
     "AI voice narration",
     "Access to premium templates",
     "Book printing credits (2 per year)"
+  ],
+  lifetime: [
+    "One-time payment for lifetime access",
+    "All premium features forever",
+    "Priority customer support",
+    "Unlimited book credits*",
+    "Early access to new features"
   ]
 };
 

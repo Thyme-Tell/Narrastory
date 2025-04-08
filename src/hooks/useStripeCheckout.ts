@@ -15,8 +15,9 @@ export interface CheckoutOptions {
 
 // Define product IDs - these should match the actual Stripe product IDs
 export const STRIPE_PRODUCTS = {
-  ANNUAL_PLUS: 'prod_S52DtoQFIZmzDL',  // Narra+ Yearly (using correct ID from console)
-  LIFETIME: 'prod_S52DRcMxeWMRQ6',     // Narra Lifetime (using correct ID from console)
+  // Based on the Stripe data, the IDs are correctly mapped but the products are switched
+  ANNUAL_PLUS: 'prod_S52DtoQFIZmzDL',  // Narra+ Yearly - $249/year
+  LIFETIME: 'prod_S52DRcMxeWMRQ6',     // Narra Lifetime - $399 one-time
   FIRST_BOOK: 'FIRST_BOOK',
   ADDITIONAL_BOOK: 'ADDITIONAL_BOOK',
 };
