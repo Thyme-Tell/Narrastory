@@ -61,41 +61,48 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
         />
       ) : (
         <>
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-sm text-muted-foreground">
-              {new Date(story.created_at).toLocaleDateString()}
-            </p>
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm text-muted-foreground">
+                {new Date(story.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            
+            {story.title && (
+              <h2 className="text-xl font-semibold mb-2">{story.title}</h2>
+            )}
+            
             <StoryActions
+              onListen={() => {/* TODO: Implement listen functionality */}}
               onEdit={() => setIsEditing(true)}
               onShare={onShare}
               onDelete={handleDelete}
             />
-          </div>
-          
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-2">
-            <span>{formattedDate}</span>
-            <span>•</span>
-            <div className="flex items-center">
-              <Book className="h-3.5 w-3.5 mr-1" />
-              <span>{wordCount} words</span>
+            
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground my-2">
+              <span>{formattedDate}</span>
+              <span>•</span>
+              <div className="flex items-center">
+                <Book className="h-3.5 w-3.5 mr-1" />
+                <span>{wordCount} words</span>
+              </div>
             </div>
-          </div>
-          
-          <StoryContent
-            title={story.title}
-            content={story.content}
-            storyId={story.id}
-            onUpdate={onUpdate}
-          />
-        </>
-      )}
+            
+            <StoryContent
+              title={story.title}
+              content={story.content}
+              storyId={story.id}
+              onUpdate={onUpdate}
+            />
+          </>
+        )}
 
-      <ShareDialog
-        open={showShareDialog}
-        onOpenChange={setShowShareDialog}
-        shareUrl={shareUrl}
-        storyTitle={story.title}
-      />
+        <ShareDialog
+          open={showShareDialog}
+          onOpenChange={setShowShareDialog}
+          shareUrl={shareUrl}
+          storyTitle={story.title}
+        />
     </div>
   );
 };
