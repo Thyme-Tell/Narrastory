@@ -17,30 +17,30 @@ import {
  * Hook to interact with the subscription service
  * 
  * @param profileId User profile ID (optional)
+ * @param forceRefresh Force a fresh check ignoring the cache (optional, defaults to true)
  * @param email User email address (optional, takes precedence over profileId if provided)
- * @param forceRefresh Force a fresh check ignoring the cache (optional)
  * @returns Subscription service operations and status
  */
 export const useSubscriptionService = (
   profileId?: string, 
-  forceRefresh?: boolean,
+  forceRefresh: boolean = true, // Default to true to ALWAYS force refresh
   email?: string
 ) => {
   const queryClient = useQueryClient();
   
-  // Query subscription status - ALWAYS force refresh to check with Stripe
+  // Query subscription status
   const { 
     data: subscriptionStatus,
     isLoading: isStatusLoading,
     error: statusError,
     refetch: refetchStatus
   } = useQuery({
-    queryKey: ['subscription-status', profileId, email, true], // Always set forceRefresh param to true
+    queryKey: ['subscription-status', profileId, email, forceRefresh],
     queryFn: async () => {
-      console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: true`);
+      console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: ${forceRefresh}`);
       try {
-        // Always force a refresh regardless of the parameter to check with Stripe
-        const result = await subscriptionService.getSubscriptionStatus(profileId, true, email);
+        // Use the provided forceRefresh value or default to true
+        const result = await subscriptionService.getSubscriptionStatus(profileId, forceRefresh, email);
         console.log('Subscription status fetch result:', result);
         return result;
       } catch (error) {

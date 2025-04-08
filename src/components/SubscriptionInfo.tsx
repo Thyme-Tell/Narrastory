@@ -55,7 +55,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
     isChangingPlan,
     getPlanPrice,
     getPlanDetails
-  } = useSubscriptionService(profileId, undefined, userEmail);
+  } = useSubscriptionService(profileId, true, userEmail);
 
   const handleUpgradeToPlan = (plan: PlanType) => {
     if (profileId) {

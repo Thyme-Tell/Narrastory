@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -51,15 +50,13 @@ const Profile = () => {
     enabled: isValidUUID,
   });
   
-  // Get subscription status - use profile email for consistent lookup
   const { 
     status: subscriptionStatus, 
     isStatusLoading, 
     statusError, 
     fetchSubscriptionStatus 
-  } = useSubscriptionService(id, profile?.email, true); // Always force refresh
+  } = useSubscriptionService(id, true, profile?.email); // Corrected parameter order
 
-  // Fetch subscription data when profile is loaded
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
     if (profile?.email) {
@@ -70,7 +67,6 @@ const Profile = () => {
     }
   }, [id, profile?.email, fetchSubscriptionStatus]);
 
-  // Debug subscription status
   useEffect(() => {
     console.log("Current subscription status:", subscriptionStatus);
     if (statusError) {
@@ -129,16 +125,12 @@ const Profile = () => {
     setIsBookExpanded(expanded);
   };
 
-  // Enhanced helper function to correctly determine if we should show upgrade prompts
-  // Only show for free accounts - triple-check all relevant flags
   const shouldShowUpgradePrompts = () => {
-    // If subscription data is loading, don't show prompts yet
     if (isStatusLoading) {
       console.log("Not showing prompts because subscription data is loading");
       return false;
     }
     
-    // Check each subscription flag individually and log it
     const isFree = subscriptionStatus.planType === 'free';
     const hasNoPremium = !subscriptionStatus.isPremium;
     const hasNoLifetime = !subscriptionStatus.isLifetime;
@@ -149,7 +141,6 @@ const Profile = () => {
       `hasNoLifetime=${hasNoLifetime}, hasNoActiveSubscription=${hasNoActiveSubscription}`
     );
     
-    // ONLY show for completely free accounts
     const shouldShow = isFree && hasNoPremium && hasNoLifetime && hasNoActiveSubscription;
     console.log(`Upgrade prompts should show: ${shouldShow}`);
     
@@ -177,7 +168,6 @@ const Profile = () => {
     );
   }
 
-  // Check if prompts should be shown
   const showPrompts = shouldShowUpgradePrompts();
 
   return (
@@ -231,7 +221,6 @@ const Profile = () => {
             />
           </div>
           
-          {/* Only show upgrade banner for free accounts */}
           {showPrompts && (
             <div className="my-4">
               <LifetimeOfferBanner profileId={id} />
@@ -254,7 +243,6 @@ const Profile = () => {
             sortOrder={sortOrder}
           />
           
-          {/* Only show upgrade card for free accounts with 5+ stories */}
           {showPrompts && stories && stories.length > 5 && (
             <div className="mt-6">
               <UpgradePrompt profileId={id} variant="card" />
@@ -263,7 +251,6 @@ const Profile = () => {
         </div>
       </div>
       
-      {/* Only show floating prompt for free accounts */}
       {showPrompts && (
         <UpgradePrompt profileId={id} variant="floating" />
       )}
