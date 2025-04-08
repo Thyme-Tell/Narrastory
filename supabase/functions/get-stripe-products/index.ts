@@ -72,7 +72,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           annualPlus: {
-            productId: "prod_S52DtoQFIZmzDL", // Use the actual product ID you provided
+            productId: "prod_S52DtoQFIZmzDL", // Annual plan
             productName: "Narra+ Annual Subscription",
             priceId: "price_dev_annual", // This is a dummy ID for development
             amount: 249,
@@ -81,7 +81,7 @@ serve(async (req) => {
             interval: "year",
           },
           lifetime: {
-            productId: "prod_S52DRcMxeWMRQ6", // Use the actual product ID you provided
+            productId: "prod_S52DRcMxeWMRQ6", // Lifetime plan
             productName: "Narra Lifetime Access",
             priceId: "price_dev_lifetime", // This is a dummy ID for development
             amount: 399,
@@ -131,8 +131,8 @@ serve(async (req) => {
       console.log(`Processing product: ${product.name} with ID ${product.id}`);
       console.log(`Product metadata:`, product.metadata);
       
-      // Specific handling for the known product IDs
-      if (product.id === 'prod_S52DRcMxeWMRQ6' || 
+      // Specific handling for the known product IDs - corrected mapping
+      if (product.id === 'prod_S52DtoQFIZmzDL' || 
           (product.metadata.productType === 'subscription' && 
           (product.metadata.planType === 'annual' || product.name.toLowerCase().includes('annual')))) {
         productMap.annualPlus = {
@@ -144,7 +144,7 @@ serve(async (req) => {
           isRecurring: !!price.recurring,
           interval: price.recurring?.interval || null,
         };
-      } else if (product.id === 'prod_S52DtoQFIZmzDL' || 
+      } else if (product.id === 'prod_S52DRcMxeWMRQ6' || 
                 (product.metadata.productType === 'one_time' && 
                 (product.metadata.planType === 'lifetime' || product.name.toLowerCase().includes('lifetime')))) {
         productMap.lifetime = {
