@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -148,7 +149,8 @@ const Profile = () => {
           className="h-11"
         />
         <div className="flex items-center gap-3">
-          {!subscriptionStatus.isPremium && (
+          {/* Commented out upgrade button */}
+          {/* {!subscriptionStatus.isPremium && (
             <Button 
               onClick={handleUpgrade}
               size="sm"
@@ -157,7 +159,7 @@ const Profile = () => {
               <Sparkles className="mr-1.5 h-3.5 w-3.5" />
               Upgrade
             </Button>
-          )}
+          )} */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
