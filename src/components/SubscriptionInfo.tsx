@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useQuery } from '@tanstack/react-query';
@@ -48,6 +49,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
   }, [profileId, initialEmail]);
   
   // Now use both profileId and email for subscription lookup
+  // Make sure we use the correct parameter order: profileId, forceRefresh (boolean), email
   const { 
     status, 
     isStatusLoading,

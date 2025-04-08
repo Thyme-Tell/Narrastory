@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -55,7 +56,7 @@ const Profile = () => {
     isStatusLoading, 
     statusError, 
     fetchSubscriptionStatus 
-  } = useSubscriptionService(id, true, profile?.email); // Corrected parameter order
+  } = useSubscriptionService(id, true, profile?.email);
 
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
@@ -131,17 +132,19 @@ const Profile = () => {
       return false;
     }
     
+    // Don't show upgrade prompts if the user has any kind of premium access
+    const isPremium = subscriptionStatus.isPremium;
+    const isLifetime = subscriptionStatus.isLifetime;
+    const hasActiveSubscription = subscriptionStatus.hasActiveSubscription;
     const isFree = subscriptionStatus.planType === 'free';
-    const hasNoPremium = !subscriptionStatus.isPremium;
-    const hasNoLifetime = !subscriptionStatus.isLifetime;
-    const hasNoActiveSubscription = !subscriptionStatus.hasActiveSubscription;
     
     console.log(
-      `Subscription flags: isFree=${isFree}, hasNoPremium=${hasNoPremium}, ` +
-      `hasNoLifetime=${hasNoLifetime}, hasNoActiveSubscription=${hasNoActiveSubscription}`
+      `Subscription flags: isFree=${isFree}, isPremium=${isPremium}, ` +
+      `isLifetime=${isLifetime}, hasActiveSubscription=${hasActiveSubscription}`
     );
     
-    const shouldShow = isFree && hasNoPremium && hasNoLifetime && hasNoActiveSubscription;
+    // Only show upgrade prompts for free users with no premium features
+    const shouldShow = isFree && !isPremium && !isLifetime && !hasActiveSubscription;
     console.log(`Upgrade prompts should show: ${shouldShow}`);
     
     return shouldShow;
