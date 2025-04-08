@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { 
@@ -55,7 +54,7 @@ serve(async (req) => {
         email = email || body.email;
         // Always set forceRefresh to true regardless of input
         forceRefresh = true;
-        console.log(`Profile ID from body: ${profileId}, Email from body: ${email}, Force refresh: ${forceRefresh}`);
+        console.log(`Profile ID from body: ${profileId}, Email from body: ${email}, Force refresh overridden to: ${forceRefresh}`);
       } catch (e) {
         console.log("No request body or invalid JSON");
         // Still force refresh to true
@@ -64,11 +63,19 @@ serve(async (req) => {
     } else {
       // Always force refresh regardless of query param
       forceRefresh = true;
+      console.log("Force refresh overridden to: true");
     }
 
     // We need either a profileId or email to continue
     if (!profileId && !email) {
       return errorResponse('Either Profile ID or Email is required', 400);
+    }
+
+    // Log what identifier we'll use for the lookup
+    if (email) {
+      console.log(`Will use email for subscription lookup: ${email}`);
+    } else {
+      console.log(`Will use profile ID for subscription lookup: ${profileId}`);
     }
 
     // If we have email but no profileId, try to get profileId from the email
@@ -103,7 +110,9 @@ serve(async (req) => {
       } else if (subData) {
         localSubscriptionData = subData;
         stripeCustomerId = subData.stripe_customer_id;
-        console.log(`Found local subscription data for profile ${profileId}`);
+        console.log(`Found local subscription data for profile ${profileId}: ${JSON.stringify(subData)}`);
+      } else {
+        console.log(`No subscription data found for profile ${profileId}`);
       }
     }
 
@@ -145,6 +154,7 @@ serve(async (req) => {
         prioritySupport: true
       };
       
+      console.log('Returning lifetime subscription status');
       return successResponse({
         hasSubscription: true,
         isPremium: true,
@@ -163,10 +173,17 @@ serve(async (req) => {
     if (!stripeCustomerId && email) {
       try {
         console.log(`Looking up Stripe customer for email ${email}`);
-        const customers = await stripe.customers.list({ email, limit: 1 });
+        const customers = await stripe.customers.list({ email, limit: 10 });
         if (customers.data.length > 0) {
+          // Log all found customers for debugging
+          customers.data.forEach(cust => {
+            console.log(`Found Stripe customer: ${cust.id}, ${cust.email}, metadata: ${JSON.stringify(cust.metadata)}`);
+          });
+          
           stripeCustomerId = customers.data[0].id;
-          console.log(`Found Stripe customer ${stripeCustomerId} for email ${email}`);
+          console.log(`Using Stripe customer ${stripeCustomerId} for email ${email}`);
+        } else {
+          console.log(`No Stripe customers found for email ${email}`);
         }
       } catch (stripeError) {
         console.error(`Error finding Stripe customer: ${stripeError.message}`);
@@ -178,78 +195,99 @@ serve(async (req) => {
     if (stripeCustomerId) {
       try {
         console.log(`Looking up subscriptions for Stripe customer ${stripeCustomerId}`);
-        const subscriptions = await stripe.subscriptions.list({
+        
+        // Include all possible subscription statuses to catch anything we might be missing
+        const allSubscriptions = await stripe.subscriptions.list({
           customer: stripeCustomerId,
-          status: 'active',
-          limit: 1,
+          limit: 20,
           expand: ['data.items.data.price', 'data.items.data.price.product']
         });
         
-        if (subscriptions.data.length > 0) {
-          stripeSubscription = subscriptions.data[0];
+        // Log all subscriptions found for this customer
+        console.log(`Found ${allSubscriptions.data.length} subscriptions for customer ${stripeCustomerId}`);
+        allSubscriptions.data.forEach(sub => {
+          console.log(`Subscription ${sub.id}, status: ${sub.status}, metadata: ${JSON.stringify(sub.metadata)}`);
+        });
+        
+        // First try to find an active subscription
+        const activeSubscriptions = allSubscriptions.data.filter(sub => sub.status === 'active');
+        if (activeSubscriptions.length > 0) {
+          stripeSubscription = activeSubscriptions[0];
           console.log(`Found active Stripe subscription ${stripeSubscription.id}`);
+        } 
+        // If no active subscriptions, check for trialing
+        else if (allSubscriptions.data.some(sub => sub.status === 'trialing')) {
+          stripeSubscription = allSubscriptions.data.find(sub => sub.status === 'trialing');
+          console.log(`Found trialing Stripe subscription ${stripeSubscription?.id}`);
+        }
+        // Otherwise, take the most recent subscription for reference
+        else if (allSubscriptions.data.length > 0) {
+          // Sort by created date (newest first)
+          const sortedSubs = [...allSubscriptions.data].sort((a, b) => b.created - a.created);
+          stripeSubscription = sortedSubs[0];
+          console.log(`No active subscriptions, using most recent subscription ${stripeSubscription.id} with status ${stripeSubscription.status}`);
+        }
+        
+        // If we have a profileId but the subscription isn't in our database or needs updating, add/update it
+        if (profileId && stripeSubscription) {
+          const price = stripeSubscription.items.data[0]?.price;
+          let planType = 'monthly'; // Default to monthly for active subscriptions
           
-          // If we have a profileId but the subscription isn't in our database or needs updating, add/update it
-          if (profileId) {
-            const price = stripeSubscription.items.data[0]?.price;
-            let planType = 'monthly'; // Default to monthly for active subscriptions
+          if (price) {
+            // Try to determine plan type from the price
+            if (price.recurring) {
+              planType = price.recurring.interval === 'month' ? 'monthly' : 'annual';
+            }
             
-            if (price) {
-              // Try to determine plan type from the price
-              if (price.recurring) {
-                planType = price.recurring.interval === 'month' ? 'monthly' : 'annual';
+            // Also check the product metadata if available
+            if (price.product && typeof price.product !== 'string') {
+              if (price.product.metadata?.planType) {
+                planType = price.product.metadata.planType;
               }
+            } else if (price.metadata?.planType) {
+              planType = price.metadata.planType;
+            }
+          }
+          
+          console.log(`Storing/updating Stripe subscription data for profile ${profileId}, plan type: ${planType}`);
+          
+          try {
+            // Use upsert to either insert or update the subscription record
+            const { error: upsertError } = await supabase
+              .from('subscriptions')
+              .upsert({
+                user_id: profileId,
+                stripe_customer_id: stripeCustomerId,
+                stripe_subscription_id: stripeSubscription.id,
+                plan_type: planType,
+                status: stripeSubscription.status,
+                current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
+                current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+                book_credits: planType === 'annual' || planType === 'plus' ? 1 : 0,
+                is_lifetime: false,
+                cancel_at_period_end: stripeSubscription.cancel_at_period_end,
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'user_id'
+              });
               
-              // Also check the product metadata if available
-              if (price.product && typeof price.product !== 'string') {
-                if (price.product.metadata?.planType) {
-                  planType = price.product.metadata.planType;
-                }
-              } else if (price.metadata?.planType) {
-                planType = price.metadata.planType;
-              }
-            }
-            
-            console.log(`Storing/updating Stripe subscription data for profile ${profileId}, plan type: ${planType}`);
-            
-            try {
-              // Use upsert to either insert or update the subscription record
-              const { error: upsertError } = await supabase
+            if (upsertError) {
+              console.error(`Error saving subscription data: ${upsertError.message}`);
+            } else {
+              // Update our local reference to include the newly stored/updated data
+              const { data: freshData } = await supabase
                 .from('subscriptions')
-                .upsert({
-                  user_id: profileId,
-                  stripe_customer_id: stripeCustomerId,
-                  stripe_subscription_id: stripeSubscription.id,
-                  plan_type: planType,
-                  status: stripeSubscription.status,
-                  current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
-                  current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
-                  book_credits: planType === 'annual' || planType === 'plus' ? 1 : 0,
-                  is_lifetime: false,
-                  cancel_at_period_end: stripeSubscription.cancel_at_period_end,
-                  updated_at: new Date().toISOString()
-                }, {
-                  onConflict: 'user_id'
-                });
+                .select('*')
+                .eq('user_id', profileId)
+                .single();
                 
-              if (upsertError) {
-                console.error(`Error saving subscription data: ${upsertError.message}`);
-              } else {
-                // Update our local reference to include the newly stored/updated data
-                const { data: freshData } = await supabase
-                  .from('subscriptions')
-                  .select('*')
-                  .eq('user_id', profileId)
-                  .single();
-                  
-                if (freshData) {
-                  localSubscriptionData = freshData;
-                  console.log('Updated local subscription data reference');
-                }
+              if (freshData) {
+                localSubscriptionData = freshData;
+                console.log('Updated local subscription data reference');
               }
-            } catch (dbError) {
-              console.error(`Database operation error: ${dbError.message}`);
             }
+          } catch (dbError) {
+            console.error(`Database operation error: ${dbError.message}`);
           }
         }
       } catch (stripeError) {
@@ -269,7 +307,8 @@ serve(async (req) => {
     let lastPaymentStatus = null;
     
     // If there's an active Stripe subscription, use that status
-    if (stripeSubscription) {
+    if (stripeSubscription && (stripeSubscription.status === 'active' || stripeSubscription.status === 'trialing')) {
+      console.log(`Using active Stripe subscription for status determination`);
       hasActiveSubscription = true;
       isPremium = true;
       planType = localSubscriptionData?.plan_type || 'monthly'; // Default to monthly for active subscriptions
@@ -299,7 +338,17 @@ serve(async (req) => {
     }
     // Otherwise, if we have local data, use that
     else if (localSubscriptionData) {
-      if (localSubscriptionData.status === 'active' || localSubscriptionData.status === 'trialing') {
+      console.log(`Using local subscription data: status=${localSubscriptionData.status}, planType=${localSubscriptionData.plan_type}, isLifetime=${localSubscriptionData.is_lifetime}`);
+      
+      // Double-check lifetime status
+      if (localSubscriptionData.is_lifetime) {
+        hasActiveSubscription = true;
+        isPremium = true;
+        isLifetime = true;
+        planType = 'lifetime';
+      }
+      // Check active status
+      else if (localSubscriptionData.status === 'active' || localSubscriptionData.status === 'trialing') {
         hasActiveSubscription = true;
         isPremium = true;
         
@@ -401,7 +450,7 @@ serve(async (req) => {
         };
     }
 
-    console.log(`Final subscription status: hasActive=${hasActiveSubscription}, isPremium=${isPremium}, plan=${planType}`);
+    console.log(`Final subscription status: hasActive=${hasActiveSubscription}, isPremium=${isPremium}, isLifetime=${isLifetime}, plan=${planType}`);
 
     // Return the final subscription status
     return successResponse({

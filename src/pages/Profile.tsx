@@ -1,12 +1,8 @@
 
 import React, { useEffect, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useNavigate } from "react-router-dom";
-import ProfileHeader from "@/components/ProfileHeader";
-import StoriesList from "@/components/StoriesList";
-import { BookProgress } from "@/components/BookProgress";
 import { Menu } from "lucide-react";
 import {
   DropdownMenu,
@@ -21,6 +17,9 @@ import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
 import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 import { toast } from "sonner";
+import ProfileHeader from "@/components/ProfileHeader";
+import StoriesList from "@/components/StoriesList";
+import { BookProgress } from "@/components/BookProgress";
 
 const Profile = () => {
   const { id } = useParams();
@@ -52,13 +51,15 @@ const Profile = () => {
     enabled: isValidUUID,
   });
   
+  // Get subscription status - use profile email for consistent lookup
   const { 
     status: subscriptionStatus, 
     isStatusLoading, 
     statusError, 
     fetchSubscriptionStatus 
-  } = useSubscriptionService(id, true, profile?.email); // Set forceRefresh to true
+  } = useSubscriptionService(id, profile?.email, true); // Always force refresh
 
+  // Fetch subscription data when profile is loaded
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
     if (profile?.email) {
@@ -69,6 +70,7 @@ const Profile = () => {
     }
   }, [id, profile?.email, fetchSubscriptionStatus]);
 
+  // Debug subscription status
   useEffect(() => {
     console.log("Current subscription status:", subscriptionStatus);
     if (statusError) {
@@ -127,14 +129,31 @@ const Profile = () => {
     setIsBookExpanded(expanded);
   };
 
-  // Helper function to determine if we should show upgrade prompts
+  // Enhanced helper function to correctly determine if we should show upgrade prompts
+  // Only show for free accounts - triple-check all relevant flags
   const shouldShowUpgradePrompts = () => {
-    if (isStatusLoading) return false;
+    // If subscription data is loading, don't show prompts yet
+    if (isStatusLoading) {
+      console.log("Not showing prompts because subscription data is loading");
+      return false;
+    }
     
-    // Only show for free accounts - be extra cautious
-    return subscriptionStatus.planType === 'free' && 
-           !subscriptionStatus.isPremium && 
-           !subscriptionStatus.isLifetime;
+    // Check each subscription flag individually and log it
+    const isFree = subscriptionStatus.planType === 'free';
+    const hasNoPremium = !subscriptionStatus.isPremium;
+    const hasNoLifetime = !subscriptionStatus.isLifetime;
+    const hasNoActiveSubscription = !subscriptionStatus.hasActiveSubscription;
+    
+    console.log(
+      `Subscription flags: isFree=${isFree}, hasNoPremium=${hasNoPremium}, ` +
+      `hasNoLifetime=${hasNoLifetime}, hasNoActiveSubscription=${hasNoActiveSubscription}`
+    );
+    
+    // ONLY show for completely free accounts
+    const shouldShow = isFree && hasNoPremium && hasNoLifetime && hasNoActiveSubscription;
+    console.log(`Upgrade prompts should show: ${shouldShow}`);
+    
+    return shouldShow;
   };
 
   if (isLoadingProfile) {
@@ -157,6 +176,9 @@ const Profile = () => {
       </div>
     );
   }
+
+  // Check if prompts should be shown
+  const showPrompts = shouldShowUpgradePrompts();
 
   return (
     <div 
@@ -209,7 +231,8 @@ const Profile = () => {
             />
           </div>
           
-          {shouldShowUpgradePrompts() && (
+          {/* Only show upgrade banner for free accounts */}
+          {showPrompts && (
             <div className="my-4">
               <LifetimeOfferBanner profileId={id} />
             </div>
@@ -231,7 +254,8 @@ const Profile = () => {
             sortOrder={sortOrder}
           />
           
-          {shouldShowUpgradePrompts() && stories && stories.length > 5 && (
+          {/* Only show upgrade card for free accounts with 5+ stories */}
+          {showPrompts && stories && stories.length > 5 && (
             <div className="mt-6">
               <UpgradePrompt profileId={id} variant="card" />
             </div>
@@ -239,7 +263,8 @@ const Profile = () => {
         </div>
       </div>
       
-      {shouldShowUpgradePrompts() && (
+      {/* Only show floating prompt for free accounts */}
+      {showPrompts && (
         <UpgradePrompt profileId={id} variant="floating" />
       )}
       

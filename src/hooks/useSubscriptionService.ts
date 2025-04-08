@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionService } from '@/services/SubscriptionService';
@@ -23,21 +22,21 @@ import {
  */
 export const useSubscriptionService = (
   profileId?: string, 
-  forceRefresh = true, // Default to true to always force refresh
-  email?: string
+  email?: string,
+  forceRefresh = true // Default to true to ALWAYS force refresh
 ) => {
   const queryClient = useQueryClient();
   
-  // Query subscription status
+  // Query subscription status - ALWAYS force refresh to check with Stripe
   const { 
     data: subscriptionStatus,
     isLoading: isStatusLoading,
     error: statusError,
     refetch: refetchStatus
   } = useQuery({
-    queryKey: ['subscription-status', profileId, email, forceRefresh],
+    queryKey: ['subscription-status', profileId, email, true], // Always set forceRefresh param to true
     queryFn: async () => {
-      console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: ${forceRefresh}`);
+      console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: true`);
       try {
         // Always force a refresh regardless of the parameter to check with Stripe
         const result = await subscriptionService.getSubscriptionStatus(profileId, true, email);

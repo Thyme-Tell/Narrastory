@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_PRODUCTS } from "@/hooks/useStripeCheckout";
 import { toast } from "@/hooks/use-toast";
@@ -52,6 +53,7 @@ class SubscriptionService {
   ): Promise<SubscriptionStatusResult> {
     // Exit early if no identifiers provided
     if (!profileId && !email) {
+      console.log('No profile ID or email provided - returning default subscription status');
       return this.getDefaultSubscriptionStatus();
     }
 
@@ -80,6 +82,9 @@ class SubscriptionService {
         });
         return this.getDefaultSubscriptionStatus();
       }
+
+      // Log raw response for debugging
+      console.log('Raw subscription response from edge function:', data);
 
       // Extract subscription data
       const subscriptionData = data?.subscriptionData as SubscriptionData;
@@ -489,6 +494,7 @@ class SubscriptionService {
    * @returns Default subscription status
    */
   private getDefaultSubscriptionStatus(): SubscriptionStatusResult {
+    console.log('Returning default subscription status (free plan)');
     return {
       isPremium: false,
       isLifetime: false,
