@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionService } from '@/services/SubscriptionService';
 import { 
@@ -12,6 +11,7 @@ import {
   CreditResult,
   PlanDetails
 } from '@/types/subscription';
+import Cookies from 'js-cookie';
 
 /**
  * Hook to interact with the subscription service
@@ -27,6 +27,26 @@ export const useSubscriptionService = (
   email?: string
 ) => {
   const queryClient = useQueryClient();
+  const [effectiveProfileId, setEffectiveProfileId] = useState<string | undefined>(profileId);
+  const [effectiveEmail, setEffectiveEmail] = useState<string | undefined>(email);
+  
+  // Try to get profileId/email from cookies if not provided
+  useEffect(() => {
+    if (!profileId && !email) {
+      const cookieProfileId = Cookies.get('profile_id');
+      const cookieEmail = Cookies.get('user_email');
+      
+      console.log("Subscription service using cookies:", { cookieProfileId, cookieEmail });
+      
+      if (cookieProfileId) {
+        setEffectiveProfileId(cookieProfileId);
+      }
+      
+      if (cookieEmail) {
+        setEffectiveEmail(cookieEmail);
+      }
+    }
+  }, [profileId, email]);
   
   // Query subscription status
   const { 
@@ -35,12 +55,12 @@ export const useSubscriptionService = (
     error: statusError,
     refetch: refetchStatus
   } = useQuery({
-    queryKey: ['subscription-status', profileId, email, forceRefresh],
+    queryKey: ['subscription-status', effectiveProfileId, effectiveEmail, forceRefresh],
     queryFn: async () => {
-      console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: ${forceRefresh}`);
+      console.log(`Fetching subscription status for profile: ${effectiveProfileId}, email: ${effectiveEmail}, force refresh: ${forceRefresh}`);
       try {
         // Use the provided forceRefresh value or default to true
-        const result = await subscriptionService.getSubscriptionStatus(profileId, forceRefresh, email);
+        const result = await subscriptionService.getSubscriptionStatus(effectiveProfileId, forceRefresh, effectiveEmail);
         console.log('Subscription status fetch result:', result);
         return result;
       } catch (error) {
@@ -48,7 +68,7 @@ export const useSubscriptionService = (
         throw error;
       }
     },
-    enabled: !!profileId || !!email,
+    enabled: !!effectiveProfileId || !!effectiveEmail,
     staleTime: 0, // Set stale time to 0 to always refetch
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gets focus
@@ -63,9 +83,9 @@ export const useSubscriptionService = (
     },
     onSuccess: () => {
       // Invalidate the subscription status cache
-      console.log(`Invalidating cache for profile ${profileId} after plan change`);
-      subscriptionService.invalidateCache(profileId, email);
-      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId, email] });
+      console.log(`Invalidating cache for profile ${effectiveProfileId} after plan change`);
+      subscriptionService.invalidateCache(effectiveProfileId, effectiveEmail);
+      queryClient.invalidateQueries({ queryKey: ['subscription-status', effectiveProfileId, effectiveEmail] });
     },
     onError: (error) => {
       console.error('Error changing plan:', error);
@@ -80,9 +100,9 @@ export const useSubscriptionService = (
     },
     onSuccess: () => {
       // Invalidate the subscription status cache
-      console.log(`Invalidating cache for profile ${profileId} after using credits`);
-      subscriptionService.invalidateCache(profileId, email);
-      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId, email] });
+      console.log(`Invalidating cache for profile ${effectiveProfileId} after using credits`);
+      subscriptionService.invalidateCache(effectiveProfileId, effectiveEmail);
+      queryClient.invalidateQueries({ queryKey: ['subscription-status', effectiveProfileId, effectiveEmail] });
     },
     onError: (error) => {
       console.error('Error using book credits:', error);
@@ -102,9 +122,9 @@ export const useSubscriptionService = (
 
   // Query to check if a user has access to a specific feature
   const checkFeatureAccess = async (featureName: string): Promise<boolean> => {
-    if (!profileId && !email) return false;
-    console.log(`Checking feature access for ${featureName} for profile ${profileId} or email ${email}`);
-    return subscriptionService.hasFeatureAccess(profileId || '', featureName as any, email);
+    if (!effectiveProfileId && !effectiveEmail) return false;
+    console.log(`Checking feature access for ${featureName} for profile ${effectiveProfileId} or email ${effectiveEmail}`);
+    return subscriptionService.hasFeatureAccess(effectiveProfileId || '', featureName as any, effectiveEmail);
   };
 
   // Helper function to get formatted status data with defaults
@@ -113,7 +133,8 @@ export const useSubscriptionService = (
       console.error('Error in subscription status:', statusError);
     }
     
-    return subscriptionStatus || {
+    // Make sure to log the status we're returning
+    const status = subscriptionStatus || {
       isPremium: false,
       isLifetime: false,
       hasActiveSubscription: false,
@@ -132,17 +153,18 @@ export const useSubscriptionService = (
         prioritySupport: false
       }
     };
+    
+    console.log("Current subscription status:", status);
+    return status;
   };
 
   // Fetch subscription status immediately if needed
   const fetchSubscriptionStatus = async () => {
-    if (profileId || email) {
-      console.log(`Manually fetching subscription status for profile: ${profileId}, email: ${email}`);
-      try {
-        await refetchStatus();
-      } catch (error) {
-        console.error('Error manually fetching subscription status:', error);
-      }
+    console.log(`Manually fetching subscription status with: profileId=${effectiveProfileId}, email=${effectiveEmail}`);
+    try {
+      await refetchStatus();
+    } catch (error) {
+      console.error('Error manually fetching subscription status:', error);
     }
   };
 
@@ -178,9 +200,9 @@ export const useSubscriptionService = (
     
     // Cache control
     invalidateCache: () => {
-      console.log(`Manually invalidating cache for profile ${profileId} or email ${email}`);
-      subscriptionService.invalidateCache(profileId, email);
-      queryClient.invalidateQueries({ queryKey: ['subscription-status', profileId, email] });
+      console.log(`Manually invalidating cache for profile ${effectiveProfileId} or email ${effectiveEmail}`);
+      subscriptionService.invalidateCache(effectiveProfileId, effectiveEmail);
+      queryClient.invalidateQueries({ queryKey: ['subscription-status', effectiveProfileId, effectiveEmail] });
     }
   };
 };

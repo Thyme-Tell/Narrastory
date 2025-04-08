@@ -1,4 +1,3 @@
-
 // Import necessary libraries
 import Stripe from "https://esm.sh/stripe@14.21.0?dts";
 import { getUserProfileByEmail } from "../_shared/stripe-utils.ts";
@@ -30,11 +29,15 @@ export async function handleSubscriptionCheckout(
   const profile = await getUserProfileByEmail(email, supabase);
   const userId = profile.id;
   
+  console.log(`Found user profile for checkout: ${userId} with email ${email}`);
+  
   // Get subscription details
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  console.log(`Retrieved Stripe subscription: ${subscriptionId}, status: ${subscription.status}`);
   
   // Get the plan type from the metadata or try to determine from the price
   const price = await stripe.prices.retrieve(subscription.items.data[0].price.id);
+  console.log(`Subscription price: ${price.id}, product: ${price.product}`);
   
   // Try to determine plan type from metadata or interval
   let planType = price.metadata?.planType;
@@ -43,16 +46,18 @@ export async function handleSubscriptionCheckout(
     // If no metadata, try to determine from the interval
     if (price.recurring) {
       planType = price.recurring.interval === 'month' ? 'monthly' : 'annual';
+      console.log(`Determined plan type from interval: ${planType}`);
     } else {
       // Default to plus if we can't determine
       planType = 'plus';
+      console.log(`Using default plan type: ${planType}`);
     }
   }
   
   console.log(`User ${userId} subscribed to plan: ${planType}`);
   
   // Update or create subscription record
-  const { error: upsertError } = await supabase
+  const { data, error: upsertError } = await supabase
     .from('subscriptions')
     .upsert(
       {
@@ -75,7 +80,7 @@ export async function handleSubscriptionCheckout(
     throw new Error(`Failed to update subscription: ${upsertError.message}`);
   }
   
-  console.log(`Successfully processed subscription checkout for user ${userId}`);
+  console.log(`Successfully processed subscription checkout for user ${userId}, subscription data:`, data);
 }
 
 // Handle one-time payment
@@ -210,7 +215,7 @@ export async function updateSubscriptionInDatabase(
   console.log(`Updating subscription for user ${userId}, plan: ${planType}, status: ${subscription.status}`);
   
   // Update subscription record
-  const { error: updateError } = await supabase
+  const { data, error: updateError } = await supabase
     .from('subscriptions')
     .update({
       stripe_customer_id: customerId,
@@ -229,7 +234,7 @@ export async function updateSubscriptionInDatabase(
     throw new Error(`Failed to update subscription: ${updateError.message}`);
   }
   
-  console.log(`Successfully updated subscription for user ${userId}`);
+  console.log(`Successfully updated subscription for user ${userId}, subscription data:`, data);
 }
 
 // Handle subscription cancellation

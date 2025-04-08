@@ -120,20 +120,25 @@ serve(async (req) => {
     
     // If forceRefresh or we need to verify with Stripe
     if (forceRefresh && subscriptionData && subscriptionData.stripe_subscription_id) {
-      console.log(`Force refreshing subscription with Stripe`);
+      console.log(`Force refreshing subscription with Stripe for sub ID: ${subscriptionData.stripe_subscription_id}`);
       
       // Initialize Stripe client
-      const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || "", {
+      const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+      console.log(`Using Stripe key: ${stripeSecretKey ? 'Available' : 'Not available'}`);
+      
+      const stripe = new Stripe(stripeSecretKey || "", {
         apiVersion: '2023-10-16',
       });
       
       try {
         // Get the subscription from Stripe
+        console.log(`Fetching subscription from Stripe: ${subscriptionData.stripe_subscription_id}`);
         const stripeSubscription = await stripe.subscriptions.retrieve(
           subscriptionData.stripe_subscription_id
         );
         
         console.log(`Stripe subscription status: ${stripeSubscription.status}`);
+        console.log(`Stripe subscription details:`, JSON.stringify(stripeSubscription, null, 2));
         
         // Update our database if the status has changed
         if (stripeSubscription.status !== subscriptionData.status) {
@@ -152,6 +157,7 @@ serve(async (req) => {
           if (updateError) {
             console.error(`Error updating subscription: ${updateError.message}`);
           } else {
+            console.log(`Successfully updated subscription in database`);
             // Update the local subscription data with the new status
             subscriptionData.status = stripeSubscription.status;
             subscriptionData.current_period_start = new Date(stripeSubscription.current_period_start * 1000).toISOString();
@@ -172,6 +178,11 @@ serve(async (req) => {
     
     // A user has premium if they have an active subscription or lifetime access
     const isPremium = isLifetime || (hasSubscription && isActiveStatus);
+    
+    // Determine plan type - use the one from the database or default to free
+    const planType = isPremium ? (subscriptionData?.plan_type || 'free') : 'free';
+    
+    console.log(`Subscription status summary: isPremium=${isPremium}, planType=${planType}, isActive=${isActiveStatus}`);
     
     // Determine available features based on subscription plan
     let features = {
@@ -199,17 +210,22 @@ serve(async (req) => {
     }
     
     // Return the subscription status
+    const result = {
+      hasSubscription,
+      isPremium,
+      isLifetime,
+      subscriptionData,
+      features,
+      planType,
+      cancelAtPeriodEnd: subscriptionData?.cancel_at_period_end || false,
+      lastPaymentStatus: null, // Add this if you have payment history tracking
+      purchaseDate: isLifetime ? subscriptionData?.lifetime_purchase_date : null
+    };
+    
+    console.log(`Final subscription response:`, JSON.stringify(result));
+    
     return new Response(
-      JSON.stringify({
-        hasSubscription,
-        isPremium,
-        isLifetime,
-        subscriptionData,
-        features,
-        cancelAtPeriodEnd: subscriptionData?.cancel_at_period_end || false,
-        lastPaymentStatus: null, // Add this if you have payment history tracking
-        purchaseDate: isLifetime ? subscriptionData?.lifetime_purchase_date : null
-      }),
+      JSON.stringify(result),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

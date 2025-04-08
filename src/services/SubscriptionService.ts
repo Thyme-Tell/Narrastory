@@ -64,7 +64,7 @@ class SubscriptionService {
     const cacheKey = email ? `email:${email}` : `profile:${profileId}`;
 
     try {
-      console.log(`Fetching fresh subscription status for ${cacheKey}`);
+      console.log(`Fetching fresh subscription status for ${cacheKey}, forceRefresh=${forceRefresh}`);
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         body: { 
           profileId, 
@@ -86,11 +86,14 @@ class SubscriptionService {
       // Log raw response for debugging
       console.log('Raw subscription response from edge function:', data);
 
-      // Extract subscription data
-      const subscriptionData = data?.subscriptionData as SubscriptionData;
+      // Extract subscription data and status
+      const subscriptionData = data?.subscriptionData;
       const isPremium = data?.isPremium || false;
       const isLifetime = data?.isLifetime || false;
       const hasActiveSubscription = data?.hasSubscription || false;
+      const planType = data?.planType || 'free';
+      
+      console.log(`Subscription status processed: isPremium=${isPremium}, planType=${planType}`);
       
       // Expiration date (if applicable)
       // For lifetime subscriptions, there is no expiration
@@ -102,7 +105,6 @@ class SubscriptionService {
       
       // Status information
       const status = subscriptionData?.status as SubscriptionStatus | null;
-      const planType = subscriptionData?.plan_type || 'free';
       
       // Additional data from the enhanced edge function
       const features = data?.features || PLAN_FEATURES[planType as PlanType] || PLAN_FEATURES.free;
@@ -129,7 +131,7 @@ class SubscriptionService {
       };
       
       // We no longer cache the result - always use fresh data
-      console.log(`Using fresh subscription data, not caching`);
+      console.log(`Subscription status fetch result:`, result);
 
       return result;
     } catch (err) {

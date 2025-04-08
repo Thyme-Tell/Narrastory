@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { cn } from '@/lib/utils';
+import Cookies from 'js-cookie';
 
 interface SubscriptionStatusBadgeProps {
   profileId?: string;
@@ -19,11 +20,33 @@ const SubscriptionStatusBadge: React.FC<SubscriptionStatusBadgeProps> = ({
   className
 }) => {
   const navigate = useNavigate();
-  const { status, isStatusLoading } = useSubscriptionService(profileId);
+  const cookieProfileId = Cookies.get('profile_id');
+  const cookieEmail = Cookies.get('user_email');
+  
+  // Use cookie values if profileId not provided
+  const effectiveProfileId = profileId || cookieProfileId;
+  
+  // Only pass email if we don't have a profileId
+  const effectiveEmail = !effectiveProfileId ? cookieEmail : undefined;
+  
+  console.log(`SubscriptionStatusBadge using profileId=${effectiveProfileId}, email=${effectiveEmail}`);
+  
+  const { status, isStatusLoading, refetchStatus } = useSubscriptionService(
+    effectiveProfileId, 
+    true, 
+    effectiveEmail
+  );
+  
+  // Force refresh on mount
+  useEffect(() => {
+    refetchStatus();
+  }, [refetchStatus]);
   
   const handleUpgradeClick = () => {
     navigate('/subscribe');
   };
+  
+  console.log("Subscription status in badge:", status);
   
   if (isStatusLoading) {
     return (
