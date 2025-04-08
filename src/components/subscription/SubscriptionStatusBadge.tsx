@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useSubscriptionService } from '@/hooks/useSubscriptionService';
+import { useSubscriptionService } from '@/hooks/subscription';
 import { cn } from '@/lib/utils';
 import Cookies from 'js-cookie';
 
