@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -109,7 +110,20 @@ const SignIn = () => {
         Cookies.set('user_email', profile.email, { expires: expirationDays });
       }
       
-      const destination = redirectTo || `/profile/${profile.id}`;
+      // Get the redirect parameter from URL or state
+      let destination = '';
+      const redirectParam = searchParams.get('redirect') || 
+                            searchParams.get('redirectTo') || 
+                            (location.state as { redirectTo?: string })?.redirectTo;
+                            
+      if (redirectParam) {
+        // Handle different redirect formats
+        destination = redirectParam.startsWith('/') ? redirectParam : `/${redirectParam}`;
+        console.log("Redirecting to:", destination);
+      } else {
+        destination = `/profile/${profile.id}`;
+      }
+      
       console.log("Login successful, redirecting to:", destination);
       
       toast({

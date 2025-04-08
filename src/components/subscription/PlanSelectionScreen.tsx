@@ -68,9 +68,9 @@ const PlanSelectionScreen: React.FC = () => {
         </div>
         
         {showAuthWarning && (
-          <Alert variant="warning" className="mb-6 bg-amber-50 border-amber-200">
+          <Alert variant="default" className="mb-6 bg-amber-50 border-amber-200">
             <AlertDescription className="text-amber-800">
-              Please <Button variant="link" className="p-0 h-auto text-amber-800 font-bold underline" onClick={() => navigate('/sign-in')}>sign in</Button> to complete your purchase. You need to be logged in to subscribe.
+              Please <Button variant="link" className="p-0 h-auto text-amber-800 font-bold underline" onClick={() => navigate('/sign-in?redirect=subscribe')}>sign in</Button> to complete your purchase. You need to be logged in to subscribe.
             </AlertDescription>
           </Alert>
         )}

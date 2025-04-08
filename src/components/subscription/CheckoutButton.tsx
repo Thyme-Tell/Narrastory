@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
 import { useToast } from '@/hooks/use-toast';
+import Cookies from 'js-cookie';
 
 export type PlanType = 'annual' | 'lifetime' | 'monthly';
 
@@ -42,8 +43,18 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
   } = useStripeCheckout();
 
   const handleCheckout = async () => {
-    if (!profileId && !email) {
-      // If no user info, redirect to sign in page
+    // Check for user authentication - first try props, then cookies
+    const effectiveProfileId = profileId || Cookies.get('profile_id');
+    const effectiveEmail = email || Cookies.get('user_email');
+    
+    console.log("Checkout attempt with:", { 
+      profileId: effectiveProfileId, 
+      email: effectiveEmail,
+      cookieAuth: !!Cookies.get('profile_authorized')
+    });
+
+    if (!effectiveProfileId && !effectiveEmail) {
+      // If no user info, redirect to sign in page with redirect back to subscribe
       toast({
         title: "Authentication Required",
         description: "Please sign in to continue with your purchase.",
@@ -54,15 +65,16 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     }
 
     try {
+      console.log(`Creating checkout for plan: ${planType}`);
       switch (planType) {
         case 'annual':
-          createAnnualCheckout(profileId, email, promoCode);
+          createAnnualCheckout(effectiveProfileId, effectiveEmail, promoCode);
           break;
         case 'lifetime':
-          createLifetimeCheckout(profileId, email, promoCode);
+          createLifetimeCheckout(effectiveProfileId, effectiveEmail, promoCode);
           break;
         case 'monthly':
-          createMonthlyCheckout(profileId, email, promoCode);
+          createMonthlyCheckout(effectiveProfileId, effectiveEmail, promoCode);
           break;
         default:
           throw new Error(`Unknown plan type: ${planType}`);
