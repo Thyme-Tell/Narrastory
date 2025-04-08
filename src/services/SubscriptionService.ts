@@ -76,7 +76,7 @@ class SubscriptionService {
             email,
             forceRefresh: true // Always send forceRefresh=true to the edge function
           },
-          signal: controller.signal,
+          // Remove the signal property as it's not supported in FunctionInvokeOptions
         });
   
         clearTimeout(timeoutId); // Clear the timeout if successful

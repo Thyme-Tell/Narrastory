@@ -11,12 +11,14 @@ import { useToast } from '@/hooks/use-toast';
 
 interface SubscriptionStatusBadgeProps {
   profileId?: string;
+  email?: string;
   compact?: boolean;
   className?: string;
 }
 
 const SubscriptionStatusBadge: React.FC<SubscriptionStatusBadgeProps> = ({ 
   profileId, 
+  email,
   compact = true,
   className
 }) => {
@@ -28,11 +30,9 @@ const SubscriptionStatusBadge: React.FC<SubscriptionStatusBadgeProps> = ({
   const cookieProfileId = Cookies.get('profile_id');
   const cookieEmail = Cookies.get('user_email');
   
-  // Use cookie values if profileId not provided
+  // Use provided values or fall back to cookies
   const effectiveProfileId = profileId || cookieProfileId;
-  
-  // Only pass email if we don't have a profileId
-  const effectiveEmail = !effectiveProfileId ? cookieEmail : undefined;
+  const effectiveEmail = email || cookieEmail;
   
   console.log(`SubscriptionStatusBadge using profileId=${effectiveProfileId}, email=${effectiveEmail}`);
   

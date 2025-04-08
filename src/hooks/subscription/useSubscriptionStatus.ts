@@ -30,12 +30,10 @@ export const useSubscriptionStatus = (
       
       console.log("Subscription service using cookies:", { cookieProfileId, cookieEmail });
       
-      if (cookieProfileId) {
-        setEffectiveProfileId(cookieProfileId);
-      }
-      
       if (cookieEmail) {
         setEffectiveEmail(cookieEmail);
+      } else if (cookieProfileId) {
+        setEffectiveProfileId(cookieProfileId);
       }
     } else {
       // Update if they change
