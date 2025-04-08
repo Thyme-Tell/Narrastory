@@ -1,13 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@14.21.0?dts";
 import { corsHeaders } from "../_shared/cors.ts";
-import { 
-  getStripeClient, 
-  getSupabaseClient, 
-  errorResponse, 
-  successResponse,
-  PRICE_IDS 
-} from "../_shared/stripe-utils.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 /**
  * Create Checkout Edge Function
@@ -24,7 +19,6 @@ import {
  * - email: string (optional, user email)
  * - successUrl: string (redirect URL on success)
  * - cancelUrl: string (redirect URL on cancel)
- * - mode: string (optional, 'payment' or 'subscription')
  * - promoCode: string (optional, promotional code for discounts)
  * 
  * Response:
@@ -43,32 +37,74 @@ serve(async (req) => {
   try {
     // Parse the request body
     const reqBody = await req.json();
-    const { priceId, successUrl, cancelUrl, email, profileId, mode: requestedMode, promoCode } = reqBody;
+    const { priceId, successUrl, cancelUrl, email, profileId, promoCode } = reqBody;
 
     console.log(`Request received with priceId: ${priceId}`);
-    console.log(`Profile ID: ${profileId}, Email: ${email}, Mode: ${requestedMode || 'not specified'}`);
+    console.log(`Profile ID: ${profileId}, Email: ${email}`);
     if (promoCode) {
       console.log(`Promo code provided: ${promoCode}`);
     }
 
     // Validate required fields
     if (!priceId) {
-      return errorResponse('Price ID is required', 400);
+      return new Response(
+        JSON.stringify({ error: 'Price ID is required' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
     if (!successUrl || !cancelUrl) {
-      return errorResponse('Success and cancel URLs are required', 400);
+      return new Response(
+        JSON.stringify({ error: 'Success and cancel URLs are required' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
-    // Initialize clients
-    const stripe = getStripeClient();
-    const supabase = getSupabaseClient();
+    // Initialize Stripe
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      return new Response(
+        JSON.stringify({ error: 'Stripe not properly configured' }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+    
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: '2023-10-16',
+    });
 
-    // If profileId is provided, get user email
+    // Initialize Supabase client if profileId is provided
     let userEmail = email;
     if (profileId && !userEmail) {
       console.log(`Looking up email for profile ID: ${profileId}`);
       try {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+        
+        if (!supabaseUrl || !supabaseKey) {
+          throw new Error('Supabase credentials not configured');
+        }
+        
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
         const { data, error } = await supabase
           .from('profiles')
           .select('email')
@@ -77,32 +113,56 @@ serve(async (req) => {
 
         if (error || !data?.email) {
           console.error(`Error fetching email: ${error?.message}`);
-          return errorResponse(`Could not find email for profile ID: ${profileId}`, 404);
+          return new Response(
+            JSON.stringify({ error: `Could not find email for profile ID: ${profileId}` }),
+            {
+              status: 404,
+              headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders,
+              },
+            }
+          );
         }
 
         userEmail = data.email;
         console.log(`Found email: ${userEmail}`);
       } catch (err) {
         console.error(`Error in profile lookup: ${err.message}`);
-        return errorResponse(`Error retrieving user profile: ${err.message}`, 500);
+        return new Response(
+          JSON.stringify({ error: `Error retrieving user profile: ${err.message}` }),
+          {
+            status: 500,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
       }
     }
 
-    // Determine if this is a subscription or one-time payment
-    let mode: 'payment' | 'subscription' = 'payment';
-    
-    if (requestedMode === 'subscription') {
-      mode = 'subscription';
-      console.log("Mode explicitly set to subscription");
-    } else if (requestedMode === 'payment') {
-      mode = 'payment';
-      console.log("Mode explicitly set to payment");
-    } else if (priceId === PRICE_IDS.ANNUAL_PLUS) {
-      mode = 'subscription';
-      console.log("Creating subscription checkout based on product ID");
-    } else {
-      console.log("Creating one-time payment checkout");
+    // Fetch the price to determine if it's a subscription or one-time payment
+    let price;
+    try {
+      price = await stripe.prices.retrieve(priceId);
+    } catch (err) {
+      console.error(`Error retrieving price: ${err.message}`);
+      return new Response(
+        JSON.stringify({ error: `Invalid price ID: ${err.message}` }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
+
+    // Determine if this is a subscription or one-time payment
+    const mode = price.recurring ? 'subscription' : 'payment';
+    console.log(`Creating ${mode} checkout`);
 
     // Prepare checkout session parameters
     const sessionParams: any = {
@@ -125,7 +185,6 @@ serve(async (req) => {
     // Add promo code if provided
     if (promoCode) {
       try {
-        // First, check if the promo code exists
         console.log(`Validating promo code: ${promoCode}`);
         const promotionCodes = await stripe.promotionCodes.list({
           code: promoCode,
@@ -135,15 +194,32 @@ serve(async (req) => {
         
         if (promotionCodes.data.length > 0) {
           console.log(`Valid promo code found: ${promoCode}`);
-          // Use the promotion code ID from the retrieved code
           sessionParams.discounts = [{ promotion_code: promotionCodes.data[0].id }];
         } else {
           console.log(`No valid promo code found for: ${promoCode}`);
-          return errorResponse(`Invalid or expired promotion code: ${promoCode}`, 400);
+          return new Response(
+            JSON.stringify({ error: `Invalid or expired promotion code: ${promoCode}` }),
+            {
+              status: 400,
+              headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders,
+              },
+            }
+          );
         }
       } catch (promoErr) {
         console.error(`Error validating promo code: ${promoErr.message}`);
-        return errorResponse(`Error validating promotion code: ${promoErr.message}`, 400);
+        return new Response(
+          JSON.stringify({ error: `Error validating promotion code: ${promoErr.message}` }),
+          {
+            status: 400,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
       }
     }
 
@@ -154,17 +230,43 @@ serve(async (req) => {
 
       console.log(`Checkout session created: ${session.id}`);
       
-      // Return the session ID and URL
-      return successResponse({
-        sessionId: session.id,
-        url: session.url,
-      });
+      return new Response(
+        JSON.stringify({
+          sessionId: session.id,
+          url: session.url,
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     } catch (stripeErr) {
       console.error(`Stripe error: ${stripeErr.message}`);
-      return errorResponse(`Error creating checkout session: ${stripeErr.message}`, 500);
+      return new Response(
+        JSON.stringify({ error: `Error creating checkout session: ${stripeErr.message}` }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
   } catch (error) {
     console.error(`Unhandled error: ${error.message}`);
-    return errorResponse(`Internal server error: ${error.message}`, 500);
+    return new Response(
+      JSON.stringify({ error: `Internal server error: ${error.message}` }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      }
+    );
   }
 });
