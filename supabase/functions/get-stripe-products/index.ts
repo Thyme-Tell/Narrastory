@@ -43,13 +43,15 @@ serve(async (req) => {
     
     console.log("Fetching Stripe products");
     
-    // Fetch all active products
+    // Fetch all active products - include the specific IDs provided
     const products = await stripe.products.list({
       active: true,
       limit: 100,
+      ids: ['prod_S52DRcMxeWMRQ6', 'prod_S52DtoQFIZmzDL']
     });
     
     console.log(`Found ${products.data.length} products`);
+    console.log(`Products data: ${JSON.stringify(products.data.map(p => ({ id: p.id, name: p.name })))}`);
     
     // Fetch all active prices
     const prices = await stripe.prices.list({
@@ -70,7 +72,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           annualPlus: {
-            productId: "prod_dev_annual",
+            productId: "prod_S52DRcMxeWMRQ6", // Use the actual product ID you provided
             productName: "Narra+ Annual Subscription",
             priceId: "price_dev_annual", // This is a dummy ID for development
             amount: 249,
@@ -79,7 +81,7 @@ serve(async (req) => {
             interval: "year",
           },
           lifetime: {
-            productId: "prod_dev_lifetime",
+            productId: "prod_S52DtoQFIZmzDL", // Use the actual product ID you provided
             productName: "Narra Lifetime Access",
             priceId: "price_dev_lifetime", // This is a dummy ID for development
             amount: 399,
@@ -113,6 +115,7 @@ serve(async (req) => {
       );
     }
     
+    // Process all the products we have
     for (const product of products.data) {
       // Find associated prices for this product
       const productPrices = prices.data.filter(price => price.product === product.id);
@@ -128,9 +131,10 @@ serve(async (req) => {
       console.log(`Processing product: ${product.name} with ID ${product.id}`);
       console.log(`Product metadata:`, product.metadata);
       
-      // Determine product type from metadata
-      if (product.metadata.productType === 'subscription' && 
-          (product.metadata.planType === 'annual' || product.name.toLowerCase().includes('annual'))) {
+      // Specific handling for the known product IDs
+      if (product.id === 'prod_S52DRcMxeWMRQ6' || 
+          (product.metadata.productType === 'subscription' && 
+          (product.metadata.planType === 'annual' || product.name.toLowerCase().includes('annual')))) {
         productMap.annualPlus = {
           productId: product.id,
           productName: product.name,
@@ -140,8 +144,9 @@ serve(async (req) => {
           isRecurring: !!price.recurring,
           interval: price.recurring?.interval || null,
         };
-      } else if (product.metadata.productType === 'one_time' && 
-                (product.metadata.planType === 'lifetime' || product.name.toLowerCase().includes('lifetime'))) {
+      } else if (product.id === 'prod_S52DtoQFIZmzDL' || 
+                (product.metadata.productType === 'one_time' && 
+                (product.metadata.planType === 'lifetime' || product.name.toLowerCase().includes('lifetime')))) {
         productMap.lifetime = {
           productId: product.id,
           productName: product.name,

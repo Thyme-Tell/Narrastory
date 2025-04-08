@@ -13,10 +13,10 @@ export interface CheckoutOptions {
   promoCode?: string;
 }
 
-// Define product IDs - these should match price IDs from Stripe
+// Define product IDs - these should match the actual Stripe product IDs
 export const STRIPE_PRODUCTS = {
-  ANNUAL_PLUS: 'ANNUAL_PLUS',
-  LIFETIME: 'LIFETIME',
+  ANNUAL_PLUS: 'prod_S52DRcMxeWMRQ6',  // Updated to use actual product ID
+  LIFETIME: 'prod_S52DtoQFIZmzDL',      // Updated to use actual product ID
   FIRST_BOOK: 'FIRST_BOOK',
   ADDITIONAL_BOOK: 'ADDITIONAL_BOOK',
 };
@@ -50,27 +50,45 @@ export const useStripeCheckout = () => {
           throw new Error('No product data returned from setup function');
         }
         
+        console.log('Stripe products data:', setupData);
+        
         // Map the product key to the actual Stripe price ID
         let actualPriceId = options.priceId;
         let foundProduct = false;
         
-        if (options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus?.priceId) {
+        // Handle the direct product ID case (when we're passing actual product IDs)
+        if (options.priceId === STRIPE_PRODUCTS.ANNUAL_PLUS && setupData.annualPlus?.priceId) {
           actualPriceId = setupData.annualPlus.priceId;
           foundProduct = true;
-        } else if (options.priceId === 'LIFETIME' && setupData.lifetime?.priceId) {
+          console.log(`Found annual plus product, using price ID: ${actualPriceId}`);
+        } else if (options.priceId === STRIPE_PRODUCTS.LIFETIME && setupData.lifetime?.priceId) {
           actualPriceId = setupData.lifetime.priceId;
           foundProduct = true;
-        } else if (options.priceId === 'FIRST_BOOK' && setupData.firstBook?.priceId) {
+          console.log(`Found lifetime product, using price ID: ${actualPriceId}`);
+        } else if (options.priceId === STRIPE_PRODUCTS.FIRST_BOOK && setupData.firstBook?.priceId) {
           actualPriceId = setupData.firstBook.priceId;
           foundProduct = true;
-        } else if (options.priceId === 'ADDITIONAL_BOOK' && setupData.additionalBook?.priceId) {
+          console.log(`Found first book product, using price ID: ${actualPriceId}`);
+        } else if (options.priceId === STRIPE_PRODUCTS.ADDITIONAL_BOOK && setupData.additionalBook?.priceId) {
           actualPriceId = setupData.additionalBook.priceId;
           foundProduct = true;
+          console.log(`Found additional book product, using price ID: ${actualPriceId}`);
+        }
+        
+        // Fallback to legacy ID handling
+        if (!foundProduct && options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus?.priceId) {
+          actualPriceId = setupData.annualPlus.priceId;
+          foundProduct = true;
+          console.log(`Found annual plus product (legacy ID), using price ID: ${actualPriceId}`);
+        } else if (!foundProduct && options.priceId === 'LIFETIME' && setupData.lifetime?.priceId) {
+          actualPriceId = setupData.lifetime.priceId;
+          foundProduct = true;
+          console.log(`Found lifetime product (legacy ID), using price ID: ${actualPriceId}`);
         }
         
         // If we're in development mode and using price_dev ids, use them directly
-        if (!foundProduct && actualPriceId.startsWith('price_dev_')) {
-          console.log(`Using development price ID: ${actualPriceId}`);
+        if (!foundProduct && actualPriceId.startsWith('price_')) {
+          console.log(`Using direct price ID: ${actualPriceId}`);
           foundProduct = true;
         }
         

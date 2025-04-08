@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check, ArrowLeft, AlertCircle, Info, Tag } from 'lucide-react';
 import { useStripeCheckout, STRIPE_PRODUCTS } from '@/hooks/useStripeCheckout';
@@ -58,7 +58,7 @@ const PlanSelectionScreen: React.FC = () => {
       }
       
       await createCheckout.mutateAsync({
-        priceId: STRIPE_PRODUCTS.ANNUAL_PLUS,
+        priceId: STRIPE_PRODUCTS.ANNUAL_PLUS, // Using the actual product ID
         profileId: userProfileId,
         promoCode: promoCode || undefined
       });
