@@ -93,19 +93,8 @@ enabled = true
 [functions.create-checkout]
 verify_jwt = true
 
-[functions.check-subscription]
-verify_jwt = true
-
-[functions.stripe-setup]
-verify_jwt = false
-
-[functions.stripe-webhook]
-verify_jwt = false
-
 [functions.get-stripe-products]
 verify_jwt = true
 
-# Run stripe-setup occasionally to ensure products are created
-[functions.stripe-setup.hooks.on-destroy]
-invoke = ["stripe-setup"]
-schedule = "15 * * * *"
+[functions.stripe-webhook]
+verify_jwt = false

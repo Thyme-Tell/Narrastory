@@ -1,12 +1,9 @@
-import { useParams, Navigate } from "react-router-dom";
+
+import React, { useEffect, useState } from "react";
+import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useNavigate } from "react-router-dom";
-import ProfileHeader from "@/components/ProfileHeader";
-import StoriesList from "@/components/StoriesList";
-import { BookProgress } from "@/components/BookProgress";
-import { Menu } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Menu, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,10 +13,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
-import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
-// import UpgradePrompt from "@/components/subscription/UpgradePrompt";  // Commented out
+import ProfileHeader from "@/components/ProfileHeader";
+import StoriesList from "@/components/StoriesList";
+import { BookProgress } from "@/components/BookProgress";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
-import { toast } from "sonner";
 
 const Profile = () => {
   const { id } = useParams();
@@ -30,7 +27,8 @@ const Profile = () => {
   
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-  // Get profile data to extract email for subscription lookup
+  const { status: subscriptionStatus } = useSubscriptionService(id);
+
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
@@ -52,34 +50,14 @@ const Profile = () => {
     enabled: isValidUUID,
   });
   
-  // Now we get subscription status using email when available
-  const { 
-    status: subscriptionStatus, 
-    isStatusLoading, 
-    statusError, 
-    fetchSubscriptionStatus 
-  } = useSubscriptionService(id, false, profile?.email);
-
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
     if (profile?.email) {
-      console.log("Will fetch subscription using email:", profile.email);
-    }
-    if (id || profile?.email) {
-      fetchSubscriptionStatus();
+      console.log("Profile email:", profile.email);
     }
   }, [id, profile?.email]);
 
-  useEffect(() => {
-    // Log subscription status for debugging
-    console.log("Current subscription status:", subscriptionStatus);
-    if (statusError) {
-      console.error("Subscription status error:", statusError);
-      toast.error("There was an issue loading subscription details");
-    }
-  }, [subscriptionStatus, statusError]);
-
-  if (!isValidUUID && !window.location.pathname.includes('/sign-in')) {
+  if (!isValidUUID && id !== undefined) {
     return <Navigate to="/sign-in" replace />;
   }
 
@@ -129,6 +107,10 @@ const Profile = () => {
     setIsBookExpanded(expanded);
   };
 
+  const handleUpgrade = () => {
+    navigate(`/subscribe/${id}`);
+  };
+
   if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -166,7 +148,18 @@ const Profile = () => {
           alt="Narra Logo"
           className="h-11"
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Commented out upgrade button */}
+          {/* {!subscriptionStatus.isPremium && (
+            <Button 
+              onClick={handleUpgrade}
+              size="sm"
+              className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+            >
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              Upgrade
+            </Button>
+          )} */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -175,13 +168,17 @@ const Profile = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white">
-              <DropdownMenuItem asChild>
-                <Link to={`/subscription/${id}`} className="w-full">
-                  Subscription Settings
-                </Link>
-              </DropdownMenuItem>
+              {subscriptionStatus.isPremium ? (
+                <DropdownMenuItem onClick={() => navigate(`/subscription/${id}`)}>
+                  Manage Subscription
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={handleUpgrade}>
+                  Upgrade to Premium
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
-                Not {profile.first_name}? Log Out
+                Not {profile?.first_name}? Log Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -201,17 +198,10 @@ const Profile = () => {
             />
           </div>
           
-          {/* Comment out Lifetime Offer Banner */}
-          {/* {!isStatusLoading && !subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
-            <div className="my-4">
-              <LifetimeOfferBanner profileId={id} />
-            </div>
-          )} */}
-          
           <ProfileHeader 
-            firstName={profile.first_name} 
-            lastName={profile.last_name}
-            profileId={profile.id}
+            firstName={profile?.first_name || ''} 
+            lastName={profile?.last_name || ''}
+            profileId={profile?.id || ''}
             onUpdate={refetchStories}
             sortOrder={sortOrder}
             onSortChange={setSortOrder}
@@ -223,20 +213,8 @@ const Profile = () => {
             onUpdate={refetchStories}
             sortOrder={sortOrder}
           />
-          
-          {/* Comment out Upgrade Prompt Card */}
-          {/* {!isStatusLoading && !subscriptionStatus.isPremium && stories && stories.length > 5 && (
-            <div className="mt-6">
-              <UpgradePrompt profileId={id} variant="card" />
-            </div>
-          )} */}
         </div>
       </div>
-      
-      {/* Comment out Floating Upgrade Prompt */}
-      {/* {!isStatusLoading && !subscriptionStatus.isPremium && (
-        <UpgradePrompt profileId={id} variant="floating" />
-      )} */}
       
       <ScrollToTopButton />
     </div>

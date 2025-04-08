@@ -17,13 +17,13 @@ import {
  * Hook to interact with the subscription service
  * 
  * @param profileId User profile ID (optional)
+ * @param forceRefresh Force a fresh check ignoring the cache (optional, defaults to true)
  * @param email User email address (optional, takes precedence over profileId if provided)
- * @param forceRefresh Force a fresh check ignoring the cache (optional)
  * @returns Subscription service operations and status
  */
 export const useSubscriptionService = (
   profileId?: string, 
-  forceRefresh = false, 
+  forceRefresh: boolean = true, // Default to true to ALWAYS force refresh
   email?: string
 ) => {
   const queryClient = useQueryClient();
@@ -39,6 +39,7 @@ export const useSubscriptionService = (
     queryFn: async () => {
       console.log(`Fetching subscription status for profile: ${profileId}, email: ${email}, force refresh: ${forceRefresh}`);
       try {
+        // Use the provided forceRefresh value or default to true
         const result = await subscriptionService.getSubscriptionStatus(profileId, forceRefresh, email);
         console.log('Subscription status fetch result:', result);
         return result;
@@ -48,7 +49,9 @@ export const useSubscriptionService = (
       }
     },
     enabled: !!profileId || !!email,
-    staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // 5 minutes if not forcing refresh
+    staleTime: 0, // Set stale time to 0 to always refetch
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
     retry: 2, // Retry twice on failure
   });
 
@@ -110,7 +113,8 @@ export const useSubscriptionService = (
       console.error('Error in subscription status:', statusError);
     }
     
-    return subscriptionStatus || {
+    // Ensure we handle null/undefined status properly
+    const status = subscriptionStatus || {
       isPremium: false,
       isLifetime: false,
       hasActiveSubscription: false,
@@ -129,6 +133,13 @@ export const useSubscriptionService = (
         prioritySupport: false
       }
     };
+    
+    // Fix status property if it's undefined
+    if (status.status === undefined) {
+      status.status = null;
+    }
+    
+    return status;
   };
 
   // Fetch subscription status immediately if needed

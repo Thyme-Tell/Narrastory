@@ -49,6 +49,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
   }, [profileId, initialEmail]);
   
   // Now use both profileId and email for subscription lookup
+  // Make sure we use the correct parameter order: profileId, forceRefresh (boolean), email
   const { 
     status, 
     isStatusLoading,
@@ -56,7 +57,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
     isChangingPlan,
     getPlanPrice,
     getPlanDetails
-  } = useSubscriptionService(profileId, false, userEmail);
+  } = useSubscriptionService(profileId, true, userEmail);
 
   const handleUpgradeToPlan = (plan: PlanType) => {
     if (profileId) {

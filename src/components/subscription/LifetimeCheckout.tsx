@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, Shield, AlertCircle } from 'lucide-react';
@@ -7,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useStripeCheckout, STRIPE_PRODUCTS } from '@/hooks/useStripeCheckout';
 import { useToast } from '@/hooks/use-toast';
 import LifetimeTimer from './LifetimeTimer';
 
@@ -23,12 +22,11 @@ const LifetimeCheckout: React.FC = () => {
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({ status: 'idle' });
   
   const { getPlanPrice, status } = useSubscriptionService(profileId);
-  const { createLifetimeCheckout, isLoading } = useStripeCheckout();
+  const { createCheckout, isLoading } = useStripeCheckout();
   
   const lifetimePrice = getPlanPrice('lifetime');
   
   useEffect(() => {
-    // If user already has lifetime access, redirect them back
     if (status.isLifetime) {
       toast({
         title: "Already Purchased",
@@ -59,14 +57,16 @@ const LifetimeCheckout: React.FC = () => {
         description: "Setting up your lifetime access checkout...",
       });
       
-      await createLifetimeCheckout(profileId);
-      // Note: The redirect happens in the useStripeCheckout hook
+      await createCheckout.mutateAsync({
+        priceId: STRIPE_PRODUCTS.LIFETIME,
+        profileId,
+        email: undefined
+      });
     } catch (error) {
       console.error('Checkout error:', error);
       let errorMessage = "Payment processing is currently unavailable. Please try again later.";
       
       if (error instanceof Error) {
-        // Check for specific error types
         if (error.message.includes("not available for purchase")) {
           errorMessage = "The lifetime plan is not available for purchase at this time. Please try again later.";
         } else if (error.message.includes("No such price")) {
@@ -74,7 +74,6 @@ const LifetimeCheckout: React.FC = () => {
         } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is currently unavailable. Please contact support.";
         } else {
-          // If we have a specific error message, use that
           errorMessage = error.message;
         }
       }

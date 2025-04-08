@@ -1,18 +1,36 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowUp } from "lucide-react";
 
 const ScrollToTopButton = () => {
-  // Always hide the button
-  const [isVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Empty scroll function (no-op)
+  // Show button when scrolling down 500px
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 500) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    
+    // Clean up event listener
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   const scrollToTop = () => {
-    // Function implementation removed
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
-  // The button will never be visible
   if (!isVisible) return null;
 
   return (

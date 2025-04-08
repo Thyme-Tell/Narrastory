@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_PRODUCTS } from "@/hooks/useStripeCheckout";
 import { toast } from "@/hooks/use-toast";
@@ -28,14 +29,14 @@ import { SubscriptionData } from "@/hooks/useSubscription";
  * - Feature entitlements
  */
 class SubscriptionService {
-  // Cache for subscription status to minimize API calls
+  // Cache for subscription status to minimize API calls - now disabled
   private statusCache: Map<string, { 
     status: SubscriptionStatusResult, 
     timestamp: number
   }> = new Map();
   
-  // Cache TTL in milliseconds (5 minutes)
-  private cacheTtlMs = 5 * 60 * 1000;
+  // Cache TTL in milliseconds (set to 0 to effectively disable caching)
+  private cacheTtlMs = 0;
   
   /**
    * Get current subscription status for a user
@@ -47,30 +48,29 @@ class SubscriptionService {
    */
   async getSubscriptionStatus(
     profileId?: string, 
-    forceRefresh = false, 
+    forceRefresh = true, // Always force refresh by default
     email?: string
   ): Promise<SubscriptionStatusResult> {
     // Exit early if no identifiers provided
     if (!profileId && !email) {
+      console.log('No profile ID or email provided - returning default subscription status');
       return this.getDefaultSubscriptionStatus();
     }
 
-    // Create a cache key based on the available identifiers
-    const cacheKey = email ? `email:${email}` : `profile:${profileId}`;
+    // Always force a refresh and bypass cache to check with Stripe directly
+    forceRefresh = true;
 
-    // Check cache first if not forcing a refresh
-    if (!forceRefresh) {
-      const cachedStatus = this.statusCache.get(cacheKey);
-      if (cachedStatus && Date.now() - cachedStatus.timestamp < this.cacheTtlMs) {
-        console.log(`Using cached subscription status for ${cacheKey}`);
-        return cachedStatus.status;
-      }
-    }
+    // Create a cache key based on the available identifiers (though we won't use it for caching anymore)
+    const cacheKey = email ? `email:${email}` : `profile:${profileId}`;
 
     try {
       console.log(`Fetching fresh subscription status for ${cacheKey}`);
       const { data, error } = await supabase.functions.invoke('check-subscription', {
-        body: { profileId, email },
+        body: { 
+          profileId, 
+          email,
+          forceRefresh: true // Always send forceRefresh=true to the edge function
+        },
       });
 
       if (error) {
@@ -82,6 +82,9 @@ class SubscriptionService {
         });
         return this.getDefaultSubscriptionStatus();
       }
+
+      // Log raw response for debugging
+      console.log('Raw subscription response from edge function:', data);
 
       // Extract subscription data
       const subscriptionData = data?.subscriptionData as SubscriptionData;
@@ -125,11 +128,8 @@ class SubscriptionService {
         subscription: subscriptionData
       };
       
-      // Cache the result
-      this.statusCache.set(cacheKey, {
-        status: result,
-        timestamp: Date.now()
-      });
+      // We no longer cache the result - always use fresh data
+      console.log(`Using fresh subscription data, not caching`);
 
       return result;
     } catch (err) {
@@ -494,6 +494,7 @@ class SubscriptionService {
    * @returns Default subscription status
    */
   private getDefaultSubscriptionStatus(): SubscriptionStatusResult {
+    console.log('Returning default subscription status (free plan)');
     return {
       isPremium: false,
       isLifetime: false,

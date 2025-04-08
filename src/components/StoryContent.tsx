@@ -42,9 +42,6 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const wordCount = content.trim().split(/\s+/).length;
-  const estimatedMinutes = Math.max(1, Math.ceil(wordCount / 150));
-
   const handleListen = async () => {
     console.log('Listen button clicked for story:', storyId);
     
@@ -113,27 +110,9 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
 
   return (
     <>
-      <div className={`${isMobile ? 'flex flex-col space-y-3' : 'flex justify-between items-center'} mb-4`}>
-        {title && (
-          <h3 className="font-semibold text-lg text-left">{title}</h3>
-        )}
-        
-        <div className={`${isMobile ? 'self-start' : 'ml-auto'} flex space-x-2`}>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleListen}
-            disabled={isLoading || !content || content.trim() === ''}
-          >
-            {isLoading ? (
-              <LoadingSpinner className="mr-2 h-4 w-4" />
-            ) : (
-              <Headphones className="mr-2 h-4 w-4" />
-            )}
-            Listen ({estimatedMinutes} min)
-          </Button>
-        </div>
-      </div>
+      {title && (
+        <h3 className="font-semibold text-lg text-left">{title}</h3>
+      )}
       
       {error && (
         <div className="text-red-500 mb-4 p-2 bg-red-50 rounded-md text-sm">
@@ -190,3 +169,4 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
 };
 
 export default StoryContent;
+

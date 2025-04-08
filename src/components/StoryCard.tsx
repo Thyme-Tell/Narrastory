@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useStoryOperations } from "./story/StoryOperations";
 import StoryEditForm from "./StoryEditForm";
 import StoryContent from "./StoryContent";
-import StoryHeader from "./story/StoryHeader";
+import StoryActions from "./story/StoryActions";
 import ShareDialog from "./story/ShareDialog";
 import { formatDistanceToNow } from "date-fns";
 import { Book } from "lucide-react";
@@ -28,10 +28,7 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
     onUpdate,
   });
 
-  // Calculate word count
   const wordCount = story.content.trim().split(/\s+/).length;
-  
-  // Format the created_at date
   const formattedDate = formatDistanceToNow(new Date(story.created_at), { addSuffix: true });
 
   const onSave = async (title: string, content: string, date: Date) => {
@@ -64,15 +61,18 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
         />
       ) : (
         <>
-          <StoryHeader
-            date={story.created_at}
-            onEdit={() => setIsEditing(true)}
-            onDelete={handleDelete}
-            onShare={onShare}
-          />
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-sm text-muted-foreground">
+              {new Date(story.created_at).toLocaleDateString()}
+            </p>
+          </div>
           
-          {/* Story Metadata */}
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-2">
+          {story.title && (
+            <h2 className="text-xl font-semibold mb-2">{story.title}</h2>
+          )}
+          
+          {/* Date and word count right after title, before buttons */}
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-3">
             <span>{formattedDate}</span>
             <span>•</span>
             <div className="flex items-center">
@@ -81,8 +81,15 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             </div>
           </div>
           
+          <StoryActions
+            onListen={() => {/* TODO: Implement listen functionality */}}
+            onEdit={() => setIsEditing(true)}
+            onShare={onShare}
+            onDelete={handleDelete}
+          />
+          
           <StoryContent
-            title={story.title}
+            title={null} // Pass null to prevent duplicate title
             content={story.content}
             storyId={story.id}
             onUpdate={onUpdate}

@@ -10,7 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { isAuthenticated, profileId } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Using user?.id instead of profileId
+  const profileId = user?.id;
 
   const menuItems = [
     {
@@ -27,6 +30,13 @@ export function AppSidebar() {
 
   return (
     <ShadcnSidebar>
+      <div className="flex justify-center py-4">
+        <img 
+          src="https://pohnhzxqorelllbfnqyj.supabase.co/storage/v1/object/public/assets/metallic-narra.png" 
+          alt="Narra Logo" 
+          className="w-10 h-10"
+        />
+      </div>
       <ShadcnSidebarGroup>
         <ShadcnSidebarGroupContent>
           {menuItems.map((item, index) => (

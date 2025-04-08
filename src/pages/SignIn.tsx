@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -22,7 +21,7 @@ const SignIn = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { toast } = useToast();
-  const { setRememberMe: updateRememberMe } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
@@ -31,7 +30,10 @@ const SignIn = () => {
     password: "",
   });
 
-  // Capture the redirectTo parameter from URL or location state
+  const handleRememberMeChange = (checked: boolean) => {
+    setRememberMe(checked);
+  };
+
   const redirectTo = searchParams.get('redirectTo') || 
                     (location.state as { redirectTo?: string })?.redirectTo || 
                     null;
@@ -89,12 +91,8 @@ const SignIn = () => {
         return;
       }
 
-      // Update rememberMe in the AuthContext
-      updateRememberMe(rememberMe);
-      
       const expirationDays = rememberMe ? 365 : 7;
       
-      // Clear existing cookies first
       Cookies.remove('profile_authorized');
       Cookies.remove('phone_number');
       Cookies.remove('profile_id');
@@ -102,18 +100,15 @@ const SignIn = () => {
       
       console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
       
-      // Set cookies immediately (no setTimeout)
       Cookies.set('profile_authorized', 'true', { expires: expirationDays });
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
       Cookies.set('profile_id', profile.id, { expires: expirationDays });
       
-      // Also store email for admin authorization
       if (profile.email) {
         console.log("Setting email cookie:", profile.email);
         Cookies.set('user_email', profile.email, { expires: expirationDays });
       }
       
-      // Determine redirect destination
       const destination = redirectTo || `/profile/${profile.id}`;
       console.log("Login successful, redirecting to:", destination);
       
@@ -122,10 +117,8 @@ const SignIn = () => {
         description: `You've successfully signed in as ${profile.first_name}`,
       });
       
-      // Trigger storage event to update auth state
       window.dispatchEvent(new Event('storage'));
       
-      // Navigate to destination
       navigate(destination, { replace: true });
       
     } catch (error) {
@@ -192,7 +185,7 @@ const SignIn = () => {
               <Checkbox 
                 id="remember-me" 
                 checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                onCheckedChange={(checked) => handleRememberMeChange(checked as boolean)}
                 className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
               />
               <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">

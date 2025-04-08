@@ -22,7 +22,9 @@ const StoryBooks = () => {
   const [storybooks, setStorybooks] = useState<StoryBook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [firstName, setFirstName] = useState("");
-  const { isAuthenticated, profileId } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  const profileId = user?.id;
 
   useEffect(() => {
     const init = async () => {
@@ -55,7 +57,7 @@ const StoryBooks = () => {
     };
 
     init();
-    if (isAuthenticated) {
+    if (isAuthenticated && profileId) {
       fetchStorybooks();
     }
   }, [navigate, toast, isAuthenticated, profileId, location.pathname]);
