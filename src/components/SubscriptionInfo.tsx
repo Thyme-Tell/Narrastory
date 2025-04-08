@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import { useQuery } from '@tanstack/react-query';
@@ -56,7 +55,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
     isChangingPlan,
     getPlanPrice,
     getPlanDetails
-  } = useSubscriptionService(profileId, false, userEmail);
+  } = useSubscriptionService(profileId, undefined, userEmail);
 
   const handleUpgradeToPlan = (plan: PlanType) => {
     if (profileId) {

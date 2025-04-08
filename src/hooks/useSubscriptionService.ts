@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionService } from '@/services/SubscriptionService';
@@ -22,8 +23,8 @@ import {
  */
 export const useSubscriptionService = (
   profileId?: string, 
-  email?: string,
-  forceRefresh = true // Default to true to ALWAYS force refresh
+  forceRefresh?: boolean,
+  email?: string
 ) => {
   const queryClient = useQueryClient();
   
