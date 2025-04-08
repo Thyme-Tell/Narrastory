@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Menu } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +15,7 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
+import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 
 const Profile = () => {
   const { id } = useParams();
@@ -25,6 +25,8 @@ const Profile = () => {
   const [isBookExpanded, setIsBookExpanded] = useState(false);
   
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+  const { status: subscriptionStatus } = useSubscriptionService(id);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
@@ -104,6 +106,10 @@ const Profile = () => {
     setIsBookExpanded(expanded);
   };
 
+  const handleUpgrade = () => {
+    navigate(`/subscribe/${id}`);
+  };
+
   if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -141,7 +147,17 @@ const Profile = () => {
           alt="Narra Logo"
           className="h-11"
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {!subscriptionStatus.isPremium && (
+            <Button 
+              onClick={handleUpgrade}
+              size="sm"
+              className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+            >
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              Upgrade
+            </Button>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -150,6 +166,15 @@ const Profile = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white">
+              {subscriptionStatus.isPremium ? (
+                <DropdownMenuItem onClick={() => navigate(`/subscription/${id}`)}>
+                  Manage Subscription
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={handleUpgrade}>
+                  Upgrade to Premium
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
                 Not {profile?.first_name}? Log Out
               </DropdownMenuItem>
