@@ -85,9 +85,9 @@ const PlanSelectionScreen: React.FC = () => {
       });
 
       // Use the appropriate price ID based on the selected plan
-      const priceId = selectedPlan === 'lifetime' 
-        ? STRIPE_PRODUCTS.LIFETIME 
-        : STRIPE_PRODUCTS.ANNUAL_PLUS;
+      const priceId = selectedPlan === 'annual' 
+        ? STRIPE_PRODUCTS.ANNUAL_PLUS 
+        : STRIPE_PRODUCTS.LIFETIME;
       
       await createCheckout.mutateAsync({
         priceId: priceId,
