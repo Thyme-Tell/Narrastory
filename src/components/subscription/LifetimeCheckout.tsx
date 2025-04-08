@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useStripeCheckout, STRIPE_PRODUCTS } from '@/hooks/useStripeCheckout';
 import { useToast } from '@/hooks/use-toast';
 import LifetimeTimer from './LifetimeTimer';
 
@@ -23,7 +23,7 @@ const LifetimeCheckout: React.FC = () => {
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({ status: 'idle' });
   
   const { getPlanPrice, status } = useSubscriptionService(profileId);
-  const { createLifetimeCheckout, isLoading } = useStripeCheckout();
+  const { createCheckout, isLoading } = useStripeCheckout();
   
   const lifetimePrice = getPlanPrice('lifetime');
   
@@ -59,7 +59,11 @@ const LifetimeCheckout: React.FC = () => {
         description: "Setting up your lifetime access checkout...",
       });
       
-      await createLifetimeCheckout(profileId);
+      await createCheckout.mutateAsync({
+        priceId: STRIPE_PRODUCTS.LIFETIME,
+        profileId,
+        email: status.subscription?.user_email // Optional: pass user email
+      });
       // Note: The redirect happens in the useStripeCheckout hook
     } catch (error) {
       console.error('Checkout error:', error);

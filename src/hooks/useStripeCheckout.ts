@@ -50,8 +50,6 @@ export const useStripeCheckout = () => {
           throw new Error('No product data returned from setup function');
         }
         
-        console.log('Retrieved Stripe products data:', JSON.stringify(setupData));
-        
         // Map the product key to the actual Stripe price ID
         let actualPriceId = options.priceId;
         let foundProduct = false;
