@@ -62,8 +62,9 @@ const LifetimeCheckout: React.FC = () => {
       await createCheckout.mutateAsync({
         priceId: STRIPE_PRODUCTS.LIFETIME,
         profileId,
-        // Get the email from the subscription status directly instead of from the subscription object
-        email: status.subscription?.email || undefined
+        // Pass the user's email from the status object - the email might be in a different location
+        // than we initially expected
+        email: undefined // Let the backend determine the email from the profile ID
       });
       // Note: The redirect happens in the useStripeCheckout hook
     } catch (error) {
