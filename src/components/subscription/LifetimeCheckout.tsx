@@ -27,7 +27,6 @@ const LifetimeCheckout: React.FC = () => {
   const lifetimePrice = getPlanPrice('lifetime');
   
   useEffect(() => {
-    // If user already has lifetime access, redirect them back
     if (status.isLifetime) {
       toast({
         title: "Already Purchased",
@@ -63,7 +62,6 @@ const LifetimeCheckout: React.FC = () => {
         profileId,
         email: undefined
       });
-      // Note: The redirect happens in the useStripeCheckout hook
     } catch (error) {
       console.error('Checkout error:', error);
       let errorMessage = "Payment processing is currently unavailable. Please try again later.";

@@ -53,7 +53,7 @@ export const useStripeCheckout = () => {
           throw new Error('No product data returned from setup function');
         }
         
-        console.log('Stripe products data:', setupData);
+        console.log('Stripe products data:', JSON.stringify(setupData));
         
         // Map the product key to the actual Stripe price ID
         let actualPriceId = options.priceId;
@@ -133,15 +133,23 @@ export const useStripeCheckout = () => {
           description: "Opening secure payment page...",
         });
         
-        // Mobile friendly handling of the checkout URL
+        // Mobile friendly handling of the checkout URL and preventing iframe issues
         console.log(`Opening checkout URL: ${data.url} on ${isMobile ? 'mobile' : 'desktop'}`);
         
-        // On mobile, directly navigate to the URL in the same window
-        // On desktop, open in a new tab which is generally more expected
+        // Force the browser to navigate to the checkout URL at the top level
+        // This prevents Stripe from thinking it's in an iframe
         if (isMobile) {
-          window.location.href = data.url;
+          // On mobile, we use this approach to ensure top-level navigation
+          window.location.replace(data.url);
         } else {
-          window.open(data.url, "_blank");
+          // For desktop, open in a new tab with specific parameters to ensure proper context
+          const newWindow = window.open();
+          if (newWindow) {
+            newWindow.location.href = data.url;
+          } else {
+            // If popup is blocked, fallback to direct navigation
+            window.location.href = data.url;
+          }
         }
       } else {
         toast({
