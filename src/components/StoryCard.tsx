@@ -94,15 +94,16 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
               storyId={story.id}
               onUpdate={onUpdate}
             />
-          </>
-        )}
+          </div>
+        </>
+      )}
 
-        <ShareDialog
-          open={showShareDialog}
-          onOpenChange={setShowShareDialog}
-          shareUrl={shareUrl}
-          storyTitle={story.title}
-        />
+      <ShareDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        shareUrl={shareUrl}
+        storyTitle={story.title}
+      />
     </div>
   );
 };
