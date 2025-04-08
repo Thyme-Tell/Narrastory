@@ -2,6 +2,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Define the checkout options type
 export interface CheckoutOptions {
@@ -27,6 +28,7 @@ export const STRIPE_PRODUCTS = {
  */
 export const useStripeCheckout = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Mutation to create a checkout session
   const createCheckout = useMutation({
@@ -128,9 +130,19 @@ export const useStripeCheckout = () => {
       if (data && data.url) {
         toast({
           title: "Redirecting to Checkout",
-          description: "Opening secure payment page in a new window.",
+          description: "Opening secure payment page...",
         });
-        window.open(data.url, "_blank");
+        
+        // Mobile friendly handling of the checkout URL
+        console.log(`Opening checkout URL: ${data.url} on ${isMobile ? 'mobile' : 'desktop'}`);
+        
+        // On mobile, directly navigate to the URL in the same window
+        // On desktop, open in a new tab which is generally more expected
+        if (isMobile) {
+          window.location.href = data.url;
+        } else {
+          window.open(data.url, "_blank");
+        }
       } else {
         toast({
           title: "Error",
