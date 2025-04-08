@@ -1,4 +1,5 @@
-import { useParams, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,7 +7,6 @@ import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
 import { Menu } from "lucide-react";
-import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -198,7 +198,7 @@ const Profile = () => {
             />
           </div>
           
-          {!isStatusLoading && !subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
+          {!isStatusLoading && subscriptionStatus.planType === 'free' && (
             <div className="my-4">
               <LifetimeOfferBanner profileId={id} />
             </div>
@@ -220,7 +220,7 @@ const Profile = () => {
             sortOrder={sortOrder}
           />
           
-          {!isStatusLoading && !subscriptionStatus.isPremium && stories && stories.length > 5 && (
+          {!isStatusLoading && subscriptionStatus.planType === 'free' && stories && stories.length > 5 && (
             <div className="mt-6">
               <UpgradePrompt profileId={id} variant="card" />
             </div>
@@ -228,7 +228,7 @@ const Profile = () => {
         </div>
       </div>
       
-      {!isStatusLoading && !subscriptionStatus.isPremium && (
+      {!isStatusLoading && subscriptionStatus.planType === 'free' && (
         <UpgradePrompt profileId={id} variant="floating" />
       )}
       
