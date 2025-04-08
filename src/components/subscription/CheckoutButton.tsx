@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
@@ -31,20 +32,24 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
   children,
 }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const {
     createCheckout,
     isLoading,
     createAnnualCheckout,
     createLifetimeCheckout,
+    createMonthlyCheckout
   } = useStripeCheckout();
 
   const handleCheckout = async () => {
     if (!profileId && !email) {
+      // If no user info, redirect to sign in page
       toast({
-        title: "Error",
-        description: "User information is required to proceed with checkout.",
+        title: "Authentication Required",
+        description: "Please sign in to continue with your purchase.",
         variant: "destructive",
       });
+      navigate('/sign-in?redirect=subscribe');
       return;
     }
 
@@ -57,13 +62,7 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
           createLifetimeCheckout(profileId, email, promoCode);
           break;
         case 'monthly':
-          // For monthly, use the direct createCheckout method with the correct price ID
-          createCheckout.mutate({
-            priceId: 'prod_MONTHLY_ID', // You'll need to add this to STRIPE_PRODUCTS in useStripeCheckout
-            profileId,
-            email,
-            promoCode,
-          });
+          createMonthlyCheckout(profileId, email, promoCode);
           break;
         default:
           throw new Error(`Unknown plan type: ${planType}`);

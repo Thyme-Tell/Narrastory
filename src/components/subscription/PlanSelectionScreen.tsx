@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ArrowLeft, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import CheckoutButton from './CheckoutButton';
 import LifetimeOfferBanner from './LifetimeOfferBanner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const PlanSelectionScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -19,21 +20,33 @@ const PlanSelectionScreen: React.FC = () => {
   const { user } = useAuth();
   const [promoCode, setPromoCode] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'lifetime'>('annual');
+  const [showAuthWarning, setShowAuthWarning] = useState(false);
   
   const { getPlanPrice, status, isStatusLoading } = useSubscriptionService(user?.id);
+  
+  useEffect(() => {
+    // Check if user is authenticated
+    if (!user?.id && !user?.email) {
+      setShowAuthWarning(true);
+    } else {
+      setShowAuthWarning(false);
+    }
+  }, [user]);
   
   // Prevent premium users from re-selecting plans they already have
   const isPremium = status?.isPremium || false;
   const isLifetime = status?.isLifetime || false;
   
   // Redirect if already lifetime subscriber
-  if (isLifetime) {
-    navigate(`/profile/${user?.id}`);
-    toast({
-      title: "Already Subscribed",
-      description: "You already have a lifetime subscription.",
-    });
-  }
+  useEffect(() => {
+    if (isLifetime && user?.id) {
+      navigate(`/profile/${user.id}`);
+      toast({
+        title: "Already Subscribed",
+        description: "You already have a lifetime subscription.",
+      });
+    }
+  }, [isLifetime, user?.id, navigate, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-purple-50 p-4">
@@ -53,6 +66,14 @@ const PlanSelectionScreen: React.FC = () => {
             Unlock premium features, unlimited stories, and more with Narra+
           </p>
         </div>
+        
+        {showAuthWarning && (
+          <Alert variant="warning" className="mb-6 bg-amber-50 border-amber-200">
+            <AlertDescription className="text-amber-800">
+              Please <Button variant="link" className="p-0 h-auto text-amber-800 font-bold underline" onClick={() => navigate('/sign-in')}>sign in</Button> to complete your purchase. You need to be logged in to subscribe.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <LifetimeOfferBanner profileId={user?.id} />
         
@@ -215,7 +236,7 @@ const PlanSelectionScreen: React.FC = () => {
         </Tabs>
         
         <div className="text-center mt-8 text-sm text-muted-foreground">
-          <p>Need help? Contact support at <a href="mailto:support@narratory.com" className="text-purple-600 hover:underline">support@narratory.com</a></p>
+          <p>Need help? Contact support at <a href="mailto:support@narrastory.com" className="text-purple-600 hover:underline">support@narrastory.com</a></p>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +33,11 @@ export const useStripeCheckout = () => {
   // Mutation to create a checkout session
   const createCheckout = useMutation({
     mutationFn: async (options: CheckoutOptions) => {
+      // Validate required user information
+      if (!options.profileId && !options.email) {
+        throw new Error('User information is required to proceed with checkout');
+      }
+      
       // Set default success and cancel URLs if not provided
       const origin = window.location.origin;
       const successUrl = options.successUrl || `${origin}/payment-success`;
@@ -96,6 +102,8 @@ export const useStripeCheckout = () => {
           errorMessage = "Payment system is not properly configured. Please contact support.";
         } else if (error.message.includes("No such price")) {
           errorMessage = "The selected payment plan is currently unavailable. Please contact support.";
+        } else if (error.message.includes("User information is required")) {
+          errorMessage = "Please sign in to complete your purchase.";
         }
       }
       
