@@ -35,13 +35,26 @@ const SignIn = () => {
     setRememberMe(checked);
   };
 
-  const redirectTo = searchParams.get('redirectTo') || 
-                    (location.state as { redirectTo?: string })?.redirectTo || 
-                    null;
+  // Get redirect parameter from multiple possible sources
+  const redirect = searchParams.get('redirect') || 
+                   searchParams.get('redirectTo') || 
+                   (location.state as { redirectTo?: string })?.redirectTo || 
+                   null;
   
   useEffect(() => {
-    console.log("Redirect destination after login:", redirectTo);
-  }, [redirectTo]);
+    console.log("Redirect destination after login:", redirect);
+    
+    // If already authenticated, redirect to the target page or profile
+    if (isAuthenticated) {
+      const profileId = Cookies.get('profile_id');
+      const destination = redirect 
+        ? (redirect.startsWith('/') ? redirect : `/${redirect}`)
+        : (profileId ? `/profile/${profileId}` : '/');
+        
+      console.log("Already authenticated, redirecting to:", destination);
+      navigate(destination, { replace: true });
+    }
+  }, [isAuthenticated, navigate, redirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +107,7 @@ const SignIn = () => {
 
       const expirationDays = rememberMe ? 365 : 7;
       
+      // Clear existing auth cookies
       Cookies.remove('profile_authorized');
       Cookies.remove('phone_number');
       Cookies.remove('profile_id');
@@ -101,6 +115,7 @@ const SignIn = () => {
       
       console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
       
+      // Set new auth cookies
       Cookies.set('profile_authorized', 'true', { expires: expirationDays });
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
       Cookies.set('profile_id', profile.id, { expires: expirationDays });
@@ -110,7 +125,7 @@ const SignIn = () => {
         Cookies.set('user_email', profile.email, { expires: expirationDays });
       }
       
-      // Get the redirect parameter from URL or state
+      // Get the redirect parameter and construct destination URL
       let destination = '';
       const redirectParam = searchParams.get('redirect') || 
                             searchParams.get('redirectTo') || 
@@ -133,6 +148,7 @@ const SignIn = () => {
       
       window.dispatchEvent(new Event('storage'));
       
+      // Use replace to avoid having the login page in the history
       navigate(destination, { replace: true });
       
     } catch (error) {

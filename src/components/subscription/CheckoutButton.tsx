@@ -46,15 +46,17 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     // Check for user authentication - first try props, then cookies
     const effectiveProfileId = profileId || Cookies.get('profile_id');
     const effectiveEmail = email || Cookies.get('user_email');
+    const isAuthorized = Cookies.get('profile_authorized') === 'true';
     
     console.log("Checkout attempt with:", { 
       profileId: effectiveProfileId, 
       email: effectiveEmail,
-      cookieAuth: !!Cookies.get('profile_authorized')
+      cookieAuth: isAuthorized,
+      allCookies: Object.keys(Cookies.get())
     });
 
-    if (!effectiveProfileId && !effectiveEmail) {
-      // If no user info, redirect to sign in page with redirect back to subscribe
+    if (!isAuthorized || (!effectiveProfileId && !effectiveEmail)) {
+      // If no user info or not authorized, redirect to sign in page with redirect back to subscribe
       toast({
         title: "Authentication Required",
         description: "Please sign in to continue with your purchase.",
