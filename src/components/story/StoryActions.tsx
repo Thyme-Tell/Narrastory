@@ -28,24 +28,26 @@ const StoryActions = ({
   onDelete 
 }: StoryActionsProps) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 mb-3">
       {onListen && (
-        <Button variant="outline" size="icon" onClick={onListen}>
-          <Headphones className="h-4 w-4" />
+        <Button variant="outline" size="sm" onClick={onListen}>
+          <Headphones className="h-4 w-4 mr-2" />
+          Listen
         </Button>
       )}
       
-      <Button variant="outline" size="icon" onClick={onEdit}>
-        <Pencil className="h-4 w-4" />
+      <Button variant="outline" size="sm" onClick={onEdit}>
+        <Pencil className="h-4 w-4 mr-2" />
+        Edit
       </Button>
       
-      <Button variant="outline" size="icon" onClick={onShare}>
+      <Button variant="outline" size="sm" onClick={onShare}>
         <Share2 className="h-4 w-4" />
       </Button>
       
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="icon">
+          <Button variant="outline" size="sm">
             <Trash2 className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>
