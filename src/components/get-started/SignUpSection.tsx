@@ -3,6 +3,7 @@ import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import ProfileForm from "@/components/ProfileForm";
 
 interface SignUpSectionProps {
@@ -25,9 +26,19 @@ const SignUpSection: React.FC<SignUpSectionProps> = ({ signUpRef }) => {
                 <h2 className="text-3xl md:text-4xl font-caslon font-thin text-[#242F3F] mb-6 md:mb-6 text-center">
                   Join Narra
                 </h2>
-                <p className="text-sm text-[#403E43]/80">
+                <p className="text-sm text-[#403E43]/80 text-center mb-4">
                   Preserve your most meaningful stories for generations to come, wherever you are, whenever you want.
                 </p>
+                
+                {/* Add sign-in link */}
+                <div className="text-center mb-4">
+                  <Link 
+                    to="/sign-in" 
+                    className="text-[#A33D29] hover:underline text-sm"
+                  >
+                    Already signed up? Sign in
+                  </Link>
+                </div>
               </div>
               
               <div className="flex flex-col gap-6">

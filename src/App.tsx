@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route, useParams, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import SignIn from "./pages/SignIn";
@@ -12,11 +12,18 @@ import PasswordResetConfirm from "./components/PasswordResetConfirm";
 import { AuthProvider } from "./contexts/AuthContext";
 import BookPreviewPage from "./pages/BookPreviewPage";
 import GetStarted from "./pages/GetStarted";
+import SeniorLiving from "./pages/SeniorLiving"; // Add new import
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import SubscribePage from "./pages/SubscribePage";
+import LifetimeCheckoutPage from "./pages/LifetimeCheckoutPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCanceledPage from './pages/PaymentCanceledPage';
+import BookPurchasePage from './pages/BookPurchasePage';
+import AdminPage from './pages/AdminPage';
 import { Toaster } from "@/components/ui/toaster";
 
-// Wrapper component to pass the storyBookId from URL params
 const StoryBookSettingsWrapper = () => {
   const params = useParams();
   return <StoryBookSettings storyBookId={params.id!} />;
@@ -24,7 +31,7 @@ const StoryBookSettingsWrapper = () => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -38,13 +45,23 @@ function App() {
           <Route path="/reset-password" element={<PasswordResetRequest />} />
           <Route path="/reset-password/confirm" element={<PasswordResetConfirm />} />
           <Route path="/book-preview/:profileId" element={<BookPreviewPage />} />
+          <Route path="/book-purchase/:profileId" element={<BookPurchasePage />} />
           <Route path="/get-started" element={<GetStarted />} />
+          <Route path="/senior-living" element={<SeniorLiving />} /> {/* Add new route */}
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/subscribe" element={<SubscribePage />} />
+          <Route path="/subscribe/:id" element={<SubscribePage />} />
+          <Route path="/lifetime-checkout/:id" element={<LifetimeCheckoutPage />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route path="/subscription/:id" element={<SubscriptionPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-canceled" element={<PaymentCanceledPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
         <Toaster />
       </AuthProvider>
-    </BrowserRouter>
+    </Router>
   );
 }
 

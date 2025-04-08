@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SignIn = () => {
   useEffect(() => {
@@ -21,6 +22,7 @@ const SignIn = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { toast } = useToast();
+  const { setRememberMe: updateRememberMe } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
@@ -28,6 +30,15 @@ const SignIn = () => {
     phoneNumber: "",
     password: "",
   });
+
+  // Capture the redirectTo parameter from URL or location state
+  const redirectTo = searchParams.get('redirectTo') || 
+                    (location.state as { redirectTo?: string })?.redirectTo || 
+                    null;
+  
+  useEffect(() => {
+    console.log("Redirect destination after login:", redirectTo);
+  }, [redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +63,7 @@ const SignIn = () => {
     try {
       const { data: profiles, error: searchError } = await supabase
         .from("profiles")
-        .select("id, password, first_name, last_name, phone_number")
+        .select("id, password, first_name, last_name, phone_number, email")
         .eq("phone_number", normalizedPhoneNumber);
 
       if (searchError) {
@@ -78,28 +89,48 @@ const SignIn = () => {
         return;
       }
 
+      // Update rememberMe in the AuthContext
+      updateRememberMe(rememberMe);
+      
       const expirationDays = rememberMe ? 365 : 7;
+      
+      // Clear existing cookies first
+      Cookies.remove('profile_authorized');
+      Cookies.remove('phone_number');
+      Cookies.remove('profile_id');
+      Cookies.remove('user_email');
+      
       console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
+      
+      // Set cookies immediately (no setTimeout)
       Cookies.set('profile_authorized', 'true', { expires: expirationDays });
       Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
       Cookies.set('profile_id', profile.id, { expires: expirationDays });
-
-      const redirectTo = searchParams.get('redirectTo') || 
-                        (location.state as { redirectTo?: string })?.redirectTo || 
-                        `/profile/${profile.id}`;
       
-      console.log("Login successful, redirecting to:", redirectTo);
+      // Also store email for admin authorization
+      if (profile.email) {
+        console.log("Setting email cookie:", profile.email);
+        Cookies.set('user_email', profile.email, { expires: expirationDays });
+      }
+      
+      // Determine redirect destination
+      const destination = redirectTo || `/profile/${profile.id}`;
+      console.log("Login successful, redirecting to:", destination);
       
       toast({
         title: "Welcome back!",
         description: `You've successfully signed in as ${profile.first_name}`,
       });
       
-      navigate(redirectTo, { replace: true });
+      // Trigger storage event to update auth state
+      window.dispatchEvent(new Event('storage'));
+      
+      // Navigate to destination
+      navigate(destination, { replace: true });
+      
     } catch (error) {
       console.error("Error during sign in:", error);
       setError("Something went wrong while signing in. Please try again later.");
-    } finally {
       setLoading(false);
     }
   };

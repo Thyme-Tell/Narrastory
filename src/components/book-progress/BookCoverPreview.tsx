@@ -1,37 +1,35 @@
 
-import CoverCanvas from "../cover/CoverCanvas";
-import { CoverData } from "../cover/CoverTypes";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { CoverData } from "@/components/cover/CoverTypes";
+import CoverCanvas from "@/components/cover/CoverCanvas";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BookCoverPreviewProps {
   coverData: CoverData;
   isLoading: boolean;
+  compact?: boolean;
 }
 
-const BookCoverPreview = ({ coverData, isLoading }: BookCoverPreviewProps) => {
-  const isMobile = useIsMobile();
-  const width = isMobile ? 150 : 150;
-  const height = Math.round(width * (8/5));
-  const scale = 2;
-  
+const BookCoverPreview = ({ coverData, isLoading, compact = false }: BookCoverPreviewProps) => {
   if (isLoading) {
-    return (
-      <div className="w-full flex justify-center p-[10px]">
-        <div className="w-[150px] aspect-[5/8] bg-gray-200 rounded-lg animate-pulse" />
-      </div>
-    );
+    return <Skeleton className={`w-full ${compact ? 'h-16' : 'aspect-[5/8]'} mx-auto rounded-sm`} />;
   }
 
   return (
-    <div className="w-full flex justify-center p-[10px]">
-      <div className="w-[150px] h-full overflow-hidden rounded-lg relative aspect-[5/8] bg-white">
-        <div className="absolute left-0 top-0 w-[10px] h-full bg-gradient-to-r from-gray-400/40 to-transparent z-10" />
+    <div className={`w-full h-full flex items-center justify-center ${compact ? 'p-0' : 'p-2'}`}>
+      <div 
+        className={`relative ${compact ? 'w-full h-full' : 'max-w-[240px] mx-auto'}`}
+        style={{ 
+          aspectRatio: !compact ? "5/8" : undefined,
+          height: compact ? "100%" : "auto",
+          maxHeight: "100%"
+        }}
+      >
         <CoverCanvas 
           coverData={coverData} 
-          width={width}
-          height={height}
-          scale={scale}
-          className="w-full h-full object-contain"
+          width={compact ? 48 : 240}
+          height={compact ? 64 : 384}
+          scale={compact ? 1 : 2}
+          className={`w-full h-full object-contain ${compact ? 'rounded-sm' : 'rounded-md shadow-md'}`}
         />
       </div>
     </div>

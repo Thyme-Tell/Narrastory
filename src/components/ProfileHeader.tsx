@@ -13,10 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
-  ArrowDown, 
-  ArrowUp,
   Phone,
-  Pencil 
+  Pencil, 
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
 
 interface ProfileHeaderProps {
   firstName: string;
@@ -47,13 +46,11 @@ const ProfileHeader = ({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
 
   const handleCreateStory = async () => {
     try {
       setIsSubmitting(true);
 
-      // Save to Supabase
       const { data, error } = await supabase
         .from("stories")
         .insert([
@@ -99,139 +96,42 @@ const ProfileHeader = ({
     }
   };
 
-  // Test function to verify the Synthflow endpoint is working
-  const testSynthflowEndpoint = async () => {
-    try {
-      setIsTesting(true);
-      
-      const testContent = "Test Story Title\nThis is a test story content to verify the Synthflow endpoint is working correctly.";
-      
-      console.log("Testing Synthflow endpoint with payload:", {
-        profile_id: profileId,
-        story_content: testContent,
-        metadata: {
-          user_id: profileId,
-          first_name: firstName,
-          last_name: lastName
-        }
-      });
-      
-      const { data, error } = await supabase.functions.invoke('synthflow-story-save', {
-        method: 'POST',
-        body: JSON.stringify({
-          profile_id: profileId,
-          story_content: testContent,
-          metadata: {
-            user_id: profileId,
-            first_name: firstName,
-            last_name: lastName
-          }
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (error) {
-        console.error('Error in test call to Synthflow endpoint:', error);
-        toast({
-          title: "Test Failed",
-          description: "Error calling Synthflow endpoint: " + error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Synthflow test response:', data);
-      toast({
-        title: "Test Success",
-        description: "Synthflow endpoint working correctly",
-      });
-      
-      // Refresh the stories list
-      onUpdate();
-    } catch (err) {
-      console.error('Exception in Synthflow test:', err);
-      toast({
-        title: "Test Failed",
-        description: "Exception: " + (err instanceof Error ? err.message : String(err)),
-        variant: "destructive",
-      });
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold font-sans text-left">
           Your Stories
         </h1>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-            {sortOrder === 'newest' ? (
-              <ArrowDown className="h-3.5 w-3.5 mr-1" />
-            ) : (
-              <ArrowUp className="h-3.5 w-3.5 mr-1" />
-            )}
-            <span>{sortOrder === 'newest' ? 'Recent first' : 'Oldest first'}</span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-white">
-            <DropdownMenuItem
-              onClick={() => onSortChange('newest')}
-              className={`${sortOrder === 'newest' ? 'bg-accent' : ''}`}
-            >
-              <ArrowDown className="h-3.5 w-3.5 mr-2" />
-              Recent first
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onSortChange('oldest')}
-              className={`${sortOrder === 'oldest' ? 'bg-accent' : ''}`}
-            >
-              <ArrowUp className="h-3.5 w-3.5 mr-2" />
-              Oldest first
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => onSortChange(sortOrder === 'newest' ? 'oldest' : 'newest')}
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+        >
+          {sortOrder === 'newest' ? 'Recent first' : 'Oldest first'}
+        </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
+      <Card className="bg-white/90 border overflow-hidden">
+        <div className="p-4 space-y-4">
           <Button 
-            className="w-full bg-[#A33D29] hover:bg-[#A33D29]/90 text-white"
+            className="w-full h-12 bg-[#A33D29] hover:bg-[#A33D29]/90 text-white text-base"
             onClick={() => window.location.href = "tel:+15072003303"}
           >
-            <Phone className="mr-2 h-4 w-4" />
+            <Phone className="mr-2 h-5 w-5" />
             Share Your Story by Phone
           </Button>
-          <p className="text-sm text-muted-foreground text-center">
-            <a href="tel:+15072003303" className="text-[#A33D29] hover:underline">+1 (507) 200-3303</a>
-          </p>
+          
+          <Button 
+            variant="outline"
+            onClick={() => setIsDialogOpen(true)}
+            className="w-full h-12 border-[#A33D29] text-[#A33D29] hover:bg-[#A33D29]/10"
+          >
+            <Pencil className="mr-2 h-5 w-5" />
+            Write a Story
+          </Button>
         </div>
-        
-        <Button 
-          variant="outline"
-          onClick={() => setIsDialogOpen(true)}
-          className="h-[40px]"
-        >
-          <Pencil className="mr-2 h-4 w-4" />
-          Write a Story
-        </Button>
-      </div>
-
-      {/* Hidden test button in development - enable if needed for testing */}
-      {process.env.NODE_ENV === 'development' && (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={testSynthflowEndpoint}
-          disabled={isTesting}
-          className="mt-2 text-xs"
-        >
-          {isTesting ? 'Testing...' : 'Test Synthflow Endpoint'}
-        </Button>
-      )}
+      </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-white">

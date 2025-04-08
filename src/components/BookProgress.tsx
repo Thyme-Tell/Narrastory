@@ -12,10 +12,20 @@ import BookEditorModals from "./book-progress/BookEditorModals";
 import BookProgressInfo from "./book-progress/BookProgressInfo";
 import BookProgressStats from "./book-progress/BookProgressStats";
 import BookProgressActions from "./book-progress/BookProgressActions";
+import { Button } from "@/components/ui/button";
+import { BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { calculateTotalPages } from "@/utils/bookPagination";
 
-export function BookProgress({ profileId }: { profileId: string }) {
+interface BookProgressProps {
+  profileId: string;
+  onExpandToggle?: (expanded: boolean) => void;
+}
+
+export function BookProgress({ profileId, onExpandToggle }: BookProgressProps) {
   const [isHidden, setIsHidden] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   
   const { 
@@ -67,6 +77,14 @@ export function BookProgress({ profileId }: { profileId: string }) {
     }
   }, [profileId, refreshCoverData]);
 
+  // Handle expansion state change and propagate to parent
+  const handleExpansionChange = (open: boolean) => {
+    setIsExpanded(open);
+    if (onExpandToggle) {
+      onExpandToggle(open);
+    }
+  };
+
   const handleOpenCoverEditor = () => {
     refreshCoverData();
     setIsEditorOpen(true);
@@ -100,38 +118,84 @@ export function BookProgress({ profileId }: { profileId: string }) {
   if (!stories?.length) {
     return <BookProgressHeader setIsHidden={setIsHidden} />;
   }
+  
+  // Calculate total page count
+  const totalPageCount = calculateTotalPages(stories);
 
   return (
-    <div className="mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
-        <div>
-          <BookProgressInfo 
-            coverData={coverData}
-            profileFirstName={profile?.first_name}
-            profileLastName={profile?.last_name}
-            onOpenCoverEditor={handleOpenCoverEditor}
-          />
-          
-          <BookProgressStats 
-            stories={stories}
-            scrollToTableOfContents={scrollToTableOfContents}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-muted/30 rounded-lg p-4">
-            <BookCoverPreview 
-              coverData={coverData}
-              isLoading={isCoverLoading}
-            />
+    <div className="mb-0"> {/* Removed mb-8 to eliminate space */}
+      <Collapsible 
+        open={isExpanded} 
+        onOpenChange={handleExpansionChange}
+        className="w-full border rounded-lg bg-white/90 shadow overflow-hidden transition-all duration-300 ease-in-out"
+      >
+        <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-16 overflow-hidden rounded flex-shrink-0">
+              <BookCoverPreview 
+                coverData={coverData}
+                isLoading={isCoverLoading}
+                compact={true}
+              />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg leading-tight">{coverData.titleText || "My Stories"}</h3>
+              <p className="text-sm text-muted-foreground">
+                {profile?.first_name} {profile?.last_name} • {stories.length} {stories.length === 1 ? 'story' : 'stories'} 
+                {/* Added page count to collapsed view */}
+                <span className="ml-1 inline-flex items-center">
+                  <BookOpen className="h-3.5 w-3.5 mr-1 text-[#155B4A]" />
+                  {totalPageCount} pages
+                </span>
+              </p>
+            </div>
           </div>
           
-          <BookProgressActions 
-            onPreviewBook={handlePreviewBook}
-            onOpenCoverEditor={handleOpenCoverEditor}
-          />
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+              {isExpanded ? 
+                <ChevronUp className="h-4 w-4" /> : 
+                <ChevronDown className="h-4 w-4" />
+              }
+              <span className="sr-only">Toggle book details</span>
+            </Button>
+          </CollapsibleTrigger>
         </div>
-      </div>
+        
+        <CollapsibleContent>
+          <div className="px-4 pb-4 border-t pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
+              <div>
+                <BookProgressInfo 
+                  coverData={coverData}
+                  profileFirstName={profile?.first_name}
+                  profileLastName={profile?.last_name}
+                  onOpenCoverEditor={handleOpenCoverEditor}
+                />
+                
+                <BookProgressStats 
+                  stories={stories}
+                  scrollToTableOfContents={scrollToTableOfContents}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-muted/30 rounded-lg p-4 flex items-center justify-center" style={{ minHeight: "320px" }}>
+                  <BookCoverPreview 
+                    coverData={coverData}
+                    isLoading={isCoverLoading}
+                  />
+                </div>
+                
+                <BookProgressActions 
+                  onPreviewBook={handlePreviewBook}
+                  onOpenCoverEditor={handleOpenCoverEditor}
+                />
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <BookEditorModals
         profileId={profileId}
