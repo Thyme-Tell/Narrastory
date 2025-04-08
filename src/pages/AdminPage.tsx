@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,12 +10,20 @@ import { useToast } from '@/components/ui/use-toast';
  * Only accessible to user with email: mia@narrastory.com
  */
 const AdminPage: React.FC = () => {
-  const { isAuthenticated, checkAuth, userEmail } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+
+  // Get email from user object
+  const userEmail = user?.email;
+
+  // Local implementation of checkAuth
+  const checkAuth = async () => {
+    return isAuthenticated;
+  };
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -54,7 +61,7 @@ const AdminPage: React.FC = () => {
     };
 
     verifyAuth();
-  }, [checkAuth, navigate, location.pathname, userEmail, toast]);
+  }, [navigate, location.pathname, userEmail, toast, isAuthenticated]);
 
   if (isLoading) {
     return (

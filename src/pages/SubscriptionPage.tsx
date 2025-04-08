@@ -9,7 +9,10 @@ import { useAuth } from '@/contexts/AuthContext';
 const SubscriptionPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { profileId, isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Using user?.id instead of profileId
+  const profileId = user?.id;
   
   // Redirect if not authenticated or trying to access someone else's subscription
   React.useEffect(() => {
@@ -35,7 +38,7 @@ const SubscriptionPage: React.FC = () => {
         <h1 className="text-2xl font-bold font-serif">Subscription Management</h1>
       </div>
       
-      <SubscriptionDashboard profileId={id || profileId} />
+      <SubscriptionDashboard profileId={id || profileId || ''} />
     </div>
   );
 };

@@ -10,7 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { isAuthenticated, profileId } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Using user?.id instead of profileId
+  const profileId = user?.id;
 
   const menuItems = [
     {

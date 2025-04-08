@@ -15,6 +15,7 @@ interface BookPurchaseContextValue {
   bookPrice: number;
   isPurchaseInProgress: boolean;
   purchaseError: string | null;
+  remainingCredits: number; // Added this property
   completePurchase: () => Promise<void>;
   cancelPurchase: () => void;
 }
@@ -31,6 +32,8 @@ export const BookPurchaseProvider: React.FC<BookPurchaseContextProps & { childre
 }) => {
   const [isPurchaseInProgress, setIsPurchaseInProgress] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  // Default value for remaining credits
+  const [remainingCredits] = useState(1);
 
   const completePurchase = async () => {
     setIsPurchaseInProgress(true);
@@ -63,6 +66,7 @@ export const BookPurchaseProvider: React.FC<BookPurchaseContextProps & { childre
     bookPrice,
     isPurchaseInProgress,
     purchaseError,
+    remainingCredits, // Added this property to the context value
     completePurchase,
     cancelPurchase
   };

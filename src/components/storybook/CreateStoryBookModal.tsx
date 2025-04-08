@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import FormField from "@/components/FormField";
@@ -20,13 +19,12 @@ export function CreateStoryBookModal({ onSuccess, children }: CreateStoryBookMod
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isAuthenticated, profileId, checkAuth } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  const profileId = user?.id;
 
   useEffect(() => {
-    if (open) {
-      checkAuth();
-    }
-  }, [open, checkAuth]);
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
