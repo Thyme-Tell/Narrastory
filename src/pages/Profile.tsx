@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
-// import UpgradePrompt from "@/components/subscription/UpgradePrompt";  // Commented out
+import UpgradePrompt from "@/components/subscription/UpgradePrompt";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
 import { toast } from "sonner";
 
@@ -30,7 +30,6 @@ const Profile = () => {
   
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-  // Get profile data to extract email for subscription lookup
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: async () => {
@@ -52,7 +51,6 @@ const Profile = () => {
     enabled: isValidUUID,
   });
   
-  // Now we get subscription status using email when available
   const { 
     status: subscriptionStatus, 
     isStatusLoading, 
@@ -71,7 +69,6 @@ const Profile = () => {
   }, [id, profile?.email]);
 
   useEffect(() => {
-    // Log subscription status for debugging
     console.log("Current subscription status:", subscriptionStatus);
     if (statusError) {
       console.error("Subscription status error:", statusError);
@@ -201,12 +198,11 @@ const Profile = () => {
             />
           </div>
           
-          {/* Comment out Lifetime Offer Banner */}
-          {/* {!isStatusLoading && !subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
+          {!isStatusLoading && !subscriptionStatus.isLifetime && !subscriptionStatus.isPremium && (
             <div className="my-4">
               <LifetimeOfferBanner profileId={id} />
             </div>
-          )} */}
+          )}
           
           <ProfileHeader 
             firstName={profile.first_name} 
@@ -224,19 +220,17 @@ const Profile = () => {
             sortOrder={sortOrder}
           />
           
-          {/* Comment out Upgrade Prompt Card */}
-          {/* {!isStatusLoading && !subscriptionStatus.isPremium && stories && stories.length > 5 && (
+          {!isStatusLoading && !subscriptionStatus.isPremium && stories && stories.length > 5 && (
             <div className="mt-6">
               <UpgradePrompt profileId={id} variant="card" />
             </div>
-          )} */}
+          )}
         </div>
       </div>
       
-      {/* Comment out Floating Upgrade Prompt */}
-      {/* {!isStatusLoading && !subscriptionStatus.isPremium && (
+      {!isStatusLoading && !subscriptionStatus.isPremium && (
         <UpgradePrompt profileId={id} variant="floating" />
-      )} */}
+      )}
       
       <ScrollToTopButton />
     </div>
