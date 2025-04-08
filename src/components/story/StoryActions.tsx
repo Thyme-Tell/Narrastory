@@ -28,7 +28,7 @@ const StoryActions = ({
   onDelete 
 }: StoryActionsProps) => {
   return (
-    <div className="flex items-center space-x-2 mb-3">
+    <div className="flex items-center space-x-2 mb-4">
       {onListen && (
         <Button variant="outline" size="sm" onClick={onListen}>
           <Headphones className="h-4 w-4 mr-2" />

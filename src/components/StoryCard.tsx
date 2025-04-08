@@ -71,14 +71,8 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             <h2 className="text-xl font-semibold mb-2">{story.title}</h2>
           )}
           
-          <StoryActions
-            onListen={() => {/* TODO: Implement listen functionality */}}
-            onEdit={() => setIsEditing(true)}
-            onShare={onShare}
-            onDelete={handleDelete}
-          />
-          
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground my-2">
+          {/* Date and word count right after title, before buttons */}
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-3">
             <span>{formattedDate}</span>
             <span>•</span>
             <div className="flex items-center">
@@ -87,8 +81,15 @@ const StoryCard = ({ story, onUpdate }: StoryCardProps) => {
             </div>
           </div>
           
+          <StoryActions
+            onListen={() => {/* TODO: Implement listen functionality */}}
+            onEdit={() => setIsEditing(true)}
+            onShare={onShare}
+            onDelete={handleDelete}
+          />
+          
           <StoryContent
-            title={story.title}
+            title={null} // Pass null to prevent duplicate title
             content={story.content}
             storyId={story.id}
             onUpdate={onUpdate}
