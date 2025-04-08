@@ -58,12 +58,12 @@ export const useStripeCheckout = () => {
         let foundProduct = false;
         
         // Handle the direct product ID case (when we're passing actual product IDs)
-        if (options.priceId === STRIPE_PRODUCTS.ANNUAL_PLUS && setupData.lifetime?.priceId) {
-          actualPriceId = setupData.lifetime.priceId;
+        if (options.priceId === STRIPE_PRODUCTS.ANNUAL_PLUS && setupData.annualPlus?.priceId) {
+          actualPriceId = setupData.annualPlus.priceId;
           foundProduct = true;
           console.log(`Found annual plus product, using price ID: ${actualPriceId}`);
-        } else if (options.priceId === STRIPE_PRODUCTS.LIFETIME && setupData.annualPlus?.priceId) {
-          actualPriceId = setupData.annualPlus.priceId;
+        } else if (options.priceId === STRIPE_PRODUCTS.LIFETIME && setupData.lifetime?.priceId) {
+          actualPriceId = setupData.lifetime.priceId;
           foundProduct = true;
           console.log(`Found lifetime product, using price ID: ${actualPriceId}`);
         } else if (options.priceId === STRIPE_PRODUCTS.FIRST_BOOK && setupData.firstBook?.priceId) {
@@ -77,12 +77,12 @@ export const useStripeCheckout = () => {
         }
         
         // Fallback to legacy ID handling
-        if (!foundProduct && options.priceId === 'ANNUAL_PLUS' && setupData.lifetime?.priceId) {
-          actualPriceId = setupData.lifetime.priceId;
+        if (!foundProduct && options.priceId === 'ANNUAL_PLUS' && setupData.annualPlus?.priceId) {
+          actualPriceId = setupData.annualPlus.priceId;
           foundProduct = true;
           console.log(`Found annual plus product (legacy ID), using price ID: ${actualPriceId}`);
-        } else if (!foundProduct && options.priceId === 'LIFETIME' && setupData.annualPlus?.priceId) {
-          actualPriceId = setupData.annualPlus.priceId;
+        } else if (!foundProduct && options.priceId === 'LIFETIME' && setupData.lifetime?.priceId) {
+          actualPriceId = setupData.lifetime.priceId;
           foundProduct = true;
           console.log(`Found lifetime product (legacy ID), using price ID: ${actualPriceId}`);
         }

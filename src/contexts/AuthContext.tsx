@@ -29,8 +29,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
+    // First set up the auth listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setProfileId(session?.user?.id ?? null);
