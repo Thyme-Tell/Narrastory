@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ArrowLeft, Sparkles } from 'lucide-react';
@@ -26,7 +25,6 @@ const PlanSelectionScreen: React.FC = () => {
   const { getPlanPrice, status, isStatusLoading } = useSubscriptionService(user?.id);
   
   useEffect(() => {
-    // Check if user is authenticated
     const isAuthorized = Cookies.get('profile_authorized') === 'true';
     const profileId = Cookies.get('profile_id');
     const userEmail = Cookies.get('user_email');
@@ -43,11 +41,9 @@ const PlanSelectionScreen: React.FC = () => {
     }
   }, [user]);
   
-  // Prevent premium users from re-selecting plans they already have
   const isPremium = status?.isPremium || false;
   const isLifetime = status?.isLifetime || false;
   
-  // Redirect if already lifetime subscriber
   useEffect(() => {
     if (isLifetime && user?.id) {
       navigate(`/profile/${user.id}`);
@@ -78,7 +74,7 @@ const PlanSelectionScreen: React.FC = () => {
         </div>
         
         {showAuthWarning && (
-          <Alert variant="warning" className="mb-6 bg-amber-50 border-amber-200">
+          <Alert variant="destructive" className="mb-6 bg-amber-50 border-amber-200">
             <AlertDescription className="text-amber-800 flex items-center justify-between">
               <span>Please sign in to complete your purchase. You need to be logged in to subscribe.</span>
               <Button 
