@@ -33,18 +33,66 @@ serve(async (req) => {
   // Initialize Supabase client
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
   const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Supabase credentials missing');
+    return new Response(
+      JSON.stringify({ 
+        error: 'Configuration error',
+        hasSubscription: false,
+        isPremium: false,
+        isLifetime: false,
+        subscriptionData: null,
+        features: {
+          storageLimit: 100,
+          booksLimit: 1,
+          collaboratorsLimit: 0,
+          aiGeneration: false,
+          customTTS: false,
+          advancedEditing: false,
+          prioritySupport: false
+        },
+        planType: 'free'
+      }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+  
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
     // Parse the request body
-    const reqBody = await req.json();
+    let reqBody;
+    try {
+      reqBody = await req.json();
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      reqBody = {};
+    }
+    
     const { profileId, email, forceRefresh = false } = reqBody;
 
     // Validate inputs - need at least profileId or email
     if (!profileId && !email) {
       console.error('Missing profileId or email');
       return new Response(
-        JSON.stringify({ error: 'Profile ID or email is required' }),
+        JSON.stringify({ 
+          error: 'Profile ID or email is required',
+          hasSubscription: false,
+          isPremium: false,
+          isLifetime: false,
+          subscriptionData: null,
+          features: {
+            storageLimit: 100,
+            booksLimit: 1,
+            collaboratorsLimit: 0,
+            aiGeneration: false,
+            customTTS: false,
+            advancedEditing: false,
+            prioritySupport: false
+          },
+          planType: 'free'
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -58,26 +106,68 @@ serve(async (req) => {
     // If email is provided but not profileId, look up the profile
     if (!userId && email) {
       console.log(`Looking up profile ID for email: ${email}`);
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle();
-        
-      if (profileError) {
-        console.error('Error looking up profile:', profileError);
-        return new Response(
-          JSON.stringify({ error: `Error looking up profile: ${profileError.message}` }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
       
-      if (profileData) {
-        userId = profileData.id;
-        console.log(`Found profile ID: ${userId}`);
-      } else {
-        console.log(`No profile found for email: ${email}`);
-        // Return default subscription status for non-subscribed users
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .maybeSingle();
+          
+        if (profileError) {
+          console.error('Error looking up profile:', profileError);
+          return new Response(
+            JSON.stringify({ 
+              error: `Error looking up profile: ${profileError.message}`,
+              hasSubscription: false,
+              isPremium: false,
+              isLifetime: false,
+              subscriptionData: null,
+              features: {
+                storageLimit: 100,
+                booksLimit: 1,
+                collaboratorsLimit: 0,
+                aiGeneration: false,
+                customTTS: false,
+                advancedEditing: false,
+                prioritySupport: false
+              },
+              planType: 'free'
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        if (profileData) {
+          userId = profileData.id;
+          console.log(`Found profile ID: ${userId}`);
+        } else {
+          console.log(`No profile found for email: ${email}`);
+          // Return default subscription status for non-subscribed users
+          return new Response(
+            JSON.stringify({
+              hasSubscription: false,
+              isPremium: false,
+              isLifetime: false,
+              subscriptionData: null,
+              features: {
+                // Default free-tier features
+                storageLimit: 100,
+                booksLimit: 1,
+                collaboratorsLimit: 0,
+                aiGeneration: false,
+                customTTS: false,
+                advancedEditing: false,
+                prioritySupport: false
+              },
+              planType: 'free'
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      } catch (error) {
+        console.error('Unexpected error in profile lookup:', error);
+        // Return default response on error
         return new Response(
           JSON.stringify({
             hasSubscription: false,
@@ -93,7 +183,8 @@ serve(async (req) => {
               customTTS: false,
               advancedEditing: false,
               prioritySupport: false
-            }
+            },
+            planType: 'free'
           }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -101,22 +192,63 @@ serve(async (req) => {
     }
     
     // Now get subscription data from database
-    const { data: dbSubscription, error: dbError } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
+    try {
+      const { data: dbSubscription, error: dbError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+        
+      if (dbError) {
+        console.error('Error fetching subscription from database:', dbError);
+        return new Response(
+          JSON.stringify({ 
+            error: `Error fetching subscription: ${dbError.message}`,
+            hasSubscription: false,
+            isPremium: false,
+            isLifetime: false,
+            subscriptionData: null,
+            features: {
+              storageLimit: 100,
+              booksLimit: 1,
+              collaboratorsLimit: 0,
+              aiGeneration: false,
+              customTTS: false,
+              advancedEditing: false,
+              prioritySupport: false
+            },
+            planType: 'free'
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
-    if (dbError) {
-      console.error('Error fetching subscription from database:', dbError);
+      subscriptionData = dbSubscription;
+      console.log(`Database subscription data:`, subscriptionData);
+    } catch (error) {
+      console.error('Unexpected error fetching subscription:', error);
+      // Return default response on error
       return new Response(
-        JSON.stringify({ error: `Error fetching subscription: ${dbError.message}` }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          hasSubscription: false,
+          isPremium: false,
+          isLifetime: false,
+          subscriptionData: null,
+          features: {
+            // Default free-tier features
+            storageLimit: 100,
+            booksLimit: 1,
+            collaboratorsLimit: 0,
+            aiGeneration: false,
+            customTTS: false,
+            advancedEditing: false,
+            prioritySupport: false
+          },
+          planType: 'free'
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    subscriptionData = dbSubscription;
-    console.log(`Database subscription data:`, subscriptionData);
     
     // If forceRefresh or we need to verify with Stripe
     if ((forceRefresh || !subscriptionData) && subscriptionData?.stripe_subscription_id) {
@@ -126,47 +258,56 @@ serve(async (req) => {
       const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
       console.log(`Using Stripe key: ${stripeSecretKey ? 'Available' : 'Not available'}`);
       
-      const stripe = new Stripe(stripeSecretKey || "", {
-        apiVersion: '2023-10-16',
-      });
-      
-      try {
-        // Get the subscription from Stripe
-        console.log(`Fetching subscription from Stripe: ${subscriptionData.stripe_subscription_id}`);
-        const stripeSubscription = await stripe.subscriptions.retrieve(
-          subscriptionData.stripe_subscription_id
-        );
-        
-        console.log(`Stripe subscription status: ${stripeSubscription.status}`);
-        console.log(`Stripe subscription details:`, JSON.stringify(stripeSubscription, null, 2));
-        
-        // Update our database if the status has changed
-        if (stripeSubscription.status !== subscriptionData.status) {
-          console.log(`Updating subscription status from ${subscriptionData.status} to ${stripeSubscription.status}`);
-          
-          const { error: updateError } = await supabase
-            .from('subscriptions')
-            .update({
-              status: stripeSubscription.status,
-              current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
-              current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', userId);
-            
-          if (updateError) {
-            console.error(`Error updating subscription: ${updateError.message}`);
-          } else {
-            console.log(`Successfully updated subscription in database`);
-            // Update the local subscription data with the new status
-            subscriptionData.status = stripeSubscription.status;
-            subscriptionData.current_period_start = new Date(stripeSubscription.current_period_start * 1000).toISOString();
-            subscriptionData.current_period_end = new Date(stripeSubscription.current_period_end * 1000).toISOString();
-          }
-        }
-      } catch (stripeError) {
-        console.error(`Error refreshing Stripe subscription: ${stripeError.message}`);
+      if (!stripeSecretKey) {
+        console.error('Stripe key not configured');
         // Continue with the local data we have instead of failing
+      } else {
+        try {
+          const stripe = new Stripe(stripeSecretKey || "", {
+            apiVersion: '2023-10-16',
+          });
+          
+          // Get the subscription from Stripe
+          console.log(`Fetching subscription from Stripe: ${subscriptionData.stripe_subscription_id}`);
+          const stripeSubscription = await stripe.subscriptions.retrieve(
+            subscriptionData.stripe_subscription_id
+          );
+          
+          console.log(`Stripe subscription status: ${stripeSubscription.status}`);
+          
+          // Update our database if the status has changed
+          if (stripeSubscription.status !== subscriptionData.status) {
+            console.log(`Updating subscription status from ${subscriptionData.status} to ${stripeSubscription.status}`);
+            
+            try {
+              const { error: updateError } = await supabase
+                .from('subscriptions')
+                .update({
+                  status: stripeSubscription.status,
+                  current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
+                  current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId);
+                
+              if (updateError) {
+                console.error(`Error updating subscription: ${updateError.message}`);
+              } else {
+                console.log(`Successfully updated subscription in database`);
+                // Update the local subscription data with the new status
+                subscriptionData.status = stripeSubscription.status;
+                subscriptionData.current_period_start = new Date(stripeSubscription.current_period_start * 1000).toISOString();
+                subscriptionData.current_period_end = new Date(stripeSubscription.current_period_end * 1000).toISOString();
+              }
+            } catch (updateError) {
+              console.error('Error updating subscription in database:', updateError);
+              // Continue with the updated local data we have
+            }
+          }
+        } catch (stripeError) {
+          console.error(`Error refreshing Stripe subscription: ${stripeError.message}`);
+          // Continue with the local data we have instead of failing
+        }
       }
     }
     
@@ -231,7 +372,23 @@ serve(async (req) => {
   } catch (error) {
     console.error(`Unhandled error: ${error.message}`);
     return new Response(
-      JSON.stringify({ error: `Internal server error: ${error.message}` }),
+      JSON.stringify({ 
+        error: `Internal server error: ${error.message}`,
+        hasSubscription: false,
+        isPremium: false,
+        isLifetime: false,
+        subscriptionData: null,
+        features: {
+          storageLimit: 100,
+          booksLimit: 1,
+          collaboratorsLimit: 0,
+          aiGeneration: false,
+          customTTS: false,
+          advancedEditing: false,
+          prioritySupport: false
+        },
+        planType: 'free'
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

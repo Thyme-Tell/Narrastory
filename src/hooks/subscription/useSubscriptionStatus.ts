@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { subscriptionService } from '@/services/SubscriptionService';
 import { SubscriptionStatusResult } from '@/types/subscription';
 import Cookies from 'js-cookie';
+import { toast } from '@/hooks/use-toast';
 
 /**
  * Hook to get subscription status
@@ -50,7 +51,7 @@ export const useSubscriptionStatus = (
     error,
     refetch
   } = useQuery({
-    queryKey: ['subscription-status', effectiveProfileId, effectiveEmail, forceRefresh, Date.now()],
+    queryKey: ['subscription-status', effectiveProfileId, effectiveEmail, forceRefresh],
     queryFn: async () => {
       console.log(`Fetching subscription status for profile: ${effectiveProfileId}, email: ${effectiveEmail}, force refresh: ${forceRefresh}`);
       try {
@@ -60,14 +61,23 @@ export const useSubscriptionStatus = (
         return result;
       } catch (error) {
         console.error('Error fetching subscription status:', error);
+        // Show error toast only if not in development mode (to avoid spamming)
+        if (process.env.NODE_ENV !== 'development') {
+          toast({
+            title: "Subscription Check Error",
+            description: "There was an issue checking your subscription status. Using free tier access for now.",
+            variant: "destructive",
+          });
+        }
         throw error;
       }
     },
     enabled: !!effectiveProfileId || !!effectiveEmail,
-    staleTime: 0, // Set stale time to 0 to always refetch
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    retry: 2, // Retry twice on failure
+    staleTime: 60000, // 1 minute stale time to reduce excessive fetching
+    refetchOnMount: true,
+    refetchOnWindowFocus: false, // Don't refetch on window focus to avoid excessive calls
+    retry: 1, // Retry once on failure
+    retryDelay: 1000, // Wait 1 second before retrying
   });
 
   // Helper function to get formatted status data with defaults
@@ -88,7 +98,7 @@ export const useSubscriptionStatus = (
       subscription: null,
       features: {
         storageLimit: 100,
-        booksLimit: 0,
+        booksLimit: 1,
         collaboratorsLimit: 0,
         aiGeneration: false,
         customTTS: false,
