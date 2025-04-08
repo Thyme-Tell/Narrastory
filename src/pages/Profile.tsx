@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
@@ -66,7 +67,7 @@ const Profile = () => {
     if (id || profile?.email) {
       fetchSubscriptionStatus();
     }
-  }, [id, profile?.email]);
+  }, [id, profile?.email, fetchSubscriptionStatus]);
 
   useEffect(() => {
     console.log("Current subscription status:", subscriptionStatus);
@@ -76,7 +77,7 @@ const Profile = () => {
     }
   }, [subscriptionStatus, statusError]);
 
-  if (!isValidUUID && !window.location.pathname.includes('/sign-in')) {
+  if (!isValidUUID && id !== undefined) {
     return <Navigate to="/sign-in" replace />;
   }
 
@@ -124,6 +125,16 @@ const Profile = () => {
 
   const handleBookExpandToggle = (expanded: boolean) => {
     setIsBookExpanded(expanded);
+  };
+
+  // Helper function to determine if we should show upgrade prompts
+  const shouldShowUpgradePrompts = () => {
+    if (isStatusLoading) return false;
+    
+    // Only show for free accounts - be extra cautious
+    return subscriptionStatus.planType === 'free' && 
+           !subscriptionStatus.isPremium && 
+           !subscriptionStatus.isLifetime;
   };
 
   if (isLoadingProfile) {
@@ -178,7 +189,7 @@ const Profile = () => {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
-                Not {profile.first_name}? Log Out
+                Not {profile?.first_name}? Log Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -198,16 +209,16 @@ const Profile = () => {
             />
           </div>
           
-          {!isStatusLoading && subscriptionStatus.planType === 'free' && (
+          {shouldShowUpgradePrompts() && (
             <div className="my-4">
               <LifetimeOfferBanner profileId={id} />
             </div>
           )}
           
           <ProfileHeader 
-            firstName={profile.first_name} 
-            lastName={profile.last_name}
-            profileId={profile.id}
+            firstName={profile?.first_name || ''} 
+            lastName={profile?.last_name || ''}
+            profileId={profile?.id || ''}
             onUpdate={refetchStories}
             sortOrder={sortOrder}
             onSortChange={setSortOrder}
@@ -220,7 +231,7 @@ const Profile = () => {
             sortOrder={sortOrder}
           />
           
-          {!isStatusLoading && subscriptionStatus.planType === 'free' && stories && stories.length > 5 && (
+          {shouldShowUpgradePrompts() && stories && stories.length > 5 && (
             <div className="mt-6">
               <UpgradePrompt profileId={id} variant="card" />
             </div>
@@ -228,7 +239,7 @@ const Profile = () => {
         </div>
       </div>
       
-      {!isStatusLoading && subscriptionStatus.planType === 'free' && (
+      {shouldShowUpgradePrompts() && (
         <UpgradePrompt profileId={id} variant="floating" />
       )}
       
