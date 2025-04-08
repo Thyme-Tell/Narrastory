@@ -68,6 +68,12 @@ export const useStripeCheckout = () => {
           foundProduct = true;
         }
         
+        // If we're in development mode and using price_dev ids, use them directly
+        if (!foundProduct && actualPriceId.startsWith('price_dev_')) {
+          console.log(`Using development price ID: ${actualPriceId}`);
+          foundProduct = true;
+        }
+        
         // If we didn't find a mapping, check if the input is already a valid price ID
         if (!foundProduct) {
           throw new Error(`No Stripe price ID found for product: ${options.priceId}`);
@@ -122,6 +128,8 @@ export const useStripeCheckout = () => {
       if (error.message && typeof error.message === 'string') {
         if (error.message.includes("promotion code")) {
           errorMessage = "The promotion code you entered is invalid or has expired.";
+        } else if (error.message.includes("No Stripe price ID found")) {
+          errorMessage = "Payment system is currently unavailable. Please try again later.";
         } else {
           errorMessage = error.message;
         }

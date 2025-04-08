@@ -57,10 +57,8 @@ const PlanSelectionScreen: React.FC = () => {
         return;
       }
       
-      const priceId = 'ANNUAL_PLUS';
-      
       await createCheckout.mutateAsync({
-        priceId,
+        priceId: STRIPE_PRODUCTS.ANNUAL_PLUS,
         profileId: userProfileId,
         promoCode: promoCode || undefined
       });

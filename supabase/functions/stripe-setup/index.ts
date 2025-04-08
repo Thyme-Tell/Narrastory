@@ -109,11 +109,15 @@ serve(async (req) => {
 
     // Create products and prices
     for (const config of productConfigurations) {
+      console.log(`Creating product: ${config.name}`);
+      
       const product = await stripe.products.create({
         name: config.name,
         description: config.description,
         metadata: config.metadata
       });
+      
+      console.log(`Created product with ID: ${product.id}`);
 
       for (const priceConfig of config.prices) {
         const priceData: any = {
@@ -128,6 +132,7 @@ serve(async (req) => {
         }
 
         const price = await stripe.prices.create(priceData);
+        console.log(`Created price with ID: ${price.id} for product ${product.id}`);
 
         createdProducts.push({
           productId: product.id,

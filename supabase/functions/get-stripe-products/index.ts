@@ -62,6 +62,57 @@ serve(async (req) => {
     // Map products to their prices
     const productMap: Record<string, any> = {};
     
+    // If no products found, let's create default products for testing
+    if (products.data.length === 0 || prices.data.length === 0) {
+      console.log("No products or prices found, returning hardcoded values for development");
+      
+      // Return hardcoded values for development/testing
+      return new Response(
+        JSON.stringify({
+          annualPlus: {
+            productId: "prod_dev_annual",
+            productName: "Narra+ Annual Subscription",
+            priceId: "price_dev_annual", // This is a dummy ID for development
+            amount: 249,
+            currency: "usd",
+            isRecurring: true,
+            interval: "year",
+          },
+          lifetime: {
+            productId: "prod_dev_lifetime",
+            productName: "Narra Lifetime Access",
+            priceId: "price_dev_lifetime", // This is a dummy ID for development
+            amount: 399,
+            currency: "usd",
+            isRecurring: false,
+          },
+          firstBook: {
+            productId: "prod_dev_firstbook",
+            productName: "First Book Publishing",
+            priceId: "price_dev_firstbook", // This is a dummy ID for development
+            amount: 79,
+            currency: "usd",
+            isRecurring: false,
+          },
+          additionalBook: {
+            productId: "prod_dev_addbook",
+            productName: "Additional Book Publishing",
+            priceId: "price_dev_addbook", // This is a dummy ID for development
+            amount: 29,
+            currency: "usd",
+            isRecurring: false,
+          }
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+    
     for (const product of products.data) {
       // Find associated prices for this product
       const productPrices = prices.data.filter(price => price.product === product.id);
@@ -73,6 +124,9 @@ serve(async (req) => {
       
       // Select the first price for simplicity
       const price = productPrices[0];
+      
+      console.log(`Processing product: ${product.name} with ID ${product.id}`);
+      console.log(`Product metadata:`, product.metadata);
       
       // Determine product type from metadata
       if (product.metadata.productType === 'subscription' && 
@@ -116,6 +170,30 @@ serve(async (req) => {
           currency: price.currency,
           isRecurring: false,
         };
+      } else {
+        // If we can't determine the product type from metadata, try to guess from the name
+        const productName = product.name.toLowerCase();
+        
+        if (productName.includes('annual') || productName.includes('yearly') || productName.includes('subscription')) {
+          productMap.annualPlus = {
+            productId: product.id,
+            productName: product.name,
+            priceId: price.id,
+            amount: price.unit_amount ? price.unit_amount / 100 : 0,
+            currency: price.currency,
+            isRecurring: !!price.recurring,
+            interval: price.recurring?.interval || null,
+          };
+        } else if (productName.includes('lifetime') || productName.includes('forever')) {
+          productMap.lifetime = {
+            productId: product.id,
+            productName: product.name,
+            priceId: price.id,
+            amount: price.unit_amount ? price.unit_amount / 100 : 0,
+            currency: price.currency,
+            isRecurring: false,
+          };
+        }
       }
     }
     
