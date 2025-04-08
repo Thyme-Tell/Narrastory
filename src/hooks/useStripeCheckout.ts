@@ -15,8 +15,8 @@ export interface CheckoutOptions {
 
 // Define product IDs - these should match the actual Stripe product IDs
 export const STRIPE_PRODUCTS = {
-  ANNUAL_PLUS: 'prod_S52DRcMxeWMRQ6',  // Updated to use correct annual product ID
-  LIFETIME: 'prod_S52DtoQFIZmzDL',      // Updated to use correct lifetime product ID
+  ANNUAL_PLUS: 'prod_S52DtoQFIZmzDL',  // Updated to use correct annual product ID
+  LIFETIME: 'prod_S52DRcMxeWMRQ6',      // Updated to use correct lifetime product ID
   FIRST_BOOK: 'FIRST_BOOK',
   ADDITIONAL_BOOK: 'ADDITIONAL_BOOK',
 };
