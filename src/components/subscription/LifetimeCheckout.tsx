@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, Shield, AlertCircle } from 'lucide-react';
@@ -62,7 +61,7 @@ const LifetimeCheckout: React.FC = () => {
       await createCheckout.mutateAsync({
         priceId: STRIPE_PRODUCTS.LIFETIME,
         profileId,
-        email: status.subscription?.user_email // Optional: pass user email
+        email: status.subscription?.email
       });
       // Note: The redirect happens in the useStripeCheckout hook
     } catch (error) {
