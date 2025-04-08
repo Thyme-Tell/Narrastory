@@ -1,4 +1,3 @@
-
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,12 +13,12 @@ export interface CheckoutOptions {
 }
 
 // Define product IDs - these should match price IDs from Stripe
-// These are the exact product IDs specified by the user
 export const STRIPE_PRODUCTS = {
-  ANNUAL_PLUS: 'prod_S52DtoQFIZmzDL', // Narra+ Yearly
-  LIFETIME: 'prod_S52DRcMxeWMRQ6',    // Narra+ Lifetime
-  FIRST_BOOK: 'FIRST_BOOK',           // Kept for backward compatibility
-  ADDITIONAL_BOOK: 'ADDITIONAL_BOOK', // Kept for backward compatibility
+  MONTHLY: 'prod_S52CgwPdKwxgXM',       // Narra+ Monthly
+  ANNUAL_PLUS: 'prod_S52DtoQFIZmzDL',   // Narra+ Yearly
+  LIFETIME: 'prod_S52DRcMxeWMRQ6',      // Narra+ Lifetime
+  FIRST_BOOK: 'FIRST_BOOK',             // Kept for backward compatibility
+  ADDITIONAL_BOOK: 'ADDITIONAL_BOOK',   // Kept for backward compatibility
 };
 
 /**
@@ -108,6 +107,16 @@ export const useStripeCheckout = () => {
     },
   });
 
+  // Helper function to create checkout for monthly subscription
+  const createMonthlyCheckout = (profileId?: string, email?: string, promoCode?: string) => {
+    return createCheckout.mutate({
+      priceId: STRIPE_PRODUCTS.MONTHLY,
+      profileId,
+      email,
+      promoCode,
+    });
+  };
+
   // Helper function to create checkout for annual subscription
   const createAnnualCheckout = (profileId?: string, email?: string, promoCode?: string) => {
     return createCheckout.mutate({
@@ -149,6 +158,7 @@ export const useStripeCheckout = () => {
 
   return {
     createCheckout,
+    createMonthlyCheckout,
     createAnnualCheckout,
     createLifetimeCheckout,
     createFirstBookCheckout,
