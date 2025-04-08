@@ -47,6 +47,10 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
   useEffect(() => {
     const checkAuth = () => {
       const authCookie = Cookies.get('profile_authorized');
+      console.log('CheckoutButton authentication check:', { 
+        authCookie, 
+        allCookies: Object.keys(Cookies.get())
+      });
       setIsAuthenticated(authCookie === 'true');
     };
     
@@ -72,6 +76,7 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     const effectiveEmail = email || Cookies.get('user_email');
     
     console.log("Checkout attempt with:", { 
+      planType,
       profileId: effectiveProfileId, 
       email: effectiveEmail,
       cookieAuth: authCookie,
@@ -81,6 +86,10 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     // Verify authentication
     if (authCookie !== 'true' || (!effectiveProfileId && !effectiveEmail)) {
       console.log("User not authenticated for checkout, redirecting to sign in");
+      
+      // Store current route for redirect back after login
+      const currentPath = window.location.pathname;
+      sessionStorage.setItem('redirectAfterLogin', currentPath);
       
       // If no user info or not authorized, redirect to sign in page with redirect back to subscribe
       toast({

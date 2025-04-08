@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ArrowLeft, Sparkles } from 'lucide-react';
@@ -74,13 +75,16 @@ const PlanSelectionScreen: React.FC = () => {
         </div>
         
         {showAuthWarning && (
-          <Alert variant="destructive" className="mb-6 bg-amber-50 border-amber-200">
+          <Alert variant="default" className="mb-6 bg-amber-50 border-amber-200">
             <AlertDescription className="text-amber-800 flex items-center justify-between">
               <span>Please sign in to complete your purchase. You need to be logged in to subscribe.</span>
               <Button 
                 variant="default" 
                 className="bg-amber-600 hover:bg-amber-700 text-white"
-                onClick={() => navigate('/sign-in?redirect=subscribe')}
+                onClick={() => {
+                  sessionStorage.setItem('redirectAfterLogin', '/subscribe');
+                  navigate('/sign-in?redirect=subscribe');
+                }}
               >
                 Sign In
               </Button>
