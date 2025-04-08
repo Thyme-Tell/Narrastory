@@ -72,7 +72,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           annualPlus: {
-            productId: "prod_S52DRcMxeWMRQ6", // Use the actual product ID you provided
+            productId: "prod_S52DtoQFIZmzDL", // Use the actual product ID you provided
             productName: "Narra+ Annual Subscription",
             priceId: "price_dev_annual", // This is a dummy ID for development
             amount: 249,
@@ -81,7 +81,7 @@ serve(async (req) => {
             interval: "year",
           },
           lifetime: {
-            productId: "prod_S52DtoQFIZmzDL", // Use the actual product ID you provided
+            productId: "prod_S52DRcMxeWMRQ6", // Use the actual product ID you provided
             productName: "Narra Lifetime Access",
             priceId: "price_dev_lifetime", // This is a dummy ID for development
             amount: 399,
