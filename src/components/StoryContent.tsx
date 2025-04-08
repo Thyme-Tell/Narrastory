@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import StoryMediaUpload from "./StoryMediaUpload";
 import StoryMedia from "./StoryMedia";
 import { Button } from "@/components/ui/button";
-import { Headphones, Settings } from "lucide-react";
+import { Headphones } from "lucide-react";
 import AudioPlayer from "./AudioPlayer";
 import { useStoryAudio } from "@/hooks/useStoryAudio";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -118,16 +119,6 @@ const StoryContent = ({ title, content, storyId, onUpdate }: StoryContentProps) 
         )}
         
         <div className={`${isMobile ? 'self-start' : 'ml-auto'} flex space-x-2`}>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowVoiceSettings(true)}
-            disabled={isLoading}
-          >
-            <Settings className="h-4 w-4" />
-            <span className="sr-only">Voice Settings</span>
-          </Button>
-          
           <Button
             variant="outline"
             size="sm"
