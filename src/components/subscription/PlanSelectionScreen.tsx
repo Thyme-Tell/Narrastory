@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check, ArrowLeft, AlertCircle, Info, Tag } from 'lucide-react';
@@ -58,7 +59,7 @@ const PlanSelectionScreen: React.FC = () => {
       }
       
       await createCheckout.mutateAsync({
-        priceId: STRIPE_PRODUCTS.ANNUAL_PLUS, // Using the actual product ID
+        priceId: STRIPE_PRODUCTS.ANNUAL_PLUS, // Now using the correct ID for annual subscription
         profileId: userProfileId,
         promoCode: promoCode || undefined
       });

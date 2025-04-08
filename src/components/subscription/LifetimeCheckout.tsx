@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, Shield, AlertCircle } from 'lucide-react';
@@ -62,9 +61,7 @@ const LifetimeCheckout: React.FC = () => {
       await createCheckout.mutateAsync({
         priceId: STRIPE_PRODUCTS.LIFETIME,
         profileId,
-        // Pass the user's email from the status object - the email might be in a different location
-        // than we initially expected
-        email: undefined // Let the backend determine the email from the profile ID
+        email: undefined
       });
       // Note: The redirect happens in the useStripeCheckout hook
     } catch (error) {
@@ -72,7 +69,6 @@ const LifetimeCheckout: React.FC = () => {
       let errorMessage = "Payment processing is currently unavailable. Please try again later.";
       
       if (error instanceof Error) {
-        // Check for specific error types
         if (error.message.includes("not available for purchase")) {
           errorMessage = "The lifetime plan is not available for purchase at this time. Please try again later.";
         } else if (error.message.includes("No such price")) {
@@ -80,7 +76,6 @@ const LifetimeCheckout: React.FC = () => {
         } else if (error.message.includes("API Key")) {
           errorMessage = "Payment system is currently unavailable. Please contact support.";
         } else {
-          // If we have a specific error message, use that
           errorMessage = error.message;
         }
       }
