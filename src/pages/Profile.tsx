@@ -13,10 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
-import LifetimeOfferBanner from "@/components/subscription/LifetimeOfferBanner";
-import UpgradePrompt from "@/components/subscription/UpgradePrompt";
-import { useSubscriptionService } from "@/hooks/useSubscriptionService";
-import { toast } from "sonner";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
@@ -51,30 +47,12 @@ const Profile = () => {
     enabled: isValidUUID,
   });
   
-  const { 
-    status: subscriptionStatus, 
-    isStatusLoading, 
-    statusError, 
-    fetchSubscriptionStatus 
-  } = useSubscriptionService(id, true, profile?.email);
-
   useEffect(() => {
     console.log("Profile component mounted with profileId:", id);
     if (profile?.email) {
-      console.log("Will fetch subscription using email:", profile.email);
+      console.log("Profile email:", profile.email);
     }
-    if (id || profile?.email) {
-      fetchSubscriptionStatus();
-    }
-  }, [id, profile?.email, fetchSubscriptionStatus]);
-
-  useEffect(() => {
-    console.log("Current subscription status:", subscriptionStatus);
-    if (statusError) {
-      console.error("Subscription status error:", statusError);
-      toast.error("There was an issue loading subscription details");
-    }
-  }, [subscriptionStatus, statusError]);
+  }, [id, profile?.email]);
 
   if (!isValidUUID && id !== undefined) {
     return <Navigate to="/sign-in" replace />;
@@ -126,30 +104,6 @@ const Profile = () => {
     setIsBookExpanded(expanded);
   };
 
-  const shouldShowUpgradePrompts = () => {
-    if (isStatusLoading) {
-      console.log("Not showing prompts because subscription data is loading");
-      return false;
-    }
-    
-    // Don't show upgrade prompts if the user has any kind of premium access
-    const isPremium = subscriptionStatus.isPremium;
-    const isLifetime = subscriptionStatus.isLifetime;
-    const hasActiveSubscription = subscriptionStatus.hasActiveSubscription;
-    const isFree = subscriptionStatus.planType === 'free';
-    
-    console.log(
-      `Subscription flags: isFree=${isFree}, isPremium=${isPremium}, ` +
-      `isLifetime=${isLifetime}, hasActiveSubscription=${hasActiveSubscription}`
-    );
-    
-    // Only show upgrade prompts for free users with no premium features
-    const shouldShow = isFree && !isPremium && !isLifetime && !hasActiveSubscription;
-    console.log(`Upgrade prompts should show: ${shouldShow}`);
-    
-    return shouldShow;
-  };
-
   if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -170,8 +124,6 @@ const Profile = () => {
       </div>
     );
   }
-
-  const showPrompts = shouldShowUpgradePrompts();
 
   return (
     <div 
@@ -198,11 +150,6 @@ const Profile = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white">
-              <DropdownMenuItem asChild>
-                <Link to={`/subscription/${id}`} className="w-full">
-                  Subscription Settings
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
                 Not {profile?.first_name}? Log Out
               </DropdownMenuItem>
@@ -224,12 +171,6 @@ const Profile = () => {
             />
           </div>
           
-          {showPrompts && (
-            <div className="my-4">
-              <LifetimeOfferBanner profileId={id} />
-            </div>
-          )}
-          
           <ProfileHeader 
             firstName={profile?.first_name || ''} 
             lastName={profile?.last_name || ''}
@@ -245,18 +186,8 @@ const Profile = () => {
             onUpdate={refetchStories}
             sortOrder={sortOrder}
           />
-          
-          {showPrompts && stories && stories.length > 5 && (
-            <div className="mt-6">
-              <UpgradePrompt profileId={id} variant="card" />
-            </div>
-          )}
         </div>
       </div>
-      
-      {showPrompts && (
-        <UpgradePrompt profileId={id} variant="floating" />
-      )}
       
       <ScrollToTopButton />
     </div>

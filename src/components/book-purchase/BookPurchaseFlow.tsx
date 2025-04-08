@@ -4,10 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, ChevronRight } from 'lucide-react';
-import { BookPurchaseProvider, useBookPurchase } from '@/contexts/BookPurchaseContext';
-import { CreditBalanceDisplay } from './CreditBalanceDisplay';
-import { PaymentMethodSelector } from './PaymentMethodSelector';
-import { OrderSummary } from './OrderSummary';
 
 interface BookPurchaseFlowProps {
   profileId: string;
@@ -18,42 +14,26 @@ interface BookPurchaseFlowProps {
   onCancel?: () => void;
 }
 
-// Wrapper component that provides the context
 export const BookPurchaseFlow: React.FC<BookPurchaseFlowProps> = (props) => {
-  return (
-    <BookPurchaseProvider 
-      profileId={props.profileId}
-      bookId={props.bookId}
-      bookPrice={props.bookPrice}
-      onComplete={props.onComplete}
-      onCancel={props.onCancel}
-    >
-      <BookPurchaseFlowContent 
-        bookTitle={props.bookTitle}
-        bookPrice={props.bookPrice}
-      />
-    </BookPurchaseProvider>
-  );
-};
-
-// Inner component that consumes the context
-const BookPurchaseFlowContent: React.FC<{
-  bookTitle: string;
-  bookPrice: number;
-}> = ({ bookTitle, bookPrice }) => {
-  const {
-    isUsingCredits, 
-    remainingCredits,
-    togglePaymentMethod,
-    completePurchase,
-    isPurchaseInProgress,
-    purchaseError
-  } = useBookPurchase();
-  
-  const [isConfirming, setIsConfirming] = useState(false);
+  const [isPurchaseInProgress, setIsPurchaseInProgress] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
   
   const handlePurchase = async () => {
-    await completePurchase();
+    setIsPurchaseInProgress(true);
+    
+    try {
+      // Placeholder for future implementation
+      console.log('Book purchase functionality to be implemented');
+      
+      if (props.onComplete) {
+        props.onComplete();
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      setPurchaseError('There was an error processing your purchase. Please try again later.');
+    } finally {
+      setIsPurchaseInProgress(false);
+    }
   };
   
   return (
@@ -62,30 +42,28 @@ const BookPurchaseFlowContent: React.FC<{
         <CardHeader>
           <CardTitle>Purchase Book</CardTitle>
           <CardDescription>
-            Complete your purchase of "{bookTitle}"
+            Complete your purchase of "{props.bookTitle}"
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {/* Show credit balance */}
-            <CreditBalanceDisplay />
+            <div className="border rounded-md p-4 space-y-3">
+              <div className="flex justify-between items-center pb-2 border-b">
+                <span className="font-medium">Item</span>
+                <span className="font-medium">Price</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{props.bookTitle}</p>
+                  <p className="text-sm text-gray-500">Physical book printing</p>
+                </div>
+                <div>
+                  ${props.bookPrice.toFixed(2)}
+                </div>
+              </div>
+            </div>
             
-            {/* Payment options */}
-            <PaymentMethodSelector 
-              canUseCredits={remainingCredits > 0}
-              isUsingCredits={isUsingCredits}
-              onToggle={togglePaymentMethod}
-            />
-            
-            {/* Order summary */}
-            <OrderSummary 
-              bookTitle={bookTitle}
-              bookPrice={bookPrice}
-              isUsingCredits={isUsingCredits}
-              remainingCredits={remainingCredits}
-            />
-            
-            {/* Error display */}
             {purchaseError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -93,32 +71,23 @@ const BookPurchaseFlowContent: React.FC<{
               </Alert>
             )}
             
-            {/* Action buttons */}
             <div className="flex justify-end space-x-2 pt-4">
-              {isConfirming ? (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsConfirming(false)}
-                    disabled={isPurchaseInProgress}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handlePurchase}
-                    disabled={isPurchaseInProgress}
-                  >
-                    {isPurchaseInProgress ? "Processing..." : "Confirm Purchase"}
-                  </Button>
-                </>
-              ) : (
+              {props.onCancel && (
                 <Button
-                  onClick={() => setIsConfirming(true)}
-                  className="ml-auto"
+                  variant="outline"
+                  onClick={props.onCancel}
+                  disabled={isPurchaseInProgress}
                 >
-                  Continue to Checkout <ChevronRight className="h-4 w-4 ml-1" />
+                  Cancel
                 </Button>
               )}
+              <Button
+                onClick={handlePurchase}
+                disabled={isPurchaseInProgress}
+              >
+                {isPurchaseInProgress ? "Processing..." : "Place Order"}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
             </div>
           </div>
         </CardContent>
