@@ -47,7 +47,7 @@ serve(async (req) => {
     const products = await stripe.products.list({
       active: true,
       limit: 100,
-      ids: ['prod_S52DRcMxeWMRQ6', 'prod_S52DtoQFIZmzDL']
+      ids: ['prod_S52DtoQFIZmzDL','prod_S52DRcMxeWMRQ6']
     });
     
     console.log(`Found ${products.data.length} products`);
