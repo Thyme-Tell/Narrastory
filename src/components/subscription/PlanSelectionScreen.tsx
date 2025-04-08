@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { useStripeCheckout, STRIPE_PRODUCTS } from '@/hooks/useStripeCheckout';
@@ -88,10 +88,10 @@ const PlanSelectionScreen: React.FC = () => {
       let priceId;
       if (selectedPlan === 'annual') {
         priceId = STRIPE_PRODUCTS.ANNUAL_PLUS;
-        console.log(`Selected ANNUAL plan, using priceId: ${priceId}`);
+        console.log(`Selected ANNUAL plan (${selectedPlan}), using priceId: ${priceId}`);
       } else {
         priceId = STRIPE_PRODUCTS.LIFETIME;
-        console.log(`Selected LIFETIME plan, using priceId: ${priceId}`);
+        console.log(`Selected LIFETIME plan (${selectedPlan}), using priceId: ${priceId}`);
       }
       
       await createCheckout.mutateAsync({
