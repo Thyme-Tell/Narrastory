@@ -13,6 +13,7 @@ import { useSubscriptionService } from '@/hooks/useSubscriptionService';
 import CheckoutButton from './CheckoutButton';
 import LifetimeOfferBanner from './LifetimeOfferBanner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import Cookies from 'js-cookie';
 
 const PlanSelectionScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +27,16 @@ const PlanSelectionScreen: React.FC = () => {
   
   useEffect(() => {
     // Check if user is authenticated
-    if (!user?.id && !user?.email) {
+    const isAuthorized = Cookies.get('profile_authorized') === 'true';
+    const profileId = Cookies.get('profile_id');
+    const userEmail = Cookies.get('user_email');
+    
+    console.log("Plan selection auth check:", {
+      isAuthorized, profileId, userEmail,
+      allCookies: Object.keys(Cookies.get())
+    });
+    
+    if (!isAuthorized || (!profileId && !userEmail)) {
       setShowAuthWarning(true);
     } else {
       setShowAuthWarning(false);
@@ -68,9 +78,16 @@ const PlanSelectionScreen: React.FC = () => {
         </div>
         
         {showAuthWarning && (
-          <Alert variant="default" className="mb-6 bg-amber-50 border-amber-200">
-            <AlertDescription className="text-amber-800">
-              Please <Button variant="link" className="p-0 h-auto text-amber-800 font-bold underline" onClick={() => navigate('/sign-in?redirect=subscribe')}>sign in</Button> to complete your purchase. You need to be logged in to subscribe.
+          <Alert variant="warning" className="mb-6 bg-amber-50 border-amber-200">
+            <AlertDescription className="text-amber-800 flex items-center justify-between">
+              <span>Please sign in to complete your purchase. You need to be logged in to subscribe.</span>
+              <Button 
+                variant="default" 
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => navigate('/sign-in?redirect=subscribe')}
+              >
+                Sign In
+              </Button>
             </AlertDescription>
           </Alert>
         )}

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -34,6 +34,7 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
 }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const {
     createCheckout,
     isLoading,
@@ -42,26 +43,52 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     createMonthlyCheckout
   } = useStripeCheckout();
 
+  // Check authentication status on mount and when cookies change
+  useEffect(() => {
+    const checkAuth = () => {
+      const authCookie = Cookies.get('profile_authorized');
+      setIsAuthenticated(authCookie === 'true');
+    };
+    
+    // Check immediately
+    checkAuth();
+    
+    // Also set up a listener for the storage event (when cookies change)
+    const handleStorageChange = () => {
+      checkAuth();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const handleCheckout = async () => {
-    // Check for user authentication - first try props, then cookies
+    // Get the latest auth state from cookies
+    const authCookie = Cookies.get('profile_authorized');
     const effectiveProfileId = profileId || Cookies.get('profile_id');
     const effectiveEmail = email || Cookies.get('user_email');
-    const isAuthorized = Cookies.get('profile_authorized') === 'true';
     
     console.log("Checkout attempt with:", { 
       profileId: effectiveProfileId, 
       email: effectiveEmail,
-      cookieAuth: isAuthorized,
+      cookieAuth: authCookie,
       allCookies: Object.keys(Cookies.get())
     });
 
-    if (!isAuthorized || (!effectiveProfileId && !effectiveEmail)) {
+    // Verify authentication
+    if (authCookie !== 'true' || (!effectiveProfileId && !effectiveEmail)) {
+      console.log("User not authenticated for checkout, redirecting to sign in");
+      
       // If no user info or not authorized, redirect to sign in page with redirect back to subscribe
       toast({
         title: "Authentication Required",
         description: "Please sign in to continue with your purchase.",
         variant: "destructive",
       });
+      
       navigate('/sign-in?redirect=subscribe');
       return;
     }
@@ -95,7 +122,7 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     <Button
       variant={variant}
       size={size}
-      disabled={isLoading}
+      disabled={isLoading || isAuthenticated === false}
       onClick={handleCheckout}
       className={`${fullWidth ? 'w-full' : ''} ${className || ''}`}
     >
