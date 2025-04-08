@@ -1,256 +1,329 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowLeft, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Check, X, Clock, ArrowLeft, AlertCircle, Info, Tag } from 'lucide-react';
 import { useSubscriptionService } from '@/hooks/useSubscriptionService';
-import CheckoutButton from './CheckoutButton';
-import LifetimeOfferBanner from './LifetimeOfferBanner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import Cookies from 'js-cookie';
+import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import LifetimeTimer from './LifetimeTimer';
+import { useToast } from '@/hooks/use-toast';
 
 const PlanSelectionScreen: React.FC = () => {
+  const { id: profileId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [promoCode, setPromoCode] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'lifetime'>('annual');
-  const [showAuthWarning, setShowAuthWarning] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'plus' | 'lifetime'>('lifetime');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [productsLoaded, setProductsLoaded] = useState(false);
+  const [promoCode, setPromoCode] = useState<string>('');
+  const [availablePlans, setAvailablePlans] = useState<{
+    plus: boolean;
+    lifetime: boolean;
+  }>({ plus: true, lifetime: true });
   
-  const { getPlanPrice, status, isStatusLoading } = useSubscriptionService(user?.id);
+  const { getPlanPrice } = useSubscriptionService(profileId);
+  const { 
+    createAnnualCheckout, 
+    createLifetimeCheckout,
+    isLoading: isCheckoutLoading,
+  } = useStripeCheckout();
   
-  useEffect(() => {
-    const isAuthorized = Cookies.get('profile_authorized') === 'true';
-    const profileId = Cookies.get('profile_id');
-    const userEmail = Cookies.get('user_email');
-    
-    console.log("Plan selection auth check:", {
-      isAuthorized, profileId, userEmail,
-      allCookies: Object.keys(Cookies.get())
-    });
-    
-    if (!isAuthorized || (!profileId && !userEmail)) {
-      setShowAuthWarning(true);
-    } else {
-      setShowAuthWarning(false);
-    }
-  }, [user]);
-  
-  const isPremium = status?.isPremium || false;
-  const isLifetime = status?.isLifetime || false;
+  const plusPrice = getPlanPrice('plus');
+  const lifetimePrice = getPlanPrice('lifetime');
   
   useEffect(() => {
-    if (isLifetime && user?.id) {
-      navigate(`/profile/${user.id}`);
-      toast({
-        title: "Already Subscribed",
-        description: "You already have a lifetime subscription.",
-      });
+    const checkAvailablePlans = async () => {
+      try {
+        const { data } = await supabase.functions.invoke('get-stripe-products', {});
+        
+        const hasAnnual = !!(data?.annualPlus?.priceId);
+        const hasLifetime = !!(data?.lifetime?.priceId);
+        
+        setAvailablePlans({
+          plus: hasAnnual,
+          lifetime: hasLifetime
+        });
+        
+        if (!hasAnnual && hasLifetime && selectedPlan === 'plus') {
+          setSelectedPlan('lifetime');
+        }
+        
+        setProductsLoaded(true);
+      } catch (error) {
+        console.error("Error checking available plans:", error);
+        setAvailablePlans({ plus: true, lifetime: true });
+        setProductsLoaded(true);
+      }
+    };
+    
+    checkAvailablePlans();
+  }, []);
+  
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+  
+  const handlePlanSelection = (plan: 'plus' | 'lifetime') => {
+    setSelectedPlan(plan);
+    setError(null);
+  };
+  
+  const handleContinue = async () => {
+    if (!profileId) {
+      setError("User profile not found. Please sign in and try again.");
+      return;
     }
-  }, [isLifetime, user?.id, navigate, toast]);
-
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      if (selectedPlan === 'plus') {
+        toast({
+          title: "Creating Checkout",
+          description: promoCode 
+            ? `Setting up your subscription checkout with promo code ${promoCode}...` 
+            : "Setting up your subscription checkout...",
+        });
+        await createAnnualCheckout(profileId, undefined, promoCode);
+      } else {
+        toast({
+          title: "Creating Checkout",
+          description: promoCode 
+            ? `Setting up your lifetime access checkout with promo code ${promoCode}...` 
+            : "Setting up your lifetime access checkout...",
+        });
+        await createLifetimeCheckout(profileId, undefined, promoCode);
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      let errorMessage = "Could not process payment request. Please try again later.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("Invalid or expired promotion code") || 
+            error.message.includes("promotion code")) {
+          errorMessage = `The promotion code "${promoCode}" is invalid or has expired.`;
+        } else if (error.message.includes("not available for purchase")) {
+          errorMessage = "The selected product is not available for purchase. The store may still be setting up.";
+        } else if (error.message.includes("Annual subscription is not available")) {
+          errorMessage = "Annual subscription is not available at this time. Please select the Lifetime option.";
+          setSelectedPlan('lifetime');
+        } else if (error.message.includes("No such price")) {
+          errorMessage = "Payment plans are being updated. Please try again in a few minutes.";
+        } else if (error.message.includes("API Key")) {
+          errorMessage = "Payment system is currently unavailable. Please contact support.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const planFeatures = {
+    plus: [
+      "Print on-demand books",
+      "AI voice narration",
+      "Access to premium templates",
+      "Book printing credits (2 per year)"
+    ],
+    lifetime: [
+      "Everything in Plus",
+      "Forever access, no recurring payments",
+      "Priority customer support",
+      "Unlimited book credits*",
+      "Early access to new features"
+    ]
+  };
+  
+  if (!productsLoaded) {
+    return (
+      <div className="container max-w-5xl mx-auto py-8 px-4">
+        <div className="flex items-center justify-center h-40">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6E59A5]"></div>
+          <span className="ml-3">Loading available plans...</span>
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-purple-50 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="container max-w-5xl mx-auto py-8 px-4">
+      <div className="flex items-center mb-6">
         <Button 
           variant="ghost" 
-          className="mb-6" 
-          onClick={() => navigate(-1)}
+          className="mr-2" 
+          size="sm"
+          onClick={handleGoBack}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Upgrade to Narra+</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Unlock premium features, unlimited stories, and more with Narra+
-          </p>
-        </div>
-        
-        {showAuthWarning && (
-          <Alert variant="destructive" className="mb-6 bg-amber-50 border-amber-200">
-            <AlertDescription className="text-amber-800 flex items-center justify-between">
-              <span>Please sign in to complete your purchase. You need to be logged in to subscribe.</span>
-              <Button 
-                variant="default" 
-                className="bg-amber-600 hover:bg-amber-700 text-white"
-                onClick={() => navigate('/sign-in?redirect=subscribe')}
-              >
-                Sign In
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <LifetimeOfferBanner profileId={user?.id} />
-        
-        <Tabs defaultValue="annual" value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as any)} className="max-w-3xl mx-auto">
-          <TabsList className="grid grid-cols-3 mb-8">
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            <TabsTrigger value="annual">Annual</TabsTrigger>
-            <TabsTrigger value="lifetime">Lifetime</TabsTrigger>
-          </TabsList>
-          
-          <div className="grid md:grid-cols-3 gap-4">
-            <Card className={`relative ${selectedPlan === 'monthly' ? 'border-2 border-purple-400 shadow-md' : ''}`}>
-              <CardHeader>
-                <CardTitle>Monthly</CardTitle>
-                <CardDescription>Flexible month-to-month plan</CardDescription>
-                <div className="mt-2">
-                  <span className="text-3xl font-bold">${getPlanPrice('monthly')}</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Unlimited stories</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Premium voices</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Advanced editing tools</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <CheckoutButton 
-                  planType="monthly"
-                  profileId={user?.id}
-                  email={user?.email}
-                  promoCode={promoCode}
-                  fullWidth
-                  className="bg-[#9b87f5] hover:bg-[#7E69AB]"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Subscribe Monthly
-                </CheckoutButton>
-              </CardFooter>
-            </Card>
-            
-            <Card className={`relative ${selectedPlan === 'annual' ? 'border-2 border-purple-400 shadow-md' : ''}`}>
-              <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs px-2 py-1 rounded-bl-md rounded-tr-md">
-                Best Value
+        <h1 className="text-2xl font-bold font-serif">Choose Your Plan</h1>
+      </div>
+      
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {!availablePlans.plus && (
+        <Alert variant="default" className="mb-6">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Notice</AlertTitle>
+          <AlertDescription>
+            Annual subscription is currently unavailable. Only the Lifetime plan is available for purchase.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card 
+          className={`border-2 ${selectedPlan === 'plus' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md ${!availablePlans.plus ? 'opacity-50' : ''}`}
+        >
+          <CardHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-xl font-serif">Plus Plan</CardTitle>
+                <CardDescription>Annual subscription</CardDescription>
               </div>
-              <CardHeader>
-                <CardTitle>Annual</CardTitle>
-                <CardDescription>Save with yearly billing</CardDescription>
-                <div className="mt-2">
-                  <span className="text-3xl font-bold">${getPlanPrice('annual')}</span>
-                  <span className="text-muted-foreground">/year</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>All monthly plan features</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Save 50% compared to monthly</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Priority customer support</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <CheckoutButton 
-                  planType="annual"
-                  profileId={user?.id}
-                  email={user?.email}
-                  promoCode={promoCode}
-                  fullWidth
-                  className="bg-[#9b87f5] hover:bg-[#7E69AB]"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Subscribe Yearly
-                </CheckoutButton>
-              </CardFooter>
-            </Card>
-            
-            <Card className={`relative ${selectedPlan === 'lifetime' ? 'border-2 border-purple-400 shadow-md' : ''}`}>
-              <CardHeader>
-                <CardTitle>Lifetime</CardTitle>
-                <CardDescription>One-time payment, forever access</CardDescription>
-                <div className="mt-2">
-                  <span className="text-3xl font-bold">${getPlanPrice('lifetime')}</span>
-                  <span className="text-muted-foreground"> one-time</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>All premium features</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Never pay again</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>VIP support</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <CheckoutButton 
-                  planType="lifetime"
-                  profileId={user?.id}
-                  email={user?.email}
-                  promoCode={promoCode}
-                  fullWidth
-                  className="bg-[#9b87f5] hover:bg-[#7E69AB]"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Get Lifetime Access
-                </CheckoutButton>
-              </CardFooter>
-            </Card>
-          </div>
-          
-          <div className="mt-8 max-w-md mx-auto">
-            <Label htmlFor="promo-code">Have a promo code?</Label>
-            <div className="flex gap-2 mt-1">
-              <Input 
-                id="promo-code" 
-                placeholder="Enter promo code" 
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-              />
               <Button 
-                variant="outline"
-                onClick={() => {
-                  if (promoCode) {
-                    toast({
-                      title: "Promo Code Applied",
-                      description: "Your promo code will be applied at checkout.",
-                    });
-                  }
-                }}
+                variant={selectedPlan === 'plus' ? 'default' : 'outline'} 
+                size="sm"
+                className={selectedPlan === 'plus' ? 'bg-[#6E59A5] hover:bg-[#5d4a8a]' : ''}
+                onClick={() => handlePlanSelection('plus')}
+                disabled={!availablePlans.plus}
               >
-                Apply
+                {selectedPlan === 'plus' ? 'Selected' : 'Select'}
               </Button>
             </div>
-          </div>
-        </Tabs>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <span className="text-2xl font-bold">${plusPrice}</span>
+              <span className="text-gray-500 ml-1">/ year</span>
+            </div>
+            <ul className="space-y-2">
+              {planFeatures.plus.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            {!availablePlans.plus && (
+              <div className="mt-4 p-2 bg-gray-100 rounded text-sm text-gray-600">
+                Currently unavailable
+              </div>
+            )}
+          </CardContent>
+        </Card>
         
-        <div className="text-center mt-8 text-sm text-muted-foreground">
-          <p>Need help? Contact support at <a href="mailto:support@narrastory.com" className="text-purple-600 hover:underline">support@narrastory.com</a></p>
+        <Card className={`border-2 ${selectedPlan === 'lifetime' ? 'border-[#6E59A5]' : 'border-gray-200'} transition-all hover:shadow-md relative overflow-hidden ${!availablePlans.lifetime ? 'opacity-50' : ''}`}>
+          <div className="absolute top-0 right-0 bg-[#6E59A5] text-white px-3 py-1 text-xs font-semibold">
+            MOST POPULAR
+          </div>
+          <CardHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-xl font-serif">Lifetime Access</CardTitle>
+                <CardDescription>One-time payment</CardDescription>
+              </div>
+              <Button 
+                variant={selectedPlan === 'lifetime' ? 'default' : 'outline'} 
+                size="sm"
+                className={selectedPlan === 'lifetime' ? 'bg-[#6E59A5] hover:bg-[#5d4a8a]' : ''}
+                onClick={() => handlePlanSelection('lifetime')}
+                disabled={!availablePlans.lifetime}
+              >
+                {selectedPlan === 'lifetime' ? 'Selected' : 'Select'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-2">
+              <span className="text-2xl font-bold">${lifetimePrice}</span>
+              <span className="text-gray-500 ml-1">one-time</span>
+            </div>
+            <div className="mb-4">
+              <LifetimeTimer 
+                expiryTimestamp={new Date(Date.now() + 24 * 60 * 60 * 1000)} 
+                compact={true}
+              />
+            </div>
+            <ul className="space-y-2">
+              {planFeatures.lifetime.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-gray-500 mt-4">
+              * Subject to fair usage policy. 
+            </p>
+            {!availablePlans.lifetime && (
+              <div className="mt-4 p-2 bg-gray-100 rounded text-sm text-gray-600">
+                Currently unavailable
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <div className="flex items-center mb-2">
+          <Tag className="h-4 w-4 mr-2 text-[#6E59A5]" />
+          <h3 className="font-medium">Promo Code</h3>
         </div>
+        <div className="flex gap-2">
+          <Input
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            placeholder="Enter promo code"
+            className="max-w-xs"
+            disabled={isLoading || isCheckoutLoading}
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          If you have a promotional code, enter it above to receive your discount.
+        </p>
+      </div>
+      
+      <div className="mt-8 flex flex-col md:flex-row md:justify-between gap-4">
+        <div className="text-sm text-gray-500">
+          <p>All plans include a 30-day money-back guarantee.</p>
+          <p>By continuing, you agree to our Terms and Conditions.</p>
+        </div>
+        <Button 
+          size="lg" 
+          className="bg-[#6E59A5] hover:bg-[#5d4a8a]"
+          onClick={handleContinue}
+          disabled={isLoading || isCheckoutLoading || 
+                  (selectedPlan === 'plus' && !availablePlans.plus) || 
+                  (selectedPlan === 'lifetime' && !availablePlans.lifetime)}
+        >
+          {isLoading || isCheckoutLoading ? (
+            <>
+              <span className="mr-2">
+                <span className="animate-spin inline-block h-4 w-4 border-b-2 border-white rounded-full"></span>
+              </span>
+              Processing...
+            </>
+          ) : (
+            <>Continue to Checkout</>
+          )}
+        </Button>
       </div>
     </div>
   );

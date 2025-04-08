@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +16,6 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
-import SubscriptionStatusBadge from "@/components/subscription/SubscriptionStatusBadge";
 
 const Profile = () => {
   const { id } = useParams();
@@ -141,8 +141,7 @@ const Profile = () => {
           alt="Narra Logo"
           className="h-11"
         />
-        <div className="flex items-center gap-3">
-          <SubscriptionStatusBadge profileId={id} />
+        <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -151,10 +150,7 @@ const Profile = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white">
-              <DropdownMenuItem onClick={() => navigate(`/subscription/${id}`)} className="cursor-pointer">
-                Manage Subscription
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29] cursor-pointer">
+              <DropdownMenuItem onClick={handleLogout} className="text-[#A33D29]">
                 Not {profile?.first_name}? Log Out
               </DropdownMenuItem>
             </DropdownMenuContent>

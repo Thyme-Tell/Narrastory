@@ -1,45 +1,43 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { XCircle, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const PaymentCanceledPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  
+  const handleGoBack = () => {
+    navigate('/subscribe');
+  };
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-purple-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className="container max-w-md mx-auto py-12 px-4">
+      <Card className="border-2 border-gray-100">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-            <AlertCircle className="h-10 w-10 text-amber-600" />
+          <div className="flex justify-center mb-4">
+            <XCircle className="h-16 w-16 text-gray-400" />
           </div>
-          <CardTitle className="text-2xl font-bold text-amber-700">Payment Canceled</CardTitle>
-          <CardDescription>
-            Your subscription payment was not completed.
-          </CardDescription>
+          <CardTitle className="text-2xl font-serif">Payment Canceled</CardTitle>
+          <CardDescription>Your payment was not completed</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-          <p className="text-muted-foreground mb-4">
-            No worries! You can try again whenever you're ready. If you experienced any issues during checkout, please contact our support team.
+          <p className="mb-4">
+            The payment process was canceled. No charges have been made to your account.
+          </p>
+          <p className="text-sm text-gray-500">
+            If you experienced any issues or have questions, please contact our support team.
           </p>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
+        <CardFooter className="flex justify-center">
           <Button 
-            className="w-full" 
-            onClick={() => navigate('/subscribe')}
+            onClick={handleGoBack}
+            className="bg-[#6E59A5] hover:bg-[#5d4a8a]"
+            variant="outline"
           >
-            Try Again
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => navigate(user?.id ? `/profile/${user.id}` : '/')}
-          >
-            Back to Profile
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Subscription
           </Button>
         </CardFooter>
       </Card>

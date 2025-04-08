@@ -62,12 +62,10 @@ serve(async (req) => {
       return errorResponse('Stripe webhook secret not configured', 500);
     }
 
-    // Construct the event - USING ASYNC VERSION
+    // Construct the event
     let event;
     try {
-      // Use constructEventAsync instead of constructEvent
-      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
-      console.log(`Successfully verified webhook signature for event ${event.id}`);
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
       console.error(`⚠️  Webhook signature verification failed: ${err.message}`);
       return errorResponse(`Webhook signature verification failed: ${err.message}`, 400);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -25,7 +24,7 @@ const SignIn = () => {
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rememberMe, setRememberMe] = useState(true); // Default to true for better UX
+  const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: "",
     password: "",
@@ -35,31 +34,13 @@ const SignIn = () => {
     setRememberMe(checked);
   };
 
-  // Get redirect parameter from multiple possible sources
-  const redirect = searchParams.get('redirect') || 
-                   searchParams.get('redirectTo') || 
-                   (location.state as { redirectTo?: string })?.redirectTo || 
-                   null;
+  const redirectTo = searchParams.get('redirectTo') || 
+                    (location.state as { redirectTo?: string })?.redirectTo || 
+                    null;
   
   useEffect(() => {
-    console.log("Redirect destination after login:", redirect);
-    
-    // Check if we're already authenticated
-    const existingAuth = Cookies.get('profile_authorized') === 'true';
-    const existingProfileId = Cookies.get('profile_id');
-    
-    console.log("Initial auth check:", { existingAuth, existingProfileId, isAuthenticated });
-    
-    // If already authenticated, redirect to the target page or profile
-    if (existingAuth && existingProfileId) {
-      const destination = redirect 
-        ? (redirect.startsWith('/') ? redirect : `/${redirect}`)
-        : `/profile/${existingProfileId}`;
-        
-      console.log("Already authenticated, redirecting to:", destination);
-      navigate(destination, { replace: true });
-    }
-  }, [navigate, redirect, isAuthenticated]);
+    console.log("Redirect destination after login:", redirectTo);
+  }, [redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +93,6 @@ const SignIn = () => {
 
       const expirationDays = rememberMe ? 365 : 7;
       
-      // Clear existing auth cookies first to ensure clean state
       Cookies.remove('profile_authorized');
       Cookies.remove('phone_number');
       Cookies.remove('profile_id');
@@ -120,35 +100,16 @@ const SignIn = () => {
       
       console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
       
-      // Set new auth cookies with proper expiration and path to ensure they're available on all pages
-      Cookies.set('profile_authorized', 'true', { expires: expirationDays, path: '/' });
-      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays, path: '/' });
-      Cookies.set('profile_id', profile.id, { expires: expirationDays, path: '/' });
+      Cookies.set('profile_authorized', 'true', { expires: expirationDays });
+      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
+      Cookies.set('profile_id', profile.id, { expires: expirationDays });
       
       if (profile.email) {
         console.log("Setting email cookie:", profile.email);
-        Cookies.set('user_email', profile.email, { expires: expirationDays, path: '/' });
+        Cookies.set('user_email', profile.email, { expires: expirationDays });
       }
       
-      // Verify cookies were set properly
-      const authCookieSet = Cookies.get('profile_authorized');
-      const profileIdSet = Cookies.get('profile_id');
-      console.log("Verifying cookies were set:", { authCookieSet, profileIdSet });
-      
-      // Get the redirect parameter and construct destination URL
-      let destination = '';
-      const redirectParam = searchParams.get('redirect') || 
-                            searchParams.get('redirectTo') || 
-                            (location.state as { redirectTo?: string })?.redirectTo;
-                            
-      if (redirectParam) {
-        // Handle different redirect formats
-        destination = redirectParam.startsWith('/') ? redirectParam : `/${redirectParam}`;
-        console.log("Redirecting to:", destination);
-      } else {
-        destination = `/profile/${profile.id}`;
-      }
-      
+      const destination = redirectTo || `/profile/${profile.id}`;
       console.log("Login successful, redirecting to:", destination);
       
       toast({
@@ -156,10 +117,8 @@ const SignIn = () => {
         description: `You've successfully signed in as ${profile.first_name}`,
       });
       
-      // Trigger a storage event to notify other tabs/components of auth change
       window.dispatchEvent(new Event('storage'));
       
-      // Use replace to avoid having the login page in the history
       navigate(destination, { replace: true });
       
     } catch (error) {

@@ -1,61 +1,50 @@
 
 import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const PaymentSuccessPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { toast } = useToast();
   
-  // Redirect to profile after 5 seconds
   useEffect(() => {
-    const redirectTimer = setTimeout(() => {
-      if (user?.id) {
-        navigate(`/profile/${user.id}`);
-      } else {
-        navigate('/');
-      }
-    }, 5000);
-    
-    return () => clearTimeout(redirectTimer);
-  }, [user, navigate]);
+    toast({
+      title: "Payment Successful!",
+      description: "Thank you for your purchase. Your payment has been processed successfully.",
+    });
+  }, [toast]);
+  
+  const handleGoToProfile = () => {
+    navigate('/profile');
+  };
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-purple-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className="container max-w-md mx-auto py-12 px-4">
+      <Card className="border-2 border-green-100">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="h-16 w-16 text-green-500" />
           </div>
-          <CardTitle className="text-2xl font-bold text-green-700">Payment Successful!</CardTitle>
-          <CardDescription>
-            Thank you for subscribing to Narra+. Your subscription has been activated.
-          </CardDescription>
+          <CardTitle className="text-2xl font-serif">Payment Successful!</CardTitle>
+          <CardDescription>Thank you for your purchase</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-          <p className="text-muted-foreground mb-4">
-            You now have access to all premium features. Start creating beautiful stories with enhanced tools and features.
+          <p className="mb-4">
+            Your payment has been processed successfully. You can now enjoy all the premium features.
           </p>
-          <p className="text-sm text-muted-foreground">
-            You will be redirected to your profile automatically in a few seconds.
+          <p className="text-sm text-gray-500">
+            A confirmation email has been sent to your registered email address.
           </p>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
+        <CardFooter className="flex justify-center">
           <Button 
-            className="w-full" 
-            onClick={() => navigate(user?.id ? `/profile/${user.id}` : '/')}
+            onClick={handleGoToProfile}
+            className="bg-[#6E59A5] hover:bg-[#5d4a8a]"
           >
-            Go to My Profile
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => navigate('/subscription')}
-          >
-            Manage Subscription
+            Go to Profile
           </Button>
         </CardFooter>
       </Card>

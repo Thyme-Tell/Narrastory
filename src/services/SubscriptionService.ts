@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_PRODUCTS } from "@/hooks/useStripeCheckout";
 import { toast } from "@/hooks/use-toast";
@@ -59,96 +60,78 @@ class SubscriptionService {
     // Always force a refresh and bypass cache to check with Stripe directly
     forceRefresh = true;
 
-    // Create a cache key based on the available identifiers
+    // Create a cache key based on the available identifiers (though we won't use it for caching anymore)
     const cacheKey = email ? `email:${email}` : `profile:${profileId}`;
 
     try {
-      console.log(`Fetching fresh subscription status for ${cacheKey}, forceRefresh=${forceRefresh}`);
-      
-      // Add a timeout for the Edge Function call to prevent hanging requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
-      try {
-        const { data, error } = await supabase.functions.invoke('check-subscription', {
-          body: { 
-            profileId, 
-            email,
-            forceRefresh: true // Always send forceRefresh=true to the edge function
-          },
-          // Remove the signal property as it's not supported in FunctionInvokeOptions
+      console.log(`Fetching fresh subscription status for ${cacheKey}`);
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        body: { 
+          profileId, 
+          email,
+          forceRefresh: true // Always send forceRefresh=true to the edge function
+        },
+      });
+
+      if (error) {
+        console.error('Error checking subscription:', error);
+        toast({
+          title: "Subscription Check Failed",
+          description: "Could not verify your subscription status. Please try again.",
+          variant: "destructive",
         });
-  
-        clearTimeout(timeoutId); // Clear the timeout if successful
-  
-        if (error) {
-          console.error('Error checking subscription:', error);
-          toast({
-            title: "Subscription Check Failed",
-            description: "Could not verify your subscription status. Please try again.",
-            variant: "destructive",
-          });
-          return this.getDefaultSubscriptionStatus();
-        }
-  
-        // Log raw response for debugging
-        console.log('Raw subscription response from edge function:', data);
-  
-        // Extract subscription data and status
-        const subscriptionData = data?.subscriptionData;
-        const isPremium = data?.isPremium || false;
-        const isLifetime = data?.isLifetime || false;
-        const hasActiveSubscription = data?.hasSubscription || false;
-        const planType = data?.planType || 'free';
-        
-        console.log(`Subscription status processed: isPremium=${isPremium}, planType=${planType}`);
-        
-        // Expiration date (if applicable)
-        // For lifetime subscriptions, there is no expiration
-        const expirationDate = isLifetime ? null : 
-          (subscriptionData?.current_period_end ? new Date(subscriptionData.current_period_end) : null);
-        
-        // Credits information
-        const bookCredits = subscriptionData?.book_credits || 0;
-        
-        // Status information
-        const status = subscriptionData?.status as SubscriptionStatus | null;
-        
-        // Additional data from the enhanced edge function
-        const features = data?.features || PLAN_FEATURES[planType as PlanType] || PLAN_FEATURES.free;
-        const cancelAtPeriodEnd = data?.cancelAtPeriodEnd || false;
-        const lastPaymentStatus = data?.lastPaymentStatus || null;
-        const purchaseDate = data?.purchaseDate ? new Date(data.purchaseDate) : null;
-        const orderId = data?.orderId || null;
-  
-        // Create the subscription status result
-        const result: SubscriptionStatusResult = {
-          isPremium,
-          isLifetime,
-          hasActiveSubscription,
-          expirationDate,
-          bookCredits,
-          status,
-          planType: planType as PlanType,
-          features,
-          cancelAtPeriodEnd,
-          lastPaymentStatus,
-          purchaseDate,
-          orderId,
-          subscription: subscriptionData
-        };
-        
-        // We no longer cache the result - always use fresh data
-        console.log(`Subscription status fetch result:`, result);
-  
-        return result;
-      } catch (fetchError) {
-        clearTimeout(timeoutId); // Clear the timeout on error
-        console.error('Edge Function fetch error:', fetchError);
-        
-        // If the fetch fails, return the default status
         return this.getDefaultSubscriptionStatus();
       }
+
+      // Log raw response for debugging
+      console.log('Raw subscription response from edge function:', data);
+
+      // Extract subscription data
+      const subscriptionData = data?.subscriptionData as SubscriptionData;
+      const isPremium = data?.isPremium || false;
+      const isLifetime = data?.isLifetime || false;
+      const hasActiveSubscription = data?.hasSubscription || false;
+      
+      // Expiration date (if applicable)
+      // For lifetime subscriptions, there is no expiration
+      const expirationDate = isLifetime ? null : 
+        (subscriptionData?.current_period_end ? new Date(subscriptionData.current_period_end) : null);
+      
+      // Credits information
+      const bookCredits = subscriptionData?.book_credits || 0;
+      
+      // Status information
+      const status = subscriptionData?.status as SubscriptionStatus | null;
+      const planType = subscriptionData?.plan_type || 'free';
+      
+      // Additional data from the enhanced edge function
+      const features = data?.features || PLAN_FEATURES[planType as PlanType] || PLAN_FEATURES.free;
+      const cancelAtPeriodEnd = data?.cancelAtPeriodEnd || false;
+      const lastPaymentStatus = data?.lastPaymentStatus || null;
+      const purchaseDate = data?.purchaseDate ? new Date(data.purchaseDate) : null;
+      const orderId = data?.orderId || null;
+
+      // Create the subscription status result
+      const result: SubscriptionStatusResult = {
+        isPremium,
+        isLifetime,
+        hasActiveSubscription,
+        expirationDate,
+        bookCredits,
+        status,
+        planType: planType as PlanType,
+        features,
+        cancelAtPeriodEnd,
+        lastPaymentStatus,
+        purchaseDate,
+        orderId,
+        subscription: subscriptionData
+      };
+      
+      // We no longer cache the result - always use fresh data
+      console.log(`Using fresh subscription data, not caching`);
+
+      return result;
     } catch (err) {
       console.error('Error in subscription status check:', err);
       toast({
