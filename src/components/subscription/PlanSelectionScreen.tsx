@@ -84,10 +84,12 @@ const PlanSelectionScreen: React.FC = () => {
           : "Setting up checkout...",
       });
 
-      // Use the appropriate price ID based on the selected plan
+      // Use the appropriate price ID based on the selected plan - fixing the incorrect mapping
       const priceId = selectedPlan === 'annual' 
         ? STRIPE_PRODUCTS.ANNUAL_PLUS 
         : STRIPE_PRODUCTS.LIFETIME;
+      
+      console.log(`Selected plan: ${selectedPlan}, Using priceId: ${priceId}`);
       
       await createCheckout.mutateAsync({
         priceId: priceId,
