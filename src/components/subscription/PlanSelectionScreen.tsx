@@ -37,6 +37,7 @@ const PlanSelectionScreen: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<'annual' | 'lifetime'>('annual');
   const [isLoading, setIsLoading] = useState(false);
   const [promoCode, setPromoCode] = useState('');
+  const [isPromoValid, setIsPromoValid] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   const { 
@@ -51,6 +52,17 @@ const PlanSelectionScreen: React.FC = () => {
   const handlePlanSelection = (plan: 'annual' | 'lifetime') => {
     setSelectedPlan(plan);
     setError(null);
+  };
+
+  const validatePromoCode = async (code: string): Promise<boolean> => {
+    if (!code.trim()) return false;
+    
+    // For this implementation, we'll simply return true to simulate validation
+    // In a real implementation, you might want to check with Stripe or your backend
+    // However, the actual validation will happen when creating the checkout session
+    
+    setIsPromoValid(true);
+    return true;
   };
   
   const handleContinue = async () => {
@@ -72,15 +84,15 @@ const PlanSelectionScreen: React.FC = () => {
           : "Setting up checkout...",
       });
 
-      if (selectedPlan === 'lifetime') {
-        navigate(`/lifetime-checkout/${userProfileId}`);
-        return;
-      }
+      // Use the appropriate price ID based on the selected plan
+      const priceId = selectedPlan === 'lifetime' 
+        ? STRIPE_PRODUCTS.LIFETIME 
+        : STRIPE_PRODUCTS.ANNUAL_PLUS;
       
       await createCheckout.mutateAsync({
-        priceId: STRIPE_PRODUCTS.ANNUAL_PLUS, // Now using the correct ID for annual subscription
+        priceId: priceId,
         profileId: userProfileId,
-        promoCode: promoCode || undefined
+        promoCode: isPromoValid ? promoCode : undefined
       });
     } catch (error) {
       console.error('Checkout error:', error);
@@ -147,6 +159,7 @@ const PlanSelectionScreen: React.FC = () => {
         promoCode={promoCode}
         setPromoCode={setPromoCode}
         isLoading={isLoading || isCheckoutLoading}
+        onApplyPromoCode={validatePromoCode}
       />
       
       <CheckoutActions

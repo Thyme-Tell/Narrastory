@@ -16,7 +16,6 @@ import SeniorLiving from "./pages/SeniorLiving"; // Add new import
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import SubscribePage from "./pages/SubscribePage";
-import LifetimeCheckoutPage from "./pages/LifetimeCheckoutPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCanceledPage from './pages/PaymentCanceledPage';
@@ -52,7 +51,6 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/subscribe" element={<SubscribePage />} />
           <Route path="/subscribe/:id" element={<SubscribePage />} />
-          <Route path="/lifetime-checkout/:id" element={<LifetimeCheckoutPage />} />
           <Route path="/subscription" element={<SubscriptionPage />} />
           <Route path="/subscription/:id" element={<SubscriptionPage />} />
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
