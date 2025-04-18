@@ -24,15 +24,10 @@ const SignIn = () => {
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: "",
     password: "",
   });
-
-  const handleRememberMeChange = (checked: boolean) => {
-    setRememberMe(checked);
-  };
 
   const redirectTo = searchParams.get('redirectTo') || 
                     (location.state as { redirectTo?: string })?.redirectTo || 
@@ -91,50 +86,32 @@ const SignIn = () => {
         return;
       }
 
-      const expirationDays = rememberMe ? 365 : 7;
-      
+      // Clear any existing auth cookies
       Cookies.remove('profile_authorized');
       Cookies.remove('phone_number');
       Cookies.remove('profile_id');
       Cookies.remove('user_email');
       
-      console.log("Setting auth cookies for profile:", profile.id, "with expiration:", expirationDays, "days");
-      
-      Cookies.set('profile_authorized', 'true', { expires: expirationDays });
-      Cookies.set('phone_number', normalizedPhoneNumber, { expires: expirationDays });
-      Cookies.set('profile_id', profile.id, { expires: expirationDays });
-      
+      // Set auth cookies with 365-day expiration
+      Cookies.set('profile_authorized', 'true', { expires: 365 });
+      Cookies.set('phone_number', normalizedPhoneNumber, { expires: 365 });
+      Cookies.set('profile_id', profile.id, { expires: 365 });
       if (profile.email) {
-        console.log("Setting email cookie:", profile.email);
-        Cookies.set('user_email', profile.email, { expires: expirationDays });
+        Cookies.set('user_email', profile.email, { expires: 365 });
       }
-      
-      const destination = redirectTo || `/profile/${profile.id}`;
-      console.log("Login successful, redirecting to:", destination);
-      
-      toast({
-        title: "Welcome back!",
-        description: `You've successfully signed in as ${profile.first_name}`,
-      });
-      
-      window.dispatchEvent(new Event('storage'));
-      
-      navigate(destination, { replace: true });
-      
+
+      // Redirect to the appropriate page
+      if (redirectTo) {
+        navigate(redirectTo);
+      } else {
+        navigate(`/profile/${profile.id}`);
+      }
     } catch (error) {
       console.error("Error during sign in:", error);
-      setError("Something went wrong while signing in. Please try again later.");
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
     }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (error) setError(null);
-    
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
   };
 
   return (
@@ -159,80 +136,43 @@ const SignIn = () => {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <FormField
-              label="Phone Number"
-              name="phoneNumber"
-              type="tel"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              placeholder="+1 (555) 000-0000"
-            />
-
-            <FormField
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
-            />
-            
-            <div className="flex items-center">
-              <Checkbox 
-                id="remember-me" 
-                checked={rememberMe}
-                onCheckedChange={(checked) => handleRememberMeChange(checked as boolean)}
-                className="h-4 w-4 rounded-[7px] border-gray-300 text-[#A33D29]"
-              />
-              <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
-                Remember me
-              </Label>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full py-2.5 rounded-[7px] bg-gradient-to-r from-[#A33D29] to-[#B65644] hover:from-[#933629] hover:to-[#A34C3D] text-white"
-              disabled={loading}
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </Button>
-
-            <div className="text-center space-y-2">
-              <Link to="/reset-password" className="text-primary hover:underline text-sm">
-                Forgot your password?
-              </Link>
-              
-              <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <Link to="/" className="text-primary hover:underline">
-                  Sign up for Narra
-                </Link>
-              </p>
-            </div>
-            
-            <div className="text-xs text-gray-500 mt-2 text-center">
-              <p>
-                By signing in, you agree to our{" "}
-                <Link to="/terms-and-conditions" className="text-[#A33D29] hover:underline">
-                  Terms and Conditions
-                </Link>{" "}
-                and{" "}
-                <Link to="/privacy-policy" className="text-[#A33D29] hover:underline">
-                  Privacy Policy
-                </Link>
-              </p>
-              <p className="mt-1">
-                We respect your privacy and will never share your information with third parties.
-              </p>
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <FormField
+            label="Phone Number"
+            type="tel"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+            placeholder="Enter your phone number"
+            required
+          />
+          <FormField
+            label="Password"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            placeholder="Enter your password"
+            required
+          />
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Signing in..." : "Sign In"}
+          </Button>
         </form>
+
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            <Link to="/forgot-password" className="text-[#A33D29] hover:underline">
+              Forgot your password?
+            </Link>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Don't have an account?{" "}
+            <Link to="/sign-up" className="text-[#A33D29] hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
