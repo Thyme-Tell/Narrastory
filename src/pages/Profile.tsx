@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -17,15 +16,19 @@ import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
+import Cookies from "js-cookie";
 
 const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, profileId } = useAuth();
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [isBookExpanded, setIsBookExpanded] = useState(false);
   
+  console.log('Profile page rendered with:', { id, isAuthenticated, profileId });
+  
   const isValidUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  console.log('Is valid UUID:', isValidUUID);
 
   const { status: subscriptionStatus } = useSubscriptionService(id);
 
@@ -95,6 +98,13 @@ const Profile = () => {
   }, [profile]);
 
   const handleLogout = async () => {
+    // Clear all auth cookies
+    Cookies.remove('profile_authorized');
+    Cookies.remove('phone_number');
+    Cookies.remove('profile_id');
+    Cookies.remove('user_email');
+    
+    // Sign out from Supabase
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Error signing out:", error);
