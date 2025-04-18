@@ -16,6 +16,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import StoriesList from "@/components/StoriesList";
 import { BookProgress } from "@/components/BookProgress";
 import { useSubscriptionService } from "@/hooks/useSubscriptionService";
+import Cookies from "js-cookie";
 
 const Profile = () => {
   const { id } = useParams();
@@ -97,6 +98,13 @@ const Profile = () => {
   }, [profile]);
 
   const handleLogout = async () => {
+    // Clear all auth cookies
+    Cookies.remove('profile_authorized');
+    Cookies.remove('phone_number');
+    Cookies.remove('profile_id');
+    Cookies.remove('user_email');
+    
+    // Sign out from Supabase
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Error signing out:", error);

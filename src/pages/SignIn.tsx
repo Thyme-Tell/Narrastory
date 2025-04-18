@@ -5,23 +5,17 @@ import { Button } from "@/components/ui/button";
 import FormField from "@/components/FormField";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
-import Cookies from "js-cookie";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import Cookies from "js-cookie";
 
 const SignIn = () => {
-  useEffect(() => {
-    document.title = "Narra Story | Sign In";
-  }, []);
-
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -34,8 +28,20 @@ const SignIn = () => {
                     null;
   
   useEffect(() => {
-    console.log("Redirect destination after login:", redirectTo);
-  }, [redirectTo]);
+    document.title = "Narra Story | Sign In";
+    
+    // Check for existing auth cookie
+    const isAuthorized = Cookies.get('profile_authorized') === 'true';
+    const profileId = Cookies.get('profile_id');
+    
+    if (isAuthorized && profileId) {
+      if (redirectTo) {
+        navigate(redirectTo, { replace: true });
+      } else {
+        navigate(`/profile/${profileId}`, { replace: true });
+      }
+    }
+  }, [navigate, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +64,7 @@ const SignIn = () => {
     console.log("Attempting login with phone:", normalizedPhoneNumber);
 
     try {
+      // First, get the profile with the phone number
       const { data: profiles, error: searchError } = await supabase
         .from("profiles")
         .select("id, password, first_name, last_name, phone_number, email")

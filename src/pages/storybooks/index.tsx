@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { StoryBook } from "@/types/supabase";
+import Cookies from "js-cookie";
 
 const StoryBooks = () => {
   const navigate = useNavigate();
@@ -86,6 +87,13 @@ const StoryBooks = () => {
   };
 
   const handleLogout = async () => {
+    // Clear all auth cookies
+    Cookies.remove('profile_authorized');
+    Cookies.remove('phone_number');
+    Cookies.remove('profile_id');
+    Cookies.remove('user_email');
+    
+    // Sign out from Supabase
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Error signing out:", error);

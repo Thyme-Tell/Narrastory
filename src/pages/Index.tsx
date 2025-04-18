@@ -1,11 +1,25 @@
 import ProfileForm from "@/components/ProfileForm";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import Cookies from "js-cookie";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+
   useEffect(() => {
     document.title = "Narra Story | Sign Up";
-  }, []);
+    
+    // Check for existing auth cookie
+    const isAuthorized = Cookies.get('profile_authorized') === 'true';
+    const profileId = Cookies.get('profile_id');
+    
+    // Redirect to profile page if user is authenticated or has valid auth cookie
+    if ((isAuthenticated && user?.id) || (isAuthorized && profileId)) {
+      navigate(`/profile/${user?.id || profileId}`, { replace: true });
+    }
+  }, [isAuthenticated, user?.id, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
