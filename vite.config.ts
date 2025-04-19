@@ -17,19 +17,35 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@supabase/supabase-js": path.resolve(__dirname, "node_modules/@supabase/supabase-js")
     }
-  },
-  optimizeDeps: {
-    include: ['react-dropzone', '@supabase/supabase-js'],
-    exclude: ['app.attio.com']
   },
   build: {
     rollupOptions: {
       external: [
         'react-dropzone',
-        '@supabase/supabase-js',
-        /app\.attio\.com/
-      ]
-    }
+        '@supabase/supabase-js'
+      ],
+      output: {
+        manualChunks(id) {
+          // Create a chunk for each major dependency
+          if (id.includes('node_modules')) {
+            if (id.includes('react')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    },
+    sourcemap: mode === 'development',
+    minify: mode === 'production',
+    emptyOutDir: true
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(mode)
   }
 }));
