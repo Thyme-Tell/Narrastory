@@ -21,18 +21,17 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     rollupOptions: {
-      external: [
-        'react-dropzone'
-      ],
       output: {
         manualChunks(id) {
-          // Create a chunk for each major dependency
           if (id.includes('node_modules')) {
             if (id.includes('react')) {
               return 'vendor-react';
             }
             if (id.includes('@supabase')) {
               return 'vendor-supabase';
+            }
+            if (id.includes('react-dropzone')) {
+              return 'vendor-dropzone';
             }
             return 'vendor';
           }
@@ -44,7 +43,10 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: true
   },
   optimizeDeps: {
-    include: ['@supabase/supabase-js']
+    include: [
+      '@supabase/supabase-js',
+      'react-dropzone'
+    ]
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode)
