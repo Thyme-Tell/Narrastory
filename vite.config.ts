@@ -16,51 +16,26 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "react": path.resolve(__dirname, "node_modules/react"),
-      "react-dom": path.resolve(__dirname, "node_modules/react-dom")
-    }
+      "@": path.resolve(__dirname, "./src")
+    },
+    dedupe: ['react', 'react-dom']
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react/') || id.includes('react-dom/')) {
-              return 'vendor-react';
-            }
-            if (id.includes('@supabase')) {
-              return 'vendor-supabase';
-            }
-            if (id.includes('react-dropzone')) {
-              return 'vendor-dropzone';
-            }
-            return 'vendor';
-          }
-        }
-      }
-    },
+    target: 'es2020',
     sourcemap: mode === 'development',
     minify: mode === 'production',
     emptyOutDir: true,
-    commonjsOptions: {
-      include: [/node_modules/],
-      requireReturnsDefault: 'auto'
+    modulePreload: {
+      polyfill: true
     }
   },
   optimizeDeps: {
     include: [
-      '@supabase/supabase-js',
-      'react-dropzone',
       'react',
       'react-dom',
-      'react/jsx-runtime'
+      'react-dropzone',
+      '@supabase/supabase-js'
     ],
-    esbuildOptions: {
-      target: 'es2020'
-    }
-  },
-  define: {
-    'process.env.NODE_ENV': JSON.stringify(mode)
+    force: true
   }
 }));
