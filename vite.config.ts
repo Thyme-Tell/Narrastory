@@ -16,15 +16,13 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@supabase/supabase-js": path.resolve(__dirname, "node_modules/@supabase/supabase-js")
+      "@": path.resolve(__dirname, "./src")
     }
   },
   build: {
     rollupOptions: {
       external: [
-        'react-dropzone',
-        '@supabase/supabase-js'
+        'react-dropzone'
       ],
       output: {
         manualChunks(id) {
@@ -44,6 +42,9 @@ export default defineConfig(({ mode }) => ({
     sourcemap: mode === 'development',
     minify: mode === 'production',
     emptyOutDir: true
+  },
+  optimizeDeps: {
+    include: ['@supabase/supabase-js']
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode)
