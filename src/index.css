@@ -1,13 +1,9 @@
-
-/* Base styles and Tailwind imports */
 @import './styles/base.css';
-
-/* Book styling */
 @import './styles/book.css';
 @import './styles/book-cover.css';
-
-/* Animations */
 @import './styles/animations.css';
-
-/* Responsive designs */
 @import './styles/responsive.css';
+
+/* Base styles and Tailwind imports */
+
+/* Custom styles below */
