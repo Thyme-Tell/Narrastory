@@ -17,13 +17,18 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
+    }
+  },
+  optimizeDeps: {
+    include: ['react-dropzone', '@supabase/supabase-js'],
+    exclude: ['app.attio.com']
   },
   build: {
     rollupOptions: {
       external: [
         'react-dropzone',
-        '@supabase/supabase-js'
+        '@supabase/supabase-js',
+        /app\.attio\.com/
       ]
     }
   }
