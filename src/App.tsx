@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, useParams, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -22,6 +21,7 @@ import PaymentCanceledPage from './pages/PaymentCanceledPage';
 import BookPurchasePage from './pages/BookPurchasePage';
 import AdminPage from './pages/AdminPage';
 import LifetimeCheckoutPage from './pages/LifetimeCheckoutPage';
+import Founders from './pages/Founders';
 import { Toaster } from "@/components/ui/toaster";
 
 const StoryBookSettingsWrapper = () => {
@@ -59,6 +59,7 @@ function App() {
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/payment-canceled" element={<PaymentCanceledPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/founders" element={<Founders />} />
         </Routes>
         <Toaster />
       </AuthProvider>
