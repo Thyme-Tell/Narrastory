@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { CoverData } from "./CoverTypes";
 
@@ -33,14 +32,8 @@ const CoverCanvas = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw background color
-    if (coverData.backgroundColor) {
-      ctx.fillStyle = coverData.backgroundColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    
-    // Draw background image if available
-    if (coverData.backgroundImage) {
+    // Draw background based on type
+    if (coverData.backgroundType === 'image' && coverData.backgroundImage) {
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.src = coverData.backgroundImage;
@@ -67,7 +60,21 @@ const CoverCanvas = ({
         ctx.drawImage(img, x, y, drawWidth, drawHeight);
         drawTexts();
       };
+      
+      img.onerror = () => {
+        // Fallback to background color if image fails to load
+        if (coverData.backgroundColor) {
+          ctx.fillStyle = coverData.backgroundColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        drawTexts();
+      };
     } else {
+      // Draw background color
+      if (coverData.backgroundColor) {
+        ctx.fillStyle = coverData.backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
       drawTexts();
     }
     

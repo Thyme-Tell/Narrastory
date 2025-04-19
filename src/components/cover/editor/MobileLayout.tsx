@@ -1,20 +1,23 @@
-
 import React from "react";
-import { CoverData } from "../CoverTypes";
+import { CoverData, BackgroundType, DropzoneProps } from "../CoverTypes";
 import CoverPreview from "./CoverPreview";
 import EditorControlPanel from "./EditorControlPanel";
+import { ChangeEvent } from 'react';
 
-interface MobileLayoutProps {
+export interface MobileLayoutProps {
   coverData: CoverData;
   isUploading: boolean;
   onSave: () => void;
   onClose: () => void;
   onBackgroundColorChange: (color: string) => void;
+  onBackgroundTypeChange: (type: BackgroundType) => void;
   onRemoveImage: () => void;
-  onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
+  onUploadImage: (url: string) => void;
+  onTextChange: (e: ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
   onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
+  dropzoneProps: DropzoneProps;
 }
 
 const MobileLayout = ({
@@ -23,33 +26,38 @@ const MobileLayout = ({
   onSave,
   onClose,
   onBackgroundColorChange,
+  onBackgroundTypeChange,
   onRemoveImage,
+  onUploadImage,
   onTextChange,
   onTextColorChange,
   onFontSizeChange,
   onLayoutChange,
+  dropzoneProps
 }: MobileLayoutProps) => {
   return (
-    <div className="flex flex-col h-[100vh] bg-white overflow-hidden">
-      {/* Preview section - top 45% to ensure enough space for the full cover */}
-      <div className="w-full flex items-center justify-center" style={{ height: "45%" }}>
-        <CoverPreview coverData={coverData} isLoading={isUploading} />
-      </div>
-      
-      {/* Controls section - bottom 55% */}
-      <div className="w-full overflow-y-auto" style={{ height: "55%" }}>
-        <EditorControlPanel
-          coverData={coverData}
-          onSave={onSave}
-          onCancel={onClose}
-          onBackgroundColorChange={onBackgroundColorChange}
-          onRemoveImage={onRemoveImage}
-          isUploading={isUploading}
-          onTextChange={onTextChange}
-          onTextColorChange={onTextColorChange}
-          onFontSizeChange={onFontSizeChange}
-          onLayoutChange={onLayoutChange}
-        />
+    <div className="fixed inset-0 bg-white z-50 flex flex-col">
+      <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        <div className="relative">
+          <CoverPreview coverData={coverData} />
+        </div>
+        <div className="relative">
+          <EditorControlPanel
+            coverData={coverData}
+            onSave={onSave}
+            onCancel={onClose}
+            onBackgroundColorChange={onBackgroundColorChange}
+            onBackgroundTypeChange={onBackgroundTypeChange}
+            onRemoveImage={onRemoveImage}
+            onUploadImage={onUploadImage}
+            isUploading={isUploading}
+            onTextChange={onTextChange}
+            onTextColorChange={onTextColorChange}
+            onFontSizeChange={onFontSizeChange}
+            onLayoutChange={onLayoutChange}
+            dropzoneProps={dropzoneProps}
+          />
+        </div>
       </div>
     </div>
   );

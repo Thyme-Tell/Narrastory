@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { CoverData } from "../CoverTypes";
+import { CoverData, BackgroundType } from "../CoverTypes";
 
 export function useCoverEditor(
   profileId: string, 
@@ -11,18 +10,26 @@ export function useCoverEditor(
   onSave: (coverData: CoverData) => void,
   onClose: () => void
 ) {
-  const [coverData, setCoverData] = useState<CoverData>(
-    initialCoverData || {
-      backgroundColor: "#CADCDA",
-      titleText: "My Stories",
-      authorText: "",
-      titleColor: "#303441",
-      authorColor: "#303441",
-      titleSize: 21,
-      authorSize: 14,
-      layout: 'centered',
-    }
-  );
+  const defaultCoverData: CoverData = {
+    backgroundType: 'color',
+    backgroundColor: "#CADCDA",
+    titleText: "My Stories",
+    authorText: "",
+    titleColor: "#303441",
+    authorColor: "#303441",
+    titleSize: 21,
+    authorSize: 14,
+    layout: 'centered',
+  };
+
+  const [coverData, setCoverData] = useState<CoverData>(() => {
+    // Merge initial data with defaults, ensuring all properties are set
+    return {
+      ...defaultCoverData,
+      ...initialCoverData,
+    };
+  });
+  
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -58,6 +65,16 @@ export function useCoverEditor(
     }
   }, [profile, coverData.authorText]);
 
+  // Update cover data when initialCoverData changes
+  useEffect(() => {
+    if (initialCoverData) {
+      setCoverData(prev => ({
+        ...prev,
+        ...initialCoverData,
+      }));
+    }
+  }, [initialCoverData]);
+
   const handleSave = () => {
     onSave(coverData);
     onClose();
@@ -68,76 +85,75 @@ export function useCoverEditor(
   };
 
   const handleBackgroundColorChange = (color: string) => {
-    setCoverData({
-      ...coverData,
+    setCoverData(prev => ({
+      ...prev,
       backgroundColor: color,
-    });
+      backgroundType: 'color',
+    }));
+  };
+
+  const handleBackgroundTypeChange = (type: BackgroundType) => {
+    setCoverData(prev => ({
+      ...prev,
+      backgroundType: type,
+    }));
+  };
+
+  const handleUploadImage = (imageUrl: string) => {
+    setCoverData(prev => ({
+      ...prev,
+      backgroundImage: imageUrl,
+      backgroundType: 'image',
+    }));
   };
 
   const handleTextColorChange = (color: string, type: 'title' | 'author') => {
-    if (type === 'title') {
-      setCoverData({
-        ...coverData,
-        titleColor: color,
-      });
-    } else {
-      setCoverData({
-        ...coverData,
-        authorColor: color,
-      });
-    }
+    setCoverData(prev => ({
+      ...prev,
+      ...(type === 'title' ? { titleColor: color } : { authorColor: color }),
+    }));
   };
 
   const handleRemoveImage = () => {
-    setCoverData({
-      ...coverData,
+    setCoverData(prev => ({
+      ...prev,
       backgroundImage: undefined,
-    });
+      backgroundType: 'color',
+    }));
   };
 
   const handleTextChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'title' | 'author'
   ) => {
-    if (type === 'title') {
-      setCoverData({
-        ...coverData,
-        titleText: e.target.value,
-      });
-    } else {
-      setCoverData({
-        ...coverData,
-        authorText: e.target.value,
-      });
-    }
+    setCoverData(prev => ({
+      ...prev,
+      ...(type === 'title' ? { titleText: e.target.value } : { authorText: e.target.value }),
+    }));
   };
 
   const handleFontSizeChange = (value: number[], type: 'title' | 'author') => {
-    if (type === 'title') {
-      setCoverData({
-        ...coverData,
-        titleSize: value[0],
-      });
-    } else {
-      setCoverData({
-        ...coverData,
-        authorSize: value[0],
-      });
-    }
+    setCoverData(prev => ({
+      ...prev,
+      ...(type === 'title' ? { titleSize: value[0] } : { authorSize: value[0] }),
+    }));
   };
 
   const handleLayoutChange = (layout: 'centered' | 'top' | 'bottom') => {
-    setCoverData({
-      ...coverData,
+    setCoverData(prev => ({
+      ...prev,
       layout,
-    });
+    }));
   };
 
   return {
     coverData,
     isUploading,
+    setIsUploading,
     handleSave,
     handleBackgroundColorChange,
+    handleBackgroundTypeChange,
+    handleUploadImage,
     handleTextColorChange,
     handleRemoveImage,
     handleTextChange,

@@ -1,6 +1,5 @@
-
 import React from "react";
-import { CoverData } from "../CoverTypes";
+import { CoverData, BackgroundType, DropzoneProps } from "../CoverTypes";
 import CoverPreview from "./CoverPreview";
 import EditorControlPanel from "./EditorControlPanel";
 
@@ -10,11 +9,14 @@ interface DesktopLayoutProps {
   onSave: () => void;
   onClose: () => void;
   onBackgroundColorChange: (color: string) => void;
+  onBackgroundTypeChange: (type: BackgroundType) => void;
   onRemoveImage: () => void;
+  onUploadImage: (imageUrl: string) => void;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
   onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
+  dropzoneProps: DropzoneProps;
 }
 
 const DesktopLayout = ({
@@ -23,11 +25,14 @@ const DesktopLayout = ({
   onSave,
   onClose,
   onBackgroundColorChange,
+  onBackgroundTypeChange,
   onRemoveImage,
+  onUploadImage,
   onTextChange,
   onTextColorChange,
   onFontSizeChange,
   onLayoutChange,
+  dropzoneProps,
 }: DesktopLayoutProps) => {
   return (
     <div className="flex flex-row h-[90vh] bg-white">
@@ -38,12 +43,15 @@ const DesktopLayout = ({
           onSave={onSave}
           onCancel={onClose}
           onBackgroundColorChange={onBackgroundColorChange}
+          onBackgroundTypeChange={onBackgroundTypeChange}
           onRemoveImage={onRemoveImage}
+          onUploadImage={onUploadImage}
           isUploading={isUploading}
           onTextChange={onTextChange}
           onTextColorChange={onTextColorChange}
           onFontSizeChange={onFontSizeChange}
           onLayoutChange={onLayoutChange}
+          dropzoneProps={dropzoneProps}
         />
       </div>
       

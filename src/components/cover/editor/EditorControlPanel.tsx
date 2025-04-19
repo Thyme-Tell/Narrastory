@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BackgroundTab from "./BackgroundTab";
 import TextTab from "./TextTab";
 import LayoutTab from "./LayoutTab";
-import { CoverData } from "../CoverTypes";
+import { CoverData, BackgroundType, DropzoneProps } from "../CoverTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EditorControlPanelProps {
@@ -13,12 +12,15 @@ interface EditorControlPanelProps {
   onSave: () => void;
   onCancel: () => void;
   onBackgroundColorChange: (color: string) => void;
+  onBackgroundTypeChange: (type: BackgroundType) => void;
   onRemoveImage: () => void;
+  onUploadImage: (imageUrl: string) => void;
   isUploading: boolean;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>, type: 'title' | 'author') => void;
   onTextColorChange: (color: string, type: 'title' | 'author') => void;
   onFontSizeChange: (value: number[], type: 'title' | 'author') => void;
   onLayoutChange: (layout: 'centered' | 'top' | 'bottom') => void;
+  dropzoneProps: DropzoneProps;
 }
 
 const EditorControlPanel = ({
@@ -26,12 +28,15 @@ const EditorControlPanel = ({
   onSave,
   onCancel,
   onBackgroundColorChange,
+  onBackgroundTypeChange,
   onRemoveImage,
+  onUploadImage,
   isUploading,
   onTextChange,
   onTextColorChange,
   onFontSizeChange,
   onLayoutChange,
+  dropzoneProps,
 }: EditorControlPanelProps) => {
   const [activeTab, setActiveTab] = useState("text");
   const isMobile = useIsMobile();
@@ -61,7 +66,10 @@ const EditorControlPanel = ({
           <BackgroundTab
             coverData={coverData}
             onBackgroundColorChange={onBackgroundColorChange}
+            onBackgroundTypeChange={onBackgroundTypeChange}
             onRemoveImage={onRemoveImage}
+            onUploadImage={onUploadImage}
+            dropzoneProps={dropzoneProps}
           />
         )}
         
@@ -70,6 +78,7 @@ const EditorControlPanel = ({
             coverData={coverData}
             onTextChange={onTextChange}
             onFontSizeChange={onFontSizeChange}
+            onTextColorChange={onTextColorChange}
           />
         )}
         
